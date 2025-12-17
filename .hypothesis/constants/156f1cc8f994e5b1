@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/backup_service.py
+# hypothesis_version: 6.148.7
+
+[1024, 3600, '%Y%m%d_%H%M%S', '*', '*.csv', '*backup*', '.', '.db', '.zip', 'DATABASE_URL', 'Database restored', 'PROJECT_NAME', 'VERSION', 'VISION_MODEL', 'age_group_models', 'anomaly_analyses', 'backup_name', 'backup_path', 'backup_timestamp', 'backup_type', 'backups', 'completed', 'config.json', 'created', 'csv', 'database', 'database.db', 'database_only', 'drawing_embeddings', 'drawings', 'embedding_vector', 'export_info', 'export_name', 'export_path', 'format', 'full', 'in_progress', 'includes_embeddings', 'includes_files', 'json', 'modified', 'name', 'path', 'r', 'record_counts', 'restored_components', 'safety_backup', 'size_bytes', 'size_mb', 'sqlite:///', 'static/', 'static_files', 'status', 'timestamp', 'type', 'upload_files', 'uploads/', 'utf-8', 'w']

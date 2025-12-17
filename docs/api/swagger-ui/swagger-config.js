@@ -1,0 +1,4230 @@
+// Swagger UI Configuration
+
+function initializeSwaggerUI() {
+    // Store the original spec
+    const spec = {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Children's Drawing Anomaly Detection System",
+    "description": "Machine learning system for detecting anomalies in children's drawings",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/drawings/upload": {
+      "post": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Upload Drawing",
+        "description": "Upload drawing with metadata.\n\nThis endpoint accepts multipart form data with an image file and metadata.\nThe image is validated, preprocessed, and stored along with the metadata.",
+        "operationId": "upload_drawing_api_v1_drawings_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_drawing_api_v1_drawings_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/upload/progress/{upload_id}": {
+      "get": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Get Upload Progress",
+        "description": "Get upload progress for large file uploads.",
+        "operationId": "get_upload_progress_api_v1_drawings_upload_progress__upload_id__get",
+        "parameters": [
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/{drawing_id}": {
+      "get": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Get Drawing",
+        "description": "Retrieve drawing details by ID.",
+        "operationId": "get_drawing_api_v1_drawings__drawing_id__get",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Delete Drawing",
+        "description": "Delete drawing and associated data.",
+        "operationId": "delete_drawing_api_v1_drawings__drawing_id__delete",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/{drawing_id}/file": {
+      "get": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Get Drawing File",
+        "description": "Retrieve the actual drawing file.",
+        "operationId": "get_drawing_file_api_v1_drawings__drawing_id__file_get",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/": {
+      "get": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "List Drawings",
+        "description": "List drawings with optional filtering and pagination.",
+        "operationId": "list_drawings_api_v1_drawings__get",
+        "parameters": [
+          {
+            "name": "age_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Min"
+            }
+          },
+          {
+            "name": "age_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Max"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          },
+          {
+            "name": "expert_label",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ExpertLabel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Expert Label"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawingListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/batch/upload": {
+      "post": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Batch Upload Drawings",
+        "description": "Upload multiple drawings in batch.\n\nThis endpoint accepts multiple files and processes them in the background.\nReturns an upload ID for tracking progress.",
+        "operationId": "batch_upload_drawings_api_v1_drawings_batch_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_batch_upload_drawings_api_v1_drawings_batch_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drawings/stats": {
+      "get": {
+        "tags": [
+          "drawings"
+        ],
+        "summary": "Get Drawing Stats",
+        "description": "Get statistics about stored drawings.",
+        "operationId": "get_drawing_stats_api_v1_drawings_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/stats": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Analysis Stats",
+        "description": "Get dashboard statistics for analyses and drawings.\n\nThis endpoint provides comprehensive statistics for the dashboard\nincluding drawing counts, analysis results, and model status.",
+        "operationId": "get_analysis_stats_api_v1_analysis_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/analyze/{drawing_id}": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Analyze Drawing",
+        "description": "Analyze specific drawing for anomalies.\n\nThis endpoint performs anomaly detection on a single drawing,\ngenerating embeddings, computing anomaly scores, and providing\ninterpretability results if the drawing is flagged as anomalous.",
+        "operationId": "analyze_drawing_api_v1_analysis_analyze__drawing_id__post",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResultResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/batch": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Batch Analyze",
+        "description": "Batch analyze multiple drawings.\n\nThis endpoint accepts a list of drawing IDs and processes them\nin the background, returning a batch ID for progress tracking.",
+        "operationId": "batch_analyze_api_v1_analysis_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Batch Analyze Api V1 Analysis Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/batch/{batch_id}/progress": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Batch Progress",
+        "description": "Get progress of batch analysis.",
+        "operationId": "get_batch_progress_api_v1_analysis_batch__batch_id__progress_get",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchAnalysisResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/{analysis_id}": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Analysis Result",
+        "description": "Get analysis results by analysis ID.\n\nThis endpoint retrieves a complete analysis result including\nthe drawing information, anomaly analysis, and interpretability\nresults if available.",
+        "operationId": "get_analysis_result_api_v1_analysis__analysis_id__get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResultResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/embeddings/{drawing_id}": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Generate Embedding",
+        "description": "Generate embedding for a drawing without requiring a trained model.\n\nThis endpoint is used during the training phase to generate embeddings\nfor all drawings before training the autoencoder models.",
+        "operationId": "generate_embedding_api_v1_analysis_embeddings__drawing_id__post",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analysis/drawing/{drawing_id}": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Get Drawing Analyses",
+        "description": "Get all analyses for a specific drawing.\n\nThis endpoint returns the analysis history for a drawing,\nordered by most recent first.",
+        "operationId": "get_drawing_analyses_api_v1_analysis_drawing__drawing_id__get",
+        "parameters": [
+          {
+            "name": "drawing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Drawing Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisHistoryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/age-groups": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "List Age Group Models",
+        "description": "List available age group models.\n\nThis endpoint returns all age group models with their status,\nsample counts, and threshold information.",
+        "operationId": "list_age_group_models_api_v1_models_age_groups_get",
+        "parameters": [
+          {
+            "name": "active_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Active Only"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/train": {
+      "post": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Train Age Group Model",
+        "description": "Train new age group model.\n\nThis endpoint starts training a new autoencoder model for the specified\nage range. Training is performed in the background and progress can be\ntracked using the returned job ID.",
+        "operationId": "train_age_group_model_api_v1_models_train_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelTrainingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/training/{job_id}/status": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Get Training Status",
+        "description": "Get training job status.",
+        "operationId": "get_training_status_api_v1_models_training__job_id__status_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/{model_id}/threshold": {
+      "put": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Update Model Threshold",
+        "description": "Update model threshold.\n\nThis endpoint allows updating the anomaly detection threshold\nfor a specific age group model. The threshold can be set directly\nor calculated from a percentile of validation data.",
+        "operationId": "update_model_threshold_api_v1_models__model_id__threshold_put",
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Model Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThresholdUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Update Model Threshold Api V1 Models  Model Id  Threshold Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/status": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Get Model Status",
+        "description": "Get model training and system status.\n\nThis endpoint provides an overview of the model management system,\nincluding counts of models in different states and overall system health.",
+        "operationId": "get_model_status_api_v1_models_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/auto-create": {
+      "post": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Auto Create Age Groups",
+        "description": "Automatically create age group models based on data distribution.\n\nThis endpoint analyzes the available drawing data and creates\nappropriate age group models with sufficient sample sizes.",
+        "operationId": "auto_create_age_groups_api_v1_models_auto_create_post",
+        "parameters": [
+          {
+            "name": "force_recreate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Force Recreate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/creation/{job_id}/status": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Get Creation Status",
+        "description": "Get model creation job status.",
+        "operationId": "get_creation_status_api_v1_models_creation__job_id__status_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/{model_id}": {
+      "delete": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Delete Model",
+        "description": "Delete (deactivate) an age group model.\n\nThis endpoint deactivates a model rather than permanently deleting it\nto preserve analysis history.",
+        "operationId": "delete_model_api_v1_models__model_id__delete",
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/data-sufficiency/analyze": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Analyze Data Sufficiency",
+        "description": "Analyze data sufficiency for age groups.\n\nThis endpoint analyzes the available data for specified age groups\nand provides warnings about insufficient data, unbalanced distributions,\nand other data quality issues.\n\nArgs:\n    age_groups: Comma-separated list of age ranges (e.g., \"3-4,4-5,5-6\")\n               If not provided, analyzes all existing age group models",
+        "operationId": "analyze_data_sufficiency_api_v1_models_data_sufficiency_analyze_get",
+        "parameters": [
+          {
+            "name": "age_groups",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Groups"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/data-sufficiency/age-group/{age_min}/{age_max}": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Analyze Specific Age Group",
+        "description": "Analyze data sufficiency for a specific age group.\n\nThis endpoint provides detailed analysis of data availability,\nquality, and distribution for a single age group.",
+        "operationId": "analyze_specific_age_group_api_v1_models_data_sufficiency_age_group__age_min___age_max__get",
+        "parameters": [
+          {
+            "name": "age_min",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Min"
+            }
+          },
+          {
+            "name": "age_max",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Max"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/data-sufficiency/merge-age-groups": {
+      "post": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Merge Age Groups",
+        "description": "Merge age groups to improve data sufficiency.\n\nThis endpoint deactivates the original age group models and creates\na new merged age group model with combined data.",
+        "operationId": "merge_age_groups_api_v1_models_data_sufficiency_merge_age_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_merge_age_groups_api_v1_models_data_sufficiency_merge_age_groups_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/data-sufficiency/warnings": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Get Data Warnings",
+        "description": "Get data sufficiency warnings for all age groups.\n\nThis endpoint returns warnings about data quality issues,\noptionally filtered by severity level.",
+        "operationId": "get_data_warnings_api_v1_models_data_sufficiency_warnings_get",
+        "parameters": [
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Severity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/jobs": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Submit Training Job",
+        "description": "Submit a new training job to either local or SageMaker environment.\n\nThis endpoint creates and submits a training job based on the specified\nenvironment. For SageMaker jobs, it handles container building, data upload,\nand job submission. For local jobs, it starts training immediately.",
+        "operationId": "submit_training_job_api_v1_training_jobs_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "List Training Jobs",
+        "description": "List training jobs with optional filtering.\n\nThis endpoint returns a list of training jobs, optionally filtered\nby environment (local/sagemaker) and status.",
+        "operationId": "list_training_jobs_api_v1_training_jobs_get",
+        "parameters": [
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TrainingEnvironment"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Environment"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingJobResponse"
+                  },
+                  "title": "Response List Training Jobs Api V1 Training Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Get Training Job Status",
+        "description": "Get detailed status of a specific training job.\n\nThis endpoint returns comprehensive information about a training job,\nincluding progress, metrics, and environment-specific details.",
+        "operationId": "get_training_job_status_api_v1_training_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Training Job Status Api V1 Training Jobs  Job Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/jobs/{job_id}/cancel": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Cancel Training Job",
+        "description": "Cancel a running training job.\n\nThis endpoint attempts to cancel a training job. For local jobs,\nit stops the training process. For SageMaker jobs, it stops the\nSageMaker training job.",
+        "operationId": "cancel_training_job_api_v1_training_jobs__job_id__cancel_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/jobs/{job_id}/reports": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Get Training Reports",
+        "description": "Get training reports for a specific job.\n\nThis endpoint returns all training reports associated with a job,\nincluding metrics, model paths, and performance summaries.",
+        "operationId": "get_training_reports_api_v1_training_jobs__job_id__reports_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingReportResponse"
+                  },
+                  "title": "Response Get Training Reports Api V1 Training Jobs  Job Id  Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/deploy": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Deploy Trained Model",
+        "description": "Deploy trained model parameters to production system.\n\nThis endpoint loads trained model parameters and creates a new\nage group model for production use.",
+        "operationId": "deploy_trained_model_api_v1_training_deploy_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelDeploymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/environments/status": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Get Training Environments Status",
+        "description": "Get status of available training environments.\n\nThis endpoint returns information about local and SageMaker\ntraining environments, including availability and configuration.",
+        "operationId": "get_training_environments_status_api_v1_training_environments_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/sagemaker/setup": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Setup Sagemaker Environment",
+        "description": "Setup SageMaker training environment.\n\nThis endpoint helps set up the necessary AWS resources for\nSageMaker training, including IAM roles and container repositories.",
+        "operationId": "setup_sagemaker_environment_api_v1_training_sagemaker_setup_post",
+        "parameters": [
+          {
+            "name": "s3_bucket",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "S3 Bucket"
+            }
+          },
+          {
+            "name": "ecr_repository",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ecr Repository"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/export": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Export Model From Training Job",
+        "description": "Export trained model from training job in production-compatible format.\n\nThis endpoint exports a trained model from a completed training job,\ncreating a production-ready model file with metadata and validation.",
+        "operationId": "export_model_from_training_job_api_v1_training_models_export_post",
+        "parameters": [
+          {
+            "name": "training_job_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Training Job Id"
+            }
+          },
+          {
+            "name": "age_group_min",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Group Min"
+            }
+          },
+          {
+            "name": "age_group_max",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Group Max"
+            }
+          },
+          {
+            "name": "export_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "pytorch",
+              "title": "Export Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/exports": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "List Exported Models",
+        "description": "List all exported models with their metadata.\n\nThis endpoint returns a list of all models that have been exported,\nincluding their metadata, export timestamps, and file information.",
+        "operationId": "list_exported_models_api_v1_training_models_exports_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/validate": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Validate Exported Model",
+        "description": "Validate exported model for compatibility and integrity.\n\nThis endpoint performs comprehensive validation of an exported model,\nchecking file integrity, compatibility, and performance metrics.",
+        "operationId": "validate_exported_model_api_v1_training_models_validate_post",
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/deploy": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Deploy Exported Model",
+        "description": "Deploy exported model to production environment.\n\nThis endpoint deploys an exported model to the production system,\nmaking it available for anomaly detection in the specified age group.",
+        "operationId": "deploy_exported_model_api_v1_training_models_deploy_post",
+        "parameters": [
+          {
+            "name": "model_export_path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Model Export Path"
+            }
+          },
+          {
+            "name": "age_group_min",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Group Min"
+            }
+          },
+          {
+            "name": "age_group_max",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Age Group Max"
+            }
+          },
+          {
+            "name": "replace_existing",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Replace Existing"
+            }
+          },
+          {
+            "name": "validate_before_deployment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Validate Before Deployment"
+            }
+          },
+          {
+            "name": "backup_existing",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Backup Existing"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/deployed": {
+      "get": {
+        "tags": [
+          "training"
+        ],
+        "summary": "List Deployed Models",
+        "description": "List all deployed models in production.\n\nThis endpoint returns information about all models currently\ndeployed and active in the production system.",
+        "operationId": "list_deployed_models_api_v1_training_models_deployed_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/training/models/{model_id}/undeploy": {
+      "post": {
+        "tags": [
+          "training"
+        ],
+        "summary": "Undeploy Model",
+        "description": "Undeploy (deactivate) a deployed model.\n\nThis endpoint deactivates a deployed model, removing it from\nactive use in the production system.",
+        "operationId": "undeploy_model_api_v1_training_models__model_id__undeploy_post",
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Config",
+        "description": "Get current system configuration.\n\nThis endpoint returns the current system configuration including\nmodel settings, threshold parameters, and age grouping strategy.",
+        "operationId": "get_config_api_v1_config__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Update Config",
+        "description": "Update system configuration.\n\nThis endpoint updates various system configuration settings\nincluding thresholds and age grouping parameters.",
+        "operationId": "update_config_api_v1_config__put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/threshold": {
+      "put": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Update Threshold Settings",
+        "description": "Update global threshold settings.\n\nThis endpoint recalculates thresholds for all active models\nusing the specified percentile value from the request body.",
+        "operationId": "update_threshold_settings_api_v1_config_threshold_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThresholdUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/age-grouping": {
+      "put": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Update Age Grouping",
+        "description": "Modify age grouping strategy.\n\nThis endpoint updates the age grouping configuration and can\noptionally trigger recreation of age group models.",
+        "operationId": "update_age_grouping_api_v1_config_age_grouping_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurationUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/health": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Health Check",
+        "description": "System health check endpoint.\n\nThis endpoint provides information about the health and status\nof various system components.",
+        "operationId": "health_check_api_v1_config_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/stats": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get System Stats",
+        "description": "Get comprehensive system statistics.\n\nThis endpoint provides detailed statistics about the system\nincluding data distribution, model performance, and usage metrics.",
+        "operationId": "get_system_stats_api_v1_config_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/reset": {
+      "post": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Reset System",
+        "description": "Reset system configuration and models.\n\nWARNING: This endpoint deactivates all models and clears caches.\nUse with caution in production environments.",
+        "operationId": "reset_system_api_v1_config_reset_post",
+        "parameters": [
+          {
+            "name": "confirm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Confirm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Basic health check",
+        "description": "Basic health check endpoint.",
+        "operationId": "basic_health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/detailed": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Detailed health check",
+        "description": "Detailed health check with all system components.",
+        "operationId": "detailed_health_check_api_v1_health_detailed_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/component/{component_name}": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Component-specific health check",
+        "description": "Get health status for a specific component.",
+        "operationId": "component_health_check_api_v1_health_component__component_name__get",
+        "parameters": [
+          {
+            "name": "component_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Component Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "System metrics",
+        "description": "Get current system metrics.",
+        "operationId": "get_system_metrics_api_v1_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/history": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Historical metrics",
+        "description": "Get historical system metrics.",
+        "operationId": "get_metrics_history_api_v1_metrics_history_get",
+        "parameters": [
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 24,
+              "minimum": 1,
+              "description": "Hours of history to retrieve",
+              "default": 1,
+              "title": "Hours"
+            },
+            "description": "Hours of history to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alerts": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Current system alerts",
+        "description": "Get current system alerts.",
+        "operationId": "get_current_alerts_api_v1_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alerts/thresholds": {
+      "post": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Update alert thresholds",
+        "description": "Update system alert thresholds.",
+        "operationId": "update_alert_thresholds_api_v1_alerts_thresholds_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object",
+                "title": "Thresholds"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/status": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Overall system status",
+        "description": "Get overall system status summary.",
+        "operationId": "get_system_status_api_v1_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/full": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Create full system backup",
+        "description": "Create a full system backup including database and files.",
+        "operationId": "create_full_backup_api_v1_backup_full_post",
+        "parameters": [
+          {
+            "name": "include_files",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include uploaded files and generated content",
+              "default": true,
+              "title": "Include Files"
+            },
+            "description": "Include uploaded files and generated content"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/database": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Create database backup",
+        "description": "Create a database-only backup.",
+        "operationId": "create_database_backup_api_v1_backup_database_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/list": {
+      "get": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "List available backups",
+        "description": "Get list of available backup files.",
+        "operationId": "list_backups_api_v1_backup_list_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/download/{backup_name}": {
+      "get": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Download backup file",
+        "description": "Download a specific backup file.",
+        "operationId": "download_backup_api_v1_backup_download__backup_name__get",
+        "parameters": [
+          {
+            "name": "backup_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Backup Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/restore": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Restore from backup",
+        "description": "Restore system from a backup file.",
+        "operationId": "restore_from_backup_api_v1_backup_restore_post",
+        "parameters": [
+          {
+            "name": "backup_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Backup Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/upload": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Upload backup file",
+        "description": "Upload a backup file for restoration.",
+        "operationId": "upload_backup_api_v1_backup_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_backup_api_v1_backup_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/export": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Export system data",
+        "description": "Export system data in specified format.",
+        "operationId": "export_data_api_v1_export_post",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(json|csv)$",
+              "description": "Export format",
+              "default": "json",
+              "title": "Format"
+            },
+            "description": "Export format"
+          },
+          {
+            "name": "include_embeddings",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include embedding vectors",
+              "default": false,
+              "title": "Include Embeddings"
+            },
+            "description": "Include embedding vectors"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/export/download/{export_name}": {
+      "get": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Download exported data",
+        "description": "Download an exported data file.",
+        "operationId": "download_export_api_v1_export_download__export_name__get",
+        "parameters": [
+          {
+            "name": "export_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Export Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/backup/{backup_name}": {
+      "delete": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Delete backup file",
+        "description": "Delete a specific backup file.",
+        "operationId": "delete_backup_api_v1_backup__backup_name__delete",
+        "parameters": [
+          {
+            "name": "backup_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Backup Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cleanup": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Clean up old backups",
+        "description": "Clean up old backup files based on retention policy.",
+        "operationId": "cleanup_backups_api_v1_cleanup_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/storage/info": {
+      "get": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Get storage information",
+        "description": "Get information about storage usage and organization.",
+        "operationId": "get_storage_info_api_v1_storage_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/storage/cleanup": {
+      "post": {
+        "tags": [
+          "backup"
+        ],
+        "summary": "Clean up temporary and orphaned files",
+        "description": "Clean up temporary files and orphaned data.",
+        "operationId": "cleanup_storage_api_v1_storage_cleanup_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "Root endpoint providing basic system information.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint for monitoring.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/detailed": {
+      "get": {
+        "summary": "Detailed Health Check",
+        "description": "Detailed health check with system information.",
+        "operationId": "detailed_health_check_health_detailed_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Get Metrics",
+        "description": "Get system metrics for monitoring.",
+        "operationId": "get_metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgeGroupModelResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "age_min": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Min"
+          },
+          "age_max": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Max"
+          },
+          "model_type": {
+            "$ref": "#/components/schemas/AnalysisMethod"
+          },
+          "vision_model": {
+            "$ref": "#/components/schemas/VisionModel"
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sample Count"
+          },
+          "threshold": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Threshold"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ModelStatus"
+          },
+          "created_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created Timestamp"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "age_min",
+          "age_max",
+          "model_type",
+          "vision_model",
+          "sample_count",
+          "threshold",
+          "status",
+          "created_timestamp",
+          "is_active"
+        ],
+        "title": "AgeGroupModelResponse",
+        "description": "Response model for age group model information."
+      },
+      "AgeGroupingStrategy": {
+        "type": "string",
+        "enum": [
+          "yearly",
+          "custom"
+        ],
+        "title": "AgeGroupingStrategy",
+        "description": "Enumeration for age grouping strategies."
+      },
+      "AnalysisHistoryResponse": {
+        "properties": {
+          "drawing_id": {
+            "type": "integer",
+            "title": "Drawing Id"
+          },
+          "analyses": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyAnalysisResponse"
+            },
+            "type": "array",
+            "title": "Analyses"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawing_id",
+          "analyses",
+          "total_count"
+        ],
+        "title": "AnalysisHistoryResponse",
+        "description": "Response model for analysis history of a drawing."
+      },
+      "AnalysisMethod": {
+        "type": "string",
+        "enum": [
+          "autoencoder"
+        ],
+        "title": "AnalysisMethod",
+        "description": "Enumeration for anomaly detection methods."
+      },
+      "AnalysisRequest": {
+        "properties": {
+          "drawing_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Drawing Id",
+            "description": "ID of the drawing to analyze"
+          },
+          "force_reanalysis": {
+            "type": "boolean",
+            "title": "Force Reanalysis",
+            "description": "Force re-analysis even if results exist",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawing_id"
+        ],
+        "title": "AnalysisRequest",
+        "description": "Request model for analyzing a drawing."
+      },
+      "AnalysisResultResponse": {
+        "properties": {
+          "drawing": {
+            "$ref": "#/components/schemas/DrawingResponse"
+          },
+          "analysis": {
+            "$ref": "#/components/schemas/AnomalyAnalysisResponse"
+          },
+          "interpretability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InterpretabilityResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comparison_examples": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonExampleResponse"
+            },
+            "type": "array",
+            "title": "Comparison Examples",
+            "description": "Similar normal examples from the same age group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawing",
+          "analysis"
+        ],
+        "title": "AnalysisResultResponse",
+        "description": "Complete analysis result including drawing, analysis, and interpretability."
+      },
+      "AnomalyAnalysisResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "drawing_id": {
+            "type": "integer",
+            "title": "Drawing Id"
+          },
+          "anomaly_score": {
+            "type": "number",
+            "title": "Anomaly Score",
+            "description": "Raw anomaly score"
+          },
+          "normalized_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Normalized Score",
+            "description": "Normalized anomaly score (0-100 scale: 0=no anomaly, 100=maximal anomaly)"
+          },
+          "is_anomaly": {
+            "type": "boolean",
+            "title": "Is Anomaly",
+            "description": "Whether the drawing is flagged as anomalous"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "Confidence in the anomaly decision"
+          },
+          "age_group": {
+            "type": "string",
+            "title": "Age Group",
+            "description": "Age group used for analysis"
+          },
+          "method_used": {
+            "$ref": "#/components/schemas/AnalysisMethod",
+            "description": "Analysis method used"
+          },
+          "vision_model": {
+            "$ref": "#/components/schemas/VisionModel",
+            "description": "Vision model used"
+          },
+          "analysis_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Analysis Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drawing_id",
+          "anomaly_score",
+          "normalized_score",
+          "is_anomaly",
+          "confidence",
+          "age_group",
+          "method_used",
+          "vision_model",
+          "analysis_timestamp"
+        ],
+        "title": "AnomalyAnalysisResponse",
+        "description": "Response model for anomaly analysis results."
+      },
+      "BatchAnalysisRequest": {
+        "properties": {
+          "drawing_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Drawing Ids",
+            "description": "List of drawing IDs to analyze"
+          },
+          "force_reanalysis": {
+            "type": "boolean",
+            "title": "Force Reanalysis",
+            "description": "Force re-analysis even if results exist",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawing_ids"
+        ],
+        "title": "BatchAnalysisRequest",
+        "description": "Request model for batch analysis of multiple drawings."
+      },
+      "BatchAnalysisResponse": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "title": "Batch Id",
+            "description": "Unique identifier for the batch"
+          },
+          "total_drawings": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Total Drawings",
+            "description": "Total number of drawings to analyze"
+          },
+          "completed": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Completed",
+            "description": "Number of completed analyses"
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Failed",
+            "description": "Number of failed analyses"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Batch processing status"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisResultResponse"
+            },
+            "type": "array",
+            "title": "Results",
+            "description": "Completed analysis results"
+          },
+          "errors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Error details for failed analyses"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "total_drawings",
+          "completed",
+          "failed",
+          "status",
+          "started_at"
+        ],
+        "title": "BatchAnalysisResponse",
+        "description": "Response model for batch analysis operations."
+      },
+      "Body_batch_upload_drawings_api_v1_drawings_batch_upload_post": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "Multiple drawing files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_batch_upload_drawings_api_v1_drawings_batch_upload_post"
+      },
+      "Body_merge_age_groups_api_v1_models_data_sufficiency_merge_age_groups_post": {
+        "properties": {
+          "original_groups": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Original Groups"
+          },
+          "merged_group": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Merged Group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_groups",
+          "merged_group"
+        ],
+        "title": "Body_merge_age_groups_api_v1_models_data_sufficiency_merge_age_groups_post"
+      },
+      "Body_upload_backup_api_v1_backup_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_backup_api_v1_backup_upload_post"
+      },
+      "Body_upload_drawing_api_v1_drawings_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File",
+            "description": "Drawing image file (PNG, JPEG, BMP)"
+          },
+          "age_years": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Years",
+            "description": "Child's age in years"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject",
+            "description": "Drawing subject"
+          },
+          "expert_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expert Label",
+            "description": "Expert assessment"
+          },
+          "drawing_tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drawing Tool",
+            "description": "Drawing tool used"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "description": "Drawing prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "age_years"
+        ],
+        "title": "Body_upload_drawing_api_v1_drawings_upload_post"
+      },
+      "ComparisonExampleResponse": {
+        "properties": {
+          "drawing_id": {
+            "type": "integer",
+            "title": "Drawing Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "age_years": {
+            "type": "number",
+            "title": "Age Years"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "similarity_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Similarity Score",
+            "description": "Similarity score to the analyzed drawing"
+          },
+          "anomaly_score": {
+            "type": "number",
+            "title": "Anomaly Score",
+            "description": "Anomaly score of the comparison example"
+          },
+          "normalized_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Normalized Score",
+            "description": "Normalized anomaly score of the comparison example (0-100 scale: 0=no anomaly, 100=maximal anomaly)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawing_id",
+          "filename",
+          "age_years",
+          "similarity_score",
+          "anomaly_score",
+          "normalized_score"
+        ],
+        "title": "ComparisonExampleResponse",
+        "description": "Response model for comparison examples."
+      },
+      "ConfigurationUpdateRequest": {
+        "properties": {
+          "threshold_percentile": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 99.9,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Percentile",
+            "description": "Percentile for threshold calculation"
+          },
+          "age_grouping_strategy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgeGroupingStrategy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "min_samples_per_group": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 10.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Samples Per Group"
+          },
+          "max_age_group_span": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 16.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Age Group Span"
+          }
+        },
+        "type": "object",
+        "title": "ConfigurationUpdateRequest",
+        "description": "Request model for updating system configuration."
+      },
+      "DrawingListResponse": {
+        "properties": {
+          "drawings": {
+            "items": {
+              "$ref": "#/components/schemas/DrawingResponse"
+            },
+            "type": "array",
+            "title": "Drawings"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page",
+            "description": "Current page number"
+          },
+          "page_size": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Page Size",
+            "description": "Number of items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drawings",
+          "total_count",
+          "page",
+          "page_size",
+          "total_pages"
+        ],
+        "title": "DrawingListResponse",
+        "description": "Response model for listing multiple drawings."
+      },
+      "DrawingResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "age_years": {
+            "type": "number",
+            "title": "Age Years"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "expert_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expert Label"
+          },
+          "drawing_tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drawing Tool"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "upload_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Upload Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "age_years",
+          "subject",
+          "expert_label",
+          "drawing_tool",
+          "prompt",
+          "upload_timestamp"
+        ],
+        "title": "DrawingResponse",
+        "description": "Response model for drawing information."
+      },
+      "ExpertLabel": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "concern",
+          "severe"
+        ],
+        "title": "ExpertLabel",
+        "description": "Enumeration for expert labels on drawings."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthCheckResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service status"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "description": "Check timestamp"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Application version"
+          },
+          "database": {
+            "type": "string",
+            "title": "Database",
+            "description": "Database status"
+          },
+          "models": {
+            "type": "string",
+            "title": "Models",
+            "description": "ML models status"
+          },
+          "storage": {
+            "type": "string",
+            "title": "Storage",
+            "description": "File storage status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "timestamp",
+          "version",
+          "database",
+          "models",
+          "storage"
+        ],
+        "title": "HealthCheckResponse",
+        "description": "Health check response model."
+      },
+      "InterpretabilityResponse": {
+        "properties": {
+          "saliency_map_url": {
+            "type": "string",
+            "title": "Saliency Map Url",
+            "description": "URL to saliency map image"
+          },
+          "overlay_image_url": {
+            "type": "string",
+            "title": "Overlay Image Url",
+            "description": "URL to overlay visualization"
+          },
+          "explanation_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation Text",
+            "description": "Human-readable explanation"
+          },
+          "importance_regions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Importance Regions",
+            "description": "List of important regions with bounding boxes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "saliency_map_url",
+          "overlay_image_url"
+        ],
+        "title": "InterpretabilityResponse",
+        "description": "Response model for interpretability results."
+      },
+      "ModelDeploymentRequest": {
+        "properties": {
+          "model_parameters_path": {
+            "type": "string",
+            "title": "Model Parameters Path",
+            "description": "Path to trained model parameters"
+          },
+          "age_group_min": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Group Min"
+          },
+          "age_group_max": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Group Max"
+          },
+          "replace_existing": {
+            "type": "boolean",
+            "title": "Replace Existing",
+            "description": "Whether to replace existing model for age group",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_parameters_path",
+          "age_group_min",
+          "age_group_max"
+        ],
+        "title": "ModelDeploymentRequest",
+        "description": "Request model for deploying trained model parameters."
+      },
+      "ModelListResponse": {
+        "properties": {
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/AgeGroupModelResponse"
+            },
+            "type": "array",
+            "title": "Models"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "active_count": {
+            "type": "integer",
+            "title": "Active Count"
+          },
+          "training_count": {
+            "type": "integer",
+            "title": "Training Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "models",
+          "total_count",
+          "active_count",
+          "training_count"
+        ],
+        "title": "ModelListResponse",
+        "description": "Response model for listing age group models."
+      },
+      "ModelStatus": {
+        "type": "string",
+        "enum": [
+          "training",
+          "ready",
+          "failed",
+          "insufficient_data"
+        ],
+        "title": "ModelStatus",
+        "description": "Enumeration for model training status."
+      },
+      "ModelStatusResponse": {
+        "properties": {
+          "total_models": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Models"
+          },
+          "active_models": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Models"
+          },
+          "training_models": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Training Models"
+          },
+          "failed_models": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Failed Models"
+          },
+          "total_drawings": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Drawings"
+          },
+          "total_analyses": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Analyses"
+          },
+          "system_status": {
+            "type": "string",
+            "title": "System Status"
+          },
+          "last_training": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Training"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_models",
+          "active_models",
+          "training_models",
+          "failed_models",
+          "total_drawings",
+          "total_analyses",
+          "system_status"
+        ],
+        "title": "ModelStatusResponse",
+        "description": "Response model for model training and system status."
+      },
+      "ModelTrainingRequest": {
+        "properties": {
+          "age_min": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Min"
+          },
+          "age_max": {
+            "type": "number",
+            "maximum": 18.0,
+            "minimum": 2.0,
+            "title": "Age Max"
+          },
+          "model_type": {
+            "$ref": "#/components/schemas/AnalysisMethod",
+            "default": "autoencoder"
+          },
+          "vision_model": {
+            "$ref": "#/components/schemas/VisionModel",
+            "default": "vit"
+          },
+          "min_samples": {
+            "type": "integer",
+            "minimum": 10.0,
+            "title": "Min Samples",
+            "description": "Minimum samples required for training",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "required": [
+          "age_min",
+          "age_max"
+        ],
+        "title": "ModelTrainingRequest",
+        "description": "Request model for training a new age group model."
+      },
+      "SuccessResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Response data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse",
+        "description": "Standard success response model."
+      },
+      "SystemConfigurationResponse": {
+        "properties": {
+          "vision_model": {
+            "$ref": "#/components/schemas/VisionModel"
+          },
+          "anomaly_detection_method": {
+            "$ref": "#/components/schemas/AnalysisMethod"
+          },
+          "threshold_percentile": {
+            "type": "number",
+            "maximum": 99.9,
+            "minimum": 50.0,
+            "title": "Threshold Percentile"
+          },
+          "age_grouping_strategy": {
+            "$ref": "#/components/schemas/AgeGroupingStrategy"
+          },
+          "min_samples_per_group": {
+            "type": "integer",
+            "minimum": 10.0,
+            "title": "Min Samples Per Group"
+          },
+          "max_age_group_span": {
+            "type": "number",
+            "maximum": 16.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Age Group Span"
+          }
+        },
+        "type": "object",
+        "required": [
+          "vision_model",
+          "anomaly_detection_method",
+          "threshold_percentile",
+          "age_grouping_strategy",
+          "min_samples_per_group",
+          "max_age_group_span"
+        ],
+        "title": "SystemConfigurationResponse",
+        "description": "Response model for system configuration."
+      },
+      "ThresholdUpdateRequest": {
+        "properties": {
+          "threshold": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Threshold",
+            "description": "New threshold value"
+          },
+          "percentile": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 99.9,
+                "minimum": 50.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percentile",
+            "description": "Percentile for automatic threshold calculation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "threshold"
+        ],
+        "title": "ThresholdUpdateRequest",
+        "description": "Request model for updating model thresholds."
+      },
+      "TrainingConfigRequest": {
+        "properties": {
+          "job_name": {
+            "type": "string",
+            "title": "Job Name",
+            "description": "Unique name for the training job"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/TrainingEnvironment"
+          },
+          "dataset_folder": {
+            "type": "string",
+            "title": "Dataset Folder",
+            "description": "Path to folder containing drawings"
+          },
+          "metadata_file": {
+            "type": "string",
+            "title": "Metadata File",
+            "description": "Path to metadata CSV/JSON file"
+          },
+          "learning_rate": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 1e-06,
+            "title": "Learning Rate",
+            "default": 0.001
+          },
+          "batch_size": {
+            "type": "integer",
+            "maximum": 512.0,
+            "minimum": 1.0,
+            "title": "Batch Size",
+            "default": 32
+          },
+          "epochs": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Epochs",
+            "default": 100
+          },
+          "train_split": {
+            "type": "number",
+            "maximum": 0.9,
+            "minimum": 0.1,
+            "title": "Train Split",
+            "default": 0.7
+          },
+          "validation_split": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0.1,
+            "title": "Validation Split",
+            "default": 0.2
+          },
+          "test_split": {
+            "type": "number",
+            "maximum": 0.3,
+            "minimum": 0.05,
+            "title": "Test Split",
+            "default": 0.1
+          },
+          "instance_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance Type",
+            "description": "SageMaker instance type",
+            "default": "ml.m5.large"
+          },
+          "instance_count": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Instance Count",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_name",
+          "environment",
+          "dataset_folder",
+          "metadata_file"
+        ],
+        "title": "TrainingConfigRequest",
+        "description": "Request model for training job configuration."
+      },
+      "TrainingEnvironment": {
+        "type": "string",
+        "enum": [
+          "local",
+          "sagemaker"
+        ],
+        "title": "TrainingEnvironment",
+        "description": "Enumeration for training environments."
+      },
+      "TrainingJobResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "job_name": {
+            "type": "string",
+            "title": "Job Name"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "start_timestamp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Timestamp"
+          },
+          "end_timestamp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Timestamp"
+          },
+          "sagemaker_job_arn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sagemaker Job Arn"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "job_name",
+          "environment",
+          "status",
+          "start_timestamp",
+          "end_timestamp",
+          "sagemaker_job_arn"
+        ],
+        "title": "TrainingJobResponse",
+        "description": "Response model for training job information."
+      },
+      "TrainingReportResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "final_loss": {
+            "type": "number",
+            "title": "Final Loss"
+          },
+          "validation_accuracy": {
+            "type": "number",
+            "title": "Validation Accuracy"
+          },
+          "best_epoch": {
+            "type": "integer",
+            "title": "Best Epoch"
+          },
+          "training_time_seconds": {
+            "type": "number",
+            "title": "Training Time Seconds"
+          },
+          "model_parameters_path": {
+            "type": "string",
+            "title": "Model Parameters Path"
+          },
+          "report_file_path": {
+            "type": "string",
+            "title": "Report File Path"
+          },
+          "created_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "final_loss",
+          "validation_accuracy",
+          "best_epoch",
+          "training_time_seconds",
+          "model_parameters_path",
+          "report_file_path",
+          "created_timestamp"
+        ],
+        "title": "TrainingReportResponse",
+        "description": "Response model for training report information."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VisionModel": {
+        "type": "string",
+        "enum": [
+          "vit"
+        ],
+        "title": "VisionModel",
+        "description": "Enumeration for vision models."
+      }
+    }
+  }
+};
+    storeOriginalSpec(spec);
+    
+    // Initialize Swagger UI with enhanced configuration
+    window.swaggerUI = SwaggerUIBundle({
+        url: './openapi.json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+        ],
+        plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        
+        // Enhanced configuration options
+        displayOperationId: true,
+        displayRequestDuration: true,
+        docExpansion: "list",
+        filter: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        maxDisplayedTags: 50,
+        showMutatedRequest: true,
+        supportedSubmitMethods: ["get", "put", "post", "delete", "options", "head", "patch", "trace"],
+        
+        // Default model expansion
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 1,
+        
+        // Validator URL (set to null to disable validation)
+        validatorUrl: null,
+        
+        // Try it out enabled by default
+        tryItOutEnabled: true,
+        
+        // Request interceptor for authentication
+        requestInterceptor: function(request) {
+            // Add custom headers or modify requests here
+            console.log('Request interceptor:', request);
+            return request;
+        },
+        
+        // Response interceptor for handling responses
+        responseInterceptor: function(response) {
+            // Handle responses here
+            console.log('Response interceptor:', response);
+            return response;
+        },
+        
+        // Error handling
+        onComplete: function() {
+            console.log('Swagger UI loaded successfully');
+            
+            // Initialize enhancements after UI is ready
+            setTimeout(() => {
+                setupAdvancedFeatures();
+            }, 1000);
+        },
+        
+        onFailure: function(error) {
+            console.error('Swagger UI failed to load:', error);
+            showNotification('Failed to load API documentation', 'error');
+        }
+    });
+    
+    // Store reference globally
+    window.swaggerUI = window.swaggerUI;
+}
+
+// Configuration constants
+const SWAGGER_CONFIG = {
+    SEARCH_DEBOUNCE_MS: 300,
+    NOTIFICATION_DURATION_MS: 3000,
+    COPY_BUTTON_RESET_MS: 2000,
+    ENHANCEMENT_INIT_DELAY_MS: 1000,
+    
+    // Feature flags
+    ENABLE_KEYBOARD_SHORTCUTS: true,
+    ENABLE_COPY_BUTTONS: true,
+    ENABLE_EXPORT_FUNCTIONALITY: true,
+    ENABLE_EXPAND_COLLAPSE: true,
+    
+    // Styling
+    PRIMARY_COLOR: '#667eea',
+    SUCCESS_COLOR: '#28a745',
+    ERROR_COLOR: '#dc3545',
+    WARNING_COLOR: '#ffc107'
+};

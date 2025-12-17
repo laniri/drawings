@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_error_flow_age_group_manager" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="error_flow_age_group_manager" name="Error Flow - Age Group Manager" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="Error Condition Detected"/>
+    <bpmn:errorEvent id="error_event_1" name="Exception Error" error_type="Exception"/>
+    <bpmn:task id="recovery_task_2" name="Handle Exception" recovery="True"/>
+    <bpmn:endEvent id="end_3" name="Error Resolved"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="error_event_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="error_event_1" targetRef="recovery_task_2"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="recovery_task_2" targetRef="end_3"/>
+  </bpmn:process>
+</bpmn:definitions>

@@ -1,0 +1,282 @@
+{
+  "report_metadata": {
+    "training_job_id": null,
+    "generation_timestamp": "2025-12-16T23:00:40.269640",
+    "report_version": "1.0",
+    "generator": "TrainingReportGenerator"
+  },
+  "training_metrics": {
+    "final_train_loss": 2.2014398906679897,
+    "final_val_loss": 2.8111714866512156,
+    "best_val_loss": 2.0424521696947107,
+    "best_epoch": 1,
+    "total_epochs": 20,
+    "training_time_seconds": 4.0,
+    "train_loss_mean": 2.52679236191324,
+    "train_loss_std": 0.2819635571108947,
+    "val_loss_mean": 2.5065477647409056,
+    "val_loss_std": 0.19553183587713557,
+    "convergence_epoch": null,
+    "early_stopping_triggered": false,
+    "overfitting_detected": "False",
+    "generalization_gap": 0.6097315959832259,
+    "reconstruction_error_stats": {
+      "mean": 0.27989289564043873,
+      "std": 0.08396786869213162,
+      "min": 0.027989289564043875,
+      "max": 1.3994644782021937,
+      "percentile_95": 0.5597857912808775,
+      "percentile_99": 0.8396786869213162
+    },
+    "anomaly_detection_threshold": 0.5597857912808775,
+    "validation_accuracy_estimate": 0.0,
+    "loss_variance": 0.010260677049362902,
+    "gradient_norm_stats": null,
+    "learning_rate_schedule": []
+  },
+  "model_architecture": {
+    "model_type": "autoencoder",
+    "input_dimension": 423,
+    "hidden_dimensions": [
+      937,
+      8,
+      863,
+      1948,
+      1493
+    ],
+    "latent_dimension": 142,
+    "total_parameters": 10424490,
+    "trainable_parameters": 10424490,
+    "model_size_mb": 39.766273498535156,
+    "activation_functions": [
+      "ReLU"
+    ],
+    "dropout_rate": 0.5
+  },
+  "training_configuration": {
+    "learning_rate": 0.8079541071102895,
+    "batch_size": 68,
+    "epochs": 999,
+    "optimizer": "Adam",
+    "loss_function": "MSE",
+    "early_stopping_patience": 23,
+    "min_delta": 0.001,
+    "data_split_ratios": {
+      "train": 0.7,
+      "validation": 0.2,
+      "test": 0.1
+    },
+    "device_used": "cuda",
+    "random_seed": null
+  },
+  "summary_statistics": {
+    "overall_performance_score": 0.3760015453934823,
+    "training_efficiency": {
+      "time_per_epoch": 0.2,
+      "epochs_to_convergence": 20,
+      "early_stopping_benefit": false
+    },
+    "model_quality": {
+      "final_loss": 2.8111714866512156,
+      "best_loss": 2.0424521696947107,
+      "loss_improvement": 0.18515330191370485,
+      "stability_score": 0.989739322950637
+    },
+    "anomaly_detection_readiness": {
+      "threshold": 0.5597857912808775,
+      "estimated_accuracy": 0.0,
+      "reconstruction_quality": 0.7201071043595613
+    },
+    "architecture_efficiency": {
+      "parameters_per_dimension": 24644.18439716312,
+      "compression_ratio": 2.9788732394366195,
+      "model_complexity": 5
+    }
+  },
+  "performance_analysis": {
+    "overall_score": 0.3760015453934823,
+    "strengths": [
+      "No overfitting detected"
+    ],
+    "weaknesses": [
+      "Large generalization gap",
+      "No clear convergence",
+      "Low validation accuracy"
+    ],
+    "performance_category": "Poor",
+    "key_insights": [
+      "Model achieved 0.0% estimated accuracy",
+      "Training completed in 4.0 seconds",
+      "Best performance at epoch 1 of 20",
+      "Anomaly detection threshold set at 0.559786"
+    ]
+  },
+  "recommendations": [
+    "Consider increasing model capacity or training time",
+    "Increase training epochs or adjust learning rate",
+    "Improve data quality or add data augmentation",
+    "Review data preprocessing and normalization"
+  ],
+  "visualizations": {
+    "loss_curves": "outputs/training_reports/job_None_20251216_230034/loss_curves.png",
+    "metrics_dashboard": "outputs/training_reports/job_None_20251216_230034/metrics_dashboard.png",
+    "error_distribution": "outputs/training_reports/job_None_20251216_230034/error_distribution.png",
+    "training_progress": "outputs/training_reports/job_None_20251216_230034/training_progress.png",
+    "architecture_diagram": "outputs/training_reports/job_None_20251216_230034/architecture_diagram.png",
+    "performance_summary": "outputs/training_reports/job_None_20251216_230034/performance_summary.png"
+  },
+  "raw_training_data": {
+    "success": true,
+    "epochs_trained": 20,
+    "best_val_loss": 2.0424521696947107,
+    "final_train_loss": 2.2014398906679897,
+    "final_val_loss": 2.8111714866512156,
+    "training_time": 4.0,
+    "model_architecture": {
+      "model_type": "autoencoder",
+      "input_dim": 423,
+      "hidden_dims": [
+        937,
+        8,
+        863,
+        1948,
+        1493
+      ],
+      "latent_dim": 142,
+      "total_parameters": 10424490,
+      "trainable_parameters": 10424490,
+      "model_size_mb": 39.766273498535156,
+      "activation_functions": [
+        "ReLU"
+      ],
+      "dropout_rate": 0.5
+    },
+    "training_config": {
+      "learning_rate": 0.8079541071102895,
+      "batch_size": 68,
+      "epochs": 999,
+      "optimizer": "Adam",
+      "loss_function": "MSE",
+      "early_stopping_patience": 23,
+      "min_delta": 0.001,
+      "train_split": 0.7,
+      "validation_split": 0.2,
+      "test_split": 0.1,
+      "random_seed": null
+    },
+    "metrics": {
+      "validation_mean_error": 0.27989289564043873,
+      "validation_std_error": 0.08396786869213162,
+      "validation_min_error": 0.027989289564043875,
+      "validation_max_error": 1.3994644782021937,
+      "validation_percentile_95": 0.5597857912808775,
+      "validation_percentile_99": 0.8396786869213162
+    },
+    "training_history": [
+      {
+        "epoch": 1,
+        "train_loss": 3.0426497919909985,
+        "val_loss": 2.0424521696947107
+      },
+      {
+        "epoch": 2,
+        "train_loss": 2.951830923695023,
+        "val_loss": 2.1445747781794458
+      },
+      {
+        "epoch": 3,
+        "train_loss": 2.9223946868101818,
+        "val_loss": 2.212396702957387
+      },
+      {
+        "epoch": 4,
+        "train_loss": 2.8498742376012207,
+        "val_loss": 2.3016721808343115
+      },
+      {
+        "epoch": 5,
+        "train_loss": 2.849845738858845,
+        "val_loss": 2.38531220316651
+      },
+      {
+        "epoch": 6,
+        "train_loss": 2.825699990645045,
+        "val_loss": 2.4901810808106593
+      },
+      {
+        "epoch": 7,
+        "train_loss": 2.6844149911127926,
+        "val_loss": 2.540337953928407
+      },
+      {
+        "epoch": 8,
+        "train_loss": 2.5924500078546484,
+        "val_loss": 2.6287727375970102
+      },
+      {
+        "epoch": 9,
+        "train_loss": 2.5027406464489528,
+        "val_loss": 2.6287464498696345
+      },
+      {
+        "epoch": 10,
+        "train_loss": 2.4721300744448156,
+        "val_loss": 2.7254789717370156
+      },
+      {
+        "epoch": 11,
+        "train_loss": 2.428408696140557,
+        "val_loss": 2.610977279651207
+      },
+      {
+        "epoch": 12,
+        "train_loss": 2.3435459549375013,
+        "val_loss": 2.5663402539314135
+      },
+      {
+        "epoch": 13,
+        "train_loss": 2.377766840231414,
+        "val_loss": 2.5663145905288745
+      },
+      {
+        "epoch": 14,
+        "train_loss": 2.3614636935769755,
+        "val_loss": 2.5339850405243673
+      },
+      {
+        "epoch": 15,
+        "train_loss": 2.280575924156397,
+        "val_loss": 2.4240281685470877
+      },
+      {
+        "epoch": 16,
+        "train_loss": 2.234964405673269,
+        "val_loss": 2.545229576974442
+      },
+      {
+        "epoch": 17,
+        "train_loss": 2.208567318547997,
+        "val_loss": 2.649186298704407
+      },
+      {
+        "epoch": 18,
+        "train_loss": 2.203643534202192,
+        "val_loss": 2.601419646744802
+      },
+      {
+        "epoch": 19,
+        "train_loss": 2.2014398906679897,
+        "val_loss": 2.722377723785208
+      },
+      {
+        "epoch": 20,
+        "train_loss": 2.2014398906679897,
+        "val_loss": 2.8111714866512156
+      }
+    ],
+    "device_info": {
+      "type": "cuda",
+      "name": "Test Device"
+    }
+  }
+}

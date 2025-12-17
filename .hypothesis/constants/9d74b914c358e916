@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/threshold_manager.py
+# hypothesis_version: 6.148.7
+
+[0.0, 50.0, 90.0, 95.0, 99.0, 99.9, 100, 'age_group_model_id', 'age_range', 'errors', 'failed_updates', 'max', 'mean', 'mean_threshold', 'median', 'min', 'model_id', 'model_results', 'model_thresholds', 'new_threshold', 'old_threshold', 'percentile_used', 'primary_threshold', 'sample_count', 'statistics', 'std', 'std_threshold', 'success', 'successful_updates', 'threshold', 'threshold_range', 'thresholds', 'total_models']

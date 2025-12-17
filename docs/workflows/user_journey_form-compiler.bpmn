@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_user_journey_form-compiler" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="user_journey_form-compiler" name="User Journey - Form-compiler" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="User Starts Journey"/>
+    <bpmn:userTask id="user_task_1" name="Submit Submit(onSubmit)" actor="user"/>
+    <bpmn:userTask id="user_task_2" name="Submit Submit" actor="user"/>
+    <bpmn:endEvent id="end_3" name="Journey Complete"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="user_task_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="user_task_1" targetRef="user_task_2"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="user_task_2" targetRef="end_3"/>
+  </bpmn:process>
+</bpmn:definitions>

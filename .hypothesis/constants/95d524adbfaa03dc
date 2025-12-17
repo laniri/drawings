@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/dataset_preparation.py
+# hypothesis_version: 6.148.7
+
+[0.01, 0.1, 0.2, 0.7, 1.0, 100, '.bmp', '.csv', '.jpeg', '.jpg', '.json', '.png', 'age_range', 'age_years', 'classes', 'csv', 'drawing_tool', 'expert_label', 'filename', 'is_valid', 'json', 'max', 'mean', 'min', 'prompt', 'r', 'recommendations', 'statistics', 'subject', 'test_samples', 'test_size', 'total_samples', 'train_samples', 'validation_samples', 'warnings']

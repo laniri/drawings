@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/core/database.py
+# hypothesis_version: 6.148.7
+
+['check_same_thread', 'connect', 'sqlite:///', 'timeout']

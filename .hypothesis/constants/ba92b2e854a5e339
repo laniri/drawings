@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/__init__.py
+# hypothesis_version: 6.148.7
+
+['AgeGroupingStrategy', 'AnalysisMethod', 'AnalysisRequest', 'BatchAnalysisRequest', 'DrawingFilterRequest', 'DrawingListResponse', 'DrawingResponse', 'DrawingUploadRequest', 'ErrorDetail', 'ErrorResponse', 'ExpertLabel', 'FileUploadResponse', 'HealthCheckResponse', 'ImageFormat', 'ModelListResponse', 'ModelStatus', 'ModelStatusResponse', 'ModelTrainingRequest', 'PaginationInfo', 'SuccessResponse', 'VisionModel']

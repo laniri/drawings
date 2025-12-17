@@ -1,0 +1,352 @@
+% Performance Analysis Template for Algorithm Documentation
+% Includes complexity analysis, benchmarking, and validation methodologies
+
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{array}
+
+% Custom commands for performance analysis
+\newcommand{\bigO}[1]{\mathcal{O}\left(#1\right)}
+\newcommand{\bigTheta}[1]{\Theta\left(#1\right)}
+\newcommand{\bigOmega}[1]{\Omega\left(#1\right)}
+\newcommand{\littleo}[1]{o\left(#1\right)}
+\newcommand{\littleomega}[1]{\omega\left(#1\right)}
+
+\begin{document}
+
+% 1. COMPUTATIONAL COMPLEXITY ANALYSIS
+\section{Computational Complexity Analysis}
+
+\subsection{Time Complexity}
+
+\subsubsection{Best Case Analysis}
+The best-case time complexity occurs when {{BEST_CASE_CONDITION}}:
+\begin{equation}
+T_{\text{best}}(n) = \bigO{{{BEST_CASE_COMPLEXITY}}}
+\end{equation}
+
+\textbf{Analysis:} {{BEST_CASE_ANALYSIS}}
+
+\subsubsection{Average Case Analysis}
+Under the assumption of {{AVERAGE_CASE_ASSUMPTION}}, the expected time complexity is:
+\begin{equation}
+T_{\text{avg}}(n) = \mathbb{E}[T(n)] = \bigTheta{{{AVERAGE_CASE_COMPLEXITY}}}
+\end{equation}
+
+\textbf{Derivation:}
+\begin{align}
+\mathbb{E}[T(n)] &= \sum_{i} P(i) \cdot T_i(n) \\
+&= {{AVERAGE_CASE_DERIVATION}} \\
+&= \bigTheta{{{AVERAGE_CASE_COMPLEXITY}}}
+\end{align}
+
+\subsubsection{Worst Case Analysis}
+The worst-case scenario occurs when {{WORST_CASE_CONDITION}}:
+\begin{equation}
+T_{\text{worst}}(n) = \bigO{{{WORST_CASE_COMPLEXITY}}}
+\end{equation}
+
+\textbf{Proof:} {{WORST_CASE_PROOF}}
+
+\subsection{Space Complexity}
+
+\subsubsection{Auxiliary Space}
+The algorithm requires auxiliary space for:
+\begin{align}
+S_{\text{variables}} &= \bigO{{{VARIABLE_SPACE}}} \\
+S_{\text{data structures}} &= \bigO{{{DATA_STRUCTURE_SPACE}}} \\
+S_{\text{recursion}} &= \bigO{{{RECURSION_SPACE}}}
+\end{align}
+
+Total auxiliary space: $S_{\text{aux}}(n) = \bigO{{{TOTAL_AUXILIARY_SPACE}}}$
+
+\subsubsection{Total Space}
+Including input space, the total space complexity is:
+\begin{equation}
+S_{\text{total}}(n) = \bigO{{{TOTAL_SPACE_COMPLEXITY}}}
+\end{equation}
+
+% 2. SCALABILITY ANALYSIS
+\section{Scalability Analysis}
+
+\subsection{Input Size Scaling}
+
+The algorithm's performance scales with input size $n$ as follows:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Input Size & Time Complexity & Space Complexity \\
+\midrule
+$n \leq 10^3$ & $\bigO{{{SMALL_INPUT_TIME}}}$ & $\bigO{{{SMALL_INPUT_SPACE}}}$ \\
+$10^3 < n \leq 10^6$ & $\bigO{{{MEDIUM_INPUT_TIME}}}$ & $\bigO{{{MEDIUM_INPUT_SPACE}}}$ \\
+$n > 10^6$ & $\bigO{{{LARGE_INPUT_TIME}}}$ & $\bigO{{{LARGE_INPUT_SPACE}}}$ \\
+\bottomrule
+\end{tabular}
+\caption{Scalability characteristics by input size}
+\end{table}
+
+\subsection{Parallel Scalability}
+
+For $p$ parallel processors, the parallel time complexity is:
+\begin{equation}
+T_p(n) = \frac{T(n)}{p} + T_{\text{communication}}(n, p)
+\end{equation}
+
+where $T_{\text{communication}}(n, p) = \bigO{{{COMMUNICATION_COMPLEXITY}}}$.
+
+The parallel efficiency is:
+\begin{equation}
+E(n, p) = \frac{T(n)}{p \cdot T_p(n)} = \frac{{{SEQUENTIAL_TIME}}}{{{PARALLEL_TIME}}}
+\end{equation}
+
+% 3. PERFORMANCE BENCHMARKS
+\section{Performance Benchmarks}
+
+\subsection{Benchmark Methodology}
+
+\subsubsection{Test Environment}
+\begin{itemize}
+\item \textbf{Hardware:} {{HARDWARE_SPECIFICATIONS}}
+\item \textbf{Software:} {{SOFTWARE_SPECIFICATIONS}}
+\item \textbf{Compiler:} {{COMPILER_SPECIFICATIONS}}
+\item \textbf{Optimization:} {{OPTIMIZATION_FLAGS}}
+\end{itemize}
+
+\subsubsection{Dataset Characteristics}
+\begin{align}
+\text{Dataset size:} &\quad n = {{DATASET_SIZE}} \\
+\text{Feature dimension:} &\quad d = {{FEATURE_DIMENSION}} \\
+\text{Data type:} &\quad {{DATA_TYPE}} \\
+\text{Distribution:} &\quad {{DATA_DISTRIBUTION}}
+\end{align}
+
+\subsection{Execution Time Benchmarks}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Dataset Size & Mean Time (ms) & Std Dev (ms) & Min Time (ms) & Max Time (ms) \\
+\midrule
+{{#BENCHMARK_RESULTS}}
+{{DATASET_SIZE}} & {{MEAN_TIME}} & {{STD_DEV}} & {{MIN_TIME}} & {{MAX_TIME}} \\
+{{/BENCHMARK_RESULTS}}
+\bottomrule
+\end{tabular}
+\caption{Execution time benchmarks across different dataset sizes}
+\end{table}
+
+\subsection{Memory Usage Benchmarks}
+
+Peak memory usage follows the pattern:
+\begin{equation}
+M_{\text{peak}}(n) = {{MEMORY_FORMULA}}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Dataset Size & Peak Memory (MB) & Average Memory (MB) & Memory Efficiency \\
+\midrule
+{{#MEMORY_RESULTS}}
+{{DATASET_SIZE}} & {{PEAK_MEMORY}} & {{AVERAGE_MEMORY}} & {{MEMORY_EFFICIENCY}} \\
+{{/MEMORY_RESULTS}}
+\bottomrule
+\end{tabular}
+\caption{Memory usage benchmarks}
+\end{table}
+
+% 4. ACCURACY AND QUALITY METRICS
+\section{Accuracy and Quality Metrics}
+
+\subsection{Accuracy Analysis}
+
+The algorithm achieves the following accuracy metrics:
+
+\begin{align}
+\text{Precision} &= \frac{TP}{TP + FP} = {{PRECISION_VALUE}} \\
+\text{Recall} &= \frac{TP}{TP + FN} = {{RECALL_VALUE}} \\
+\text{F1-Score} &= \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}} = {{F1_SCORE}}
+\end{align}
+
+\subsection{Error Analysis}
+
+\subsubsection{Mean Squared Error}
+\begin{equation}
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = {{MSE_VALUE}}
+\end{equation}
+
+\subsubsection{Mean Absolute Error}
+\begin{equation}
+\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i| = {{MAE_VALUE}}
+\end{equation}
+
+\subsubsection{Root Mean Squared Error}
+\begin{equation}
+\text{RMSE} = \sqrt{\text{MSE}} = {{RMSE_VALUE}}
+\end{equation}
+
+% 5. COMPARATIVE ANALYSIS
+\section{Comparative Analysis}
+
+\subsection{Algorithm Comparison}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Algorithm & Time Complexity & Space Complexity & Accuracy & Implementation \\
+\midrule
+{{ALGORITHM_NAME}} & $\bigO{{{OUR_TIME}}}$ & $\bigO{{{OUR_SPACE}}}$ & {{OUR_ACCURACY}} & {{OUR_COMPLEXITY}} \\
+{{#COMPARISON_ALGORITHMS}}
+{{ALG_NAME}} & $\bigO{{{ALG_TIME}}}$ & $\bigO{{{ALG_SPACE}}}$ & {{ALG_ACCURACY}} & {{ALG_COMPLEXITY}} \\
+{{/COMPARISON_ALGORITHMS}}
+\bottomrule
+\end{tabular}
+\caption{Comparative analysis with existing algorithms}
+\end{table}
+
+\subsection{Performance Trade-offs}
+
+The algorithm exhibits the following trade-offs:
+
+\begin{itemize}
+\item \textbf{Time vs. Accuracy:} {{TIME_ACCURACY_TRADEOFF}}
+\item \textbf{Space vs. Time:} {{SPACE_TIME_TRADEOFF}}
+\item \textbf{Scalability vs. Precision:} {{SCALABILITY_PRECISION_TRADEOFF}}
+\end{itemize}
+
+% 6. OPTIMIZATION ANALYSIS
+\section{Optimization Analysis}
+
+\subsection{Optimization Techniques Applied}
+
+\subsubsection{{{OPTIMIZATION_1_NAME}}}
+\textbf{Description:} {{OPTIMIZATION_1_DESCRIPTION}}
+
+\textbf{Performance Impact:}
+\begin{align}
+\text{Time improvement:} &\quad {{TIME_IMPROVEMENT_1}} \\
+\text{Space improvement:} &\quad {{SPACE_IMPROVEMENT_1}}
+\end{align}
+
+\subsubsection{{{OPTIMIZATION_2_NAME}}}
+\textbf{Description:} {{OPTIMIZATION_2_DESCRIPTION}}
+
+\textbf{Performance Impact:}
+\begin{align}
+\text{Time improvement:} &\quad {{TIME_IMPROVEMENT_2}} \\
+\text{Space improvement:} &\quad {{SPACE_IMPROVEMENT_2}}
+\end{align}
+
+\subsection{Optimization Potential}
+
+Theoretical lower bounds suggest:
+\begin{align}
+T_{\text{optimal}}(n) &\geq \bigOmega{{{THEORETICAL_LOWER_BOUND}}} \\
+S_{\text{optimal}}(n) &\geq \bigOmega{{{SPACE_LOWER_BOUND}}}
+\end{align}
+
+Current implementation achieves {{OPTIMALITY_PERCENTAGE}}\% of theoretical optimum.
+
+% 7. VALIDATION METHODOLOGY
+\section{Validation Methodology}
+
+\subsection{Cross-Validation}
+
+\subsubsection{K-Fold Cross-Validation}
+Using $k = {{K_VALUE}}$ folds, the cross-validation results are:
+
+\begin{align}
+\text{Mean Accuracy} &= \frac{1}{k} \sum_{i=1}^{k} A_i = {{CV_MEAN_ACCURACY}} \\
+\text{Standard Deviation} &= \sqrt{\frac{1}{k-1} \sum_{i=1}^{k} (A_i - \bar{A})^2} = {{CV_STD_ACCURACY}}
+\end{align}
+
+\subsubsection{Leave-One-Out Cross-Validation}
+LOOCV results: Mean accuracy = {{LOOCV_ACCURACY}}, Variance = {{LOOCV_VARIANCE}}
+
+\subsection{Statistical Significance Testing}
+
+\subsubsection{Paired t-test}
+Comparing with baseline algorithm:
+\begin{align}
+H_0: &\quad \mu_{\text{diff}} = 0 \\
+H_1: &\quad \mu_{\text{diff}} \neq 0
+\end{align}
+
+Test statistic: $t = \frac{\bar{d}}{s_d/\sqrt{n}} = {{T_STATISTIC}}$
+
+p-value: $p = {{P_VALUE}}$
+
+\subsubsection{Wilcoxon Signed-Rank Test}
+Non-parametric test results:
+\begin{itemize}
+\item Test statistic: $W = {{WILCOXON_STATISTIC}}$
+\item p-value: $p = {{WILCOXON_P_VALUE}}$
+\item Effect size: $r = {{EFFECT_SIZE}}$
+\end{itemize}
+
+% 8. ROBUSTNESS ANALYSIS
+\section{Robustness Analysis}
+
+\subsection{Noise Sensitivity}
+
+Performance under different noise levels:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Noise Level & Accuracy Drop & Time Increase & Space Increase \\
+\midrule
+{{#NOISE_LEVELS}}
+{{NOISE_LEVEL}} & {{ACCURACY_DROP}} & {{TIME_INCREASE}} & {{SPACE_INCREASE}} \\
+{{/NOISE_LEVELS}}
+\bottomrule
+\end{tabular}
+\caption{Performance degradation under noise}
+\end{table}
+
+\subsection{Parameter Sensitivity}
+
+Sensitivity analysis for key parameters:
+
+\begin{align}
+\frac{\partial \text{Accuracy}}{\partial \theta_1} &= {{SENSITIVITY_PARAM_1}} \\
+\frac{\partial \text{Accuracy}}{\partial \theta_2} &= {{SENSITIVITY_PARAM_2}}
+\end{align}
+
+% 9. CONFIDENCE INTERVALS
+\section{Confidence Intervals}
+
+\subsection{Performance Confidence Intervals}
+
+95\% confidence intervals for key metrics:
+
+\begin{align}
+\text{Accuracy:} &\quad [{{ACCURACY_CI_LOWER}}, {{ACCURACY_CI_UPPER}}] \\
+\text{Execution Time:} &\quad [{{TIME_CI_LOWER}}, {{TIME_CI_UPPER}}] \text{ ms} \\
+\text{Memory Usage:} &\quad [{{MEMORY_CI_LOWER}}, {{MEMORY_CI_UPPER}}] \text{ MB}
+\end{align}
+
+\subsection{Bootstrap Confidence Intervals}
+
+Using {{BOOTSTRAP_SAMPLES}} bootstrap samples:
+
+\begin{align}
+\text{Bootstrap Mean:} &\quad {{BOOTSTRAP_MEAN}} \\
+\text{Bootstrap Std:} &\quad {{BOOTSTRAP_STD}} \\
+\text{95\% CI:} &\quad [{{BOOTSTRAP_CI_LOWER}}, {{BOOTSTRAP_CI_UPPER}}]
+\end{align}
+
+\end{document}

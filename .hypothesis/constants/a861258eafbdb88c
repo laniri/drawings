@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/models.py
+# hypothesis_version: 6.148.7
+
+[0.0, 1e-06, 0.001, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.0, 2.0, 16.0, 18.0, 50.0, 99.9, 100, 512, 1000, 'Export format', 'New threshold value', 'active_models', 'age_group_max', 'age_group_min', 'age_max', 'age_min', 'custom', 'failed', 'failed_models', 'from_attributes', 'insufficient_data', 'local', 'ml.m5.large', 'onnx', 'pickle', 'production', 'pytorch', 'ready', 'sagemaker', 'test_split', 'total_models', 'train_split', 'training', 'training_models', 'validation_split', 'yearly']

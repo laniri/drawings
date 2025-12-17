@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Interface Change Monitor",
+  "description": "Monitors changes to interface components, pages, and configuration files to detect when UI behavior or content changes occur",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "frontend/src/components/**/*.tsx",
+      "frontend/src/pages/**/*.tsx",
+      "frontend/src/App.tsx",
+      "frontend/src/theme/theme.ts",
+      "app/api/api_v1/endpoints/**/*.py",
+      "app/schemas/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file that affects the interface behavior or content has been modified. Please analyze the changes to determine:\n\n1. What specific interface elements or behaviors have changed\n2. Whether these changes affect user workflows or data flow\n3. If any documentation needs to be updated to reflect the interface changes\n4. Whether the changes impact API contracts or component interfaces\n5. If any tests need to be updated to cover the new interface behavior\n\nFocus on identifying changes that could affect how users interact with the system or how different parts of the interface communicate with each other."
+  }
+}

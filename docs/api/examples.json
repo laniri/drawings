@@ -1,0 +1,3993 @@
+{
+  "endpoints": {
+    "POST /api/v1/drawings/upload": {
+      "request_examples": {
+        "request_body": {
+          "multipart/form-data": {
+            "file": "example_string",
+            "age_years": 3.14,
+            "subject": {},
+            "expert_label": {},
+            "drawing_tool": {},
+            "prompt": {}
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/drawings/upload",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "201": {
+          "description": "Successful Response",
+          "status_code": "201",
+          "content": {
+            "application/json": {
+              "id": 42,
+              "filename": "example_string",
+              "age_years": 3.14,
+              "subject": {},
+              "expert_label": {},
+              "drawing_tool": {},
+              "prompt": {},
+              "upload_timestamp": "example_string"
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Upload Drawing",
+        "description": "Upload drawing with metadata.\n\nThis endpoint accepts multipart form data with an image file and metadata.\nThe image is validated, preprocessed, and stored along with the metadata.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/drawings/upload/progress/{upload_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "upload_id": "example_upload_id"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/drawings/upload/progress/{upload_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Upload Progress",
+        "description": "Get upload progress for large file uploads.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/drawings/{drawing_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/drawings/{drawing_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "id": 42,
+              "filename": "example_string",
+              "age_years": 3.14,
+              "subject": {},
+              "expert_label": {},
+              "drawing_tool": {},
+              "prompt": {},
+              "upload_timestamp": "example_string"
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Drawing",
+        "description": "Retrieve drawing details by ID.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "DELETE /api/v1/drawings/{drawing_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          }
+        },
+        "complete_request": {
+          "method": "DELETE",
+          "url": "/api/v1/drawings/{drawing_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "204": {
+          "description": "Successful Response",
+          "status_code": "204"
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Delete Drawing",
+        "description": "Delete drawing and associated data.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/drawings/{drawing_id}/file": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/drawings/{drawing_id}/file",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Drawing File",
+        "description": "Retrieve the actual drawing file.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/drawings/": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "age_min": "example_age_min",
+            "age_max": "example_age_max",
+            "subject": "example_subject",
+            "expert_label": "example_expert_label",
+            "page": 10,
+            "page_size": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/drawings/",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "drawings": [
+                {
+                  "id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "expert_label": {},
+                  "drawing_tool": {},
+                  "prompt": {},
+                  "upload_timestamp": "example_string"
+                },
+                {
+                  "id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "expert_label": {},
+                  "drawing_tool": {},
+                  "prompt": {},
+                  "upload_timestamp": "example_string"
+                }
+              ],
+              "total_count": 42,
+              "page": 42,
+              "page_size": 42,
+              "total_pages": 42
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List Drawings",
+        "description": "List drawings with optional filtering and pagination.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "POST /api/v1/drawings/batch/upload": {
+      "request_examples": {
+        "request_body": {
+          "multipart/form-data": {
+            "files": [
+              "example_string",
+              "example_string"
+            ]
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/drawings/batch/upload",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Batch Upload Drawings",
+        "description": "Upload multiple drawings in batch.\n\nThis endpoint accepts multiple files and processes them in the background.\nReturns an upload ID for tracking progress.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/drawings/stats": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/drawings/stats",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Drawing Stats",
+        "description": "Get statistics about stored drawings.",
+        "tags": [
+          "drawings"
+        ]
+      }
+    },
+    "GET /api/v1/analysis/stats": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/analysis/stats",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Analysis Stats",
+        "description": "Get dashboard statistics for analyses and drawings.\n\nThis endpoint provides comprehensive statistics for the dashboard\nincluding drawing counts, analysis results, and model status.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "POST /api/v1/analysis/analyze/{drawing_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          }
+        },
+        "request_body": {
+          "application/json": {
+            "drawing_id": 42,
+            "force_reanalysis": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/analysis/analyze/{drawing_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "drawing": {
+                "id": 42,
+                "filename": "example_string",
+                "age_years": 3.14,
+                "subject": {},
+                "expert_label": {},
+                "drawing_tool": {},
+                "prompt": {},
+                "upload_timestamp": "example_string"
+              },
+              "analysis": {
+                "id": 42,
+                "drawing_id": 42,
+                "anomaly_score": 3.14,
+                "normalized_score": 3.14,
+                "is_anomaly": true,
+                "confidence": 3.14,
+                "age_group": "example_string",
+                "method_used": "example_string",
+                "vision_model": "example_string",
+                "analysis_timestamp": "example_string"
+              },
+              "interpretability": {},
+              "comparison_examples": [
+                {
+                  "drawing_id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "similarity_score": 3.14,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14
+                },
+                {
+                  "drawing_id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "similarity_score": 3.14,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14
+                }
+              ]
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Analyze Drawing",
+        "description": "Analyze specific drawing for anomalies.\n\nThis endpoint performs anomaly detection on a single drawing,\ngenerating embeddings, computing anomaly scores, and providing\ninterpretability results if the drawing is flagged as anomalous.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "POST /api/v1/analysis/batch": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "drawing_ids": [
+              42,
+              42
+            ],
+            "force_reanalysis": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/analysis/batch",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Batch Analyze",
+        "description": "Batch analyze multiple drawings.\n\nThis endpoint accepts a list of drawing IDs and processes them\nin the background, returning a batch ID for progress tracking.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "GET /api/v1/analysis/batch/{batch_id}/progress": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "batch_id": "example_batch_id"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/analysis/batch/{batch_id}/progress",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "batch_id": "example_string",
+              "total_drawings": 42,
+              "completed": 42,
+              "failed": 42,
+              "status": "example_string",
+              "results": [
+                {
+                  "drawing": {
+                    "id": 42,
+                    "filename": "example_string",
+                    "age_years": 3.14,
+                    "subject": {},
+                    "expert_label": {},
+                    "drawing_tool": {},
+                    "prompt": {},
+                    "upload_timestamp": "example_string"
+                  },
+                  "analysis": {
+                    "id": 42,
+                    "drawing_id": 42,
+                    "anomaly_score": 3.14,
+                    "normalized_score": 3.14,
+                    "is_anomaly": true,
+                    "confidence": 3.14,
+                    "age_group": "example_string",
+                    "method_used": "example_string",
+                    "vision_model": "example_string",
+                    "analysis_timestamp": "example_string"
+                  },
+                  "interpretability": {},
+                  "comparison_examples": [
+                    {
+                      "drawing_id": 42,
+                      "filename": "example_string",
+                      "age_years": 3.14,
+                      "subject": {},
+                      "similarity_score": 3.14,
+                      "anomaly_score": 3.14,
+                      "normalized_score": 3.14
+                    },
+                    {
+                      "drawing_id": 42,
+                      "filename": "example_string",
+                      "age_years": 3.14,
+                      "subject": {},
+                      "similarity_score": 3.14,
+                      "anomaly_score": 3.14,
+                      "normalized_score": 3.14
+                    }
+                  ]
+                },
+                {
+                  "drawing": {
+                    "id": 42,
+                    "filename": "example_string",
+                    "age_years": 3.14,
+                    "subject": {},
+                    "expert_label": {},
+                    "drawing_tool": {},
+                    "prompt": {},
+                    "upload_timestamp": "example_string"
+                  },
+                  "analysis": {
+                    "id": 42,
+                    "drawing_id": 42,
+                    "anomaly_score": 3.14,
+                    "normalized_score": 3.14,
+                    "is_anomaly": true,
+                    "confidence": 3.14,
+                    "age_group": "example_string",
+                    "method_used": "example_string",
+                    "vision_model": "example_string",
+                    "analysis_timestamp": "example_string"
+                  },
+                  "interpretability": {},
+                  "comparison_examples": [
+                    {
+                      "drawing_id": 42,
+                      "filename": "example_string",
+                      "age_years": 3.14,
+                      "subject": {},
+                      "similarity_score": 3.14,
+                      "anomaly_score": 3.14,
+                      "normalized_score": 3.14
+                    },
+                    {
+                      "drawing_id": 42,
+                      "filename": "example_string",
+                      "age_years": 3.14,
+                      "subject": {},
+                      "similarity_score": 3.14,
+                      "anomaly_score": 3.14,
+                      "normalized_score": 3.14
+                    }
+                  ]
+                }
+              ],
+              "errors": [
+                {},
+                {}
+              ],
+              "started_at": "example_string",
+              "completed_at": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Batch Progress",
+        "description": "Get progress of batch analysis.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "GET /api/v1/analysis/{analysis_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/analysis/{analysis_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "drawing": {
+                "id": 42,
+                "filename": "example_string",
+                "age_years": 3.14,
+                "subject": {},
+                "expert_label": {},
+                "drawing_tool": {},
+                "prompt": {},
+                "upload_timestamp": "example_string"
+              },
+              "analysis": {
+                "id": 42,
+                "drawing_id": 42,
+                "anomaly_score": 3.14,
+                "normalized_score": 3.14,
+                "is_anomaly": true,
+                "confidence": 3.14,
+                "age_group": "example_string",
+                "method_used": "example_string",
+                "vision_model": "example_string",
+                "analysis_timestamp": "example_string"
+              },
+              "interpretability": {},
+              "comparison_examples": [
+                {
+                  "drawing_id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "similarity_score": 3.14,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14
+                },
+                {
+                  "drawing_id": 42,
+                  "filename": "example_string",
+                  "age_years": 3.14,
+                  "subject": {},
+                  "similarity_score": 3.14,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14
+                }
+              ]
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Analysis Result",
+        "description": "Get analysis results by analysis ID.\n\nThis endpoint retrieves a complete analysis result including\nthe drawing information, anomaly analysis, and interpretability\nresults if available.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "POST /api/v1/analysis/embeddings/{drawing_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/analysis/embeddings/{drawing_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Generate Embedding",
+        "description": "Generate embedding for a drawing without requiring a trained model.\n\nThis endpoint is used during the training phase to generate embeddings\nfor all drawings before training the autoencoder models.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "GET /api/v1/analysis/drawing/{drawing_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "drawing_id": 123
+          },
+          "query": {
+            "limit": 10
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/analysis/drawing/{drawing_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "drawing_id": 42,
+              "analyses": [
+                {
+                  "id": 42,
+                  "drawing_id": 42,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14,
+                  "is_anomaly": true,
+                  "confidence": 3.14,
+                  "age_group": "example_string",
+                  "method_used": "example_string",
+                  "vision_model": "example_string",
+                  "analysis_timestamp": "example_string"
+                },
+                {
+                  "id": 42,
+                  "drawing_id": 42,
+                  "anomaly_score": 3.14,
+                  "normalized_score": 3.14,
+                  "is_anomaly": true,
+                  "confidence": 3.14,
+                  "age_group": "example_string",
+                  "method_used": "example_string",
+                  "vision_model": "example_string",
+                  "analysis_timestamp": "example_string"
+                }
+              ],
+              "total_count": 42
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Drawing Analyses",
+        "description": "Get all analyses for a specific drawing.\n\nThis endpoint returns the analysis history for a drawing,\nordered by most recent first.",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "GET /api/v1/models/age-groups": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "active_only": true
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/age-groups",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "models": [
+                {
+                  "id": 42,
+                  "age_min": 3.14,
+                  "age_max": 3.14,
+                  "model_type": "example_string",
+                  "vision_model": "example_string",
+                  "sample_count": 42,
+                  "threshold": 3.14,
+                  "status": "example_string",
+                  "created_timestamp": "example_string",
+                  "is_active": true
+                },
+                {
+                  "id": 42,
+                  "age_min": 3.14,
+                  "age_max": 3.14,
+                  "model_type": "example_string",
+                  "vision_model": "example_string",
+                  "sample_count": 42,
+                  "threshold": 3.14,
+                  "status": "example_string",
+                  "created_timestamp": "example_string",
+                  "is_active": true
+                }
+              ],
+              "total_count": 42,
+              "active_count": 42,
+              "training_count": 42
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List Age Group Models",
+        "description": "List available age group models.\n\nThis endpoint returns all age group models with their status,\nsample counts, and threshold information.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "POST /api/v1/models/train": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "age_min": 3.14,
+            "age_max": 3.14,
+            "model_type": "example_string",
+            "vision_model": "example_string",
+            "min_samples": 42
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/models/train",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Train Age Group Model",
+        "description": "Train new age group model.\n\nThis endpoint starts training a new autoencoder model for the specified\nage range. Training is performed in the background and progress can be\ntracked using the returned job ID.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/training/{job_id}/status": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "job_id": "example_job_id"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/training/{job_id}/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Training Status",
+        "description": "Get training job status.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "PUT /api/v1/models/{model_id}/threshold": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "model_id": 42
+          }
+        },
+        "request_body": {
+          "application/json": {
+            "threshold": 3.14,
+            "percentile": {}
+          }
+        },
+        "complete_request": {
+          "method": "PUT",
+          "url": "/api/v1/models/{model_id}/threshold",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Update Model Threshold",
+        "description": "Update model threshold.\n\nThis endpoint allows updating the anomaly detection threshold\nfor a specific age group model. The threshold can be set directly\nor calculated from a percentile of validation data.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/status": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "total_models": 42,
+              "active_models": 42,
+              "training_models": 42,
+              "failed_models": 42,
+              "total_drawings": 42,
+              "total_analyses": 42,
+              "system_status": "example_string",
+              "last_training": {}
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Model Status",
+        "description": "Get model training and system status.\n\nThis endpoint provides an overview of the model management system,\nincluding counts of models in different states and overall system health.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "POST /api/v1/models/auto-create": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "force_recreate": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/models/auto-create",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Auto Create Age Groups",
+        "description": "Automatically create age group models based on data distribution.\n\nThis endpoint analyzes the available drawing data and creates\nappropriate age group models with sufficient sample sizes.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/creation/{job_id}/status": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "job_id": "example_job_id"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/creation/{job_id}/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Creation Status",
+        "description": "Get model creation job status.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "DELETE /api/v1/models/{model_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "model_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "DELETE",
+          "url": "/api/v1/models/{model_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Delete Model",
+        "description": "Delete (deactivate) an age group model.\n\nThis endpoint deactivates a model rather than permanently deleting it\nto preserve analysis history.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/data-sufficiency/analyze": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "age_groups": "example_age_groups"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/data-sufficiency/analyze",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Analyze Data Sufficiency",
+        "description": "Analyze data sufficiency for age groups.\n\nThis endpoint analyzes the available data for specified age groups\nand provides warnings about insufficient data, unbalanced distributions,\nand other data quality issues.\n\nArgs:\n    age_groups: Comma-separated list of age ranges (e.g., \"3-4,4-5,5-6\")\n               If not provided, analyzes all existing age group models",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/data-sufficiency/age-group/{age_min}/{age_max}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "age_min": 3.14,
+            "age_max": 3.14
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/data-sufficiency/age-group/{age_min}/{age_max}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Analyze Specific Age Group",
+        "description": "Analyze data sufficiency for a specific age group.\n\nThis endpoint provides detailed analysis of data availability,\nquality, and distribution for a single age group.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "POST /api/v1/models/data-sufficiency/merge-age-groups": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "original_groups": [
+              [
+                3.14,
+                3.14
+              ],
+              [
+                3.14,
+                3.14
+              ]
+            ],
+            "merged_group": [
+              3.14,
+              3.14
+            ]
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/models/data-sufficiency/merge-age-groups",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Merge Age Groups",
+        "description": "Merge age groups to improve data sufficiency.\n\nThis endpoint deactivates the original age group models and creates\na new merged age group model with combined data.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "GET /api/v1/models/data-sufficiency/warnings": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "severity": "example_severity"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/models/data-sufficiency/warnings",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Data Warnings",
+        "description": "Get data sufficiency warnings for all age groups.\n\nThis endpoint returns warnings about data quality issues,\noptionally filtered by severity level.",
+        "tags": [
+          "models"
+        ]
+      }
+    },
+    "POST /api/v1/training/jobs": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "job_name": "example_string",
+            "environment": "example_string",
+            "dataset_folder": "example_string",
+            "metadata_file": "example_string",
+            "learning_rate": 3.14,
+            "batch_size": 42,
+            "epochs": 42,
+            "train_split": 3.14,
+            "validation_split": 3.14,
+            "test_split": 3.14,
+            "instance_type": {},
+            "instance_count": 42
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/jobs",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "id": 42,
+              "job_name": "example_string",
+              "environment": "example_string",
+              "status": "example_string",
+              "start_timestamp": {},
+              "end_timestamp": {},
+              "sagemaker_job_arn": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Submit Training Job",
+        "description": "Submit a new training job to either local or SageMaker environment.\n\nThis endpoint creates and submits a training job based on the specified\nenvironment. For SageMaker jobs, it handles container building, data upload,\nand job submission. For local jobs, it starts training immediately.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/jobs": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "environment": "example_environment",
+            "status": "example_status",
+            "limit": 10
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/jobs",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": [
+              {
+                "id": 42,
+                "job_name": "example_string",
+                "environment": "example_string",
+                "status": "example_string",
+                "start_timestamp": {},
+                "end_timestamp": {},
+                "sagemaker_job_arn": {}
+              },
+              {
+                "id": 42,
+                "job_name": "example_string",
+                "environment": "example_string",
+                "status": "example_string",
+                "start_timestamp": {},
+                "end_timestamp": {},
+                "sagemaker_job_arn": {}
+              }
+            ]
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List Training Jobs",
+        "description": "List training jobs with optional filtering.\n\nThis endpoint returns a list of training jobs, optionally filtered\nby environment (local/sagemaker) and status.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/jobs/{job_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "job_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/jobs/{job_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Training Job Status",
+        "description": "Get detailed status of a specific training job.\n\nThis endpoint returns comprehensive information about a training job,\nincluding progress, metrics, and environment-specific details.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/jobs/{job_id}/cancel": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "job_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/jobs/{job_id}/cancel",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Cancel Training Job",
+        "description": "Cancel a running training job.\n\nThis endpoint attempts to cancel a training job. For local jobs,\nit stops the training process. For SageMaker jobs, it stops the\nSageMaker training job.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/jobs/{job_id}/reports": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "job_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/jobs/{job_id}/reports",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": [
+              {
+                "id": 42,
+                "final_loss": 3.14,
+                "validation_accuracy": 3.14,
+                "best_epoch": 42,
+                "training_time_seconds": 3.14,
+                "model_parameters_path": "example_string",
+                "report_file_path": "example_string",
+                "created_timestamp": "example_string"
+              },
+              {
+                "id": 42,
+                "final_loss": 3.14,
+                "validation_accuracy": 3.14,
+                "best_epoch": 42,
+                "training_time_seconds": 3.14,
+                "model_parameters_path": "example_string",
+                "report_file_path": "example_string",
+                "created_timestamp": "example_string"
+              }
+            ]
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Training Reports",
+        "description": "Get training reports for a specific job.\n\nThis endpoint returns all training reports associated with a job,\nincluding metrics, model paths, and performance summaries.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/deploy": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "model_parameters_path": "example_string",
+            "age_group_min": 3.14,
+            "age_group_max": 3.14,
+            "replace_existing": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/deploy",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Deploy Trained Model",
+        "description": "Deploy trained model parameters to production system.\n\nThis endpoint loads trained model parameters and creates a new\nage group model for production use.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/environments/status": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/environments/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Training Environments Status",
+        "description": "Get status of available training environments.\n\nThis endpoint returns information about local and SageMaker\ntraining environments, including availability and configuration.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/sagemaker/setup": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "s3_bucket": "example_s3_bucket",
+            "ecr_repository": "example_ecr_repository"
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/sagemaker/setup",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Setup Sagemaker Environment",
+        "description": "Setup SageMaker training environment.\n\nThis endpoint helps set up the necessary AWS resources for\nSageMaker training, including IAM roles and container repositories.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/models/export": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "training_job_id": 42,
+            "age_group_min": 3.14,
+            "age_group_max": 3.14,
+            "export_format": "example_export_format"
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/models/export",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Export Model From Training Job",
+        "description": "Export trained model from training job in production-compatible format.\n\nThis endpoint exports a trained model from a completed training job,\ncreating a production-ready model file with metadata and validation.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/models/exports": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/models/exports",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List Exported Models",
+        "description": "List all exported models with their metadata.\n\nThis endpoint returns a list of all models that have been exported,\nincluding their metadata, export timestamps, and file information.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/models/validate": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "model_id": "example_model_id"
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/models/validate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Validate Exported Model",
+        "description": "Validate exported model for compatibility and integrity.\n\nThis endpoint performs comprehensive validation of an exported model,\nchecking file integrity, compatibility, and performance metrics.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/models/deploy": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "model_export_path": "example_model_export_path",
+            "age_group_min": 3.14,
+            "age_group_max": 3.14,
+            "replace_existing": true,
+            "validate_before_deployment": true,
+            "backup_existing": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/models/deploy",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Deploy Exported Model",
+        "description": "Deploy exported model to production environment.\n\nThis endpoint deploys an exported model to the production system,\nmaking it available for anomaly detection in the specified age group.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/training/models/deployed": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/training/models/deployed",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List Deployed Models",
+        "description": "List all deployed models in production.\n\nThis endpoint returns information about all models currently\ndeployed and active in the production system.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "POST /api/v1/training/models/{model_id}/undeploy": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "model_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/training/models/{model_id}/undeploy",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Undeploy Model",
+        "description": "Undeploy (deactivate) a deployed model.\n\nThis endpoint deactivates a deployed model, removing it from\nactive use in the production system.",
+        "tags": [
+          "training"
+        ]
+      }
+    },
+    "GET /api/v1/config/": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "vision_model": "example_string",
+              "anomaly_detection_method": "example_string",
+              "threshold_percentile": 3.14,
+              "age_grouping_strategy": "example_string",
+              "min_samples_per_group": 42,
+              "max_age_group_span": 3.14
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Config",
+        "description": "Get current system configuration.\n\nThis endpoint returns the current system configuration including\nmodel settings, threshold parameters, and age grouping strategy.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "PUT /api/v1/config/": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "threshold_percentile": {},
+            "age_grouping_strategy": {},
+            "min_samples_per_group": {},
+            "max_age_group_span": {}
+          }
+        },
+        "complete_request": {
+          "method": "PUT",
+          "url": "/api/v1/config/",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "success": true,
+              "message": "example_string",
+              "data": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Update Config",
+        "description": "Update system configuration.\n\nThis endpoint updates various system configuration settings\nincluding thresholds and age grouping parameters.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "PUT /api/v1/config/threshold": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "threshold": 3.14,
+            "percentile": {}
+          }
+        },
+        "complete_request": {
+          "method": "PUT",
+          "url": "/api/v1/config/threshold",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "success": true,
+              "message": "example_string",
+              "data": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Update Threshold Settings",
+        "description": "Update global threshold settings.\n\nThis endpoint recalculates thresholds for all active models\nusing the specified percentile value from the request body.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "PUT /api/v1/config/age-grouping": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "threshold_percentile": {},
+            "age_grouping_strategy": {},
+            "min_samples_per_group": {},
+            "max_age_group_span": {}
+          }
+        },
+        "complete_request": {
+          "method": "PUT",
+          "url": "/api/v1/config/age-grouping",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "success": true,
+              "message": "example_string",
+              "data": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Update Age Grouping",
+        "description": "Modify age grouping strategy.\n\nThis endpoint updates the age grouping configuration and can\noptionally trigger recreation of age group models.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/config/health": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/health",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "status": "example_string",
+              "timestamp": "example_string",
+              "version": "example_string",
+              "database": "example_string",
+              "models": "example_string",
+              "storage": "example_string"
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Health Check",
+        "description": "System health check endpoint.\n\nThis endpoint provides information about the health and status\nof various system components.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/config/stats": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/stats",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get System Stats",
+        "description": "Get comprehensive system statistics.\n\nThis endpoint provides detailed statistics about the system\nincluding data distribution, model performance, and usage metrics.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "POST /api/v1/config/reset": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "confirm": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/config/reset",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Reset System",
+        "description": "Reset system configuration and models.\n\nWARNING: This endpoint deactivates all models and clears caches.\nUse with caution in production environments.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/health": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/health",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Basic health check",
+        "description": "Basic health check endpoint.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/health/detailed": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/health/detailed",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Detailed health check",
+        "description": "Detailed health check with all system components.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/health/component/{component_name}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "component_name": "example_component_name"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/health/component/{component_name}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Component-specific health check",
+        "description": "Get health status for a specific component.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/metrics": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/metrics",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "System metrics",
+        "description": "Get current system metrics.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/metrics/history": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "hours": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/metrics/history",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Historical metrics",
+        "description": "Get historical system metrics.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/alerts": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/alerts",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Current system alerts",
+        "description": "Get current system alerts.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "POST /api/v1/alerts/thresholds": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {}
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/alerts/thresholds",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Update alert thresholds",
+        "description": "Update system alert thresholds.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "GET /api/v1/status": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Overall system status",
+        "description": "Get overall system status summary.",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "POST /api/v1/backup/full": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "include_files": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/backup/full",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Create full system backup",
+        "description": "Create a full system backup including database and files.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/backup/database": {
+      "request_examples": {
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/backup/database",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Create database backup",
+        "description": "Create a database-only backup.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "GET /api/v1/backup/list": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/backup/list",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "List available backups",
+        "description": "Get list of available backup files.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "GET /api/v1/backup/download/{backup_name}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "backup_name": "example_backup_name"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/backup/download/{backup_name}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Download backup file",
+        "description": "Download a specific backup file.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/backup/restore": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "backup_name": "example_backup_name"
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/backup/restore",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Restore from backup",
+        "description": "Restore system from a backup file.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/backup/upload": {
+      "request_examples": {
+        "request_body": {
+          "multipart/form-data": {
+            "file": "example_string"
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/backup/upload",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Upload backup file",
+        "description": "Upload a backup file for restoration.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/export": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "format": "example_format",
+            "include_embeddings": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/export",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Export system data",
+        "description": "Export system data in specified format.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "GET /api/v1/export/download/{export_name}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "export_name": "example_export_name"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/export/download/{export_name}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Download exported data",
+        "description": "Download an exported data file.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "DELETE /api/v1/backup/{backup_name}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "backup_name": "example_backup_name"
+          }
+        },
+        "complete_request": {
+          "method": "DELETE",
+          "url": "/api/v1/backup/{backup_name}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Delete backup file",
+        "description": "Delete a specific backup file.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/cleanup": {
+      "request_examples": {
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/cleanup",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Clean up old backups",
+        "description": "Clean up old backup files based on retention policy.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "GET /api/v1/storage/info": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/storage/info",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get storage information",
+        "description": "Get information about storage usage and organization.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "POST /api/v1/storage/cleanup": {
+      "request_examples": {
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/storage/cleanup",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Clean up temporary and orphaned files",
+        "description": "Clean up temporary files and orphaned data.",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "GET /": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Root",
+        "description": "Root endpoint providing basic system information.",
+        "tags": []
+      }
+    },
+    "GET /health": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/health",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Health Check",
+        "description": "Health check endpoint for monitoring.",
+        "tags": []
+      }
+    },
+    "GET /health/detailed": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/health/detailed",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Detailed Health Check",
+        "description": "Detailed health check with system information.",
+        "tags": []
+      }
+    },
+    "GET /metrics": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/metrics",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Metrics",
+        "description": "Get system metrics for monitoring.",
+        "tags": []
+      }
+    }
+  },
+  "generation_info": {
+    "timestamp": "2025-12-16T15:53:08.822902",
+    "total_endpoints": 72,
+    "examples_generated": 72
+  }
+}

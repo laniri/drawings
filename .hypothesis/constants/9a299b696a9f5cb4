@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/api.py
+# hypothesis_version: 6.148.7
+
+['/analysis', '/config', '/documentation', '/drawings', '/interpretability', '/models', '/training', 'analysis', 'backup', 'configuration', 'documentation', 'drawings', 'health', 'interpretability', 'models', 'training']

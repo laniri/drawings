@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/analysis.py
+# hypothesis_version: 6.148.7
+
+[0.0, 1.0, 100, 'Analysis method used', 'Raw anomaly score', 'Vision model used', 'autoencoder', 'completed', 'drawing_ids', 'failed', 'from_attributes', 'total_drawings', 'vit']

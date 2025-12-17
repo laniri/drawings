@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/health.py
+# hypothesis_version: 6.148.7
+
+[100, 400, 404, 500, 503, '/alerts', '/alerts/thresholds', '/health', '/health/detailed', '/metrics', '/metrics/history', '/status', 'Basic health check', 'Historical metrics', 'System metrics', '_percent', 'active_connections', 'alert_count', 'alerts', 'component', 'components', 'cpu_percent', 'critical', 'critical_alerts', 'current_thresholds', 'data_points', 'details', 'disk_free_gb', 'disk_percent', 'disk_total_gb', 'healthy', 'last_check', 'memory_available_gb', 'memory_percent', 'memory_total_gb', 'message', 'metrics', 'overall_status', 'period_hours', 'process_count', 'response_time_ms', 'service', 'severity', 'status', 'system', 'timestamp', 'updated_thresholds', 'warning', 'warning_alerts']

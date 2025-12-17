@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/data_pipeline.py
+# hypothesis_version: 6.148.7
+
+[2.0, 18.0, 255.0, 100, 224, 255, 500, 1024, 'Age must be a number', 'BMP', "Child's age in years", 'Drawing prompt given', 'Drawing subject', 'Drawing tool used', 'Empty file provided', 'Expert annotation', 'JPEG', 'JPG', 'L', 'P', 'PNG', 'RGB', 'RGBA', 'age_years', 'drawing_tool', 'expert_label', 'prompt', 'subject']

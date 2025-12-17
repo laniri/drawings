@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/drawings.py
+# hypothesis_version: 6.148.7
+
+[2.0, 18.0, 100, 500, 'Current page number', 'Items per page', 'Page number', 'age_max', 'age_min', 'concern', 'drawing_tool', 'from_attributes', 'normal', 'prompt', 'severe', 'subject']

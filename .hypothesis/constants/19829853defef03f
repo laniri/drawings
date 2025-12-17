@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/models/database.py
+# hypothesis_version: 6.148.7
+
+['AgeGroupModel', 'AnomalyAnalysis', 'Drawing', 'DrawingEmbedding', 'TrainingJob', 'TrainingReport', 'age_group_model', 'age_group_models', 'age_group_models.id', 'all, delete-orphan', 'analyses', 'analysis', 'anomaly_analyses', 'anomaly_analyses.id', 'drawing', 'drawing_embeddings', 'drawings', 'drawings.id', 'embeddings', 'interpretability', 'training_job', 'training_jobs', 'training_jobs.id', 'training_reports']

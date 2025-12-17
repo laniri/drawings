@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/models.py
+# hypothesis_version: 6.148.7
+
+[0.001, 0.2, 100, 128, 256, '/age-groups', '/auto-create', '/status', '/train', '/{model_id}', 'Training started', 'age_range', 'completed', 'creating', 'deactivated', 'error', 'existing_models', 'failed', 'force_recreate', 'healthy', 'inactive', 'insufficient_data', 'job_id', 'limited_data', 'message', 'model_id', 'new_threshold', 'no_models', 'old_threshold', 'percentile_used', 'primary_threshold', 'progress', 'progress_url', 'ready', 'sample_count', 'status', 'training', 'updated_at']

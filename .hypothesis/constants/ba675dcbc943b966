@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/core/config.py
+# hypothesis_version: 6.148.7
+
+[95.0, 1024, 86400, ',', '.env', '/api/v1', '0.1.0', 'ml.m5.large', 'static', 'uploads', 'vit']

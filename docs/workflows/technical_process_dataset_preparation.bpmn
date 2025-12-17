@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_technical_process_dataset_preparation" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="technical_process_dataset_preparation" name="Technical Process - Dataset Preparation" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="Process Start"/>
+    <bpmn:serviceTask id="service_task_1" name="Get Dataset Preparation Service" service="dataset_preparation" method="get_dataset_preparation_service"/>
+    <bpmn:serviceTask id="service_task_2" name="Train Count" service="dataset_preparation" method="train_count"/>
+    <bpmn:serviceTask id="service_task_3" name="Validation Count" service="dataset_preparation" method="validation_count"/>
+    <bpmn:serviceTask id="service_task_4" name="Test Count" service="dataset_preparation" method="test_count"/>
+    <bpmn:serviceTask id="service_task_5" name="Total Count" service="dataset_preparation" method="total_count"/>
+    <bpmn:endEvent id="end_6" name="Process Complete"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="service_task_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="service_task_1" targetRef="service_task_2"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="service_task_2" targetRef="service_task_3"/>
+    <bpmn:sequenceFlow id="flow_3" sourceRef="service_task_3" targetRef="service_task_4"/>
+    <bpmn:sequenceFlow id="flow_4" sourceRef="service_task_4" targetRef="service_task_5"/>
+    <bpmn:sequenceFlow id="flow_5" sourceRef="service_task_5" targetRef="end_6"/>
+  </bpmn:process>
+</bpmn:definitions>

@@ -1,0 +1,42 @@
+
+TRAINING REPORT SUMMARY
+=======================
+
+Job ID: None
+Generated: 2025-12-16T23:01:12.766353
+Performance Category: Fair
+Overall Score: 0.547
+
+TRAINING RESULTS
+----------------
+Total Epochs: 38
+Best Epoch: 33
+Training Time: 13024.2 seconds
+
+Final Training Loss: 2.813997
+Final Validation Loss: 2.688951
+Best Validation Loss: 2.672412
+
+PERFORMANCE INDICATORS
+----------------------
+Validation Accuracy: 18.3%
+Anomaly Threshold: 0.123086
+Generalization Gap: -0.125046
+Early Stopping: No
+Overfitting: Not Detected
+
+STRENGTHS
+---------
+• No overfitting detected
+• Stable training
+
+WEAKNESSES
+----------
+• No clear convergence
+• Low validation accuracy
+
+RECOMMENDATIONS
+---------------
+• Consider increasing model capacity or training time
+• Increase training epochs or adjust learning rate
+• Consider using GPU acceleration or reducing batch size

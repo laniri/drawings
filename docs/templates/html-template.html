@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{PAGE_DESCRIPTION}}">
+    <meta name="keywords" content="{{PAGE_KEYWORDS}}">
+    <meta name="author" content="{{PAGE_AUTHOR}}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{PAGE_URL}}">
+    <meta property="og:title" content="{{PAGE_TITLE}}">
+    <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
+    <meta property="og:image" content="{{PAGE_IMAGE}}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{PAGE_URL}}">
+    <meta property="twitter:title" content="{{PAGE_TITLE}}">
+    <meta property="twitter:description" content="{{PAGE_DESCRIPTION}}">
+    <meta property="twitter:image" content="{{PAGE_IMAGE}}">
+    
+    <title>{{PAGE_TITLE}} | {{SITE_NAME}}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{FAVICON_URL}}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{APPLE_TOUCH_ICON_URL}}">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{BASE_URL}}/styles/documentation-framework.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Mermaid for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- MathJax for mathematical notation -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "{{PAGE_TITLE}}",
+        "description": "{{PAGE_DESCRIPTION}}",
+        "author": {
+            "@type": "Organization",
+            "name": "{{ORGANIZATION_NAME}}"
+        },
+        "datePublished": "{{PUBLISH_DATE}}",
+        "dateModified": "{{MODIFIED_DATE}}",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{PAGE_URL}}"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Documentation Layout -->
+    <div class="doc-layout">
+        <!-- Header -->
+        <header class="doc-header">
+            <div class="flex items-center">
+                <!-- Mobile Navigation Toggle -->
+                <button class="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    ☰
+                </button>
+                
+                <!-- Logo and Site Title -->
+                <div class="flex items-center">
+                    <img src="{{LOGO_URL}}" alt="{{SITE_NAME}} Logo" class="logo" width="32" height="32">
+                    <h1 class="site-title">{{SITE_NAME}}</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center">
+                <!-- Enhanced Search -->
+                <div class="search-container">
+                    <input type="search" class="search-input" placeholder="Search documentation..." aria-label="Search documentation" id="doc-search">
+                    <div class="search-results" id="search-results" style="display: none;">
+                        <div class="search-loading" style="display: none;">Searching...</div>
+                        <div class="search-content"></div>
+                        <div class="search-facets" style="display: none;">
+                            <h4>Filter by:</h4>
+                            <div class="facet-group">
+                                <label>Document Type:</label>
+                                <div class="facet-options" id="type-facets"></div>
+                            </div>
+                            <div class="facet-group">
+                                <label>Tags:</label>
+                                <div class="facet-options" id="tag-facets"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-suggestions" id="search-suggestions" style="display: none;"></div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" aria-label="Switch to dark theme">
+                    🌙
+                </button>
+            </div>
+        </header>
+        
+        <!-- Sidebar Navigation -->
+        <nav class="doc-sidebar" aria-label="Main navigation">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3 class="toc-title">Table of Contents</h3>
+                <ul class="toc-list">
+                    <!-- TOC will be generated by JavaScript -->
+                </ul>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <div class="nav-menu">
+                <h3 class="nav-title">Documentation</h3>
+                <ul class="nav-list">
+                    {{#NAVIGATION_ITEMS}}
+                    <li class="nav-item">
+                        <a href="{{ITEM_URL}}" class="nav-link {{ITEM_ACTIVE_CLASS}}">{{ITEM_TITLE}}</a>
+                        {{#ITEM_CHILDREN}}
+                        <ul class="nav-sublist">
+                            {{#CHILDREN}}
+                            <li class="nav-subitem">
+                                <a href="{{CHILD_URL}}" class="nav-sublink">{{CHILD_TITLE}}</a>
+                            </li>
+                            {{/CHILDREN}}
+                        </ul>
+                        {{/ITEM_CHILDREN}}
+                    </li>
+                    {{/NAVIGATION_ITEMS}}
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Mobile Sidebar -->
+        <nav class="mobile-sidebar" aria-label="Mobile navigation">
+            <!-- Same content as desktop sidebar -->
+            <div class="toc">
+                <h3 class="toc-title">Table of Contents</h3>
+                <ul class="toc-list">
+                    <!-- TOC will be generated by JavaScript -->
+                </ul>
+            </div>
+            
+            <div class="nav-menu">
+                <h3 class="nav-title">Documentation</h3>
+                <ul class="nav-list">
+                    {{#NAVIGATION_ITEMS}}
+                    <li class="nav-item">
+                        <a href="{{ITEM_URL}}" class="nav-link {{ITEM_ACTIVE_CLASS}}">{{ITEM_TITLE}}</a>
+                        {{#ITEM_CHILDREN}}
+                        <ul class="nav-sublist">
+                            {{#CHILDREN}}
+                            <li class="nav-subitem">
+                                <a href="{{CHILD_URL}}" class="nav-sublink">{{CHILD_TITLE}}</a>
+                            </li>
+                            {{/CHILDREN}}
+                        </ul>
+                        {{/ITEM_CHILDREN}}
+                    </li>
+                    {{/NAVIGATION_ITEMS}}
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay"></div>
+        
+        <!-- Main Content -->
+        <main class="doc-main" id="main-content">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                {{#BREADCRUMB_ITEMS}}
+                <span class="breadcrumb-item">
+                    {{#ITEM_URL}}<a href="{{ITEM_URL}}">{{ITEM_TITLE}}</a>{{/ITEM_URL}}
+                    {{^ITEM_URL}}{{ITEM_TITLE}}{{/ITEM_URL}}
+                </span>
+                {{/BREADCRUMB_ITEMS}}
+            </nav>
+            
+            <!-- Page Header -->
+            <header class="page-header">
+                <h1>{{PAGE_TITLE}}</h1>
+                {{#PAGE_DESCRIPTION}}
+                <p class="page-description">{{PAGE_DESCRIPTION}}</p>
+                {{/PAGE_DESCRIPTION}}
+                
+                <!-- Page Metadata -->
+                <div class="page-meta">
+                    {{#LAST_UPDATED}}
+                    <span class="meta-item">
+                        <strong>Last Updated:</strong> {{LAST_UPDATED}}
+                    </span>
+                    {{/LAST_UPDATED}}
+                    {{#VERSION}}
+                    <span class="meta-item">
+                        <strong>Version:</strong> {{VERSION}}
+                    </span>
+                    {{/VERSION}}
+                    {{#AUTHORS}}
+                    <span class="meta-item">
+                        <strong>Authors:</strong> {{AUTHORS}}
+                    </span>
+                    {{/AUTHORS}}
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <article class="content">
+                {{CONTENT}}
+            </article>
+            
+            <!-- Page Navigation -->
+            <nav class="page-nav" aria-label="Page navigation">
+                {{#PREV_PAGE}}
+                <a href="{{PREV_URL}}" class="page-nav-link page-nav-prev">
+                    <span class="page-nav-label">← Previous</span>
+                    <span class="page-nav-title">{{PREV_TITLE}}</span>
+                </a>
+                {{/PREV_PAGE}}
+                
+                {{#NEXT_PAGE}}
+                <a href="{{NEXT_URL}}" class="page-nav-link page-nav-next">
+                    <span class="page-nav-label">Next →</span>
+                    <span class="page-nav-title">{{NEXT_TITLE}}</span>
+                </a>
+                {{/NEXT_PAGE}}
+            </nav>
+            
+            <!-- Feedback Section -->
+            <section class="feedback-section">
+                <h3>Was this page helpful?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn feedback-yes" data-feedback="yes">👍 Yes</button>
+                    <button class="feedback-btn feedback-no" data-feedback="no">👎 No</button>
+                </div>
+                <div class="feedback-form" style="display: none;">
+                    <textarea placeholder="Tell us how we can improve this page..." rows="3"></textarea>
+                    <button class="feedback-submit">Submit Feedback</button>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="doc-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <p>&copy; {{CURRENT_YEAR}} {{ORGANIZATION_NAME}}. All rights reserved.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <div class="footer-links">
+                        {{#FOOTER_LINKS}}
+                        <a href="{{LINK_URL}}" class="footer-link">{{LINK_TITLE}}</a>
+                        {{/FOOTER_LINKS}}
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <p class="footer-meta">
+                        Generated on {{GENERATION_DATE}} | 
+                        <a href="{{SOURCE_URL}}">View Source</a> |
+                        <a href="{{EDIT_URL}}">Edit Page</a>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="{{BASE_URL}}/styles/documentation-framework.js"></script>
+    
+    <!-- Initialize Mermaid -->
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+            themeVariables: {
+                primaryColor: '#ff6b6b',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#ff4757',
+                lineColor: '#5f27cd',
+                secondaryColor: '#00d2d3',
+                tertiaryColor: '#ff9ff3'
+            }
+        });
+        
+        // Update Mermaid theme when theme changes
+        document.addEventListener('themeChanged', (e) => {
+            mermaid.initialize({
+                theme: e.detail.theme === 'dark' ? 'dark' : 'default'
+            });
+            mermaid.init();
+        });
+    </script>
+    
+    <!-- Initialize MathJax -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    
+    <!-- Analytics (if enabled) -->
+    {{#ANALYTICS_ID}}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ANALYTICS_ID}}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ANALYTICS_ID}}');
+    </script>
+    {{/ANALYTICS_ID}}
+    
+    <!-- Service Worker for offline support -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

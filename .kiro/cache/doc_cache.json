@@ -1,0 +1,168 @@
+{
+  "frontend": {
+    "content_hash": "eb4fbd28e342774371520ada2fc56dde",
+    "generated_files": [
+      "docs/frontend/components.md"
+    ],
+    "timestamp": "2025-12-16T10:15:34.997944",
+    "dependencies": []
+  },
+  "services": {
+    "content_hash": "da3d5ca6a0ed292fbb91c00e487a4dda",
+    "generated_files": [
+      "docs/interfaces/services/training_config.md",
+      "docs/interfaces/services/file_storage.md",
+      "docs/interfaces/services/model_deployment_service.md",
+      "docs/interfaces/services/sagemaker_training_service.md",
+      "docs/interfaces/services/data_sufficiency_service.md",
+      "docs/interfaces/services/threshold_manager.md",
+      "docs/interfaces/services/data_pipeline.md",
+      "docs/interfaces/services/comparison_service.md",
+      "docs/interfaces/services/score_normalizer.md",
+      "docs/interfaces/services/local_training_environment.md",
+      "docs/interfaces/services/health_monitor.md",
+      "docs/interfaces/services/embedding_service.md",
+      "docs/interfaces/services/model_manager.md",
+      "docs/interfaces/services/interpretability_engine.md",
+      "docs/interfaces/services/dataset_preparation.md",
+      "docs/interfaces/services/age_group_manager.md",
+      "docs/interfaces/services/training_report_service.md",
+      "docs/interfaces/services/backup_service.md"
+    ],
+    "timestamp": "2025-12-16T10:15:35.244978",
+    "dependencies": []
+  },
+  "deployment": {
+    "content_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "generated_files": [
+      "docs/deployment/environment-setup.md",
+      "docs/deployment/docker.md"
+    ],
+    "timestamp": "2025-12-16T10:15:35.246808",
+    "dependencies": []
+  },
+  "database": {
+    "content_hash": "24f28e0adca246bbec2b8f66ebc6bb44",
+    "generated_files": [
+      "/Users/itay/Desktop/drawings/docs/database/schema.md"
+    ],
+    "timestamp": "2025-12-16T13:40:02.961917",
+    "dependencies": []
+  },
+  "algorithms": {
+    "content_hash": "da3d5ca6a0ed292fbb91c00e487a4dda",
+    "generated_files": [
+      "docs/algorithms/implementations/threshold_manager.md",
+      "docs/algorithms/implementations/score_normalizer.md",
+      "docs/algorithms/implementations/embedding_service.md",
+      "docs/algorithms/implementations/model_manager.md",
+      "docs/algorithms/implementations/interpretability_engine.md"
+    ],
+    "timestamp": "2025-12-16T10:15:35.901411",
+    "dependencies": [
+      "services"
+    ]
+  },
+  "api": {
+    "content_hash": "d6553d8dc4f1c3415f6f9d1c36a461b4",
+    "generated_files": [
+      "docs/api/README.md",
+      "docs/api/endpoints/GET__api_v1_models_status.md",
+      "docs/api/endpoints/GET__api_v1_models_creation_job_id_status.md",
+      "docs/api/endpoints/POST__api_v1_backup_upload.md",
+      "docs/api/endpoints/GET__api_v1_drawings_upload_progress_upload_id.md",
+      "docs/api/endpoints/GET__api_v1_backup_list.md",
+      "docs/api/endpoints/POST__api_v1_config_reset.md",
+      "docs/api/endpoints/GET__api_v1_training_models_deployed.md",
+      "docs/api/endpoints/DELETE__api_v1_backup_backup_name.md",
+      "docs/api/endpoints/GET__api_v1_metrics.md",
+      "docs/api/endpoints/GET__api_v1_training_jobs_job_id.md",
+      "docs/api/endpoints/GET__api_v1_storage_info.md",
+      "docs/api/endpoints/POST__api_v1_training_jobs_job_id_cancel.md",
+      "docs/api/endpoints/POST__api_v1_models_auto-create.md",
+      "docs/api/endpoints/GET__api_v1_training_jobs_job_id_reports.md",
+      "docs/api/endpoints/GET__metrics.md",
+      "docs/api/endpoints/POST__api_v1_cleanup.md",
+      "docs/api/endpoints/GET__api_v1_metrics_history.md",
+      "docs/api/endpoints/PUT__api_v1_config_age-grouping.md",
+      "docs/api/endpoints/POST__api_v1_export.md",
+      "docs/api/endpoints/PUT__api_v1_config_.md",
+      "docs/api/endpoints/GET__api_v1_health_detailed.md",
+      "docs/api/endpoints/GET__api_v1_backup_download_backup_name.md",
+      "docs/api/endpoints/GET__api_v1_health_component_component_name.md",
+      "docs/api/endpoints/GET__api_v1_drawings_drawing_id_file.md",
+      "docs/api/endpoints/POST__api_v1_training_deploy.md",
+      "docs/api/endpoints/GET__api_v1_training_jobs.md",
+      "docs/api/endpoints/GET__api_v1_drawings_stats.md",
+      "docs/api/endpoints/POST__api_v1_backup_restore.md",
+      "docs/api/endpoints/GET__api_v1_status.md",
+      "docs/api/endpoints/POST__api_v1_training_models_model_id_undeploy.md",
+      "docs/api/endpoints/POST__api_v1_alerts_thresholds.md",
+      "docs/api/endpoints/GET__api_v1_drawings_drawing_id.md",
+      "docs/api/endpoints/GET__api_v1_training_environments_status.md",
+      "docs/api/endpoints/GET__api_v1_analysis_batch_batch_id_progress.md",
+      "docs/api/endpoints/GET__api_v1_export_download_export_name.md",
+      "docs/api/endpoints/POST__api_v1_storage_cleanup.md",
+      "docs/api/endpoints/GET__api_v1_models_data-sufficiency_age-group_age_min_age_max.md",
+      "docs/api/endpoints/PUT__api_v1_models_model_id_threshold.md",
+      "docs/api/endpoints/GET__api_v1_models_age-groups.md",
+      "docs/api/endpoints/GET__api_v1_training_models_exports.md",
+      "docs/api/endpoints/GET__api_v1_alerts.md",
+      "docs/api/endpoints/POST__api_v1_backup_full.md",
+      "docs/api/endpoints/POST__api_v1_drawings_batch_upload.md",
+      "docs/api/endpoints/GET__api_v1_config_.md",
+      "docs/api/endpoints/PUT__api_v1_config_threshold.md",
+      "docs/api/endpoints/POST__api_v1_training_sagemaker_setup.md",
+      "docs/api/endpoints/POST__api_v1_training_models_validate.md",
+      "docs/api/endpoints/POST__api_v1_training_jobs.md",
+      "docs/api/endpoints/GET__health.md",
+      "docs/api/endpoints/GET__api_v1_models_data-sufficiency_analyze.md",
+      "docs/api/endpoints/POST__api_v1_training_models_deploy.md",
+      "docs/api/endpoints/POST__api_v1_drawings_upload.md",
+      "docs/api/endpoints/GET__api_v1_analysis_drawing_drawing_id.md",
+      "docs/api/endpoints/GET__api_v1_config_stats.md",
+      "docs/api/endpoints/DELETE__api_v1_drawings_drawing_id.md",
+      "docs/api/endpoints/POST__api_v1_models_train.md",
+      "docs/api/endpoints/GET__api_v1_health.md",
+      "docs/api/endpoints/POST__api_v1_analysis_embeddings_drawing_id.md",
+      "docs/api/endpoints/POST__api_v1_training_models_export.md",
+      "docs/api/endpoints/GET__api_v1_models_data-sufficiency_warnings.md",
+      "docs/api/endpoints/GET__api_v1_analysis_stats.md",
+      "docs/api/endpoints/DELETE__api_v1_models_model_id.md",
+      "docs/api/endpoints/GET__api_v1_config_health.md",
+      "docs/api/endpoints/POST__api_v1_models_data-sufficiency_merge-age-groups.md",
+      "docs/api/endpoints/POST__api_v1_analysis_analyze_drawing_id.md",
+      "docs/api/endpoints/GET__.md",
+      "docs/api/endpoints/GET__health_detailed.md",
+      "docs/api/endpoints/POST__api_v1_backup_database.md",
+      "docs/api/endpoints/POST__api_v1_analysis_batch.md",
+      "docs/api/endpoints/GET__api_v1_models_training_job_id_status.md",
+      "docs/api/endpoints/GET__api_v1_drawings_.md",
+      "docs/api/endpoints/GET__api_v1_analysis_analysis_id.md",
+      "docs/api/errors/README.md",
+      "docs/api/authentication/README.md"
+    ],
+    "timestamp": "2025-12-16T10:15:51.447461",
+    "dependencies": [
+      "database",
+      "services"
+    ]
+  },
+  "architecture": {
+    "content_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "generated_files": [
+      "docs/architecture/README.md",
+      "docs/architecture/02-container-diagram.md",
+      "docs/architecture/04-code-diagram.md",
+      "docs/architecture/01-system-context.md",
+      "docs/architecture/03-component-diagram.md"
+    ],
+    "timestamp": "2025-12-16T10:15:52.204747",
+    "dependencies": [
+      "database",
+      "api",
+      "frontend",
+      "services"
+    ]
+  }
+}

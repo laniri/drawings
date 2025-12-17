@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/backup.py
+# hypothesis_version: 6.148.7
+
+[100, 400, 404, 500, 507, 1024, '*', '*.temp', '*.tmp', '*~', '.', '.DS_Store', '.db', '.json', '.zip', '/', '/backup/database', '/backup/full', '/backup/list', '/backup/restore', '/backup/upload', '/cleanup', '/export', '/storage/cleanup', '/storage/info', 'Clean up old backups', 'Delete backup file', 'Download backup file', 'Export format', 'Export system data', 'No filename provided', 'Restore from backup', 'Upload backup file', '^(json|csv)$', 'backup_count', 'backups', 'backups_after', 'backups_before', 'database', 'directories', 'disk_usage', 'exists', 'file_count', 'filename', 'files_cleaned', 'free_gb', 'json', 'message', 'path', 'size_bytes', 'size_freed_mb', 'size_mb', 'space_freed_mb', 'static', 'temp_files_removed', 'total_gb', 'uploads', 'used_gb', 'used_percent', 'wb']

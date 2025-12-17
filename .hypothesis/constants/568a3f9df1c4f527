@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/analysis.py
+# hypothesis_version: 6.148.7
+
+[0.5, 1.0, 100, '/batch', '/stats', '/{analysis_id}', 'active_age_groups', 'age', 'age_distribution', 'age_floor', 'age_group', 'age_years', 'analysis_timestamp', 'anomaly_count', 'anomaly_score', 'autoencoder', 'batch_id', 'completed', 'completed_at', 'count', 'created_timestamp', 'drawing_id', 'embedding_id', 'error', 'errors', 'exists', 'explanation', 'failed', 'filename', 'generated', 'id', 'important_regions', 'is_anomaly', 'is_loaded', 'last_updated', 'message', 'model_status', 'normal_count', 'overlay', 'processing', 'progress_url', 'recent_analyses', 'results', 'saliency_map', 'started_at', 'status', 'subject', 'summary', 'timestamp', 'total_analyses', 'total_drawings', 'unknown', 'vector_dimension', 'vision_model', 'visualization_paths', 'vit']

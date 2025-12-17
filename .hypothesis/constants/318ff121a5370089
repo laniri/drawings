@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/models.py
+# hypothesis_version: 6.148.7
+
+[0.0, 2.0, 16.0, 18.0, 50.0, 99.9, 'New threshold value', 'active_models', 'age_max', 'age_min', 'custom', 'failed', 'failed_models', 'from_attributes', 'insufficient_data', 'ready', 'total_models', 'training', 'training_models', 'yearly']

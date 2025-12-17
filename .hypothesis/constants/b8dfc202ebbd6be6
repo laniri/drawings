@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/schemas/analysis.py
+# hypothesis_version: 6.148.7
+
+[0.0, 1.0, 100.0, 100, 500, 'Analysis method used', 'Attention head index', 'Export format used', 'File size in bytes', 'Raw anomaly score', 'User annotation text', 'Vision model used', 'annotation_type', 'autoencoder', 'completed', 'concern', 'csv', 'drawing_ids', 'failed', 'format', 'from_attributes', 'html', 'hypothesis', 'json', 'note', 'observation', 'pdf', 'png', 'question', 'total_drawings', 'vit']

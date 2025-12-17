@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ml_pipeline_train_models" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="ml_pipeline_train_models" name="ML Pipeline - Train Models" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="ML Pipeline Start"/>
+    <bpmn:serviceTask id="ml_task_1" name="Model Training" pipeline="train_models" step_type="ml"/>
+    <bpmn:endEvent id="end_2" name="ML Pipeline Complete"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="ml_task_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="ml_task_1" targetRef="end_2"/>
+  </bpmn:process>
+</bpmn:definitions>

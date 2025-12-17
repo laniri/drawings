@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/main.py
+# hypothesis_version: 6.148.7
+
+[0.1, 8000, '*', '/', '/docs', '/health', '/health/detailed', '/metrics', '/static', '0.0.0.0', '__main__', 'app.main:app', 'available', 'connected', 'cpu_percent', 'database', 'disk', 'disk_percent', 'docs_url', 'error_middleware', 'errors', 'free', 'healthy', 'info', 'max_file_size', 'memory', 'memory_percent', 'message', 'percent', 'process_id', 'resource_middleware', 'resources', 'service', 'static', 'static_dir', 'status', 'storage', 'system', 'timestamp', 'total', 'upload_dir', 'url', 'version']

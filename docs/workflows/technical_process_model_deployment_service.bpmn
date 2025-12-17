@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_technical_process_model_deployment_service" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="technical_process_model_deployment_service" name="Technical Process - Model Deployment Service" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="Process Start"/>
+    <bpmn:serviceTask id="service_task_1" name="Get Model Exporter" service="model_deployment_service" method="get_model_exporter"/>
+    <bpmn:serviceTask id="service_task_2" name="Get Model Validator" service="model_deployment_service" method="get_model_validator"/>
+    <bpmn:serviceTask id="service_task_3" name="Get Model Deployment Service" service="model_deployment_service" method="get_model_deployment_service"/>
+    <bpmn:serviceTask id="service_task_4" name="To Dict" service="model_deployment_service" method="to_dict"/>
+    <bpmn:serviceTask id="service_task_5" name="To Dict" service="model_deployment_service" method="to_dict"/>
+    <bpmn:endEvent id="end_6" name="Process Complete"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="service_task_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="service_task_1" targetRef="service_task_2"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="service_task_2" targetRef="service_task_3"/>
+    <bpmn:sequenceFlow id="flow_3" sourceRef="service_task_3" targetRef="service_task_4"/>
+    <bpmn:sequenceFlow id="flow_4" sourceRef="service_task_4" targetRef="service_task_5"/>
+    <bpmn:sequenceFlow id="flow_5" sourceRef="service_task_5" targetRef="end_6"/>
+  </bpmn:process>
+</bpmn:definitions>

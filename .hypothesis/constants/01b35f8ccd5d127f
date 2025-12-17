@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/config.py
+# hypothesis_version: 6.148.7
+
+[4.0, 50.0, 95.0, 99.9, '/', '/age-grouping', '/health', '/reset', '/stats', '/threshold', '1.0.0', 'Health check failed', 'SELECT 1', 'age_distribution', 'age_group_coverage', 'autoencoder', 'caches_cleared', 'coverage_gaps', 'deactivated_models', 'degraded', 'error', 'errors', 'failed_updates', 'healthy', 'max_age_group_span', 'no active models', 'percentile', 'static/models', 'successful_updates', 'system_health', 'threshold_statistics', 'total_models', 'uploads', 'validation_errors', 'validation_results', 'validation_warnings', 'vit', 'warnings', 'yearly']

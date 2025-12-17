@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Children's Drawing Anomaly Detection System - API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
+        body {
+            margin:0;
+            background: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .swagger-ui .topbar {
+            background-color: #2c3e50;
+            padding: 10px 0;
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper {
+            display: none;
+        }
+        
+        .swagger-ui .info .title {
+            color: #2c3e50;
+        }
+        
+        .swagger-ui .scheme-container {
+            background: #fff;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,.15);
+        }
+        
+        .custom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .custom-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .custom-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .api-info {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-container {
+            margin: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>Children's Drawing Anomaly Detection System</h1>
+        <p>Machine learning system for detecting anomalies in children's drawings</p>
+        <p>Version: 0.1.0</p>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search endpoints..." id="endpoint-search">
+    </div>
+    
+    <div class="api-info">
+        <h3>API Information</h3>
+        <p><strong>Base URL:</strong> http://localhost:8000</p>
+        <p><strong>OpenAPI Version:</strong> 3.1.0</p>
+        <p><strong>Total Endpoints:</strong> <span id="endpoint-count">72</span></p>
+    </div>
+    
+    <div id="swagger-ui"></div>
+    
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: '../openapi.json',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                tryItOutEnabled: true,
+                filter: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                onComplete: function() {
+                    console.log("Swagger UI loaded successfully");
+                    setupSearch();
+                },
+                requestInterceptor: function(request) {
+                    // Add custom headers or modify requests here
+                    console.log("Request:", request);
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Handle responses here
+                    console.log("Response:", response);
+                    return response;
+                }
+            });
+            
+            function setupSearch() {
+                const searchInput = document.getElementById('endpoint-search');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const operations = document.querySelectorAll('.opblock');
+                        
+                        operations.forEach(function(operation) {
+                            const summary = operation.querySelector('.opblock-summary-description');
+                            const path = operation.querySelector('.opblock-summary-path');
+                            
+                            if (summary && path) {
+                                const summaryText = summary.textContent.toLowerCase();
+                                const pathText = path.textContent.toLowerCase();
+                                
+                                if (summaryText.includes(searchTerm) || pathText.includes(searchTerm)) {
+                                    operation.style.display = 'block';
+                                } else {
+                                    operation.style.display = 'none';
+                                }
+                            }
+                        });
+                    });
+                }
+            }
+        };
+    </script>
+</body>
+</html>

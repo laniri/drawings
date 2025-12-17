@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/data_sufficiency_service.py
+# hypothesis_version: 6.148.7
+
+[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.5, 2.0, 3.0, 5.0, 100, 'Scaling (0.9-1.1x)', 'Translation (±5%)', 'appearance', 'cautions', 'critical', 'drawing_specific', 'geometric', 'high', 'insufficient_data', 'low', 'medium', 'multiplier_target', 'narrow_age_range', 'priority_subjects', 'unknown']

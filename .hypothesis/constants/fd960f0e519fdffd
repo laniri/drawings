@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/scripts/generate_docs.py
+# hypothesis_version: 6.148.7
+
+[100, ' */', '# Database Schema\n\n', '### Columns\n\n', '### Indexes\n\n', '*.py', '*.tsx', '*/', '/**', 'DELETE', 'GET', 'No', 'No parameters\n', 'None', 'POST', 'PUT', 'Props', 'README.md', 'Yes', '_', '__init__.py', '__main__', 'algorithms', 'api', 'app', 'components.md', 'database', 'deployment', 'docker-compose.yml', 'docker.md', 'docs', 'embedding_service.py', 'endpoints', 'environment-setup.md', 'frontend', 'implementations', 'interface', 'interfaces', 'model_manager.py', 'openapi.json', 'pages', 'parameters', 'paths', 'r', 'requestBody', 'responses', 'schema.md', 'score_normalizer.py', 'self', 'services', 'src', 'threshold_manager.py', 'w']

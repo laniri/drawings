@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/file_storage.py
+# hypothesis_version: 6.148.7
+
+[1024, '%Y%m%d_%H%M%S', '*', '/static', 'created', 'directories', 'drawings', 'error', 'exists', 'extension', 'file_count', 'filename', 'generated', 'models', 'modified', 'overlays', 'saliency_maps', 'size', 'static', 'static_dir', 'total_size_bytes', 'total_size_mb', 'unknown.png', 'upload_dir', 'uploads', 'wb']

@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/drawings.py
+# hypothesis_version: 6.148.7
+
+[0.0, 2.0, 5.0, 18.0, 100.0, 100, '/', '/batch/upload', '/stats', '/upload', '/{drawing_id}', '/{drawing_id}/file', 'Batch upload', "Child's age in years", 'Drawing prompt', 'Drawing subject', 'Drawing tool used', 'Expert assessment', 'age_range', 'age_years', 'average', 'drawing_tool', 'drawings', 'exists', 'expert_label', 'expert_labels', 'file_count', 'image/*', 'max', 'min', 'not_found', 'processing', 'progress', 'progress_url', 'prompt', 'started', 'status', 'storage', 'subject', 'total_drawings', 'upload_id']

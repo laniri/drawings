@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/utils/embedding_serialization.py
+# hypothesis_version: 6.148.7
+
+[0.003, 1000, 3600, 'EMBEDDING_CACHE_SIZE', 'EMBEDDING_CACHE_TTL', 'active_entries', 'age', 'cache_stats', 'dimension', 'drawing_id', 'embedding', 'expired_entries', 'max_size', 'model_type', 'pickle', 'serializer_type', 'storage_ready', 'timestamp', 'total_entries', 'ttl_seconds']

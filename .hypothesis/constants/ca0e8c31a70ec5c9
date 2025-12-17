@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/api/api_v1/endpoints/analysis.py
+# hypothesis_version: 6.148.7
+
+[0.5, 1.0, 100, '/batch', '/{analysis_id}', 'age', 'autoencoder', 'batch_id', 'completed', 'completed_at', 'drawing_id', 'error', 'errors', 'explanation', 'failed', 'filename', 'important_regions', 'overlay', 'processing', 'progress_url', 'results', 'saliency_map', 'started_at', 'status', 'subject', 'summary', 'timestamp', 'total_drawings', 'unknown', 'visualization_paths', 'vit']

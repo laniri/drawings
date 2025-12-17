@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/score_normalizer.py
+# hypothesis_version: 6.148.7
+
+[-1.0, 0.0, 0.3, 0.4, 0.5, 0.6, 0.75, 0.9, 0.95, 0.99, 1.0, 1.5, 2.0, 2.5, 3.0, 100, 'age', 'age_group_model_id', 'age_group_stats', 'age_range', 'comparable', 'confidence', 'confidence_method', 'index', 'iqr', 'max', 'mean', 'median', 'min', 'min_max', 'model_id', 'normalization_method', 'normalized_score', 'percentile_based', 'percentile_rank', 'q25', 'q75', 'range', 'rank', 'raw_score', 'robust', 'sample_count', 'score_statistics', 'statistical', 'std', 'sufficient_data', 'total_age_groups', 'z_score']

@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/age_group_manager.py
+# hypothesis_version: 6.148.7
+
+[0.0, 0.001, 0.2, 1.0, 4.0, 100, 128, 256, 'age_end', 'age_floor', 'age_groups', 'age_range', 'age_ranges', 'age_start', 'count', 'coverage_gaps', 'errors', 'id', 'inf', 'max_age', 'mean_age', 'min_age', 'models', 'sample_count', 'sufficient_data', 'threshold', 'total_coverage', 'total_drawings', 'total_models', 'valid_models', 'warnings']

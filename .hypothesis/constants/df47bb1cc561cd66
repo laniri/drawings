@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/app/services/embedding_service.py
+# hypothesis_version: 6.148.7
+
+[0.0, 224, 255, 1000, 'CPU', 'RGB', 'Using CPU device', 'age_augmented', 'allocated', 'cache_hits', 'cache_size', 'cached', 'count', 'cpu', 'cuda', 'device', 'device_info', 'drawing_id', 'embedding', 'embedding_dim', 'embedding_dimension', 'error', 'failed', 'failure_rate', 'image_size', 'loaded', 'max_allocated', 'memory', 'memory_usage', 'model', 'model_info', 'model_name', 'mps', 'name', 'num_attention_heads', 'num_hidden_layers', 'patch_size', 'pixel_values', 'processor', 'pt', 'rb', 'ready', 'static/models', 'storage', 'success', 'success_rate', 'successful', 'total_processed', 'type', 'vit', 'wb']

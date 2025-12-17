@@ -1,0 +1,211 @@
+% Mathematical Notation Template for Algorithm Documentation
+% Compatible with MathJax and LaTeX rendering systems
+
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+% Custom commands for consistency
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\seq}[1]{\left\langle#1\right\rangle}
+\newcommand{\prob}[1]{\mathbb{P}\left(#1\right)}
+\newcommand{\expect}[1]{\mathbb{E}\left[#1\right]}
+\newcommand{\var}[1]{\text{Var}\left(#1\right)}
+
+% Algorithm-specific notation
+\newcommand{\loss}[1]{\mathcal{L}\left(#1\right)}
+\newcommand{\recon}[1]{\hat{#1}}
+\newcommand{\embed}[1]{\mathbf{e}_{#1}}
+\newcommand{\model}[1]{\mathcal{M}_{#1}}
+
+\begin{document}
+
+% Template sections for different mathematical concepts
+
+% 1. ALGORITHM DEFINITION
+\section{Algorithm Definition}
+
+\subsection{Problem Formulation}
+Given a dataset $\mathcal{D} = \{x_1, x_2, \ldots, x_n\}$ where $x_i \in \mathbb{R}^d$, 
+we seek to find a function $f: \mathbb{R}^d \rightarrow \mathbb{R}$ such that:
+
+\begin{equation}
+f^* = \arg\min_{f \in \mathcal{F}} \sum_{i=1}^{n} \loss{f(x_i), y_i} + \lambda \Omega(f)
+\end{equation}
+
+where:
+\begin{align}
+\mathcal{F} &= \text{function space} \\
+\loss{\cdot, \cdot} &= \text{loss function} \\
+\Omega(f) &= \text{regularization term} \\
+\lambda &= \text{regularization parameter}
+\end{align}
+
+% 2. RECONSTRUCTION LOSS FORMULATION
+\subsection{Reconstruction Loss}
+
+For autoencoder-based anomaly detection, the reconstruction loss is defined as:
+
+\begin{equation}
+\mathcal{L}_{\text{recon}}(x) = \norm{x - \recon{x}}_2^2
+\end{equation}
+
+where $\recon{x} = \text{decoder}(\text{encoder}(x))$ is the reconstructed input.
+
+The anomaly score is computed as:
+\begin{equation}
+s(x) = \frac{\mathcal{L}_{\text{recon}}(x) - \mu_{\mathcal{L}}}{\sigma_{\mathcal{L}}}
+\end{equation}
+
+where $\mu_{\mathcal{L}}$ and $\sigma_{\mathcal{L}}$ are the mean and standard deviation of reconstruction losses on the training set.
+
+% 3. PERCENTILE NORMALIZATION
+\subsection{Percentile Normalization}
+
+Given a set of historical scores $S = \{s_1, s_2, \ldots, s_m\}$ and a new score $s_{\text{new}}$, 
+the percentile rank is:
+
+\begin{equation}
+P(s_{\text{new}}) = \frac{|\{s_i \in S : s_i \leq s_{\text{new}}\}|}{|S|} \times 100
+\end{equation}
+
+The normalized score is bounded: $P(s_{\text{new}}) \in [0, 100]$.
+
+% 4. COMPLEXITY ANALYSIS
+\subsection{Complexity Analysis}
+
+\subsubsection{Time Complexity}
+The algorithm has the following time complexities:
+\begin{align}
+T_{\text{encoding}} &= O(d \cdot h) \\
+T_{\text{decoding}} &= O(h \cdot d) \\
+T_{\text{total}} &= O(d \cdot h)
+\end{align}
+
+where $d$ is the input dimension and $h$ is the hidden layer size.
+
+\subsubsection{Space Complexity}
+The space complexity is:
+\begin{equation}
+S_{\text{total}} = O(d \cdot h + h^2 + m)
+\end{equation}
+
+where $m$ is the number of historical scores stored for normalization.
+
+% 5. PROBABILITY AND STATISTICS
+\subsection{Statistical Properties}
+
+\subsubsection{Distribution Assumptions}
+We assume the reconstruction losses follow a distribution $\mathcal{L}_{\text{recon}} \sim \mathcal{N}(\mu, \sigma^2)$ 
+for normal samples.
+
+The probability of anomaly given score $s$ is:
+\begin{equation}
+\prob{\text{anomaly} | s} = 1 - \Phi\left(\frac{s - \mu}{\sigma}\right)
+\end{equation}
+
+where $\Phi$ is the cumulative distribution function of the standard normal distribution.
+
+% 6. OPTIMIZATION FORMULATION
+\subsection{Optimization Problem}
+
+The autoencoder training objective is:
+\begin{equation}
+\min_{\theta_e, \theta_d} \frac{1}{n} \sum_{i=1}^{n} \norm{x_i - g_{\theta_d}(f_{\theta_e}(x_i))}_2^2 + \lambda_1 \norm{\theta_e}_2^2 + \lambda_2 \norm{\theta_d}_2^2
+\end{equation}
+
+where:
+\begin{align}
+f_{\theta_e} &: \mathbb{R}^d \rightarrow \mathbb{R}^h \quad \text{(encoder)} \\
+g_{\theta_d} &: \mathbb{R}^h \rightarrow \mathbb{R}^d \quad \text{(decoder)} \\
+\theta_e, \theta_d &\quad \text{(encoder and decoder parameters)}
+\end{align}
+
+% 7. CONVERGENCE ANALYSIS
+\subsection{Convergence Properties}
+
+\begin{theorem}[Convergence]
+Under Lipschitz continuity assumptions, the gradient descent algorithm converges to a local minimum:
+\begin{equation}
+\lim_{t \rightarrow \infty} \norm{\nabla \mathcal{L}(\theta^{(t)})}_2 = 0
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+The proof follows from the standard convergence analysis of gradient descent with Lipschitz gradients.
+\end{proof}
+
+% 8. PERFORMANCE BOUNDS
+\subsection{Performance Bounds}
+
+\begin{lemma}[Reconstruction Error Bound]
+For a $k$-dimensional latent space, the reconstruction error is bounded by:
+\begin{equation}
+\mathcal{L}_{\text{recon}}(x) \leq \norm{x}_2^2 \left(1 - \frac{\lambda_k}{\lambda_1}\right)
+\end{equation}
+where $\lambda_1 \geq \lambda_2 \geq \ldots \geq \lambda_k$ are the eigenvalues of the data covariance matrix.
+\end{lemma}
+
+% 9. INFORMATION THEORY
+\subsection{Information Theoretic Analysis}
+
+The mutual information between input and latent representation is:
+\begin{equation}
+I(X; Z) = \expect{\log \frac{p(x, z)}{p(x)p(z)}}
+\end{equation}
+
+The rate-distortion trade-off is characterized by:
+\begin{equation}
+R(D) = \min_{p(\hat{x}|x): \expect{d(x,\hat{x})} \leq D} I(X; \hat{X})
+\end{equation}
+
+% 10. MATRIX OPERATIONS
+\subsection{Matrix Formulations}
+
+For batch processing, the encoder operation can be written as:
+\begin{equation}
+\mathbf{Z} = \sigma(\mathbf{X}\mathbf{W}_e + \mathbf{b}_e)
+\end{equation}
+
+where:
+\begin{align}
+\mathbf{X} &\in \mathbb{R}^{n \times d} \quad \text{(input batch)} \\
+\mathbf{W}_e &\in \mathbb{R}^{d \times h} \quad \text{(encoder weights)} \\
+\mathbf{b}_e &\in \mathbb{R}^{h} \quad \text{(encoder bias)} \\
+\mathbf{Z} &\in \mathbb{R}^{n \times h} \quad \text{(latent representations)}
+\end{align}
+
+% 11. GRADIENT COMPUTATIONS
+\subsection{Gradient Formulations}
+
+The gradient of the loss with respect to encoder parameters is:
+\begin{equation}
+\frac{\partial \mathcal{L}}{\partial \mathbf{W}_e} = \frac{2}{n} \mathbf{X}^T \left(\frac{\partial \mathcal{L}}{\partial \mathbf{Z}} \odot \sigma'(\mathbf{X}\mathbf{W}_e + \mathbf{b}_e)\right)
+\end{equation}
+
+where $\odot$ denotes element-wise multiplication and $\sigma'$ is the derivative of the activation function.
+
+% 12. SPECIAL FUNCTIONS
+\subsection{Special Functions}
+
+The softmax function used in attention mechanisms:
+\begin{equation}
+\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_{j=1}^{n} e^{x_j}}
+\end{equation}
+
+The sigmoid activation function:
+\begin{equation}
+\sigma(x) = \frac{1}{1 + e^{-x}}
+\end{equation}
+
+The ReLU activation function:
+\begin{equation}
+\text{ReLU}(x) = \max(0, x)
+\end{equation}
+
+\end{document}

@@ -1,0 +1,418 @@
+#!/usr/bin/env python3
+"""
+Pre-push Git hook for ensuring documentation completeness.
+
+This hook ensures that:
+- All documentation is up to date before pushing
+- No broken links exist in documentation
+- Documentation coverage meets minimum requirements
+- Critical documentation exists for new features
+"""
+
+import os
+import sys
+import subprocess
+from pathlib import Path
+from typing import List, Set, Dict, Any, Tuple
+import json
+from datetime import datetime
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from scripts.generate_docs import DocumentationEngine, DocumentationType
+    from scripts.validation_engine import ValidationEngine
+except ImportError as e:
+    print(f"❌ Failed to import documentation modules: {e}")
+    print("Make sure you're running from the project root with proper dependencies installed.")
+    sys.exit(1)
+
+
+class PrePushDocValidator:
+    """Pre-push documentation validator."""
+    
+    def __init__(self):
+        self.project_root = project_root
+        self.docs_engine = DocumentationEngine(self.project_root)
+        self.validation_engine = ValidationEngine(self.project_root, self.project_root / "docs")
+        
+    def get_push_info(self) -> Dict[str, Any]:
+        """Get information about commits being pushed."""
+        try:
+            # Read from stdin (git provides remote and local refs)
+            push_info = sys.stdin.read().strip()
+            
+            if not push_info:
+                # Fallback: get commits since last push
+                return self._get_commits_since_last_push()
+            
+            # Parse push info
+            lines = push_info.split('\n')
+            commits = []
+            
+            for line in lines:
+                if line:
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        local_ref, local_sha, remote_ref, remote_sha = parts[:4]
+                        
+                        # Get commits between remote and local
+                        if remote_sha != '0000000000000000000000000000000000000000':
+                            commit_range = f"{remote_sha}..{local_sha}"
+                        else:
+                            # New branch
+                            commit_range = local_sha
+                        
+                        range_commits = self._get_commits_in_range(commit_range)
+                        commits.extend(range_commits)
+            
+            return {
+                'commits': commits,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"⚠️  Failed to get push info: {e}")
+            return self._get_commits_since_last_push()
+    
+    def _get_commits_since_last_push(self) -> Dict[str, Any]:
+        """Fallback method to get recent commits."""
+        try:
+            # Get commits from last 10 commits (reasonable default)
+            result = subprocess.run(
+                ["git", "log", "--oneline", "-10", "--pretty=format:%H|%s"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            commits = []
+            for line in result.stdout.strip().split('\n'):
+                if '|' in line:
+                    hash_part, message = line.split('|', 1)
+                    commits.append({
+                        'hash': hash_part.strip(),
+                        'message': message.strip()
+                    })
+            
+            return {
+                'commits': commits,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+        except subprocess.CalledProcessError:
+            return {'commits': [], 'timestamp': datetime.now().isoformat()}
+    
+    def _get_commits_in_range(self, commit_range: str) -> List[Dict[str, Any]]:
+        """Get commits in a specific range."""
+        try:
+            result = subprocess.run(
+                ["git", "log", commit_range, "--pretty=format:%H|%s"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            commits = []
+            for line in result.stdout.strip().split('\n'):
+                if line and '|' in line:
+                    hash_part, message = line.split('|', 1)
+                    commits.append({
+                        'hash': hash_part.strip(),
+                        'message': message.strip()
+                    })
+            
+            return commits
+            
+        except subprocess.CalledProcessError:
+            return []
+    
+    def get_changed_files_in_commits(self, commits: List[Dict[str, Any]]) -> List[str]:
+        """Get all files changed in the commits being pushed."""
+        all_files = set()
+        
+        for commit in commits:
+            try:
+                result = subprocess.run(
+                    ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit['hash']],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                
+                files = [f for f in result.stdout.strip().split('\n') if f]
+                all_files.update(files)
+                
+            except subprocess.CalledProcessError:
+                continue
+        
+        return list(all_files)
+    
+    def check_documentation_freshness(self, changed_files: List[str]) -> bool:
+        """Check if documentation is up to date with code changes."""
+        print("🔍 Checking documentation freshness...")
+        
+        # Categorize changed files
+        code_changes = []
+        doc_changes = []
+        
+        for file_path in changed_files:
+            if '/docs/' in file_path or file_path.endswith('.md'):
+                doc_changes.append(file_path)
+            elif file_path.endswith(('.py', '.ts', '.tsx', '.js', '.jsx')):
+                code_changes.append(file_path)
+        
+        if not code_changes:
+            print("📋 No code changes detected")
+            return True
+        
+        print(f"📊 Found {len(code_changes)} code changes and {len(doc_changes)} doc changes")
+        
+        # Check if significant code changes have corresponding doc updates
+        significant_changes = self._identify_significant_changes(code_changes)
+        
+        if significant_changes and not doc_changes:
+            print("❌ Significant code changes detected without documentation updates:")
+            for change in significant_changes:
+                print(f"  - {change}")
+            print("\n💡 Consider updating documentation or run 'python scripts/generate_docs.py'")
+            return False
+        
+        # Run incremental documentation generation to check for staleness
+        print("🔄 Checking for stale documentation...")
+        
+        try:
+            # Detect changes and see if docs need regeneration
+            source_paths = [self.project_root / "app", self.project_root / "frontend"]
+            changes = self.docs_engine.change_detector.detect_changes(source_paths)
+            
+            if changes:
+                affected_types = self.docs_engine.dependency_manager.get_affected_components(changes)
+                
+                if affected_types:
+                    print(f"⚠️  Documentation may be stale for: {[t.value for t in affected_types]}")
+                    print("💡 Run 'python scripts/generate_docs.py' to update documentation")
+                    
+                    # Allow push but warn
+                    return True
+            
+            print("✅ Documentation appears to be up to date")
+            return True
+            
+        except Exception as e:
+            print(f"⚠️  Failed to check documentation freshness: {e}")
+            return True  # Don't block push on check failure
+    
+    def _identify_significant_changes(self, code_files: List[str]) -> List[str]:
+        """Identify code changes that likely require documentation updates."""
+        significant = []
+        
+        for file_path in code_files:
+            # New API endpoints
+            if '/api/' in file_path and '/endpoints/' in file_path:
+                significant.append(f"New/modified API endpoint: {file_path}")
+            
+            # New services (likely new algorithms)
+            elif '/services/' in file_path and not file_path.endswith('__init__.py'):
+                significant.append(f"New/modified service: {file_path}")
+            
+            # Database model changes
+            elif '/models/' in file_path:
+                significant.append(f"Database model change: {file_path}")
+            
+            # New frontend pages/components
+            elif '/frontend/' in file_path and ('Page' in file_path or 'Component' in file_path):
+                significant.append(f"New/modified UI component: {file_path}")
+        
+        return significant
+    
+    def validate_documentation_quality(self) -> bool:
+        """Validate overall documentation quality."""
+        print("🔍 Validating documentation quality...")
+        
+        try:
+            # Run comprehensive validation
+            validation_result = self.docs_engine.validate_sources()
+            
+            if validation_result.is_valid:
+                print(f"✅ Documentation validation passed ({len(validation_result.validated_files)} files)")
+                return True
+            else:
+                print(f"❌ Documentation validation failed:")
+                print(f"  Errors: {len(validation_result.errors)}")
+                print(f"  Warnings: {len(validation_result.warnings)}")
+                
+                # Show first few errors
+                for error in validation_result.errors[:5]:
+                    print(f"    - {error}")
+                
+                if len(validation_result.errors) > 5:
+                    print(f"    ... and {len(validation_result.errors) - 5} more errors")
+                
+                return False
+                
+        except Exception as e:
+            print(f"⚠️  Documentation validation failed with error: {e}")
+            return True  # Don't block push on validation failure
+    
+    def check_documentation_coverage(self) -> bool:
+        """Check if documentation coverage meets minimum requirements."""
+        print("📊 Checking documentation coverage...")
+        
+        try:
+            docs_dir = self.project_root / "docs"
+            
+            # Required documentation files/directories
+            required_docs = [
+                "README.md",
+                "api/",
+                "architecture/",
+                "algorithms/",
+                "workflows/"
+            ]
+            
+            missing_docs = []
+            
+            for required in required_docs:
+                doc_path = docs_dir / required
+                if not doc_path.exists():
+                    missing_docs.append(required)
+            
+            if missing_docs:
+                print(f"❌ Missing required documentation:")
+                for missing in missing_docs:
+                    print(f"  - docs/{missing}")
+                print("\n💡 Run 'python scripts/generate_docs.py' to generate missing documentation")
+                return False
+            
+            # Check for minimum content in key documentation
+            api_docs = list((docs_dir / "api").glob("*.md"))
+            if len(api_docs) < 2:  # At least README and one endpoint doc
+                print("⚠️  API documentation appears incomplete")
+                print("💡 Consider running API documentation generation")
+            
+            algo_docs = list((docs_dir / "algorithms").glob("**/*.md"))
+            if len(algo_docs) < 3:  # At least a few algorithm docs
+                print("⚠️  Algorithm documentation appears incomplete")
+                print("💡 Consider running algorithm documentation generation")
+            
+            print("✅ Documentation coverage check passed")
+            return True
+            
+        except Exception as e:
+            print(f"⚠️  Documentation coverage check failed: {e}")
+            return True  # Don't block push on check failure
+    
+    def check_critical_documentation(self, commits: List[Dict[str, Any]]) -> bool:
+        """Check for critical documentation that must exist before push."""
+        print("🔍 Checking critical documentation requirements...")
+        
+        # Look for commits that indicate new features
+        feature_commits = []
+        breaking_commits = []
+        
+        for commit in commits:
+            message = commit['message'].lower()
+            
+            if any(keyword in message for keyword in ['feat:', 'feature:', 'add:', 'new:']):
+                feature_commits.append(commit)
+            
+            if any(keyword in message for keyword in ['breaking:', 'break:', 'major:']):
+                breaking_commits.append(commit)
+        
+        issues = []
+        
+        # Check for feature documentation
+        if feature_commits:
+            print(f"📝 Found {len(feature_commits)} feature commits")
+            
+            # For now, just warn about new features
+            for commit in feature_commits[:3]:  # Show first 3
+                print(f"  - {commit['hash'][:8]}: {commit['message'][:60]}...")
+            
+            print("💡 Ensure new features are documented in relevant sections")
+        
+        # Check for breaking change documentation
+        if breaking_commits:
+            print(f"⚠️  Found {len(breaking_commits)} breaking change commits")
+            
+            # Check if CHANGELOG or migration docs exist
+            changelog_exists = (self.project_root / "CHANGELOG.md").exists()
+            migration_docs = list((self.project_root / "docs").glob("**/migration*.md"))
+            
+            if not changelog_exists and not migration_docs:
+                issues.append("Breaking changes detected but no CHANGELOG.md or migration documentation found")
+        
+        if issues:
+            print("❌ Critical documentation issues:")
+            for issue in issues:
+                print(f"  - {issue}")
+            return False
+        
+        print("✅ Critical documentation check passed")
+        return True
+    
+    def run_pre_push_validation(self) -> bool:
+        """Run complete pre-push validation."""
+        print("🚀 Running pre-push documentation validation...")
+        
+        # Get push information
+        push_info = self.get_push_info()
+        commits = push_info.get('commits', [])
+        
+        if not commits:
+            print("📋 No commits to validate")
+            return True
+        
+        print(f"📊 Validating {len(commits)} commits")
+        
+        # Get all changed files
+        changed_files = self.get_changed_files_in_commits(commits)
+        print(f"📊 Total changed files: {len(changed_files)}")
+        
+        validation_passed = True
+        
+        # Check documentation freshness
+        if not self.check_documentation_freshness(changed_files):
+            validation_passed = False
+        
+        # Validate documentation quality
+        if not self.validate_documentation_quality():
+            validation_passed = False
+        
+        # Check documentation coverage
+        if not self.check_documentation_coverage():
+            validation_passed = False
+        
+        # Check critical documentation requirements
+        if not self.check_critical_documentation(commits):
+            validation_passed = False
+        
+        if validation_passed:
+            print("✅ Pre-push documentation validation passed!")
+        else:
+            print("❌ Pre-push documentation validation failed!")
+            print("\n💡 Fix the issues above before pushing, or use --no-verify to skip validation")
+        
+        return validation_passed
+
+
+def main():
+    """Main entry point for pre-push hook."""
+    validator = PrePushDocValidator()
+    
+    try:
+        success = validator.run_pre_push_validation()
+        sys.exit(0 if success else 1)
+    except KeyboardInterrupt:
+        print("\n⚠️  Validation interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Pre-push validation failed with error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

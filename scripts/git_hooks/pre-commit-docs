@@ -1,0 +1,365 @@
+#!/usr/bin/env python3
+"""
+Pre-commit Git hook for documentation validation.
+
+This hook validates documentation changes before commit to ensure:
+- Documentation is technically accurate
+- Links are valid
+- Formatting is consistent
+- Required documentation exists for code changes
+"""
+
+import os
+import sys
+import subprocess
+from pathlib import Path
+from typing import List, Set, Dict, Any
+import json
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from scripts.generate_docs import DocumentationEngine, DocumentationType
+    from scripts.validation_engine import ValidationEngine
+except ImportError as e:
+    print(f"❌ Failed to import documentation modules: {e}")
+    print("Make sure you're running from the project root with proper dependencies installed.")
+    sys.exit(1)
+
+
+class PreCommitDocValidator:
+    """Pre-commit documentation validator."""
+    
+    def __init__(self):
+        self.project_root = project_root
+        self.docs_engine = DocumentationEngine(self.project_root)
+        self.validation_engine = ValidationEngine(self.project_root, self.project_root / "docs")
+        
+    def get_staged_files(self) -> List[Path]:
+        """Get list of staged files from git."""
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--name-only"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            staged_files = []
+            for file_path in result.stdout.strip().split('\n'):
+                if file_path:  # Skip empty lines
+                    full_path = self.project_root / file_path
+                    if full_path.exists():
+                        staged_files.append(full_path)
+            
+            return staged_files
+            
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to get staged files: {e}")
+            return []
+    
+    def categorize_changes(self, staged_files: List[Path]) -> Dict[str, List[Path]]:
+        """Categorize staged files by type."""
+        categories = {
+            'code': [],
+            'docs': [],
+            'config': [],
+            'tests': []
+        }
+        
+        for file_path in staged_files:
+            file_str = str(file_path)
+            
+            if '/docs/' in file_str or file_str.endswith('.md'):
+                categories['docs'].append(file_path)
+            elif file_str.endswith(('.py', '.ts', '.tsx', '.js', '.jsx')):
+                categories['code'].append(file_path)
+            elif file_str.endswith(('.json', '.yaml', '.yml', '.toml', '.ini')):
+                categories['config'].append(file_path)
+            elif '/tests/' in file_str or file_str.endswith('.test.py'):
+                categories['tests'].append(file_path)
+        
+        return categories
+    
+    def validate_documentation_changes(self, doc_files: List[Path]) -> bool:
+        """Validate direct documentation changes."""
+        if not doc_files:
+            return True
+        
+        print("📝 Validating documentation changes...")
+        
+        validation_passed = True
+        
+        for doc_file in doc_files:
+            print(f"  Checking {doc_file.relative_to(self.project_root)}...")
+            
+            # Basic markdown validation
+            if doc_file.suffix == '.md':
+                if not self._validate_markdown_syntax(doc_file):
+                    validation_passed = False
+                    continue
+                
+                if not self._validate_markdown_links(doc_file):
+                    validation_passed = False
+                    continue
+            
+            # Validate against documentation standards
+            if not self._validate_doc_standards(doc_file):
+                validation_passed = False
+        
+        return validation_passed
+    
+    def check_documentation_completeness(self, code_files: List[Path]) -> bool:
+        """Check if code changes require documentation updates."""
+        if not code_files:
+            return True
+        
+        print("🔍 Checking documentation completeness for code changes...")
+        
+        missing_docs = []
+        
+        for code_file in code_files:
+            file_str = str(code_file)
+            
+            # Check if new API endpoints need documentation
+            if '/api/' in file_str and '/endpoints/' in file_str:
+                if not self._has_api_documentation(code_file):
+                    missing_docs.append(f"API documentation for {code_file.relative_to(self.project_root)}")
+            
+            # Check if new services need algorithm documentation
+            elif '/services/' in file_str:
+                if not self._has_service_documentation(code_file):
+                    missing_docs.append(f"Service documentation for {code_file.relative_to(self.project_root)}")
+            
+            # Check if new models need database documentation
+            elif '/models/' in file_str:
+                if not self._has_model_documentation(code_file):
+                    missing_docs.append(f"Model documentation for {code_file.relative_to(self.project_root)}")
+        
+        if missing_docs:
+            print("❌ Missing documentation for code changes:")
+            for missing in missing_docs:
+                print(f"  - {missing}")
+            print("\n💡 Run 'python scripts/generate_docs.py' to generate missing documentation")
+            return False
+        
+        return True
+    
+    def _validate_markdown_syntax(self, file_path: Path) -> bool:
+        """Validate markdown syntax."""
+        try:
+            content = file_path.read_text(encoding='utf-8')
+            
+            # Basic syntax checks
+            lines = content.split('\n')
+            errors = []
+            
+            for i, line in enumerate(lines, 1):
+                # Check for unmatched code blocks
+                if line.strip().startswith('```'):
+                    # Find matching closing block
+                    found_close = False
+                    for j in range(i, len(lines)):
+                        if lines[j].strip() == '```':
+                            found_close = True
+                            break
+                    
+                    if not found_close:
+                        errors.append(f"Line {i}: Unclosed code block")
+                
+                # Check for malformed links
+                if '[' in line and ']' in line:
+                    # Basic link format validation
+                    import re
+                    link_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+                    matches = re.findall(link_pattern, line)
+                    
+                    for text, url in matches:
+                        if not text.strip():
+                            errors.append(f"Line {i}: Empty link text")
+                        if not url.strip():
+                            errors.append(f"Line {i}: Empty link URL")
+            
+            if errors:
+                print(f"❌ Markdown syntax errors in {file_path.relative_to(self.project_root)}:")
+                for error in errors:
+                    print(f"  {error}")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to validate markdown syntax for {file_path}: {e}")
+            return False
+    
+    def _validate_markdown_links(self, file_path: Path) -> bool:
+        """Validate markdown links."""
+        try:
+            content = file_path.read_text(encoding='utf-8')
+            
+            import re
+            link_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+            matches = re.findall(link_pattern, content)
+            
+            broken_links = []
+            
+            for text, url in matches:
+                # Skip external URLs (basic check)
+                if url.startswith(('http://', 'https://', 'mailto:')):
+                    continue
+                
+                # Check internal links
+                if url.startswith('#'):
+                    # Anchor link - check if header exists
+                    anchor = url[1:].lower().replace('-', ' ')
+                    if anchor not in content.lower():
+                        broken_links.append(f"Anchor '{url}' not found")
+                else:
+                    # File link - check if file exists
+                    link_path = file_path.parent / url
+                    if not link_path.exists():
+                        # Try relative to project root
+                        link_path = self.project_root / url
+                        if not link_path.exists():
+                            broken_links.append(f"File '{url}' not found")
+            
+            if broken_links:
+                print(f"❌ Broken links in {file_path.relative_to(self.project_root)}:")
+                for link in broken_links:
+                    print(f"  {link}")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to validate links for {file_path}: {e}")
+            return False
+    
+    def _validate_doc_standards(self, file_path: Path) -> bool:
+        """Validate documentation against project standards."""
+        try:
+            content = file_path.read_text(encoding='utf-8')
+            
+            # Check for required sections in certain document types
+            file_name = file_path.name.lower()
+            
+            if file_name == 'readme.md':
+                required_sections = ['overview', 'installation', 'usage']
+                missing_sections = []
+                
+                for section in required_sections:
+                    if f"# {section}" not in content.lower() and f"## {section}" not in content.lower():
+                        missing_sections.append(section)
+                
+                if missing_sections:
+                    print(f"❌ Missing required sections in {file_path.relative_to(self.project_root)}: {missing_sections}")
+                    return False
+            
+            # Check for proper heading hierarchy
+            lines = content.split('\n')
+            heading_levels = []
+            
+            for line in lines:
+                if line.strip().startswith('#'):
+                    level = len(line) - len(line.lstrip('#'))
+                    heading_levels.append(level)
+            
+            # Validate heading hierarchy (no skipping levels)
+            for i in range(1, len(heading_levels)):
+                if heading_levels[i] > heading_levels[i-1] + 1:
+                    print(f"❌ Invalid heading hierarchy in {file_path.relative_to(self.project_root)}: skipped from h{heading_levels[i-1]} to h{heading_levels[i]}")
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to validate documentation standards for {file_path}: {e}")
+            return False
+    
+    def _has_api_documentation(self, api_file: Path) -> bool:
+        """Check if API endpoint has corresponding documentation."""
+        # Check if OpenAPI documentation exists
+        api_docs_dir = self.project_root / "docs" / "api"
+        
+        # Look for endpoint-specific documentation
+        endpoint_name = api_file.stem
+        endpoint_docs = list(api_docs_dir.glob(f"*{endpoint_name}*"))
+        
+        return len(endpoint_docs) > 0 or (api_docs_dir / "openapi.json").exists()
+    
+    def _has_service_documentation(self, service_file: Path) -> bool:
+        """Check if service has corresponding documentation."""
+        # Check algorithm documentation
+        algo_docs_dir = self.project_root / "docs" / "algorithms" / "implementations"
+        
+        service_name = service_file.stem
+        service_docs = list(algo_docs_dir.glob(f"*{service_name}*"))
+        
+        return len(service_docs) > 0
+    
+    def _has_model_documentation(self, model_file: Path) -> bool:
+        """Check if model has corresponding documentation."""
+        # Check database documentation
+        db_docs_dir = self.project_root / "docs" / "database"
+        
+        return (db_docs_dir / "schema.md").exists()
+    
+    def run_validation(self) -> bool:
+        """Run complete pre-commit validation."""
+        print("🔍 Running pre-commit documentation validation...")
+        
+        # Get staged files
+        staged_files = self.get_staged_files()
+        
+        if not staged_files:
+            print("📋 No staged files found")
+            return True
+        
+        # Categorize changes
+        categories = self.categorize_changes(staged_files)
+        
+        print(f"📊 Found changes:")
+        for category, files in categories.items():
+            if files:
+                print(f"  {category}: {len(files)} files")
+        
+        validation_passed = True
+        
+        # Validate documentation changes
+        if categories['docs']:
+            if not self.validate_documentation_changes(categories['docs']):
+                validation_passed = False
+        
+        # Check documentation completeness for code changes
+        if categories['code']:
+            if not self.check_documentation_completeness(categories['code']):
+                validation_passed = False
+        
+        if validation_passed:
+            print("✅ Pre-commit documentation validation passed!")
+        else:
+            print("❌ Pre-commit documentation validation failed!")
+            print("\n💡 Fix the issues above and try committing again.")
+        
+        return validation_passed
+
+
+def main():
+    """Main entry point for pre-commit hook."""
+    validator = PreCommitDocValidator()
+    
+    try:
+        success = validator.run_validation()
+        sys.exit(0 if success else 1)
+    except KeyboardInterrupt:
+        print("\n⚠️  Validation interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Pre-commit validation failed with error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

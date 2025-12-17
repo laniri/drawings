@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_technical_process_backup_service" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="technical_process_backup_service" name="Technical Process - Backup Service" isExecutable="false">
+    <bpmn:startEvent id="start_0" name="Process Start"/>
+    <bpmn:serviceTask id="service_task_1" name="  Init  " service="backup_service" method="__init__"/>
+    <bpmn:endEvent id="end_2" name="Process Complete"/>
+    <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="service_task_1"/>
+    <bpmn:sequenceFlow id="flow_1" sourceRef="service_task_1" targetRef="end_2"/>
+  </bpmn:process>
+</bpmn:definitions>

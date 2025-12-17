@@ -1,0 +1,4 @@
+# file: /Users/itay/Desktop/drawings/scripts/swagger_ui_generator.py
+# hypothesis_version: 6.148.7
+
+['API Documentation', 'JWT', 'X-API-Key', 'api', 'apiKey', 'basic', 'bearer', 'bearerFormat', 'components', 'delete', 'description', 'docs', 'enable_filter', 'enable_search', 'errors', 'flows', 'generated_files', 'get', 'head', 'header', 'http', 'in', 'index.html', 'info', 'list', 'max_displayed_tags', 'name', 'oauth2', 'options', 'patch', 'post', 'put', 'scheme', 'securitySchemes', 'success', 'swagger-config.js', 'swagger-custom.css', 'swagger-ui', 'title', 'trace', 'type', 'utf-8', 'w', 'warnings']

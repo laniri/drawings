@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Children's Drawing Anomaly Detection System - Interactive Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <link rel="stylesheet" type="text/css" href="./swagger-custom.css" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.9.0/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5.9.0/favicon-16x16.png" sizes="16x16" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin:0;
+            background: #fafafa;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        .swagger-ui .topbar {
+            background-color: #2c3e50;
+            padding: 10px 0;
+        }
+        .swagger-ui .topbar .download-url-wrapper {
+            display: none;
+        }
+        .custom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .custom-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .custom-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .api-info {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e8e8e8;
+            z-index: 1000;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e8e8e8;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus {
+            border-color: #667eea;
+        }
+        .filter-tags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .filter-tag {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 4px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .filter-tag:hover {
+            background: #e9ecef;
+        }
+        .filter-tag.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .auth-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+        }
+        .auth-section h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .auth-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+        }
+        .auth-button:hover {
+            background: #218838;
+        }
+        .clear-auth {
+            background: #dc3545;
+        }
+        .clear-auth:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>Children's Drawing Anomaly Detection System</h1>
+        <p>Interactive API Documentation with Enhanced Features</p>
+    </div>
+    
+    <div class="api-info">
+        <h2>API Information</h2>
+        <p><strong>Version:</strong> 0.1.0</p>
+        <p><strong>Description:</strong> Machine learning system for detecting anomalies in children's drawings</p>
+        <p><strong>Generated:</strong> 2025-12-16 15:53:20</p>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" id="api-search" class="search-input" placeholder="🔍 Search endpoints, operations, or descriptions...">
+        <div class="filter-tags" id="filter-tags">
+            <!-- Tags will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <div class="auth-section" id="auth-section" style="display: none;">
+        <h3>🔐 Authentication</h3>
+        <div id="auth-controls">
+            <!-- Authentication controls will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <div id="swagger-ui"></div>
+    
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script src="./swagger-config.js"></script>
+    <script src="./swagger-enhancements.js"></script>
+    <script>
+        // Initialize Swagger UI with enhanced configuration
+        window.onload = function() {
+            initializeSwaggerUI();
+            initializeEnhancements();
+        };
+    </script>
+</body>
+</html>
