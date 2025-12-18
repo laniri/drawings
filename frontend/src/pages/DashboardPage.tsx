@@ -98,6 +98,18 @@ const DashboardPage: React.FC = () => {
     refetchInterval: 30000, // Refresh every 30 seconds
   })
 
+  // Get unique subjects from recent analyses for filter (moved before early return)
+  const availableSubjects = React.useMemo(() => {
+    if (!stats?.recent_analyses) return []
+    const subjects = new Set<string>()
+    stats.recent_analyses.forEach(analysis => {
+      if (analysis.subject) {
+        subjects.add(analysis.subject)
+      }
+    })
+    return Array.from(subjects).sort()
+  }, [stats?.recent_analyses])
+
   const anomalyRate = stats
     ? ((stats.anomaly_count / (stats.anomaly_count + stats.normal_count)) * 100).toFixed(1)
     : '0'
@@ -119,18 +131,6 @@ const DashboardPage: React.FC = () => {
       </Box>
     )
   }
-
-  // Get unique subjects from recent analyses for filter
-  const availableSubjects = React.useMemo(() => {
-    if (!stats?.recent_analyses) return []
-    const subjects = new Set<string>()
-    stats.recent_analyses.forEach(analysis => {
-      if (analysis.subject) {
-        subjects.add(analysis.subject)
-      }
-    })
-    return Array.from(subjects).sort()
-  }, [stats?.recent_analyses])
 
   return (
     <Box>
