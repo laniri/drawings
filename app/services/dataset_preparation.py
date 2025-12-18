@@ -17,6 +17,7 @@ from sklearn.model_selection import train_test_split
 
 from app.core.exceptions import ValidationError
 from app.services.data_pipeline import DataPipelineService, DrawingMetadata
+from app.services.data_sufficiency_service import get_data_sufficiency_analyzer, DataSufficiencyWarning
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class DatasetSplit:
     validation_metadata: List[DrawingMetadata]
     test_files: List[Path]
     test_metadata: List[DrawingMetadata]
+    subject_stratification_warnings: List[DataSufficiencyWarning] = None  # Warnings about age-subject combinations
     
     @property
     def train_count(self) -> int:
@@ -62,7 +64,9 @@ class SplitConfig:
     test_ratio: float = 0.1
     random_seed: int = 42
     stratify_by_age: bool = True
+    stratify_by_subject: bool = True  # Enable subject-aware stratification
     age_group_size: float = 1.0  # Age group size in years for stratification
+    min_samples_per_age_subject: int = 3  # Minimum samples per age-subject combination
     
     def __post_init__(self):
         """Validate split ratios sum to 1.0."""
@@ -308,6 +312,155 @@ class DatasetPreparationService:
         if age_range < 1.0:
             logger.warning(f"Narrow age range: {age_range:.1f} years")
     
+    def _is_stratification_viable(self, labels: np.ndarray, test_ratio: float, val_ratio: float) -> bool:
+        """
+        Check if stratification is mathematically viable.
+        
+        Args:
+            labels: Stratification labels
+            test_ratio: Test set ratio
+            val_ratio: Validation set ratio
+            
+        Returns:
+            True if stratification is viable, False otherwise
+        """
+        unique_labels, counts = np.unique(labels, return_counts=True)
+        min_count = min(counts)
+        n_classes = len(unique_labels)
+        total_samples = len(labels)
+        
+        # Calculate minimum samples needed for each split
+        min_test_size = max(1, int(total_samples * test_ratio)) if test_ratio > 0 else 0
+        min_val_size = max(1, int(total_samples * val_ratio)) if val_ratio > 0 else 0
+        
+        # Check constraints:
+        # 1. Each class must have at least 2 samples for stratification
+        # 2. Number of classes cannot exceed the size of any split
+        # 3. Each class should have enough samples to contribute to each split
+        if min_count < 2:
+            return False
+        
+        if test_ratio > 0 and n_classes > min_test_size:
+            return False
+            
+        if val_ratio > 0 and n_classes > min_val_size:
+            return False
+        
+        # Additional check: ensure we can create meaningful splits
+        # Each class should be able to contribute at least 1 sample to train set
+        min_train_samples_per_class = 1
+        if min_count < min_train_samples_per_class + (1 if test_ratio > 0 else 0) + (1 if val_ratio > 0 else 0):
+            return False
+        
+        return True
+
+    def _create_age_subject_stratification_labels(self, 
+                                                metadata: List[DrawingMetadata], 
+                                                split_config: SplitConfig) -> Tuple[Optional[np.ndarray], List[DataSufficiencyWarning]]:
+        """
+        Create stratification labels based on age and subject combinations.
+        
+        Args:
+            metadata: List of metadata objects
+            split_config: Configuration for splitting
+            
+        Returns:
+            Tuple of (stratification_labels, warnings)
+        """
+        warnings = []
+        
+        if not split_config.stratify_by_subject:
+            # Fall back to age-only stratification
+            if split_config.stratify_by_age:
+                ages = [m.age_years for m in metadata]
+                # Use more robust age binning
+                age_bins = np.arange(
+                    min(ages), 
+                    max(ages) + split_config.age_group_size, 
+                    split_config.age_group_size
+                )
+                age_labels = np.digitize(ages, age_bins)
+                
+                # Check if age-only stratification is viable
+                if self._is_stratification_viable(age_labels, split_config.test_ratio, split_config.validation_ratio):
+                    return age_labels, warnings
+                else:
+                    logger.warning("Age-only stratification not viable, will use random splitting")
+                    return None, warnings
+            else:
+                return None, warnings
+        
+        # Create age-subject combination labels
+        age_subject_combinations = []
+        for m in metadata:
+            # Create age bin - use floor division for more consistent binning
+            age_bin = int(m.age_years // split_config.age_group_size)
+            # Use subject or "unspecified" if None
+            subject = m.subject or "unspecified"
+            age_subject_combinations.append(f"{age_bin}_{subject}")
+        
+        # Convert to numeric labels
+        unique_combinations = list(set(age_subject_combinations))
+        combination_to_label = {combo: i for i, combo in enumerate(unique_combinations)}
+        stratify_labels = np.array([combination_to_label[combo] for combo in age_subject_combinations])
+        
+        # Analyze data sufficiency for age-subject combinations
+        combination_counts = {}
+        for combo in age_subject_combinations:
+            combination_counts[combo] = combination_counts.get(combo, 0) + 1
+        
+        # Generate warnings for insufficient age-subject combinations
+        for combo, count in combination_counts.items():
+            if count < split_config.min_samples_per_age_subject:
+                age_bin_str, subject = combo.split('_', 1)
+                age_bin = int(age_bin_str)
+                age_min = age_bin * split_config.age_group_size
+                age_max = (age_bin + 1) * split_config.age_group_size
+                
+                warnings.append(DataSufficiencyWarning(
+                    warning_type="insufficient_age_subject_data",
+                    severity="medium" if count >= 2 else "high",
+                    age_group_min=age_min,
+                    age_group_max=age_max,
+                    current_samples=count,
+                    recommended_samples=split_config.min_samples_per_age_subject,
+                    message=f"Insufficient data for age {age_min:.1f}-{age_max:.1f}, subject '{subject}': {count} samples",
+                    suggestions=[
+                        f"Collect more '{subject}' drawings from age {age_min:.1f}-{age_max:.1f}",
+                        "Consider merging similar subject categories",
+                        "Use 'unspecified' category for drawings without clear subject",
+                        "Consider age group consolidation if multiple age-subject pairs are insufficient"
+                    ]
+                ))
+        
+        # Check if subject-aware stratification is viable
+        if self._is_stratification_viable(stratify_labels, split_config.test_ratio, split_config.validation_ratio):
+            logger.info(f"Created subject-aware stratification with {len(unique_combinations)} age-subject combinations")
+            return stratify_labels, warnings
+        else:
+            logger.warning(f"Subject-aware stratification not viable: {len(unique_combinations)} age-subject combinations. "
+                         f"Falling back to age-only stratification")
+            
+            # Fall back to age-only stratification
+            if split_config.stratify_by_age:
+                ages = [m.age_years for m in metadata]
+                age_bins = np.arange(
+                    min(ages), 
+                    max(ages) + split_config.age_group_size, 
+                    split_config.age_group_size
+                )
+                age_labels = np.digitize(ages, age_bins)
+                
+                # Check if age-only stratification is viable
+                if self._is_stratification_viable(age_labels, split_config.test_ratio, split_config.validation_ratio):
+                    logger.info("Using age-only stratification as fallback")
+                    return age_labels, warnings
+                else:
+                    logger.warning("Age-only stratification also not viable, will use random splitting")
+                    return None, warnings
+            else:
+                return None, warnings
+
     def create_dataset_splits(
         self, 
         files: List[Path], 
@@ -337,66 +490,43 @@ class DatasetPreparationService:
         logger.info(f"Creating dataset splits with config: train={split_config.train_ratio}, "
                    f"val={split_config.validation_ratio}, test={split_config.test_ratio}")
         
+        if split_config.stratify_by_subject:
+            logger.info("Using subject-aware stratification for balanced age-subject representation")
+        elif split_config.stratify_by_age:
+            logger.info("Using age-only stratification")
+        
         # Prepare data for splitting
         indices = np.arange(len(files))
         
-        # Create stratification labels if requested
+        # Create stratification labels and collect warnings
         stratify_labels = None
-        if split_config.stratify_by_age and len(files) >= 10:  # Need minimum samples for stratification
-            ages = [m.age_years for m in metadata]
-            # Group ages into bins for stratification
-            age_bins = np.arange(
-                min(ages), 
-                max(ages) + split_config.age_group_size, 
-                split_config.age_group_size
-            )
-            stratify_labels = np.digitize(ages, age_bins)
-            
-            # Check if we have enough samples per stratum for stratified splitting
-            unique_labels, counts = np.unique(stratify_labels, return_counts=True)
-            min_count = min(counts)
-            n_classes = len(unique_labels)
-            
-            # Calculate minimum samples needed for stratified split
-            min_test_size = max(1, int(len(files) * split_config.test_ratio))
-            min_val_size = max(1, int(len(files) * split_config.validation_ratio))
-            
-            # Need at least 2 samples per class and enough samples for each split
-            if (min_count < 2 or 
-                n_classes > min_test_size or 
-                n_classes > min_val_size or
-                min_count < 3):  # Need at least 3 samples per stratum for reliable splitting
-                logger.warning(f"Insufficient samples for age stratification: {n_classes} classes, "
-                             f"min_count={min_count}, test_size={min_test_size}, val_size={min_val_size}. "
-                             f"Using random split")
-                stratify_labels = None
+        stratification_warnings = []
         
+        if len(files) >= 10:  # Need minimum samples for stratification
+            stratify_labels, stratification_warnings = self._create_age_subject_stratification_labels(
+                metadata, split_config
+            )
+        
+        # Perform the actual splitting with robust error handling
         try:
             # First split: separate test set
             if split_config.test_ratio > 0:
-                try:
-                    train_val_indices, test_indices = train_test_split(
-                        indices,
-                        test_size=split_config.test_ratio,
-                        random_state=split_config.random_seed,
-                        stratify=stratify_labels
-                    )
-                except ValueError as e:
-                    if "test_size" in str(e) and "classes" in str(e):
-                        # Stratification failed, fall back to random split
-                        logger.warning(f"Stratified split failed ({str(e)}), using random split")
-                        train_val_indices, test_indices = train_test_split(
-                            indices,
-                            test_size=split_config.test_ratio,
-                            random_state=split_config.random_seed,
-                            stratify=None
-                        )
-                        stratify_labels = None  # Disable stratification for subsequent splits
-                    else:
-                        raise
+                train_val_indices, test_indices = self._safe_train_test_split(
+                    indices,
+                    test_size=split_config.test_ratio,
+                    random_state=split_config.random_seed,
+                    stratify=stratify_labels
+                )
+                
+                # Update stratify_labels for remaining data if stratification was used
+                if stratify_labels is not None and len(train_val_indices) > 0:
+                    remaining_stratify = stratify_labels[train_val_indices]
+                else:
+                    remaining_stratify = None
             else:
                 train_val_indices = indices
                 test_indices = np.array([])
+                remaining_stratify = stratify_labels
             
             # Second split: separate train and validation
             if split_config.validation_ratio > 0 and len(train_val_indices) > 1:
@@ -405,30 +535,12 @@ class DatasetPreparationService:
                     split_config.train_ratio + split_config.validation_ratio
                 )
                 
-                # Prepare stratification for remaining data
-                remaining_stratify = None
-                if stratify_labels is not None:
-                    remaining_stratify = stratify_labels[train_val_indices]
-                
-                try:
-                    train_indices, val_indices = train_test_split(
-                        train_val_indices,
-                        test_size=val_ratio_adjusted,
-                        random_state=split_config.random_seed,
-                        stratify=remaining_stratify
-                    )
-                except ValueError as e:
-                    if "test_size" in str(e) and "classes" in str(e):
-                        # Stratification failed, fall back to random split
-                        logger.warning(f"Validation stratified split failed ({str(e)}), using random split")
-                        train_indices, val_indices = train_test_split(
-                            train_val_indices,
-                            test_size=val_ratio_adjusted,
-                            random_state=split_config.random_seed,
-                            stratify=None
-                        )
-                    else:
-                        raise
+                train_indices, val_indices = self._safe_train_test_split(
+                    train_val_indices,
+                    test_size=val_ratio_adjusted,
+                    random_state=split_config.random_seed,
+                    stratify=remaining_stratify
+                )
             else:
                 train_indices = train_val_indices
                 val_indices = np.array([])
@@ -440,7 +552,8 @@ class DatasetPreparationService:
                 validation_files=[files[i] for i in val_indices],
                 validation_metadata=[metadata[i] for i in val_indices],
                 test_files=[files[i] for i in test_indices],
-                test_metadata=[metadata[i] for i in test_indices]
+                test_metadata=[metadata[i] for i in test_indices],
+                subject_stratification_warnings=stratification_warnings
             )
             
             logger.info(f"Dataset split created: train={dataset_split.train_count}, "
@@ -450,7 +563,88 @@ class DatasetPreparationService:
             
         except Exception as e:
             logger.error(f"Failed to create dataset splits: {str(e)}")
-            raise ValidationError(f"Dataset splitting failed: {str(e)}")
+            
+            # For very small datasets, create a minimal split without validation/test sets
+            if len(files) <= 4:
+                logger.warning("Very small dataset, creating minimal split with training data only")
+                return DatasetSplit(
+                    train_files=files,
+                    train_metadata=metadata,
+                    validation_files=[],
+                    validation_metadata=[],
+                    test_files=[],
+                    test_metadata=[],
+                    subject_stratification_warnings=stratification_warnings
+                )
+            else:
+                raise ValidationError(f"Dataset splitting failed: {str(e)}")
+    
+    def _safe_train_test_split(self, 
+                              indices: np.ndarray, 
+                              test_size: float, 
+                              random_state: int, 
+                              stratify: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Perform train_test_split with robust error handling and fallback.
+        
+        Args:
+            indices: Array indices to split
+            test_size: Size of test set
+            random_state: Random seed
+            stratify: Optional stratification labels
+            
+        Returns:
+            Tuple of (train_indices, test_indices)
+        """
+        # Handle very small datasets
+        if len(indices) <= 2:
+            # For very small datasets, put everything in training
+            return indices, np.array([])
+        
+        # Calculate actual test size
+        actual_test_size = max(1, int(len(indices) * test_size))
+        if actual_test_size >= len(indices):
+            # Test size too large, put everything in training
+            return indices, np.array([])
+        
+        try:
+            # First attempt: use stratification if provided and viable
+            if stratify is not None and len(np.unique(stratify)) > 1:
+                # Check if stratification is viable
+                unique_labels, counts = np.unique(stratify, return_counts=True)
+                min_count = min(counts)
+                
+                # Need at least 2 samples per class for stratification
+                if min_count >= 2 and len(unique_labels) <= actual_test_size:
+                    return train_test_split(
+                        indices,
+                        test_size=test_size,
+                        random_state=random_state,
+                        stratify=stratify
+                    )
+            
+            # Fall back to random split
+            return train_test_split(
+                indices,
+                test_size=test_size,
+                random_state=random_state,
+                stratify=None
+            )
+            
+        except ValueError as e:
+            # Any stratification error, fall back to random split
+            logger.warning(f"Stratified split failed ({str(e)}), falling back to random split")
+            try:
+                return train_test_split(
+                    indices,
+                    test_size=test_size,
+                    random_state=random_state,
+                    stratify=None
+                )
+            except ValueError as e2:
+                # Even random split failed, return all as training
+                logger.warning(f"Random split also failed ({str(e2)}), using all data for training")
+                return indices, np.array([])
     
     def prepare_dataset(
         self, 
@@ -480,6 +674,81 @@ class DatasetPreparationService:
         
         return dataset_split
     
+    def validate_age_subject_combinations(self, dataset_split: DatasetSplit) -> Dict[str, Any]:
+        """
+        Validate age-subject combinations for training readiness.
+        
+        Args:
+            dataset_split: Dataset split to validate
+            
+        Returns:
+            Dictionary with validation results and age-subject specific warnings
+        """
+        validation_result = {
+            'is_valid': True,
+            'age_subject_warnings': [],
+            'age_subject_statistics': {},
+            'recommendations': []
+        }
+        
+        # Analyze age-subject combinations in training data
+        age_subject_counts = {}
+        for metadata in dataset_split.train_metadata:
+            age_bin = int(metadata.age_years)  # Simple age binning
+            subject = metadata.subject or "unspecified"
+            key = f"{age_bin}_{subject}"
+            age_subject_counts[key] = age_subject_counts.get(key, 0) + 1
+        
+        # Check for insufficient age-subject combinations
+        insufficient_combinations = []
+        for combo, count in age_subject_counts.items():
+            if count < 3:  # Minimum samples per age-subject combination
+                age_str, subject = combo.split('_', 1)
+                age = int(age_str)
+                insufficient_combinations.append({
+                    'age': age,
+                    'subject': subject,
+                    'count': count,
+                    'recommended': 3
+                })
+        
+        validation_result['age_subject_statistics'] = {
+            'total_combinations': len(age_subject_counts),
+            'insufficient_combinations': len(insufficient_combinations),
+            'combination_counts': age_subject_counts
+        }
+        
+        # Generate warnings and recommendations
+        if insufficient_combinations:
+            validation_result['is_valid'] = False
+            validation_result['age_subject_warnings'] = insufficient_combinations
+            
+            # Group by subject for recommendations
+            subjects_needing_data = {}
+            for combo in insufficient_combinations:
+                subject = combo['subject']
+                if subject not in subjects_needing_data:
+                    subjects_needing_data[subject] = []
+                subjects_needing_data[subject].append(combo['age'])
+            
+            for subject, ages in subjects_needing_data.items():
+                if len(ages) > 2:  # Multiple age groups need this subject
+                    validation_result['recommendations'].append(
+                        f"Collect more '{subject}' drawings across multiple age groups: {sorted(ages)}"
+                    )
+                else:
+                    validation_result['recommendations'].append(
+                        f"Collect more '{subject}' drawings for age {ages[0]}"
+                    )
+        
+        # Add stratification warnings from dataset split
+        if dataset_split.subject_stratification_warnings:
+            validation_result['age_subject_warnings'].extend([
+                warning.to_dict() for warning in dataset_split.subject_stratification_warnings
+            ])
+        
+        return validation_result
+
     def validate_dataset_for_training(self, dataset_split: DatasetSplit) -> Dict[str, Any]:
         """
         Validate dataset split for training readiness.
@@ -538,11 +807,29 @@ class DatasetPreparationService:
                 "Training and validation sets have non-overlapping age ranges"
             )
         
-        # Generate recommendations
+        # Validate age-subject combinations
+        age_subject_validation = self.validate_age_subject_combinations(dataset_split)
+        validation_result['age_subject_validation'] = age_subject_validation
+        
+        # Merge age-subject warnings into main warnings
+        if age_subject_validation['age_subject_warnings']:
+            validation_result['warnings'].extend([
+                f"Age-subject combination issue: {warning}" 
+                for warning in age_subject_validation['age_subject_warnings']
+            ])
+        
+        # Merge age-subject recommendations
+        validation_result['recommendations'].extend(age_subject_validation['recommendations'])
+        
+        # Generate general recommendations
         if dataset_split.total_count < 100:
             validation_result['recommendations'].append(
                 "Consider collecting more data for better model performance"
             )
+        
+        # Update validity based on age-subject validation
+        if not age_subject_validation['is_valid']:
+            validation_result['is_valid'] = False
         
         if len(validation_result['warnings']) > 0:
             validation_result['is_valid'] = False

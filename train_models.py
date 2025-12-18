@@ -42,16 +42,21 @@ def get_all_drawings() -> List[Dict]:
     return all_drawings
 
 def generate_embeddings_for_drawings(drawings: List[Dict]) -> int:
-    """Generate embeddings for all drawings using the analysis endpoint."""
-    print(f"\nGenerating embeddings for {len(drawings)} drawings...")
+    """Generate hybrid embeddings for all drawings using the analysis endpoint."""
+    print(f"\nGenerating hybrid embeddings for {len(drawings)} drawings...")
+    print("  Note: All embeddings will be 832-dimensional hybrid format (768 visual + 64 subject)")
     
     successful = 0
     failed = 0
+    subject_stats = {}
     
     for i, drawing in enumerate(drawings, 1):
         drawing_id = drawing["id"]
         age = drawing["age_years"]
-        subject = drawing["subject"]
+        subject = drawing.get("subject", "unspecified")
+        
+        # Track subject statistics
+        subject_stats[subject] = subject_stats.get(subject, 0) + 1
         
         print(f"  [{i}/{len(drawings)}] Processing drawing {drawing_id} (age: {age}, subject: {subject})")
         
@@ -66,8 +71,14 @@ def generate_embeddings_for_drawings(drawings: List[Dict]) -> int:
             if response.status_code == 200:
                 result = response.json()
                 status = result.get("status", "unknown")
+                dimension = result.get('vector_dimension', 'N/A')
+                
                 if status in ["generated", "exists"]:
-                    print(f"    ✓ Embedding {status} (dimension: {result.get('vector_dimension', 'N/A')})")
+                    # Verify it's hybrid format
+                    if dimension == 832:
+                        print(f"    ✓ Hybrid embedding {status} (832-dim: 768 visual + 64 subject)")
+                    else:
+                        print(f"    ⚠ Embedding {status} but unexpected dimension: {dimension}")
                     successful += 1
                 else:
                     print(f"    ✗ Unexpected status: {status}")
@@ -85,15 +96,23 @@ def generate_embeddings_for_drawings(drawings: List[Dict]) -> int:
         if i % 10 == 0:
             time.sleep(1)
     
-    print(f"\nEmbedding generation complete:")
+    print(f"\nHybrid embedding generation complete:")
     print(f"  ✓ Successful: {successful}")
     print(f"  ✗ Failed: {failed}")
+    
+    # Show subject distribution
+    print(f"\nSubject category distribution:")
+    for subject, count in sorted(subject_stats.items()):
+        percentage = (count / len(drawings)) * 100
+        print(f"  {subject}: {count} drawings ({percentage:.1f}%)")
     
     return successful
 
 def train_age_group_models() -> List[Dict]:
-    """Train autoencoder models for different age groups."""
-    print("\nStarting age group model training...")
+    """Train subject-aware autoencoder models for different age groups."""
+    print("\nStarting subject-aware age group model training...")
+    print("  Note: All models will use 832-dimensional hybrid embeddings")
+    print("  Architecture: Unified subject-aware autoencoders for each age group")
     
     # Define age groups with sufficient samples
     age_groups = [
@@ -105,17 +124,19 @@ def train_age_group_models() -> List[Dict]:
     training_jobs = []
     
     for age_min, age_max, description in age_groups:
-        print(f"\n  Training model for {description} (ages {age_min}-{age_max})...")
+        print(f"\n  Training subject-aware model for {description} (ages {age_min}-{age_max})...")
         
         training_request = {
             "age_min": age_min,
             "age_max": age_max,
-            "min_samples": 10  # API minimum requirement
+            "min_samples": 10,  # API minimum requirement
+            "subject_aware": True,  # Enable subject-aware training
+            "embedding_type": "hybrid"  # Ensure hybrid embeddings are used
         }
         
         try:
             # Start training job (runs in background)
-            print(f"    Submitting training job for {training_request['age_min']}-{training_request['age_max']} years...")
+            print(f"    Submitting subject-aware training job for {training_request['age_min']}-{training_request['age_max']} years...")
             response = requests.post(
                 "http://localhost:8000/api/v1/models/train",
                 json=training_request,
@@ -125,10 +146,11 @@ def train_age_group_models() -> List[Dict]:
             if response.status_code == 200:
                 job_info = response.json()
                 training_jobs.append(job_info)
-                print(f"    ✓ Training job submitted: {job_info['job_id']}")
+                print(f"    ✓ Subject-aware training job submitted: {job_info['job_id']}")
                 print(f"    ✓ Sample count: {job_info['sample_count']}")
                 print(f"    ✓ Age range: {job_info['age_range']}")
                 print(f"    ✓ Status: {job_info['status']}")
+                print(f"    ✓ Architecture: Unified subject-aware autoencoder")
             else:
                 error_detail = response.json().get("detail", "Unknown error") if response.headers.get("content-type") == "application/json" else response.text
                 print(f"    ✗ Training submission failed ({response.status_code}): {error_detail}")

@@ -5,18 +5,20 @@ A machine learning-powered application that analyzes children's drawings to iden
 ## ✅ System Status
 
 **Current Status**: Fully functional and trained
-- **95 sample drawings** uploaded and processed
-- **3 trained autoencoder models** for age groups (3-6, 6-9, 9-12 years)
+- **37,778+ drawings** uploaded and processed
+- **8 trained autoencoder models** for age groups (2-3, 3-4, 4-5, 5-6, 6-7, 7-8, 8-9, 9-12 years)
 - **Vision Transformer embeddings** generated for all drawings
-- **Web interface** connected and displaying data
-- **Anomaly detection** active and working
+- **Interactive interpretability** with guaranteed saliency maps for all drawings
+- **Advanced export system** with multi-format support (PNG, PDF, JSON, CSV, HTML)
+- **Web interface** with 6 interpretability tabs and real-time features
 
 ## Features
 
 - **Drawing Upload & Analysis**: Support for PNG, JPEG, and BMP formats with metadata
 - **Age-Based Modeling**: Separate autoencoder models trained for different age groups
 - **Anomaly Detection**: Reconstruction loss-based scoring with configurable thresholds
-- **Interpretability**: Saliency maps and attention visualizations for model explanations
+- **Interactive Interpretability**: Simplified gradient-based saliency maps with hoverable regions, zoom/pan, and detailed explanations guaranteed for all drawings
+- **Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with comprehensive reports and composite visualizations
 - **Web Interface**: Modern React frontend with Material-UI components
 - **REST API**: FastAPI backend with automatic OpenAPI documentation
 - **Real-time Dashboard**: System statistics, age distribution, and analysis results
@@ -30,7 +32,8 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **SQLAlchemy** with SQLite database for data persistence
 - **Alembic** for database migrations
 - **Pydantic** for data validation and settings management
-- **Captum** for model interpretability (saliency maps)
+- **ReportLab** for PDF generation and comprehensive export reports
+- **Pillow & OpenCV** for image processing and simplified saliency map generation
 - **NumPy 1.26.4** (downgraded for PyTorch compatibility)
 
 ### Frontend
@@ -245,9 +248,15 @@ npm run build
    - Supported formats: PNG, JPEG, BMP (max 10MB)
 
 3. **Analysis Results**
-   - View anomaly scores and confidence levels
-   - See interpretability visualizations for anomalous drawings
-   - Browse analysis history
+   - View anomaly scores and confidence levels with 6 interactive tabs:
+     - **Interactive Analysis**: Hoverable saliency regions with click-to-zoom
+     - **Saliency Map**: Original + saliency overlays with adjustable opacity
+     - **Confidence**: Detailed confidence metrics and reliability warnings
+     - **Comparison**: Similar examples from same age group
+     - **History**: Historical analysis tracking and trends
+     - **Annotations**: User annotation tools for regions
+   - Export results in multiple formats (PNG, PDF, JSON, CSV, HTML)
+   - Browse analysis history with comprehensive interpretability
 
 4. **Configuration**
    - View trained models and their statistics
@@ -270,6 +279,14 @@ curl "http://localhost:8000/api/v1/drawings/"
 
 # Get model information
 curl "http://localhost:8000/api/v1/models/age-groups"
+
+# Get interactive interpretability data
+curl "http://localhost:8000/api/v1/interpretability/522/interactive"
+
+# Export analysis results
+curl -X POST "http://localhost:8000/api/v1/interpretability/522/export" \
+     -H "Content-Type: application/json" \
+     -d '{"format": "pdf", "export_options": {}}'
 ```
 
 ## API Documentation

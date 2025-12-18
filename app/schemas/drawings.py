@@ -18,6 +18,76 @@ class ExpertLabel(str, Enum):
     SEVERE = "severe"
 
 
+class SubjectCategory(str, Enum):
+    """
+    Enumeration for drawing subject categories.
+    
+    Supports up to 64 distinct categories using one-hot encoding.
+    "unspecified" is the default category when subject information is unavailable.
+    """
+    # Default category (position 0 in one-hot encoding)
+    UNSPECIFIED = "unspecified"
+    
+    # Objects
+    TV = "TV"
+    AIRPLANE = "airplane"
+    APPLE = "apple"
+    BED = "bed"
+    BIKE = "bike"
+    BOAT = "boat"
+    BOOK = "book"
+    BOTTLE = "bottle"
+    BOWL = "bowl"
+    CACTUS = "cactus"
+    CAR = "car"
+    CHAIR = "chair"
+    CLOCK = "clock"
+    COUCH = "couch"
+    CUP = "cup"
+    HAT = "hat"
+    HOUSE = "house"
+    ICE_CREAM = "ice cream"
+    KEY = "key"
+    LAMP = "lamp"
+    MUSHROOM = "mushroom"
+    PHONE = "phone"
+    PIANO = "piano"
+    SCISSORS = "scissors"
+    TRAIN = "train"
+    TREE = "tree"
+    WATCH = "watch"
+    
+    # Animals
+    BEAR = "bear"
+    BEE = "bee"
+    BIRD = "bird"
+    CAMEL = "camel"
+    CAT = "cat"
+    COW = "cow"
+    DOG = "dog"
+    ELEPHANT = "elephant"
+    FISH = "fish"
+    FROG = "frog"
+    HORSE = "horse"
+    OCTOPUS = "octopus"
+    RABBIT = "rabbit"
+    SHEEP = "sheep"
+    SNAIL = "snail"
+    SPIDER = "spider"
+    TIGER = "tiger"
+    WHALE = "whale"
+    
+    # People and body parts
+    FACE = "face"
+    HAND = "hand"
+    PERSON = "person"
+    
+    # Abstract/other categories
+    FAMILY = "family"
+    ABSTRACT = "abstract"
+    OTHER = "other"
+
+
 class DrawingUploadRequest(BaseModel):
     """Request model for uploading a drawing with metadata."""
     
@@ -27,10 +97,9 @@ class DrawingUploadRequest(BaseModel):
         le=18.0, 
         description="Child's age in years (2-18)"
     )
-    subject: Optional[str] = Field(
-        None, 
-        max_length=50,
-        description="Drawing subject (person, house, tree, etc.)"
+    subject: Optional[SubjectCategory] = Field(
+        None,
+        description="Drawing subject category"
     )
     expert_label: Optional[ExpertLabel] = Field(
         None,
@@ -47,11 +116,19 @@ class DrawingUploadRequest(BaseModel):
         description="Prompt or instruction given to the child"
     )
     
-    @field_validator('subject', 'drawing_tool', 'prompt')
+    @field_validator('drawing_tool', 'prompt')
     @classmethod
     def validate_optional_strings(cls, v):
         """Validate optional string fields - convert empty strings to None."""
         if v is not None and v.strip() == "":
+            return None
+        return v
+    
+    @field_validator('subject')
+    @classmethod
+    def validate_subject_category(cls, v):
+        """Validate subject category - convert empty strings to None, validate enum values."""
+        if v is not None and isinstance(v, str) and v.strip() == "":
             return None
         return v
 
@@ -62,7 +139,7 @@ class DrawingResponse(BaseModel):
     id: int
     filename: str
     age_years: float
-    subject: Optional[str]
+    subject: Optional[str]  # Returned as string from database
     expert_label: Optional[str]
     drawing_tool: Optional[str]
     prompt: Optional[str]
@@ -86,7 +163,7 @@ class DrawingFilterRequest(BaseModel):
     
     age_min: Optional[float] = Field(None, ge=2.0, le=18.0)
     age_max: Optional[float] = Field(None, ge=2.0, le=18.0)
-    subject: Optional[str] = Field(None, max_length=50)
+    subject: Optional[SubjectCategory] = Field(None)
     expert_label: Optional[ExpertLabel] = None
     page: int = Field(1, ge=1, description="Page number")
     page_size: int = Field(20, ge=1, le=100, description="Items per page")

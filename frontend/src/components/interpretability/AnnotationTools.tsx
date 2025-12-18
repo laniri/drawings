@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -7,10 +7,7 @@ import {
   Button,
   Chip,
   IconButton,
-  Menu,
   MenuItem,
-  ListItemIcon,
-  ListItemText,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -19,12 +16,7 @@ import {
   InputLabel,
   Select,
   Alert,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
   Avatar,
-  Tooltip,
   Fab,
   Collapse,
   Card,
@@ -43,9 +35,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
-  Comment as CommentIcon,
-  Person as PersonIcon
+  Comment as CommentIcon
 } from '@mui/icons-material'
 
 interface Annotation {
@@ -89,7 +79,6 @@ export default function AnnotationTools({
   readOnly = false
 }: AnnotationToolsProps) {
   const [annotations, setAnnotations] = useState<Annotation[]>([])
-  const [selectedRegion, setSelectedRegion] = useState<string>('')
   const [annotationDialogOpen, setAnnotationDialogOpen] = useState(false)
   const [editingAnnotation, setEditingAnnotation] = useState<Annotation | null>(null)
   const [newAnnotation, setNewAnnotation] = useState({
@@ -100,7 +89,6 @@ export default function AnnotationTools({
   const [expanded, setExpanded] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   // Load existing annotations
   useEffect(() => {
@@ -143,7 +131,7 @@ export default function AnnotationTools({
     setNewAnnotation({
       text: '',
       type: 'note',
-      region_id: regionId || selectedRegion
+      region_id: regionId || ''
     })
     setEditingAnnotation(null)
     setAnnotationDialogOpen(true)
@@ -170,7 +158,7 @@ export default function AnnotationTools({
         annotation_type: newAnnotation.type
       }
 
-      const response = await fetch(`/api/v1/interpretability/${analysisId}/annotate`, {
+      const response = await fetch(`/api/interpretability/${analysisId}/annotate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

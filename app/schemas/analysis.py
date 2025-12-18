@@ -63,12 +63,32 @@ class AnomalyAnalysisResponse(BaseModel):
     
     id: int
     drawing_id: int
-    anomaly_score: float = Field(..., description="Raw anomaly score")
+    anomaly_score: float = Field(..., description="Overall reconstruction loss on full 832-dimensional embedding")
     normalized_score: float = Field(
         ..., 
         ge=0.0, 
         le=100.0, 
         description="Normalized anomaly score (0-100 scale: 0=no anomaly, 100=maximal anomaly)"
+    )
+    visual_anomaly_score: Optional[float] = Field(
+        None, 
+        description="Visual component reconstruction loss (dims 0-767)"
+    )
+    subject_anomaly_score: Optional[float] = Field(
+        None, 
+        description="Subject component reconstruction loss (dims 768-831)"
+    )
+    anomaly_attribution: Optional[str] = Field(
+        None, 
+        description="Primary anomaly source: 'visual', 'subject', 'both', or 'age'"
+    )
+    analysis_type: str = Field(
+        "subject_aware", 
+        description="Type of analysis performed"
+    )
+    subject_category: Optional[str] = Field(
+        None, 
+        description="Subject category used in analysis"
     )
     is_anomaly: bool = Field(..., description="Whether the drawing is flagged as anomalous")
     confidence: float = Field(

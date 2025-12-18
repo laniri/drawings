@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Button,
@@ -18,7 +18,6 @@ import {
   Checkbox,
   RadioGroup,
   Radio,
-  TextField,
   Alert,
   CircularProgress,
   Chip,
@@ -36,7 +35,6 @@ import {
   Code as JsonIcon,
   Web as HtmlIcon,
   Settings as SettingsIcon,
-  Share as ShareIcon,
   History as HistoryIcon,
   CheckCircle as CheckIcon
 } from '@mui/icons-material'
@@ -140,12 +138,7 @@ export default function ExportToolbar({
     setAnchorEl(null)
   }
 
-  const handleFormatSelect = (format: ExportOptions['format']) => {
-    setSelectedFormat(format)
-    setExportOptions(prev => ({ ...prev, format }))
-    setExportDialogOpen(true)
-    handleMenuClose()
-  }
+
 
   const handleQuickExport = async (format: ExportOptions['format']) => {
     const quickOptions: ExportOptions = {
@@ -171,7 +164,7 @@ export default function ExportToolbar({
       setExportError(null)
       setExportSuccess(null)
 
-      const response = await fetch(`/api/v1/interpretability/${analysisId}/export`, {
+      const response = await fetch(`/api/interpretability/${analysisId}/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

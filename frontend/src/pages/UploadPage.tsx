@@ -25,6 +25,7 @@ import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { useAppStore } from '../store/useAppStore'
 import { useNavigate } from 'react-router-dom'
+import SubjectCategorySelect from '../components/SubjectCategorySelect'
 
 // Validation schema
 const uploadSchema = z.object({
@@ -282,18 +283,11 @@ const UploadPage: React.FC = () => {
                 )}
               />
 
-              <Controller
-                name="subject"
+              <SubjectCategorySelect
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Drawing Subject (optional)"
-                    fullWidth
-                    margin="normal"
-                    placeholder="e.g., person, house, tree, family"
-                  />
-                )}
+                name="subject"
+                label="Drawing Subject (optional)"
+                showSearch={true}
               />
 
               <Controller

@@ -11,7 +11,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **Drawing Upload & Analysis**: Support for PNG, JPEG, and BMP formats with metadata
 - **Age-Based Modeling**: Separate models trained for different age groups
 - **Anomaly Detection**: Reconstruction loss-based scoring with configurable thresholds
-- **Interactive Interpretability**: Advanced saliency analysis with hoverable regions, zoom/pan, and detailed explanations
+- **Interactive Interpretability**: Simplified gradient-based saliency analysis with hoverable regions, zoom/pan, and detailed explanations guaranteed for all drawings
 - **Web Interface**: Modern React frontend with Material-UI components and real-time configuration management
 - **REST API**: FastAPI backend with automatic OpenAPI documentation
 - **Enhanced Training**: Offline training system with verbose progress indicators and comprehensive model management
@@ -31,4 +31,4 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **Age-Group Stratification**: Models trained separately for different age ranges
 - **Threshold Management**: Configurable percentile-based anomaly thresholds with real-time updates
 - **Dynamic Recalculation**: Optimized threshold updates using existing analysis results
-- **Interpretability Engine**: Generates visual explanations using saliency maps
+- **Interpretability Engine**: Generates visual explanations using simplified gradient-based saliency maps with guaranteed availability for all drawings

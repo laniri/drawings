@@ -269,7 +269,7 @@
   - Create GET /api/interpretability/examples/{age_group} for comparison examples
   - _Requirements: 9.1, 9.2, 9.3, 10.3, 11.1_
 
-- [ ] 10.8 Enhance interpretability engine with interactive features
+- [x] 10.8 Enhance interpretability engine with interactive features
   - Add region-specific explanation generation for click interactions
   - Implement confidence scoring for interpretability results
   - Create comparative analysis utilities for normal vs anomalous examples
@@ -322,7 +322,7 @@
   - Add adaptive explanation complexity based on user expertise level
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 11.9 Implement comparative analysis and export features
+- [x] 11.9 Implement comparative analysis and export features
   - Create ComparativeAnalysisPanel with side-by-side normal vs anomalous examples
   - Add ExportToolbar with multiple format options (PDF, PNG, CSV)
   - Implement annotation tools for user notes and context
@@ -354,7 +354,7 @@
   - Implement file storage organization and cleanup
   - _Requirements: 1.4, 1.5_
 
-- [ ] 12.4 Write property test for error handling robustness
+- [x] 12.4 Write property test for error handling robustness
   - **Property 22: Error Handling Robustness**
   - **Validates: Requirements 2.5, 4.5, 8.1, 8.2, 8.3, 8.5**
 
@@ -393,3 +393,251 @@
 
 - [x] 14. Final Checkpoint - Complete system validation
   - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 15. Implement subject-aware architecture foundation
+- [x] 15.1 Add subject category enumeration and validation
+  - Create SubjectCategory enum with all 50+ supported categories
+  - Add "unspecified" as default category
+  - Implement subject category validation in API schemas
+  - _Requirements: 1.4, 1.7_
+
+- [x] 15.2 Update database models for subject-aware architecture
+  - Add embedding_type, visual_component, subject_component columns to DrawingEmbedding
+  - Add supports_subjects, subject_categories, embedding_type columns to AgeGroupModel
+  - Add visual_anomaly_score, subject_anomaly_score, anomaly_attribution, analysis_type columns to AnomalyAnalysis
+  - Create Alembic migration for schema changes
+  - _Requirements: 1.4, 2.4, 4.6_
+
+- [x] 15.3 Write property test for subject category validation
+  - **Property 28: Subject Category Validation**
+  - **Validates: Requirements 1.4**
+
+- [x] 16. Implement hybrid embedding generation
+- [x] 16.1 Create subject encoding utilities
+  - Implement 64-dimensional one-hot encoding for subject categories
+  - Add subject category to index mapping
+  - Create encode_subject_category() function
+  - Handle "unspecified" default category
+  - _Requirements: 2.4, 2.6_
+
+- [x] 16.2 Write property test for subject encoding consistency
+  - **Property 29: Subject Encoding Consistency**
+  - **Validates: Requirements 2.4**
+
+- [x] 16.3 Update embedding service for hybrid embeddings
+  - Modify generate_embedding() to create 832-dimensional hybrid embeddings
+  - Combine visual features (768-dim) with subject encoding (64-dim)
+  - Add separate_embedding_components() function
+  - Update batch_embed() for hybrid embeddings
+  - _Requirements: 2.5, 2.7_
+
+- [x] 16.4 Write property test for hybrid embedding construction
+  - **Property 30: Hybrid Embedding Construction**
+  - **Validates: Requirements 2.5**
+
+- [x] 16.5 Write property test for subject fallback handling
+  - **Property 31: Subject Fallback Handling**
+  - **Validates: Requirements 2.6**
+
+- [x] 16.6 Write property test for hybrid embedding dimensionality
+  - **Property 32: Hybrid Embedding Dimensionality Consistency**
+  - **Validates: Requirements 2.7**
+
+- [x] 16.7 Update embedding serialization for hybrid embeddings
+  - Modify serialization to preserve visual and subject components
+  - Update deserialization to reconstruct hybrid embeddings
+  - Add component separation in storage
+  - _Requirements: 2.9_
+
+- [x] 16.8 Write property test for hybrid embedding serialization
+  - **Property 33: Hybrid Embedding Serialization Round Trip**
+  - **Validates: Requirements 2.9**
+
+- [-] 17. Implement subject-aware model training
+- [x] 17.1 Update dataset preparation for subject stratification
+  - Modify stratify_by_age() to include subject stratification
+  - Implement balanced sampling across age-subject combinations
+  - Add data sufficiency validation for age-subject pairs
+  - Generate warnings for insufficient age-subject data
+  - _Requirements: 3.8, 3.9_
+
+- [x] 17.2 Write property test for subject stratification
+  - **Property 35: Subject Stratification Balance**
+  - **Validates: Requirements 3.8**
+
+- [x] 17.3 Write property test for insufficient data warnings
+  - **Property 36: Insufficient Data Warning Generation**
+  - **Validates: Requirements 3.9**
+
+- [x] 17.4 Update model manager for subject-aware autoencoders
+  - Modify autoencoder architecture to handle 832-dimensional input
+  - Update train_age_group_model() for hybrid embeddings
+  - Add subject_categories metadata to trained models
+  - Ensure all models use unified subject-aware architecture
+  - _Requirements: 3.7, 12.2, 12.4_
+
+- [x] 17.5 Write property test for subject-aware model training
+  - **Property 34: Subject-Aware Model Training**
+  - **Validates: Requirements 3.7**
+
+- [x] 17.6 Write property test for unified architecture
+  - **Property 43: Unified Subject-Aware Architecture**
+  - **Validates: Requirements 12.2, 12.4**
+
+- [x] 18. Implement subject-aware anomaly detection and attribution
+- [x] 18.1 Update anomaly scoring for subject-aware analysis
+  - Modify compute_anomaly_score() to use hybrid embeddings
+  - Calculate overall reconstruction loss on full 832-dimensional embedding
+  - Add component-specific loss calculation (visual: dims 0-767, subject: dims 768-831)
+  - Store visual_anomaly_score and subject_anomaly_score
+  - _Requirements: 4.1, 4.2, 4.3_
+
+- [x] 18.2 Write property test for subject-aware model selection
+  - **Property 37: Subject-Aware Model Selection**
+  - **Validates: Requirements 4.1**
+
+- [x] 18.3 Write property test for subject-aware scoring
+  - **Property 38: Subject-Aware Scoring Influence**
+  - **Validates: Requirements 4.2**
+
+- [x] 18.4 Write property test for subject-missing handling
+  - **Property 39: Subject-Missing Default Handling**
+  - **Validates: Requirements 4.3**
+
+- [x] 18.5 Implement anomaly attribution logic
+  - Create determine_attribution() function
+  - Calculate component-specific thresholds (visual, subject)
+  - Implement attribution decision rules (age, subject, visual, both)
+  - Add cross-age-group comparison for age-related detection
+  - Store anomaly_attribution in analysis results
+  - _Requirements: 4.6_
+
+- [x] 18.6 Write property test for anomaly attribution
+  - **Property 40: Anomaly Attribution Accuracy**
+  - **Validates: Requirements 4.6**
+
+- [x] 19. Update interpretability for subject-aware attribution
+- [x] 19.1 Enhance interpretability engine with attribution context
+  - Update explain_anomaly() to include attribution information
+  - Add explain_subject_aware_anomaly() function
+  - Generate attribution-specific explanations (age vs subject vs visual)
+  - Update saliency map generation to highlight attribution-relevant regions
+  - _Requirements: 6.5, 6.6_
+
+- [x] 19.2 Write property test for subject-aware interpretability
+  - **Property 41: Subject-Aware Interpretability Attribution**
+  - **Validates: Requirements 6.5**
+
+- [x] 19.3 Update comparison service for subject-specific examples
+  - Modify get_comparison_examples() to filter by age AND subject
+  - Implement fallback when age-subject examples unavailable
+  - Add subject-specific context to comparisons
+  - _Requirements: 6.7, 6.8_
+
+- [x] 19.4 Write property test for subject-specific comparisons
+  - **Property 42: Subject-Specific Comparison Provision**
+  - **Validates: Requirements 6.7**
+
+- [x] 20. Update API endpoints for subject-aware features
+- [x] 20.1 Update analysis endpoints with subject-aware responses
+  - Add visual_anomaly_score, subject_anomaly_score to AnomalyAnalysisResponse
+  - Add anomaly_attribution field
+  - Add subject_category field
+  - Update analysis_type to "subject_aware"
+  - _Requirements: 4.1, 4.6_
+
+- [x] 20.2 Update interpretability endpoints for attribution
+  - Add attribution information to interactive interpretability
+  - Include subject-specific context in explanations
+  - Update comparison examples endpoint to support subject filtering
+  - Add GET /api/interpretability/{analysis_id}/attribution endpoint
+  - _Requirements: 6.5, 6.7_
+
+- [x] 20.3 Update configuration endpoints for subject management
+  - Add endpoint to list supported subject categories
+  - Add endpoint to get subject-specific statistics
+  - Update model status to show subject-aware capabilities
+  - _Requirements: 1.4, 12.4_
+
+- [x] 21. Update frontend for subject-aware features
+- [x] 21.1 Add subject category selection to upload interface
+  - Create SubjectCategorySelect component with all 50+ categories
+  - Add visual examples/icons for common subjects
+  - Implement search/filter for subject selection
+  - Make subject optional with "unspecified" default
+  - _Requirements: 7.2, 7.9_
+
+- [x] 21.2 Update analysis results display for attribution
+  - Show anomaly attribution (age, subject, visual, both)
+  - Display component-specific scores (visual, subject)
+  - Add subject-specific context to explanations
+  - Update comparison examples to show subject-matched examples
+  - _Requirements: 7.5, 7.8_
+
+- [x] 21.3 Add subject filtering to analysis history
+  - Add subject filter to dashboard and history views
+  - Group results by subject category
+  - Show subject-specific statistics
+  - _Requirements: 7.8_
+
+- [x] 21.4 Update configuration interface for subject management
+  - Add subject category management section
+  - Show subject-specific model statistics
+  - Display data sufficiency warnings per age-subject combination
+  - Add toggle for subject-aware analysis (always enabled)
+  - _Requirements: 7.9, 12.4_
+
+- [ ] 22. Database migration and model retraining
+- [x] 22.1 Create database migration script
+  - Generate Alembic migration for all schema changes
+  - Add data migration for existing records (set subject to "unspecified")
+  - Update existing embeddings to hybrid format (pad with unspecified encoding)
+  - Migrate existing analyses to subject-aware format
+  - _Requirements: 12.1_
+
+- [x] 22.2 Retrain all age-group models with subject-aware architecture
+  - Regenerate all embeddings as hybrid embeddings
+  - Retrain autoencoders on 832-dimensional hybrid embeddings
+  - Calculate component-specific thresholds
+  - Validate cross-subject performance
+  - Deploy new models to production
+  - _Requirements: 12.2, 12.3_
+
+- [x] 22.3 Update training scripts for subject-aware workflow
+  - Modify train_models.py for hybrid embeddings
+  - Update train_models_offline.py for subject stratification
+  - Add subject-aware validation to training pipeline
+  - Update training reports to include subject statistics
+  - _Requirements: 12.2_
+
+- [ ] 23. Integration testing and validation
+- [ ] 23.1 Write end-to-end tests for subject-aware workflow
+  - Test upload with subject category
+  - Test hybrid embedding generation
+  - Test subject-aware anomaly detection
+  - Test attribution accuracy
+  - Test subject-specific comparisons
+  - _Requirements: All subject-aware requirements_
+
+- [ ] 23.2 Validate subject-aware system performance
+  - Compare subject-aware vs age-only detection accuracy
+  - Validate attribution correctness with expert labels
+  - Test data sufficiency warnings
+  - Verify cross-subject model performance
+  - _Requirements: 3.10, 4.6_
+
+- [ ] 23.3 Update documentation for subject-aware features
+  - Document subject category system
+  - Explain hybrid embedding architecture
+  - Describe anomaly attribution logic
+  - Add subject-aware API examples
+  - Update user guides for subject selection
+  - _Requirements: All subject-aware requirements_
+
+- [ ] 24. Final subject-aware system checkpoint
+  - Ensure all subject-aware tests pass
+  - Validate hybrid embeddings are generated correctly
+  - Verify attribution logic works as expected
+  - Confirm subject-specific comparisons are accurate
+  - Test with diverse subject categories
+  - Ask the user if questions arise

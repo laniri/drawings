@@ -21,7 +21,7 @@ import {
 import {
   Warning,
   CheckCircle,
-  Error,
+  Error as ErrorIcon,
   Visibility,
   Compare,
   Analytics,
@@ -34,6 +34,10 @@ import {
   InteractiveInterpretabilityViewer,
   ExplanationLevelToggle,
   ConfidenceIndicator,
+  ComparativeAnalysisPanel,
+  ExportToolbar,
+  AnnotationTools,
+  HistoricalInterpretationTracker,
 } from '../components/interpretability'
 
 interface Drawing {
@@ -49,6 +53,11 @@ interface AnalysisResult {
   id: number
   anomaly_score: number
   normalized_score: number
+  visual_anomaly_score?: number
+  subject_anomaly_score?: number
+  anomaly_attribution?: string
+  analysis_type: string
+  subject_category?: string
   is_anomaly: boolean
   confidence: number
   age_group: string
@@ -138,7 +147,7 @@ const AnalysisPage: React.FC = () => {
 
   const getAnomalyStatusIcon = (isAnomaly: boolean, confidence: number) => {
     if (!isAnomaly) return <CheckCircle />
-    if (confidence > 0.8) return <Error />
+    if (confidence > 0.8) return <ErrorIcon />
     return <Warning />
   }
 
@@ -231,6 +240,11 @@ const AnalysisPage: React.FC = () => {
                   Subject: {drawing.subject}
                 </Typography>
               )}
+              {analysis.subject_category && analysis.subject_category !== drawing.subject && (
+                <Typography variant="body2" color="text.secondary">
+                  Analysis Subject: {analysis.subject_category}
+                </Typography>
+              )}
               {drawing.expert_label && (
                 <Chip
                   label={`Expert: ${drawing.expert_label}`}
@@ -262,7 +276,7 @@ const AnalysisPage: React.FC = () => {
                     {analysis.anomaly_score.toFixed(3)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Anomaly Score
+                    Overall Score
                   </Typography>
                 </Box>
               </Grid>
@@ -298,10 +312,93 @@ const AnalysisPage: React.FC = () => {
               </Grid>
             </Grid>
 
+            {/* Subject-Aware Analysis Details */}
+            {analysis.analysis_type === 'subject_aware' && (
+              <Box mb={3}>
+                <Typography variant="h6" gutterBottom>
+                  Subject-Aware Analysis Details
+                </Typography>
+                <Grid container spacing={2}>
+                  {analysis.visual_anomaly_score !== undefined && (
+                    <Grid item xs={6} sm={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h5" color="info.main">
+                          {analysis.visual_anomaly_score.toFixed(3)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Visual Score
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                  {analysis.subject_anomaly_score !== undefined && (
+                    <Grid item xs={6} sm={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h5" color="warning.main">
+                          {analysis.subject_anomaly_score.toFixed(3)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Subject Score
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                  {analysis.anomaly_attribution && (
+                    <Grid item xs={6} sm={3}>
+                      <Box textAlign="center">
+                        <Chip
+                          label={analysis.anomaly_attribution.charAt(0).toUpperCase() + analysis.anomaly_attribution.slice(1)}
+                          color={
+                            analysis.anomaly_attribution === 'visual' ? 'info' :
+                            analysis.anomaly_attribution === 'subject' ? 'warning' :
+                            analysis.anomaly_attribution === 'both' ? 'error' :
+                            'default'
+                          }
+                          variant="filled"
+                        />
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          Primary Attribution
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                  {analysis.subject_category && (
+                    <Grid item xs={6} sm={3}>
+                      <Box textAlign="center">
+                        <Typography variant="body1" fontWeight="bold">
+                          {analysis.subject_category}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Subject Category
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+                
+                {/* Attribution Explanation */}
+                {analysis.anomaly_attribution && (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    <Typography variant="body2">
+                      <strong>Attribution Explanation:</strong>{' '}
+                      {analysis.anomaly_attribution === 'visual' && 
+                        'The anomaly is primarily in the visual features of the drawing (shapes, lines, spatial relationships).'}
+                      {analysis.anomaly_attribution === 'subject' && 
+                        'The anomaly is primarily related to the subject category representation.'}
+                      {analysis.anomaly_attribution === 'both' && 
+                        'The anomaly involves both visual features and subject representation.'}
+                      {analysis.anomaly_attribution === 'age' && 
+                        'The drawing appears more typical for a different age group.'}
+                    </Typography>
+                  </Alert>
+                )}
+              </Box>
+            )}
+
             <Divider sx={{ my: 2 }} />
 
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Method: {analysis.method_used} | Analyzed: {new Date(analysis.analysis_timestamp).toLocaleString()}
+              Method: {analysis.method_used} | Type: {analysis.analysis_type} | Analyzed: {new Date(analysis.analysis_timestamp).toLocaleString()}
             </Typography>
 
             <Button
@@ -324,12 +421,24 @@ const AnalysisPage: React.FC = () => {
                 Interpretability Analysis
               </Typography>
 
-              <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-                <Tab label="Interactive Analysis" icon={<Analytics />} />
-                <Tab label="Saliency Map" icon={<Visibility />} />
-                <Tab label="Comparison" icon={<Compare />} />
-                <Tab label="Confidence" icon={<TrendingUp />} />
-              </Tabs>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+                  <Tab label="Interactive Analysis" icon={<Analytics />} />
+                  <Tab label="Saliency Map" icon={<Visibility />} />
+                  <Tab label="Comparison" icon={<Compare />} />
+                  <Tab label="Confidence" icon={<TrendingUp />} />
+                  <Tab label="History" icon={<TrendingUp />} />
+                  <Tab label="Annotations" icon={<Analytics />} />
+                </Tabs>
+                
+                <ExportToolbar
+                  analysisId={analysis.id}
+                  drawingFilename={drawing.filename}
+                  onExportComplete={(result) => {
+                    console.log('Export completed:', result)
+                  }}
+                />
+              </Box>
 
               {activeTab === 0 && (
                 <Box sx={{ mt: 3 }}>
@@ -484,12 +593,17 @@ const AnalysisPage: React.FC = () => {
 
               {activeTab === 2 && (
                 <Box sx={{ mt: 3 }}>
-                  <Alert severity="info">
-                    <Typography variant="body2">
-                      Comparison with normal examples from the same age group would be displayed here.
-                      This feature requires a database of normal examples for comparison.
-                    </Typography>
-                  </Alert>
+                  <ComparativeAnalysisPanel
+                    currentAnalysis={{
+                      ...analysis,
+                      drawing_id: drawing.id
+                    }}
+                    currentDrawing={drawing}
+                    onExampleSelect={(exampleId) => {
+                      // Navigate to the example analysis
+                      window.open(`/analysis/${exampleId}`, '_blank')
+                    }}
+                  />
                 </Box>
               )}
 
@@ -498,6 +612,42 @@ const AnalysisPage: React.FC = () => {
                   <ConfidenceIndicator
                     analysisId={analysis.id}
                     showTechnicalDetails={true}
+                  />
+                </Box>
+              )}
+
+              {activeTab === 4 && (
+                <Box sx={{ mt: 3 }}>
+                  <HistoricalInterpretationTracker
+                    drawingId={drawing.id}
+                    currentAnalysis={analysis}
+                    onAnalysisSelect={(analysisId) => {
+                      // Navigate to the historical analysis
+                      window.location.href = `/analysis/${analysisId}`
+                    }}
+                  />
+                </Box>
+              )}
+
+              {activeTab === 5 && (
+                <Box sx={{ mt: 3 }}>
+                  <AnnotationTools
+                    analysisId={analysis.id}
+                    regions={interpretability?.importance_regions?.map((region, index) => ({
+                      region_id: `region_${index + 1}`,
+                      bounding_box: [region.x, region.y, region.x + region.width, region.y + region.height],
+                      spatial_location: `Region ${index + 1}`,
+                      importance_score: region.importance
+                    })) || []}
+                    onAnnotationAdd={(annotation) => {
+                      console.log('Annotation added:', annotation)
+                    }}
+                    onAnnotationUpdate={(annotation) => {
+                      console.log('Annotation updated:', annotation)
+                    }}
+                    onAnnotationDelete={(annotationId) => {
+                      console.log('Annotation deleted:', annotationId)
+                    }}
                   />
                 </Box>
               )}

@@ -502,6 +502,199 @@ class SaliencyMapGenerator:
             logger.error(f"Saliency map generation failed: {str(e)}")
             raise SaliencyGenerationError(f"Generation failed: {str(e)}")
     
+    def generate_attribution_aware_saliency(self,
+                                          image: Union[Image.Image, np.ndarray],
+                                          reconstruction_loss: float,
+                                          attribution_info: Dict,
+                                          method: str = "combined",
+                                          save_path: Optional[str] = None) -> Dict:
+        """
+        Generate saliency map with attribution-aware highlighting.
+        
+        Args:
+            image: Input image (PIL Image or numpy array)
+            reconstruction_loss: Reconstruction loss from autoencoder
+            attribution_info: Attribution information including component scores
+            method: Saliency method to use
+            save_path: Optional path to save the saliency map
+            
+        Returns:
+            Dictionary containing attribution-aware saliency map and metadata
+        """
+        try:
+            # Generate base saliency map
+            base_result = self.generate_saliency_map(
+                image, reconstruction_loss, method, save_path=None
+            )
+            
+            # Get attribution information
+            attribution = attribution_info.get("anomaly_attribution", "unknown")
+            visual_score = attribution_info.get("visual_anomaly_score", 0)
+            subject_score = attribution_info.get("subject_anomaly_score", 0)
+            
+            # Modify saliency map based on attribution
+            saliency_map = base_result["saliency_map"]
+            
+            if attribution == "visual":
+                # Enhance visual regions - boost overall saliency
+                enhanced_saliency = saliency_map * 1.2
+                enhanced_saliency = np.clip(enhanced_saliency, 0, 1)
+                attribution_note = "Enhanced highlighting for visual anomalies"
+                
+            elif attribution == "subject":
+                # Focus on central regions where subject is typically depicted
+                center_mask = self._create_center_focus_mask(saliency_map.shape)
+                enhanced_saliency = saliency_map * (1 + 0.3 * center_mask)
+                enhanced_saliency = np.clip(enhanced_saliency, 0, 1)
+                attribution_note = "Enhanced highlighting for subject-specific anomalies"
+                
+            elif attribution == "both":
+                # Balanced enhancement
+                center_mask = self._create_center_focus_mask(saliency_map.shape)
+                enhanced_saliency = saliency_map * (1.1 + 0.2 * center_mask)
+                enhanced_saliency = np.clip(enhanced_saliency, 0, 1)
+                attribution_note = "Balanced highlighting for combined anomalies"
+                
+            else:
+                # Default - no modification
+                enhanced_saliency = saliency_map
+                attribution_note = "Standard saliency highlighting"
+            
+            # Create attribution-aware visualization
+            visualization_path = None
+            if save_path:
+                visualization_path = self._create_attribution_visualization(
+                    image, enhanced_saliency, attribution_info, save_path
+                )
+            
+            # Combine results
+            result = base_result.copy()
+            result.update({
+                "attribution_enhanced_map": enhanced_saliency,
+                "attribution_type": attribution,
+                "attribution_note": attribution_note,
+                "component_scores": {
+                    "visual": float(visual_score),
+                    "subject": float(subject_score)
+                },
+                "attribution_visualization_path": visualization_path
+            })
+            
+            logger.info(f"Generated attribution-aware saliency map for {attribution} anomaly")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Attribution-aware saliency generation failed: {str(e)}")
+            raise SaliencyGenerationError(f"Attribution-aware generation failed: {str(e)}")
+    
+    def _create_center_focus_mask(self, shape: Tuple[int, int]) -> np.ndarray:
+        """Create a mask that emphasizes central regions."""
+        height, width = shape
+        center_y, center_x = height // 2, width // 2
+        
+        # Create distance from center
+        y, x = np.ogrid[:height, :width]
+        distances = np.sqrt((y - center_y)**2 + (x - center_x)**2)
+        
+        # Normalize distances and invert (closer to center = higher value)
+        max_distance = np.sqrt(center_y**2 + center_x**2)
+        center_mask = 1 - (distances / max_distance)
+        
+        # Apply gaussian-like falloff
+        center_mask = np.exp(-2 * (distances / max_distance)**2)
+        
+        return center_mask
+    
+    def _create_attribution_visualization(self,
+                                        original_image: Union[Image.Image, np.ndarray],
+                                        saliency_map: np.ndarray,
+                                        attribution_info: Dict,
+                                        save_path: str) -> str:
+        """
+        Create attribution-aware saliency visualization.
+        
+        Args:
+            original_image: Original input image
+            saliency_map: Attribution-enhanced saliency map
+            attribution_info: Attribution information
+            save_path: Path to save visualization
+            
+        Returns:
+            Path to saved visualization
+        """
+        try:
+            # Convert image to PIL if needed
+            if isinstance(original_image, np.ndarray):
+                if original_image.dtype != np.uint8:
+                    original_image = (original_image * 255).astype(np.uint8)
+                original_image = Image.fromarray(original_image)
+            
+            # Ensure RGB
+            if original_image.mode != 'RGB':
+                original_image = original_image.convert('RGB')
+            
+            # Resize saliency map to match image size
+            image_size = original_image.size  # (W, H)
+            saliency_resized = cv2.resize(
+                saliency_map, 
+                image_size, 
+                interpolation=cv2.INTER_CUBIC
+            )
+            
+            # Normalize saliency map
+            if saliency_resized.max() > 0:
+                saliency_resized = saliency_resized / saliency_resized.max()
+            
+            # Choose colormap based on attribution
+            attribution = attribution_info.get("anomaly_attribution", "unknown")
+            if attribution == "visual":
+                colormap = cm.plasma  # Purple-pink for visual
+            elif attribution == "subject":
+                colormap = cm.viridis  # Green-blue for subject
+            elif attribution == "both":
+                colormap = cm.inferno  # Red-orange for both
+            else:
+                colormap = cm.jet  # Default rainbow
+            
+            # Create heatmap
+            heatmap = colormap(saliency_resized)[:, :, :3]  # Remove alpha channel
+            heatmap = (heatmap * 255).astype(np.uint8)
+            
+            # Convert original image to numpy
+            original_np = np.array(original_image)
+            
+            # Create overlay
+            alpha = 0.4
+            overlay = (alpha * heatmap + (1 - alpha) * original_np).astype(np.uint8)
+            
+            # Add attribution text overlay
+            overlay_image = Image.fromarray(overlay)
+            draw = ImageDraw.Draw(overlay_image)
+            
+            # Add attribution label
+            attribution_text = f"Attribution: {attribution}"
+            try:
+                font = ImageFont.truetype("arial.ttf", 16)
+            except:
+                font = ImageFont.load_default()
+            
+            # Draw text background
+            text_bbox = draw.textbbox((10, 10), attribution_text, font=font)
+            draw.rectangle(text_bbox, fill=(0, 0, 0, 128))
+            
+            # Draw text
+            draw.text((10, 10), attribution_text, fill=(255, 255, 255), font=font)
+            
+            # Save visualization
+            overlay_image.save(save_path)
+            
+            logger.info(f"Attribution-aware saliency visualization saved to {save_path}")
+            return save_path
+            
+        except Exception as e:
+            logger.error(f"Failed to create attribution visualization: {str(e)}")
+            raise SaliencyGenerationError(f"Attribution visualization creation failed: {str(e)}")
+    
     def _generate_attention_saliency(self, 
                                    image_tensor: torch.Tensor, 
                                    model: ViTModel) -> torch.Tensor:
@@ -968,7 +1161,8 @@ class ExplanationGenerator:
                            normalized_score: float,
                            saliency_result: Dict,
                            age_group: str,
-                           drawing_metadata: Optional[Dict] = None) -> Dict:
+                           drawing_metadata: Optional[Dict] = None,
+                           attribution_info: Optional[Dict] = None) -> Dict:
         """
         Generate comprehensive explanation for anomaly detection result.
         
@@ -978,6 +1172,7 @@ class ExplanationGenerator:
             saliency_result: Result from saliency map generation
             age_group: Age group used for comparison
             drawing_metadata: Optional metadata about the drawing
+            attribution_info: Optional subject-aware attribution information
             
         Returns:
             Dictionary containing structured explanation
@@ -991,14 +1186,14 @@ class ExplanationGenerator:
                 saliency_result["saliency_map"]
             )
             
-            # Generate main explanation
+            # Generate main explanation with attribution context
             main_explanation = self._generate_main_explanation(
-                severity, important_regions, age_group
+                severity, important_regions, age_group, attribution_info
             )
             
-            # Generate detailed analysis
+            # Generate detailed analysis with attribution
             detailed_analysis = self._generate_detailed_analysis(
-                important_regions, saliency_result
+                important_regions, saliency_result, attribution_info
             )
             
             # Generate recommendations
@@ -1013,6 +1208,7 @@ class ExplanationGenerator:
                 "important_regions": important_regions,
                 "detailed_analysis": detailed_analysis,
                 "recommendations": recommendations,
+                "attribution_info": attribution_info,
                 "technical_details": {
                     "saliency_method": saliency_result["method"],
                     "max_importance": saliency_result["max_importance"],
@@ -1053,10 +1249,27 @@ class ExplanationGenerator:
     def _generate_main_explanation(self, 
                                  severity: str, 
                                  important_regions: List[Dict],
-                                 age_group: str) -> str:
-        """Generate the main explanation text."""
+                                 age_group: str,
+                                 attribution_info: Optional[Dict] = None) -> str:
+        """Generate the main explanation text with attribution context."""
+        # Include attribution context in explanation
+        attribution_context = ""
+        if attribution_info:
+            attribution = attribution_info.get("anomaly_attribution", "unknown")
+            subject = attribution_info.get("subject_category", "unspecified")
+            
+            if attribution == "subject":
+                attribution_context = f" The anomaly appears to be primarily related to how the {subject} is depicted."
+            elif attribution == "visual":
+                attribution_context = f" The anomaly appears to be primarily related to visual characteristics rather than subject-specific patterns."
+            elif attribution == "age":
+                attribution_context = f" The anomaly appears to be primarily related to age-inappropriate patterns."
+            elif attribution == "both":
+                attribution_context = f" The anomaly appears to involve both subject-specific and visual characteristics."
+        
         if not important_regions:
-            return f"This drawing shows {severity} deviation from typical patterns for age group {age_group}, but specific regions of concern could not be identified."
+            base_explanation = f"This drawing shows {severity} deviation from typical patterns for age group {age_group}, but specific regions of concern could not be identified."
+            return base_explanation + attribution_context
         
         # Get template based on severity
         template_key = severity if severity in ["high_anomaly", "medium_anomaly", "low_anomaly"] else "low_anomaly"
@@ -1085,11 +1298,15 @@ class ExplanationGenerator:
             
             explanation += f" {region_explanation}"
         
+        # Add attribution context
+        explanation += attribution_context
+        
         return explanation
     
     def _generate_detailed_analysis(self, 
                                   important_regions: List[Dict],
-                                  saliency_result: Dict) -> List[str]:
+                                  saliency_result: Dict,
+                                  attribution_info: Optional[Dict] = None) -> List[str]:
         """Generate detailed analysis points."""
         analysis_points = []
         
@@ -1117,6 +1334,21 @@ class ExplanationGenerator:
             f"Overall attention distribution: maximum focus at {max_importance:.1f}%, "
             f"average attention at {mean_importance:.1f}%."
         )
+        
+        # Add attribution-specific analysis
+        if attribution_info:
+            attribution = attribution_info.get("anomaly_attribution", "unknown")
+            visual_score = attribution_info.get("visual_anomaly_score")
+            subject_score = attribution_info.get("subject_anomaly_score")
+            
+            if visual_score is not None and subject_score is not None:
+                analysis_points.append(
+                    f"Component analysis: visual anomaly score {visual_score:.3f}, "
+                    f"subject anomaly score {subject_score:.3f}."
+                )
+            
+            if attribution != "unknown":
+                analysis_points.append(f"Primary anomaly attribution: {attribution}.")
         
         return analysis_points
     
@@ -1190,6 +1422,197 @@ class ExplanationGenerator:
                 insights["expert_comparison"] = "AI detected anomalies in expert-labeled normal drawing."
         
         return insights
+    
+    def explain_subject_aware_anomaly(self, 
+                                    attribution_info: Dict,
+                                    age_group: str,
+                                    subject: str,
+                                    anomaly_score: float,
+                                    normalized_score: float) -> Dict:
+        """
+        Generate subject-aware anomaly explanation with detailed attribution.
+        
+        Args:
+            attribution_info: Dictionary containing attribution details
+            age_group: Age group used for comparison
+            subject: Subject category of the drawing
+            anomaly_score: Raw anomaly score
+            normalized_score: Normalized anomaly score
+            
+        Returns:
+            Dictionary containing detailed subject-aware explanation
+        """
+        try:
+            attribution = attribution_info.get("anomaly_attribution", "unknown")
+            visual_score = attribution_info.get("visual_anomaly_score", 0)
+            subject_score = attribution_info.get("subject_anomaly_score", 0)
+            
+            # Generate attribution-specific explanation
+            explanation = {
+                "attribution_type": attribution,
+                "subject_category": subject,
+                "age_group": age_group,
+                "component_scores": {
+                    "visual": float(visual_score),
+                    "subject": float(subject_score),
+                    "overall": float(anomaly_score)
+                },
+                "normalized_score": float(normalized_score)
+            }
+            
+            # Generate detailed explanation based on attribution
+            if attribution == "subject":
+                explanation["primary_explanation"] = (
+                    f"This drawing shows unusual patterns in how the {subject} is depicted, "
+                    f"which differs from typical {subject} representations by children in the {age_group} age group."
+                )
+                explanation["secondary_explanation"] = (
+                    f"The visual characteristics are relatively normal, but the subject-specific "
+                    f"patterns deviate from expected norms for {subject} drawings."
+                )
+                
+            elif attribution == "visual":
+                explanation["primary_explanation"] = (
+                    f"This drawing shows unusual visual characteristics that are not typical "
+                    f"for the {age_group} age group, regardless of the {subject} being drawn."
+                )
+                explanation["secondary_explanation"] = (
+                    f"The subject-specific patterns for {subject} are relatively normal, "
+                    f"but the overall visual execution shows deviations."
+                )
+                
+            elif attribution == "age":
+                explanation["primary_explanation"] = (
+                    f"This drawing appears more appropriate for a different age group than {age_group}, "
+                    f"suggesting potential developmental considerations."
+                )
+                explanation["secondary_explanation"] = (
+                    f"The {subject} representation and visual characteristics would be more "
+                    f"typical for children of a different age."
+                )
+                
+            elif attribution == "both":
+                explanation["primary_explanation"] = (
+                    f"This drawing shows anomalies in both how the {subject} is depicted "
+                    f"and in the overall visual characteristics for the {age_group} age group."
+                )
+                explanation["secondary_explanation"] = (
+                    f"Both subject-specific patterns and general visual execution "
+                    f"deviate from expected norms."
+                )
+                
+            else:
+                explanation["primary_explanation"] = (
+                    f"This drawing shows deviations from typical patterns for {age_group} "
+                    f"children drawing {subject}, but the specific source is unclear."
+                )
+                explanation["secondary_explanation"] = (
+                    f"Further analysis may be needed to determine the primary source of the anomaly."
+                )
+            
+            # Add contextual information
+            explanation["contextual_notes"] = self._generate_contextual_notes(
+                attribution, subject, age_group, normalized_score
+            )
+            
+            # Add recommendations based on attribution
+            explanation["attribution_recommendations"] = self._generate_attribution_recommendations(
+                attribution, subject, age_group
+            )
+            
+            return explanation
+            
+        except Exception as e:
+            logger.error(f"Subject-aware anomaly explanation failed: {str(e)}")
+            return {
+                "error": str(e),
+                "attribution_type": "unknown",
+                "subject_category": subject,
+                "age_group": age_group
+            }
+    
+    def _generate_contextual_notes(self, 
+                                 attribution: str, 
+                                 subject: str, 
+                                 age_group: str,
+                                 normalized_score: float) -> List[str]:
+        """Generate contextual notes based on attribution type."""
+        notes = []
+        
+        if attribution == "subject":
+            notes.append(f"Subject-specific anomalies in {subject} drawings may indicate:")
+            notes.append("- Different understanding or representation of the subject")
+            notes.append("- Creative or unconventional approach to depicting the subject")
+            notes.append("- Possible developmental variations in subject comprehension")
+            
+        elif attribution == "visual":
+            notes.append(f"Visual anomalies in {age_group} drawings may indicate:")
+            notes.append("- Motor skill variations or developmental differences")
+            notes.append("- Different artistic style or approach")
+            notes.append("- Possible attention or execution differences")
+            
+        elif attribution == "age":
+            notes.append(f"Age-related anomalies may indicate:")
+            notes.append("- Advanced or delayed developmental patterns")
+            notes.append("- Different exposure or experience levels")
+            notes.append("- Individual variation in developmental timeline")
+            
+        elif attribution == "both":
+            notes.append("Combined anomalies may indicate:")
+            notes.append("- Multiple developmental factors at play")
+            notes.append("- Complex interaction between subject understanding and execution")
+            notes.append("- Need for comprehensive evaluation")
+        
+        # Add severity-based notes
+        if normalized_score > 0.8:
+            notes.append("High anomaly score suggests significant deviation requiring attention.")
+        elif normalized_score > 0.6:
+            notes.append("Moderate anomaly score suggests monitoring and potential follow-up.")
+        else:
+            notes.append("Lower anomaly score suggests minor variation within acceptable range.")
+        
+        return notes
+    
+    def _generate_attribution_recommendations(self, 
+                                           attribution: str, 
+                                           subject: str, 
+                                           age_group: str) -> List[str]:
+        """Generate recommendations based on attribution type."""
+        recommendations = []
+        
+        if attribution == "subject":
+            recommendations.extend([
+                f"Collect additional {subject} drawings to confirm pattern",
+                f"Compare with other subjects to isolate subject-specific effects",
+                f"Consider child's familiarity and experience with {subject}",
+                "Evaluate subject comprehension and representation skills"
+            ])
+            
+        elif attribution == "visual":
+            recommendations.extend([
+                "Assess motor skills and drawing execution abilities",
+                "Compare visual patterns across different subjects",
+                "Consider environmental factors affecting drawing execution",
+                "Evaluate attention and focus during drawing tasks"
+            ])
+            
+        elif attribution == "age":
+            recommendations.extend([
+                "Compare with age-matched peers in similar contexts",
+                "Consider developmental history and milestones",
+                "Evaluate across multiple drawing sessions",
+                "Consider referral for developmental assessment if pattern persists"
+            ])
+            
+        elif attribution == "both":
+            recommendations.extend([
+                "Conduct comprehensive evaluation across multiple domains",
+                "Collect drawings across various subjects and contexts",
+                "Consider multidisciplinary assessment approach",
+                "Monitor patterns over time with regular follow-up"
+            ])
+        
+        return recommendations
 
 
 class ImportanceRegionDetector:
@@ -1403,6 +1826,79 @@ def get_explanation_generator() -> ExplanationGenerator:
 def get_importance_region_detector() -> ImportanceRegionDetector:
     """Get an importance region detector instance."""
     return ImportanceRegionDetector()
+
+
+def explain_anomaly(drawing_data: Dict, 
+                   result: Dict, 
+                   attribution_info: Optional[Dict] = None) -> Dict:
+    """
+    Generate comprehensive explanation for anomaly detection with attribution context.
+    
+    Args:
+        drawing_data: Dictionary containing drawing information
+        result: Anomaly analysis result
+        attribution_info: Optional subject-aware attribution information
+        
+    Returns:
+        Dictionary containing comprehensive explanation
+    """
+    try:
+        # Extract information from inputs
+        anomaly_score = result.get("anomaly_score", 0)
+        normalized_score = result.get("normalized_score", 0)
+        age_group = result.get("age_group", "unknown")
+        
+        # Generate saliency map
+        saliency_generator = get_saliency_generator()
+        
+        # Use attribution-aware saliency if attribution info is available
+        if attribution_info:
+            saliency_result = saliency_generator.generate_attribution_aware_saliency(
+                image=drawing_data.get("image"),
+                reconstruction_loss=anomaly_score,
+                attribution_info=attribution_info,
+                method="combined"
+            )
+        else:
+            saliency_result = saliency_generator.generate_saliency_map(
+                image=drawing_data.get("image"),
+                reconstruction_loss=anomaly_score,
+                method="combined"
+            )
+        
+        # Generate explanation
+        explanation_generator = get_explanation_generator()
+        explanation = explanation_generator.generate_explanation(
+            anomaly_score=anomaly_score,
+            normalized_score=normalized_score,
+            saliency_result=saliency_result,
+            age_group=age_group,
+            drawing_metadata=drawing_data.get("metadata"),
+            attribution_info=attribution_info
+        )
+        
+        # Add subject-aware explanation if attribution info is available
+        if attribution_info:
+            subject = attribution_info.get("subject_category", "unspecified")
+            subject_aware_explanation = explanation_generator.explain_subject_aware_anomaly(
+                attribution_info=attribution_info,
+                age_group=age_group,
+                subject=subject,
+                anomaly_score=anomaly_score,
+                normalized_score=normalized_score
+            )
+            explanation["subject_aware_explanation"] = subject_aware_explanation
+        
+        return explanation
+        
+    except Exception as e:
+        logger.error(f"Anomaly explanation failed: {str(e)}")
+        return {
+            "error": str(e),
+            "summary": "Unable to generate explanation due to processing error.",
+            "anomaly_score": anomaly_score if 'anomaly_score' in locals() else 0,
+            "normalized_score": normalized_score if 'normalized_score' in locals() else 0
+        }
 
 class SaliencyOverlayGenerator:
     """

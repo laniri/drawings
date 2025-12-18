@@ -8,7 +8,7 @@
 ├── alembic/                      # Database migrations
 ├── tests/                        # Backend test suite
 ├── uploads/                      # User-uploaded drawings
-├── static/                       # Generated static files (models, saliency maps)
+├── static/                       # Generated static files (models, saliency maps, exports)
 ├── .kiro/                        # Kiro IDE configuration
 ├── venv/                         # Python virtual environment
 └── docker-compose.yml            # Container orchestration
@@ -27,6 +27,7 @@ app/
 │           ├── analysis.py       # Analysis operations
 │           ├── config.py         # Configuration management
 │           ├── drawings.py       # Drawing upload/retrieval
+│           ├── interpretability.py # Advanced interpretability features
 │           └── models.py         # ML model operations
 ├── core/                         # Core application configuration
 │   ├── config.py                 # Settings and environment variables
@@ -70,7 +71,8 @@ src/
 ├── App.tsx                       # Main application component
 ├── main.tsx                      # Application entry point
 ├── components/                   # Reusable UI components
-│   └── Layout/                   # Layout components
+│   ├── Layout/                   # Layout components
+│   └── interpretability/         # Advanced interpretability components
 ├── pages/                        # Page-level components
 │   ├── AnalysisPage.tsx          # Analysis results view
 │   ├── BatchProcessingPage.tsx   # Batch upload interface

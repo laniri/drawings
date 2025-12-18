@@ -97,6 +97,7 @@ jspm_packages/
 
 #raw data
 stringent_cleaned_dataset/*
+.hypothesis/
 
 # Yarn Integrity file
 .yarn-integrity

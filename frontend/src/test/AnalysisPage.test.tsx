@@ -4,7 +4,7 @@ import axios from 'axios'
 import { render } from './utils'
 import AnalysisPage from '../pages/AnalysisPage'
 
-const mockedAxios = vi.mocked(axios)
+const mockedAxios = vi.mocked(axios, true)
 
 // Mock useParams
 vi.mock('react-router-dom', async () => {

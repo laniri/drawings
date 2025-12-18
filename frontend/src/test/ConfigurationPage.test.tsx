@@ -4,7 +4,7 @@ import axios from 'axios'
 import { render } from './utils'
 import ConfigurationPage from '../pages/ConfigurationPage'
 
-const mockedAxios = vi.mocked(axios)
+const mockedAxios = vi.mocked(axios, true)
 
 const mockConfig = {
   vision_model: 'vit',

@@ -30,6 +30,139 @@ class EmbeddingSerializer:
     """Handles serialization and deserialization of embedding vectors."""
     
     @staticmethod
+    def serialize_hybrid_embedding(hybrid_embedding: np.ndarray) -> Tuple[bytes, bytes, bytes]:
+        """
+        Serialize a hybrid embedding with component separation.
+        
+        Args:
+            hybrid_embedding: 832-dimensional hybrid embedding (768 visual + 64 subject)
+            
+        Returns:
+            Tuple of (full_hybrid_bytes, visual_component_bytes, subject_component_bytes)
+            
+        Raises:
+            EmbeddingSerializationError: If serialization fails
+        """
+        try:
+            if not isinstance(hybrid_embedding, np.ndarray):
+                raise EmbeddingSerializationError(f"Expected numpy array, got {type(hybrid_embedding)}")
+            
+            if hybrid_embedding.shape != (832,):
+                raise EmbeddingSerializationError(
+                    f"Expected 832-dimensional hybrid embedding, got shape {hybrid_embedding.shape}"
+                )
+            
+            # Validate hybrid embedding before serialization
+            if not EmbeddingSerializer.validate_hybrid_embedding(hybrid_embedding):
+                raise EmbeddingSerializationError("Invalid hybrid embedding provided")
+            
+            # Ensure float32 for consistency
+            if hybrid_embedding.dtype != np.float32:
+                hybrid_embedding = hybrid_embedding.astype(np.float32)
+            
+            # Separate components
+            visual_component = hybrid_embedding[:768]
+            subject_component = hybrid_embedding[768:]
+            
+            # Serialize all components
+            full_bytes = pickle.dumps(hybrid_embedding, protocol=pickle.HIGHEST_PROTOCOL)
+            visual_bytes = pickle.dumps(visual_component, protocol=pickle.HIGHEST_PROTOCOL)
+            subject_bytes = pickle.dumps(subject_component, protocol=pickle.HIGHEST_PROTOCOL)
+            
+            logger.debug(f"Serialized hybrid embedding: full_size={len(full_bytes)}, "
+                        f"visual_size={len(visual_bytes)}, subject_size={len(subject_bytes)}")
+            
+            return full_bytes, visual_bytes, subject_bytes
+            
+        except Exception as e:
+            if isinstance(e, EmbeddingSerializationError):
+                raise
+            raise EmbeddingSerializationError(f"Failed to serialize hybrid embedding: {str(e)}")
+    
+    @staticmethod
+    def deserialize_hybrid_embedding(full_bytes: Optional[bytes] = None,
+                                   visual_bytes: Optional[bytes] = None,
+                                   subject_bytes: Optional[bytes] = None) -> Optional[np.ndarray]:
+        """
+        Deserialize a hybrid embedding from components or full data.
+        
+        Args:
+            full_bytes: Serialized full hybrid embedding (preferred)
+            visual_bytes: Serialized visual component (768-dim)
+            subject_bytes: Serialized subject component (64-dim)
+            
+        Returns:
+            832-dimensional hybrid embedding or None if reconstruction fails
+        """
+        # Try full embedding first
+        if full_bytes is not None:
+            try:
+                hybrid_embedding = pickle.loads(full_bytes)
+                if isinstance(hybrid_embedding, np.ndarray) and hybrid_embedding.shape == (832,):
+                    return hybrid_embedding.astype(np.float32)
+            except Exception as e:
+                logger.debug(f"Failed to deserialize full hybrid embedding: {str(e)}")
+        
+        # Try to reconstruct from components
+        if visual_bytes is not None and subject_bytes is not None:
+            try:
+                visual_component = pickle.loads(visual_bytes)
+                subject_component = pickle.loads(subject_bytes)
+                
+                if (isinstance(visual_component, np.ndarray) and visual_component.shape == (768,) and
+                    isinstance(subject_component, np.ndarray) and subject_component.shape == (64,)):
+                    
+                    # Reconstruct hybrid embedding
+                    hybrid_embedding = np.concatenate([
+                        visual_component.astype(np.float32),
+                        subject_component.astype(np.float32)
+                    ], axis=0)
+                    
+                    logger.debug("Reconstructed hybrid embedding from components")
+                    return hybrid_embedding
+            except Exception as e:
+                logger.debug(f"Failed to reconstruct from components: {str(e)}")
+        
+        logger.debug("Could not deserialize hybrid embedding from available data")
+        return None
+    
+    @staticmethod
+    def validate_hybrid_embedding(embedding: np.ndarray) -> bool:
+        """
+        Validate a hybrid embedding for correctness.
+        
+        Args:
+            embedding: Numpy array to validate (should be 832-dimensional)
+            
+        Returns:
+            True if valid hybrid embedding, False otherwise
+        """
+        try:
+            if not isinstance(embedding, np.ndarray):
+                logger.warning(f"Invalid embedding type: {type(embedding)}")
+                return False
+            
+            if embedding.shape != (832,):
+                logger.warning(f"Invalid hybrid embedding shape: {embedding.shape} (expected (832,))")
+                return False
+            
+            if not np.isfinite(embedding).all():
+                logger.warning("Hybrid embedding contains non-finite values")
+                return False
+            
+            # Validate subject component (last 64 dimensions should be one-hot)
+            subject_component = embedding[768:]
+            if not (np.sum(subject_component) == 1.0 and np.sum(subject_component == 1.0) == 1):
+                logger.warning("Invalid subject component in hybrid embedding (not one-hot)")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Hybrid embedding validation failed: {str(e)}")
+            return False
+
+    @staticmethod
     def serialize_embedding(embedding: np.ndarray) -> bytes:
         """
         Serialize a numpy embedding array to bytes for database storage.
@@ -357,6 +490,101 @@ class EmbeddingStorage:
         
         logger.info("EmbeddingStorage initialized")
     
+    def store_hybrid_embedding(self,
+                              drawing_id: int,
+                              model_type: str,
+                              hybrid_embedding: np.ndarray,
+                              age: Optional[float] = None,
+                              use_cache: bool = True) -> Tuple[bytes, int, bytes, bytes]:
+        """
+        Store a hybrid embedding with component separation.
+        
+        Args:
+            drawing_id: Database ID of the drawing
+            model_type: Type of model used for embedding
+            hybrid_embedding: 832-dimensional hybrid embedding
+            age: Optional age information
+            use_cache: Whether to cache the embedding
+            
+        Returns:
+            Tuple of (full_hybrid_bytes, dimension, visual_bytes, subject_bytes)
+            
+        Raises:
+            EmbeddingSerializationError: If storage fails
+        """
+        try:
+            # Validate hybrid embedding
+            if not self.serializer.validate_hybrid_embedding(hybrid_embedding):
+                raise EmbeddingSerializationError("Invalid hybrid embedding provided")
+            
+            # Serialize with component separation
+            full_bytes, visual_bytes, subject_bytes = self.serializer.serialize_hybrid_embedding(hybrid_embedding)
+            
+            # Cache if requested
+            if use_cache:
+                self.cache.put(drawing_id, model_type, hybrid_embedding, age)
+            
+            logger.debug(f"Stored hybrid embedding for drawing {drawing_id}: dimension={len(hybrid_embedding)}")
+            return full_bytes, len(hybrid_embedding), visual_bytes, subject_bytes
+            
+        except Exception as e:
+            raise EmbeddingSerializationError(f"Failed to store hybrid embedding: {str(e)}")
+    
+    def retrieve_hybrid_embedding(self,
+                                 drawing_id: int,
+                                 model_type: str,
+                                 full_data: Optional[bytes] = None,
+                                 visual_data: Optional[bytes] = None,
+                                 subject_data: Optional[bytes] = None,
+                                 age: Optional[float] = None,
+                                 use_cache: bool = True) -> Optional[np.ndarray]:
+        """
+        Retrieve a hybrid embedding with component reconstruction support.
+        
+        Args:
+            drawing_id: Database ID of the drawing
+            model_type: Type of model used for embedding
+            full_data: Serialized full hybrid embedding data
+            visual_data: Serialized visual component data
+            subject_data: Serialized subject component data
+            age: Optional age information
+            use_cache: Whether to use cache
+            
+        Returns:
+            832-dimensional hybrid embedding or None if not found
+            
+        Raises:
+            EmbeddingSerializationError: If retrieval fails
+        """
+        try:
+            # Try cache first if enabled
+            if use_cache:
+                cached_embedding = self.cache.get(drawing_id, model_type, age)
+                if cached_embedding is not None and cached_embedding.shape == (832,):
+                    logger.debug(f"Retrieved hybrid embedding from cache for drawing {drawing_id}")
+                    return cached_embedding
+            
+            # Deserialize from database components
+            hybrid_embedding = self.serializer.deserialize_hybrid_embedding(
+                full_bytes=full_data,
+                visual_bytes=visual_data,
+                subject_bytes=subject_data
+            )
+            
+            if hybrid_embedding is not None:
+                # Cache for future use
+                if use_cache:
+                    self.cache.put(drawing_id, model_type, hybrid_embedding, age)
+                
+                logger.debug(f"Retrieved hybrid embedding from database for drawing {drawing_id}")
+                return hybrid_embedding
+            
+            logger.debug(f"No hybrid embedding found for drawing {drawing_id}")
+            return None
+            
+        except Exception as e:
+            raise EmbeddingSerializationError(f"Failed to retrieve hybrid embedding: {str(e)}")
+
     def store_embedding(self, 
                        drawing_id: int, 
                        model_type: str, 
@@ -544,3 +772,46 @@ def deserialize_embedding_from_db(serialized_data: bytes) -> np.ndarray:
         Numpy array
     """
     return EmbeddingSerializer.deserialize_embedding(serialized_data)
+
+
+def serialize_hybrid_embedding_for_db(hybrid_embedding: np.ndarray) -> Tuple[bytes, bytes, bytes]:
+    """
+    Convenience function to serialize a hybrid embedding for database storage.
+    
+    Args:
+        hybrid_embedding: 832-dimensional hybrid embedding array
+        
+    Returns:
+        Tuple of (full_hybrid_bytes, visual_component_bytes, subject_component_bytes)
+    """
+    return EmbeddingSerializer.serialize_hybrid_embedding(hybrid_embedding)
+
+
+def deserialize_hybrid_embedding_from_db(full_bytes: Optional[bytes] = None,
+                                        visual_bytes: Optional[bytes] = None,
+                                        subject_bytes: Optional[bytes] = None) -> Optional[np.ndarray]:
+    """
+    Convenience function to deserialize a hybrid embedding from database.
+    
+    Args:
+        full_bytes: Serialized full hybrid embedding
+        visual_bytes: Serialized visual component
+        subject_bytes: Serialized subject component
+        
+    Returns:
+        832-dimensional hybrid embedding or None if reconstruction fails
+    """
+    return EmbeddingSerializer.deserialize_hybrid_embedding(full_bytes, visual_bytes, subject_bytes)
+
+
+def validate_hybrid_embedding(embedding: np.ndarray) -> bool:
+    """
+    Convenience function to validate a hybrid embedding.
+    
+    Args:
+        embedding: Numpy array to validate
+        
+    Returns:
+        True if valid hybrid embedding, False otherwise
+    """
+    return EmbeddingSerializer.validate_hybrid_embedding(embedding)

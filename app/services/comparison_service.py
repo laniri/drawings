@@ -31,10 +31,11 @@ class ComparisonService:
         age_group_max: float,
         db: Session,
         max_examples: int = 3,
-        similarity_threshold: float = 0.8
+        similarity_threshold: float = 0.8,
+        subject_category: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Find similar normal examples from the same age group.
+        Find similar normal examples from the same age group and optionally same subject.
         
         Args:
             target_drawing_id: ID of the drawing to find comparisons for
@@ -43,6 +44,7 @@ class ComparisonService:
             db: Database session
             max_examples: Maximum number of examples to return
             similarity_threshold: Minimum similarity score (0-1)
+            subject_category: Optional subject category to filter by
             
         Returns:
             List of similar normal examples with metadata
@@ -54,14 +56,22 @@ class ComparisonService:
                 logger.warning(f"No embedding found for drawing {target_drawing_id}")
                 return []
             
-            # Find normal drawings in the same age group
+            # Find normal drawings in the same age group and subject
             normal_drawings = self._get_normal_drawings_in_age_group(
-                age_group_min, age_group_max, target_drawing_id, db
+                age_group_min, age_group_max, target_drawing_id, db, subject_category
             )
             
             if not normal_drawings:
-                logger.info(f"No normal drawings found in age group {age_group_min}-{age_group_max}")
-                return []
+                # If no subject-specific examples found, try fallback without subject filter
+                if subject_category and subject_category != "unspecified":
+                    logger.info(f"No normal drawings found for subject '{subject_category}' in age group {age_group_min}-{age_group_max}, trying fallback")
+                    normal_drawings = self._get_normal_drawings_in_age_group(
+                        age_group_min, age_group_max, target_drawing_id, db, None
+                    )
+                
+                if not normal_drawings:
+                    logger.info(f"No normal drawings found in age group {age_group_min}-{age_group_max}")
+                    return []
             
             # Calculate similarities and find best matches
             similar_examples = []
@@ -129,11 +139,12 @@ class ComparisonService:
         age_group_max: float,
         exclude_drawing_id: int,
         db: Session,
+        subject_category: Optional[str] = None,
         max_candidates: int = 50
     ) -> Dict[int, Dict[str, Any]]:
-        """Get normal drawings in the specified age group."""
+        """Get normal drawings in the specified age group and optionally subject category."""
         try:
-            # Query for drawings in age group that have been analyzed as normal
+            # Build base query for drawings in age group that have been analyzed as normal
             query = db.query(
                 Drawing.id,
                 Drawing.filename,
@@ -153,7 +164,13 @@ class ComparisonService:
                     Drawing.id != exclude_drawing_id,
                     AnomalyAnalysis.is_anomaly == False
                 )
-            ).order_by(
+            )
+            
+            # Add subject filter if specified
+            if subject_category and subject_category != "unspecified":
+                query = query.filter(Drawing.subject == subject_category)
+            
+            query = query.order_by(
                 AnomalyAnalysis.normalized_score.asc()  # Prefer most normal examples
             ).limit(max_candidates)
             
@@ -257,6 +274,191 @@ class ComparisonService:
                 "normal_with_embeddings": 0,
                 "anomalous_count": 0,
                 "comparison_availability": False
+            }
+    
+    def get_subject_specific_examples(
+        self,
+        age_group_min: float,
+        age_group_max: float,
+        subject_category: str,
+        db: Session,
+        max_examples: int = 5,
+        include_anomalous: bool = False
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Get subject-specific examples for comparison and educational purposes.
+        
+        Args:
+            age_group_min: Minimum age for the age group
+            age_group_max: Maximum age for the age group
+            subject_category: Subject category to filter by
+            db: Database session
+            max_examples: Maximum number of examples per category
+            include_anomalous: Whether to include anomalous examples
+            
+        Returns:
+            Dictionary with 'normal' and optionally 'anomalous' example lists
+        """
+        try:
+            examples = {"normal": []}
+            
+            # Get normal examples
+            normal_query = db.query(
+                Drawing.id,
+                Drawing.filename,
+                Drawing.age_years,
+                Drawing.subject,
+                Drawing.file_path,
+                AnomalyAnalysis.anomaly_score,
+                AnomalyAnalysis.normalized_score
+            ).join(
+                AnomalyAnalysis, Drawing.id == AnomalyAnalysis.drawing_id
+            ).filter(
+                and_(
+                    Drawing.age_years >= age_group_min,
+                    Drawing.age_years <= age_group_max,
+                    Drawing.subject == subject_category,
+                    AnomalyAnalysis.is_anomaly == False
+                )
+            ).order_by(
+                AnomalyAnalysis.normalized_score.asc()
+            ).limit(max_examples)
+            
+            normal_results = normal_query.all()
+            for result in normal_results:
+                examples["normal"].append({
+                    "drawing_id": result.id,
+                    "filename": result.filename,
+                    "age_years": result.age_years,
+                    "subject": result.subject,
+                    "file_path": result.file_path,
+                    "anomaly_score": result.anomaly_score,
+                    "normalized_score": result.normalized_score,
+                    "category": "normal"
+                })
+            
+            # Get anomalous examples if requested
+            if include_anomalous:
+                examples["anomalous"] = []
+                
+                anomalous_query = db.query(
+                    Drawing.id,
+                    Drawing.filename,
+                    Drawing.age_years,
+                    Drawing.subject,
+                    Drawing.file_path,
+                    AnomalyAnalysis.anomaly_score,
+                    AnomalyAnalysis.normalized_score
+                ).join(
+                    AnomalyAnalysis, Drawing.id == AnomalyAnalysis.drawing_id
+                ).filter(
+                    and_(
+                        Drawing.age_years >= age_group_min,
+                        Drawing.age_years <= age_group_max,
+                        Drawing.subject == subject_category,
+                        AnomalyAnalysis.is_anomaly == True
+                    )
+                ).order_by(
+                    AnomalyAnalysis.normalized_score.desc()
+                ).limit(max_examples)
+                
+                anomalous_results = anomalous_query.all()
+                for result in anomalous_results:
+                    examples["anomalous"].append({
+                        "drawing_id": result.id,
+                        "filename": result.filename,
+                        "age_years": result.age_years,
+                        "subject": result.subject,
+                        "file_path": result.file_path,
+                        "anomaly_score": result.anomaly_score,
+                        "normalized_score": result.normalized_score,
+                        "category": "anomalous"
+                    })
+            
+            return examples
+            
+        except Exception as e:
+            logger.error(f"Failed to get subject-specific examples: {str(e)}")
+            return {"normal": [], "anomalous": [] if include_anomalous else None}
+    
+    def get_comparison_examples_with_fallback(
+        self,
+        target_drawing_id: int,
+        age_group_min: float,
+        age_group_max: float,
+        subject_category: Optional[str],
+        db: Session,
+        max_examples: int = 3
+    ) -> Dict[str, Any]:
+        """
+        Get comparison examples with fallback strategy when subject-specific examples are unavailable.
+        
+        Args:
+            target_drawing_id: ID of the drawing to find comparisons for
+            age_group_min: Minimum age for the age group
+            age_group_max: Maximum age for the age group
+            subject_category: Subject category to filter by
+            db: Session
+            max_examples: Maximum number of examples to return
+            
+        Returns:
+            Dictionary containing examples and metadata about fallback strategy used
+        """
+        try:
+            result = {
+                "examples": [],
+                "fallback_used": False,
+                "fallback_reason": None,
+                "subject_requested": subject_category,
+                "subject_matched": subject_category
+            }
+            
+            # Try subject-specific examples first
+            if subject_category and subject_category != "unspecified":
+                examples = self.find_similar_normal_examples(
+                    target_drawing_id=target_drawing_id,
+                    age_group_min=age_group_min,
+                    age_group_max=age_group_max,
+                    db=db,
+                    max_examples=max_examples,
+                    subject_category=subject_category
+                )
+                
+                if examples:
+                    result["examples"] = examples
+                    return result
+                else:
+                    # No subject-specific examples found, try fallback
+                    result["fallback_used"] = True
+                    result["fallback_reason"] = f"No normal examples found for subject '{subject_category}'"
+            
+            # Fallback: get examples without subject filter
+            examples = self.find_similar_normal_examples(
+                target_drawing_id=target_drawing_id,
+                age_group_min=age_group_min,
+                age_group_max=age_group_max,
+                db=db,
+                max_examples=max_examples,
+                subject_category=None
+            )
+            
+            result["examples"] = examples
+            result["subject_matched"] = "any" if result["fallback_used"] else subject_category
+            
+            if not examples and not result["fallback_used"]:
+                result["fallback_used"] = True
+                result["fallback_reason"] = f"No normal examples found in age group {age_group_min}-{age_group_max}"
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to get comparison examples with fallback: {str(e)}")
+            return {
+                "examples": [],
+                "fallback_used": True,
+                "fallback_reason": f"Error: {str(e)}",
+                "subject_requested": subject_category,
+                "subject_matched": None
             }
 
 

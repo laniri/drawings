@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Typography,
   Paper,
@@ -14,6 +14,12 @@ import {
   Chip,
   Button,
   LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
 } from '@mui/material'
 import {
   TrendingUp,
@@ -21,6 +27,8 @@ import {
   CheckCircle,
   Image as ImageIcon,
   Analytics,
+  Category,
+  FilterList,
 } from '@mui/icons-material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
@@ -48,6 +56,7 @@ interface DashboardStats {
     drawing_id: number
     filename: string
     age_years: number
+    subject?: string
     anomaly_score: number
     is_anomaly: boolean
     analysis_timestamp: string
@@ -55,6 +64,11 @@ interface DashboardStats {
   age_distribution: Array<{
     age_group: string
     count: number
+  }>
+  subject_distribution?: Array<{
+    subject: string
+    count: number
+    anomaly_rate: number
   }>
   model_status: {
     vision_model: string
@@ -68,11 +82,17 @@ interface DashboardStats {
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
+  const [subjectFilter, setSubjectFilter] = useState<string>('')
+  const [chartTab, setChartTab] = useState(0)
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', subjectFilter],
     queryFn: async () => {
-      const response = await axios.get('/api/analysis/stats')
+      let url = '/api/analysis/stats'
+      if (subjectFilter) {
+        url += `?subject=${encodeURIComponent(subjectFilter)}`
+      }
+      const response = await axios.get(url)
       return response.data
     },
     refetchInterval: 30000, // Refresh every 30 seconds
@@ -100,11 +120,45 @@ const DashboardPage: React.FC = () => {
     )
   }
 
+  // Get unique subjects from recent analyses for filter
+  const availableSubjects = React.useMemo(() => {
+    if (!stats?.recent_analyses) return []
+    const subjects = new Set<string>()
+    stats.recent_analyses.forEach(analysis => {
+      if (analysis.subject) {
+        subjects.add(analysis.subject)
+      }
+    })
+    return Array.from(subjects).sort()
+  }, [stats?.recent_analyses])
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        System Dashboard
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4">
+          System Dashboard
+        </Typography>
+        
+        {/* Subject Filter */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <FilterList color="action" />
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Filter by Subject</InputLabel>
+            <Select
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+              label="Filter by Subject"
+            >
+              <MenuItem value="">All Subjects</MenuItem>
+              {availableSubjects.map((subject) => (
+                <MenuItem key={subject} value={subject}>
+                  {subject}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
 
       {/* Key Metrics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -190,21 +244,64 @@ const DashboardPage: React.FC = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        {/* Age Distribution Chart */}
+        {/* Distribution Charts */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Age Distribution
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats?.age_distribution || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="age_group" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#1976d2" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+              <Tabs value={chartTab} onChange={(_, newValue) => setChartTab(newValue)}>
+                <Tab label="Age Distribution" />
+                <Tab label="Subject Distribution" />
+              </Tabs>
+            </Box>
+            
+            {chartTab === 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Age Distribution {subjectFilter && `(Subject: ${subjectFilter})`}
+                </Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={stats?.age_distribution || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="age_group" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#1976d2" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            )}
+            
+            {chartTab === 1 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Subject Distribution
+                </Typography>
+                {stats?.subject_distribution && stats.subject_distribution.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.subject_distribution}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="subject" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          name === 'count' ? `${value} drawings` : `${((value as number) * 100).toFixed(1)}% anomaly rate`,
+                          name === 'count' ? 'Count' : 'Anomaly Rate'
+                        ]}
+                      />
+                      <Bar dataKey="count" fill="#1976d2" name="count" />
+                      <Bar dataKey="anomaly_rate" fill="#ff9800" name="anomaly_rate" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Category sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="body1" color="text.secondary">
+                      No subject distribution data available
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
           </Paper>
         </Grid>
 
@@ -298,6 +395,7 @@ const DashboardPage: React.FC = () => {
                       <Box>
                         <Typography variant="body2" component="span">
                           Age: {analysis.age_years} years • Score: {analysis.anomaly_score.toFixed(3)}
+                          {analysis.subject && ` • Subject: ${analysis.subject}`}
                         </Typography>
                         <br />
                         <Typography variant="caption" color="text.secondary">

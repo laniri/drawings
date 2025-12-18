@@ -13,19 +13,27 @@ vi.mock('axios', () => ({
 }))
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
-global.URL.createObjectURL = vi.fn(() => 'mocked-url')
-global.URL.revokeObjectURL = vi.fn()
+Object.defineProperty(window, 'URL', {
+  value: {
+    createObjectURL: vi.fn(() => 'mocked-url'),
+    revokeObjectURL: vi.fn()
+  }
+})
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
+Object.defineProperty(window, 'ResizeObserver', {
+  value: class ResizeObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  }
+})
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
+Object.defineProperty(window, 'IntersectionObserver', {
+  value: class IntersectionObserver {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  }
+})

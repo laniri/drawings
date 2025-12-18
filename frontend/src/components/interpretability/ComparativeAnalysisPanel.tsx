@@ -130,9 +130,13 @@ export default function ComparativeAnalysisPanel({
       setLoading(true)
       setError(null)
 
-      const response = await fetch(
-        `/api/v1/interpretability/examples/${currentAnalysis.age_group}?example_type=both&limit=5`
-      )
+      // Try to get subject-specific examples first
+      let url = `/api/interpretability/examples/${currentAnalysis.age_group}?example_type=both&limit=5`
+      if (currentDrawing.subject) {
+        url += `&subject=${encodeURIComponent(currentDrawing.subject)}`
+      }
+
+      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error('Failed to load comparison examples')
@@ -150,7 +154,7 @@ export default function ComparativeAnalysisPanel({
 
   const loadAnalysisHistory = async () => {
     try {
-      const response = await fetch(`/api/v1/analysis/drawing/${currentDrawing.id}`)
+      const response = await fetch(`/api/analysis/drawing/${currentDrawing.id}`)
       
       if (!response.ok) {
         throw new Error('Failed to load analysis history')
@@ -366,10 +370,12 @@ export default function ComparativeAnalysisPanel({
             {/* Normal Examples */}
             <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
               <TrendingDownIcon sx={{ mr: 1, color: 'success.main' }} />
-              Normal Examples (Age {comparisonData.age_group})
+              Normal Examples (Age {comparisonData.age_group}
+              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`})
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               These drawings show typical patterns for this age group
+              {currentDrawing.subject && ' and subject category'}
             </Typography>
             
             <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -385,10 +391,12 @@ export default function ComparativeAnalysisPanel({
             {/* Anomalous Examples */}
             <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
               <TrendingUpIcon sx={{ mr: 1, color: 'error.main' }} />
-              Anomalous Examples (Age {comparisonData.age_group})
+              Anomalous Examples (Age {comparisonData.age_group}
+              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`})
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               These drawings show patterns that deviate from typical development
+              {currentDrawing.subject && ' for this subject category'}
             </Typography>
             
             <Grid container spacing={2}>

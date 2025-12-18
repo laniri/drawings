@@ -178,7 +178,7 @@ class TestEndToEndWorkflow:
         2. Verify drawing is stored
         3. Analyze drawing
         4. Retrieve analysis results
-        5. Verify interpretability (if anomaly)
+        5. Verify interpretability (generated for all drawings)
         """
         # Step 1: Upload drawing
         image_data = sample_image_data(width=200, height=200, color=(255, 0, 0))

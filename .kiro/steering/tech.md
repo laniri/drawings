@@ -9,8 +9,8 @@
 - **SQLAlchemy** - ORM with SQLite database
 - **Alembic** - Database migrations
 - **Pydantic** - Data validation and settings management
-- **Captum** - Model interpretability (saliency maps)
-- **Pillow & OpenCV** - Image processing
+- **ReportLab** - PDF generation for comprehensive export reports
+- **Pillow & OpenCV** - Image processing and simplified saliency map generation
 - **NumPy 1.26.4** - Downgraded for PyTorch compatibility (avoid 2.x)
 - **Transformers** - Hugging Face library for ViT models
 - **Scikit-learn** - Machine learning utilities
@@ -115,7 +115,7 @@ docker-compose -f docker-compose.dev.yml down
 - **Database**: SQLite with Alembic migrations
 - **CORS**: Configured for localhost:3000 and localhost:5173
 - **File uploads**: Max 10MB, stored in `uploads/` directory
-- **API Proxy**: Vite dev server proxy routes `/api/*` to backend at `localhost:8000/api/v1/*`
+- **API Proxy**: Vite dev server proxy routes `/api/*` to backend at `localhost:8000/api/v1/*` and `/static/*` to `localhost:8000/static/*`
 
 ## Recent Improvements
 
@@ -123,6 +123,8 @@ docker-compose -f docker-compose.dev.yml down
 - **Optimized Threshold Management**: Fast threshold recalculation using existing analysis results
 - **Robust Configuration**: Support for arbitrary percentile values with proper error handling
 - **Cache Invalidation**: Frontend properly refreshes when configuration changes
+- **Guaranteed Interpretability**: All drawings now receive interpretability analysis using simplified gradient-based saliency generation
+- **Enhanced Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with comprehensive reports and composite visualizations
 
 ## Troubleshooting
 

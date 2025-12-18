@@ -32,6 +32,7 @@ import {
   ModelTraining,
   Delete,
   Add,
+  Category,
 } from '@mui/icons-material'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
@@ -58,6 +59,8 @@ interface SystemConfig {
   anomaly_detection_method: string
   min_samples_per_group?: number
   max_age_group_span?: number
+  subject_aware_analysis: boolean
+  supported_subjects: string[]
 }
 
 interface AgeGroupModel {
@@ -66,10 +69,23 @@ interface AgeGroupModel {
   age_max: number
   model_type: string
   vision_model: string
+  supports_subjects: boolean
+  subject_categories: string[]
   sample_count: number
   threshold: number
   is_active: boolean
   created_timestamp: string
+}
+
+interface SubjectStatistics {
+  subject: string
+  total_drawings: number
+  age_groups: Array<{
+    age_group: string
+    count: number
+    sufficient_data: boolean
+  }>
+  anomaly_rate: number
 }
 
 const ConfigurationPage: React.FC = () => {
@@ -93,6 +109,15 @@ const ConfigurationPage: React.FC = () => {
     queryFn: async () => {
       const response = await axios.get('/api/models/age-groups')
       return response.data.models
+    },
+  })
+
+  // Fetch subject statistics
+  const { data: subjectStats, isLoading: subjectStatsLoading } = useQuery<SubjectStatistics[]>({
+    queryKey: ['subject-statistics'],
+    queryFn: async () => {
+      const response = await axios.get('/api/config/subject-statistics')
+      return response.data.statistics
     },
   })
 
@@ -134,7 +159,7 @@ const ConfigurationPage: React.FC = () => {
       const response = await axios.put('/api/config/age-grouping', data)
       return response.data
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       // Update the query cache with the new values to prevent form reset
       queryClient.setQueryData(['system-config'], (oldData: SystemConfig | undefined) => {
         if (!oldData) return oldData
@@ -232,13 +257,13 @@ const ConfigurationPage: React.FC = () => {
         min_samples_per_group: config.min_samples_per_group,
         max_age_group_span: config.max_age_group_span,
         age_grouping_strategy: mapAgeGroupingStrategy(config.age_grouping_strategy),
-        vision_model: config.vision_model || 'vit',
-        anomaly_detection_method: config.anomaly_detection_method || 'autoencoder',
+        vision_model: (config.vision_model || 'vit') as 'vit',
+        anomaly_detection_method: (config.anomaly_detection_method || 'autoencoder') as 'autoencoder',
       })
     }
   }, [config, reset, justSubmitted])
 
-  if (configLoading || modelsLoading) {
+  if (configLoading || modelsLoading || subjectStatsLoading) {
     return (
       <Box>
         <Typography variant="h4" gutterBottom>
@@ -257,7 +282,7 @@ const ConfigurationPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* General Settings */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} lg={4}>
           <Card>
             <CardHeader
               title="General Settings"
@@ -359,7 +384,7 @@ const ConfigurationPage: React.FC = () => {
         </Grid>
 
         {/* Age Group Models */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} lg={4}>
           <Card>
             <CardHeader
               title="Age Group Models"
@@ -390,13 +415,27 @@ const ConfigurationPage: React.FC = () => {
                             <Typography variant="caption" color="text.secondary">
                               Created: {new Date(model.created_timestamp).toLocaleDateString()}
                             </Typography>
-                            <Box sx={{ mt: 1 }}>
+                            <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                               <Chip
                                 size="small"
                                 label={model.is_active ? 'Active' : 'Inactive'}
                                 color={model.is_active ? 'success' : 'default'}
                                 variant="outlined"
                               />
+                              <Chip
+                                size="small"
+                                label={model.supports_subjects ? 'Subject-Aware' : 'Age-Only'}
+                                color={model.supports_subjects ? 'primary' : 'default'}
+                                variant="outlined"
+                              />
+                              {model.supports_subjects && model.subject_categories && (
+                                <Chip
+                                  size="small"
+                                  label={`${model.subject_categories.length} subjects`}
+                                  color="info"
+                                  variant="outlined"
+                                />
+                              )}
                             </Box>
                           </Box>
                         }
@@ -422,6 +461,118 @@ const ConfigurationPage: React.FC = () => {
                   </ListItem>
                 )}
               </List>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Subject Management */}
+        <Grid item xs={12} lg={4}>
+          <Card>
+            <CardHeader
+              title="Subject Management"
+              avatar={<Category />}
+            />
+            <CardContent>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Subject-aware analysis is always enabled in this system. All models use hybrid embeddings 
+                  that combine visual features with subject category information.
+                </Typography>
+                <Chip
+                  label="Subject-Aware Analysis: Enabled"
+                  color="success"
+                  variant="filled"
+                  sx={{ mb: 2 }}
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle2" gutterBottom>
+                Subject Statistics
+              </Typography>
+              
+              {subjectStats && subjectStats.length > 0 ? (
+                <List dense>
+                  {subjectStats.slice(0, 10).map((stat) => (
+                    <ListItem key={stat.subject} sx={{ px: 0 }}>
+                      <ListItemText
+                        primary={stat.subject}
+                        secondary={
+                          <Box>
+                            <Typography variant="caption" color="text.secondary">
+                              {stat.total_drawings} drawings • {(stat.anomaly_rate * 100).toFixed(1)}% anomaly rate
+                            </Typography>
+                            <br />
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                              {stat.age_groups.map((ageGroup) => (
+                                <Chip
+                                  key={ageGroup.age_group}
+                                  size="small"
+                                  label={`${ageGroup.age_group}: ${ageGroup.count}`}
+                                  color={ageGroup.sufficient_data ? 'success' : 'warning'}
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.6rem', height: 20 }}
+                                />
+                              ))}
+                            </Box>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                  {subjectStats.length > 10 && (
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        secondary={
+                          <Typography variant="caption" color="text.secondary">
+                            ... and {subjectStats.length - 10} more subjects
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                  )}
+                </List>
+              ) : (
+                <Alert severity="info">
+                  No subject statistics available yet. Upload drawings with subject information to see statistics.
+                </Alert>
+              )}
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle2" gutterBottom>
+                Data Sufficiency Warnings
+              </Typography>
+              
+              {subjectStats && subjectStats.some(stat => 
+                stat.age_groups.some(ag => !ag.sufficient_data)
+              ) ? (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    Some age-subject combinations have insufficient data for reliable analysis:
+                  </Typography>
+                  <Box component="ul" sx={{ mt: 1, pl: 2, mb: 0 }}>
+                    {subjectStats.map(stat => 
+                      stat.age_groups
+                        .filter(ag => !ag.sufficient_data)
+                        .map(ag => (
+                          <Typography key={`${stat.subject}-${ag.age_group}`} component="li" variant="caption">
+                            {stat.subject} (Age {ag.age_group}): {ag.count} drawings
+                          </Typography>
+                        ))
+                    )}
+                  </Box>
+                </Alert>
+              ) : (
+                <Alert severity="success">
+                  All age-subject combinations have sufficient data for analysis.
+                </Alert>
+              )}
+
+              <Typography variant="caption" color="text.secondary">
+                Minimum recommended: 50 drawings per age-subject combination
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
