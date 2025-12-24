@@ -90,9 +90,17 @@ jobs:
         pip install -r requirements-ci.txt
         # Install the package in development mode for proper imports
         pip install -e .
-        # Debug: Check if package is installed correctly
+    
+    - name: Debug package installation
+      run: |
         python -c "import sys; print('Python path:', sys.path)"
-        python -c "try: from app.models.database import Base; print('✅ Import successful!'); except Exception as e: print('❌ Import failed:', e)"
+        python -c "
+        try:
+            from app.models.database import Base
+            print('✅ Import successful!')
+        except Exception as e:
+            print('❌ Import failed:', e)
+        "
     
     - name: Run linting
       run: |
