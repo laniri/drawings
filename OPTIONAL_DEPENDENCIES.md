@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Children's Drawing Anomaly Detection System has been updated to make OpenCV an optional dependency, improving deployment flexibility and reducing installation complexity. The system now provides graceful fallbacks for all OpenCV functionality using PIL and NumPy.
+The Children's Drawing Anomaly Detection System has been updated to make several dependencies optional, improving deployment flexibility and reducing installation complexity. The system now provides graceful fallbacks for OpenCV functionality using PIL and NumPy, and AWS services are optional for local development.
 
 ## Changes Made
 
@@ -17,7 +17,28 @@ The Children's Drawing Anomaly Detection System has been updated to make OpenCV 
 - `.github/workflows/deploy-production.yml` - Removed OpenCV system dependencies from CI
 - `Dockerfile.prod` - Simplified system dependencies
 
-### 2. Fallback Implementations Added
+### 2. AWS Dependencies Made Optional
+
+**Files Modified:**
+- `app/services/database_migration_service.py` - Added optional AWS import with `HAS_AWS` flag
+- `app/services/monitoring_service.py` - Added optional AWS import handling
+- `requirements.txt` - AWS dependencies remain required but gracefully handled when missing
+
+**New Import Pattern:**
+```python
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
+```
+
+### 3. Fallback Implementations Added
 
 **New Functions in `interpretability_engine.py`:**
 - `_resize_with_pil()` - PIL-based image resizing fallback
@@ -27,10 +48,19 @@ The Children's Drawing Anomaly Detection System has been updated to make OpenCV 
 - `_safe_rgb_to_gray()` - Safe grayscale conversion with fallback
 - `_safe_edge_detection()` - Safe edge detection with fallback
 
-### 3. Documentation Updates
+**AWS Service Fallbacks:**
+- Database migration service works without AWS S3 backup
+- Monitoring service operates without CloudWatch integration
+- Local development doesn't require AWS credentials
+- Production features gracefully degrade when AWS is unavailable
+
+### 4. Documentation Updates
+
+### 4. Documentation Updates
 
 **Files Updated:**
 - `README.md` - Added Optional Dependencies section, updated installation instructions
+- `OPTIONAL_DEPENDENCIES.md` - Added AWS dependencies section
 - `.kiro/steering/tech.md` - Updated dependency descriptions
 - `.kiro/steering/interpretability.md` - Updated dependency information
 
@@ -64,14 +94,17 @@ pip install -e .[enhanced]
 
 ## Functionality Comparison
 
-| Feature | Without OpenCV | With OpenCV |
-|---------|---------------|-------------|
-| Image Resizing | PIL Lanczos | OpenCV Cubic |
-| Grayscale Conversion | NumPy weights | OpenCV optimized |
-| Edge Detection | Simple gradients | Canny algorithm |
-| Contour Detection | Basic regions | Precise contours |
-| Saliency Maps | PIL-based | OpenCV overlays |
-| Performance | Good | Optimized |
+| Feature | Without OpenCV | With OpenCV | Without AWS | With AWS |
+|---------|---------------|-------------|-------------|----------|
+| Image Resizing | PIL Lanczos | OpenCV Cubic | ✓ | ✓ |
+| Grayscale Conversion | NumPy weights | OpenCV optimized | ✓ | ✓ |
+| Edge Detection | Simple gradients | Canny algorithm | ✓ | ✓ |
+| Contour Detection | Basic regions | Precise contours | ✓ | ✓ |
+| Saliency Maps | PIL-based | OpenCV overlays | ✓ | ✓ |
+| Database Backups | Local only | Local + S3 | ✓ | ✓ |
+| Monitoring | Local logs | CloudWatch | ✓ | ✓ |
+| Alerting | Local only | SNS alerts | ✓ | ✓ |
+| Performance | Good | Optimized | Good | Enhanced |
 
 ## Deployment Benefits
 
@@ -90,14 +123,16 @@ pip install -e .[enhanced]
 ## Migration Guide
 
 ### For Existing Deployments
-1. **No action required** - OpenCV will continue to work if already installed
+1. **No action required** - OpenCV and AWS services will continue to work if already installed
 2. **To optimize**: Remove OpenCV and test functionality
 3. **To enhance**: Install enhanced requirements for full features
+4. **Local development**: AWS services are now optional for local development and testing
 
 ### For New Deployments
-1. Start with minimal installation
-2. Test core functionality
-3. Add enhanced features if needed
+1. Start with minimal installation for local development
+2. Test core functionality without AWS dependencies
+3. Add AWS services for production deployment
+4. Add enhanced features (OpenCV, ReportLab) if needed
 
 ## Testing
 
@@ -107,6 +142,15 @@ The system includes comprehensive tests that work with or without OpenCV:
 - Local development can use enhanced features
 
 ## Troubleshooting
+
+### AWS Import Errors
+```bash
+# Error: No module named 'boto3'
+# Solution: This is expected for local development and handled gracefully
+# The system will work without AWS services for local development
+# For production deployment, install AWS dependencies:
+pip install boto3 botocore
+```
 
 ### OpenCV Import Errors
 ```bash
@@ -123,7 +167,8 @@ The system includes comprehensive tests that work with or without OpenCV:
 ### Feature Limitations
 - Without OpenCV: Basic saliency overlays
 - Without ReportLab: No PDF exports (other formats available)
-- All core ML functionality remains unchanged
+- Without AWS: No S3 backups, CloudWatch monitoring, or SNS alerts
+- All core ML functionality remains unchanged regardless of optional dependencies
 
 ## Future Considerations
 

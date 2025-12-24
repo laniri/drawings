@@ -18,7 +18,7 @@
 - **Transformers** - Hugging Face library for ViT models
 - **Scikit-learn** - Machine learning utilities
 - **Pandas** - Data manipulation and analysis
-- **Boto3** - AWS SDK for SageMaker integration
+- **Boto3** - AWS SDK for production deployment (optional for local development)
 - **Docker** - Containerization support
 
 ## Frontend Stack

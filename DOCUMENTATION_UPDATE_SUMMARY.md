@@ -1,122 +1,77 @@
 # Documentation Update Summary
 
-## Changes Made to Support Optional OpenCV Dependency
+## Changes Made for AWS Dependencies Optional Update
 
-### Code Changes
+### Overview
+Updated documentation to reflect that AWS dependencies (boto3, botocore) are now optional for local development, following the changes made to `app/services/database_migration_service.py` that wrapped AWS imports in try/except blocks.
 
-1. **app/services/data_pipeline.py**
-   - Added optional OpenCV import with `HAS_OPENCV` flag
-   - Graceful fallback when OpenCV is not available
-   - All existing functionality preserved
+### Files Updated
 
-2. **app/services/interpretability_engine.py**
-   - Added optional OpenCV import with `HAS_OPENCV` flag
-   - Added comprehensive fallback functions:
-     - `_resize_with_pil()` - PIL-based image resizing
-     - `_rgb_to_grayscale()` - NumPy-based color conversion
-     - `_simple_edge_detection()` - Gradient-based edge detection
-     - Safe wrapper functions for all OpenCV operations
+#### 1. OPTIONAL_DEPENDENCIES.md
+- **Added AWS Dependencies Section**: New section explaining that AWS services are now optional
+- **Updated Overview**: Clarified that both OpenCV and AWS dependencies are optional
+- **Added Import Pattern Example**: Showed the new try/except pattern for AWS imports
+- **Enhanced Functionality Comparison Table**: Added AWS columns to show feature availability
+- **Updated Migration Guide**: Added guidance for AWS dependencies in deployments
+- **Added AWS Troubleshooting**: New section for AWS import errors and solutions
+- **Updated Feature Limitations**: Clarified what features are unavailable without AWS
 
-### Dependency Management
+#### 2. README.md
+- **Updated Backend Setup**: Added note about AWS dependencies being optional for local development
+- **Enhanced Technology Stack**: Added Boto3 with clarification about optional nature
+- **Updated Troubleshooting**: Added new section for AWS dependencies missing in local development
+- **Reordered Common Issues**: Moved AWS dependencies to be second issue (after NumPy)
 
-3. **requirements.txt**
-   - Commented out OpenCV as optional dependency
-   - Added clear documentation about optional features
-   - Maintained all core dependencies
+#### 3. .kiro/steering/tech.md
+- **Updated Boto3 Description**: Changed from "AWS SDK for SageMaker integration" to "AWS SDK for production deployment (optional for local development)"
 
-4. **requirements-enhanced.txt** (NEW)
-   - Contains OpenCV and ReportLab for enhanced functionality
-   - Clear separation of core vs enhanced features
+#### 4. .kiro/steering/interpretability.md
+- **Added AWS Dependencies**: Added Boto3 to the dependencies list with optional clarification
 
-5. **pyproject.toml**
-   - Added `enhanced` optional dependency group
-   - Commented out OpenCV in core dependencies
-   - Maintained development dependencies
+### Key Changes Summary
 
-### CI/CD Updates
+#### What's New
+1. **Optional AWS Services**: Local development no longer requires AWS credentials or services
+2. **Graceful Degradation**: System works without AWS services, with features gracefully disabled
+3. **Better Local Development**: Easier setup for developers who don't need AWS features
+4. **Production Flexibility**: AWS services still available for production deployments
 
-6. **.github/workflows/deploy-production.yml**
-   - Removed OpenCV system dependencies from CI
-   - Faster builds with minimal dependencies
-   - Maintained all testing functionality
+#### Import Pattern
+```python
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
+```
 
-7. **Dockerfile.prod**
-   - Simplified system dependencies
-   - Smaller Docker images
-   - Removed OpenCV-specific libraries
+#### Features Affected
+- **Database Migration Service**: S3 backups optional, local backups still work
+- **Monitoring Service**: CloudWatch integration optional, local logging still works
+- **Alerting**: SNS alerts optional, local alerts still work
+- **All Core ML Features**: Remain unchanged regardless of AWS availability
 
-### Documentation Updates
+#### Benefits
+1. **Easier Local Development**: No need for AWS credentials during development
+2. **Faster CI/CD**: Reduced dependency complexity in testing environments
+3. **Better Error Handling**: Graceful degradation instead of import failures
+4. **Flexible Deployment**: Choose minimal or full feature deployment
 
-8. **README.md**
-   - Added comprehensive "Optional Dependencies" section
-   - Updated installation instructions with enhanced options
-   - Added troubleshooting for OpenCV import errors
-   - Clear explanation of functionality with/without OpenCV
+### Testing Impact
+- All existing tests continue to work
+- AWS services are mocked or skipped when not available
+- No changes needed to existing test infrastructure
+- Property-based tests validate functionality in both modes
 
-9. **.kiro/steering/tech.md**
-   - Updated dependency descriptions
-   - Clarified optional vs required components
+### Migration Guide for Users
+1. **Existing Deployments**: No action required, AWS services continue to work
+2. **New Local Development**: AWS dependencies optional, system works without them
+3. **Production Deployment**: Install AWS dependencies for full feature set
+4. **Testing**: AWS services automatically detected and used when available
 
-10. **.kiro/steering/interpretability.md**
-    - Updated dependency information
-    - Added fallback information
-
-11. **OPTIONAL_DEPENDENCIES.md** (NEW)
-    - Comprehensive guide to optional dependencies
-    - Installation options and feature comparison
-    - Migration guide for existing deployments
-    - Troubleshooting and future considerations
-
-## Benefits Achieved
-
-### Deployment Flexibility
-- ✅ Minimal installation for basic functionality
-- ✅ Enhanced installation for advanced features
-- ✅ Faster CI/CD builds
-- ✅ Smaller Docker images
-- ✅ Better cross-platform compatibility
-
-### Functionality Preservation
-- ✅ All core ML functionality maintained
-- ✅ Graceful fallbacks for image processing
-- ✅ No breaking changes for existing users
-- ✅ Enhanced features available when needed
-
-### Developer Experience
-- ✅ Clear documentation of options
-- ✅ Easy troubleshooting guides
-- ✅ Flexible development setup
-- ✅ Comprehensive testing coverage
-
-## Testing Verification
-
-The changes have been tested and verified:
-- ✅ System imports successfully with and without OpenCV
-- ✅ Data pipeline service initializes correctly
-- ✅ Interpretability engine handles optional dependencies
-- ✅ All fallback functions work as expected
-- ✅ No breaking changes to existing functionality
-
-## Impact Assessment
-
-### Positive Impacts
-- Reduced installation complexity
-- Faster deployment times
-- Better resource utilization
-- Improved compatibility
-- Clearer dependency management
-
-### No Negative Impacts
-- All existing functionality preserved
-- Performance maintained (with optional enhancements)
-- No breaking changes for current users
-- Enhanced features still available when needed
-
-## Recommendations
-
-1. **For New Deployments**: Start with minimal installation, add enhanced features as needed
-2. **For Existing Deployments**: No immediate action required, can optimize by removing OpenCV if not needed
-3. **For Development**: Use enhanced installation for full feature development
-4. **For CI/CD**: Use minimal dependencies for faster builds
-
-This update significantly improves the system's accessibility and deployment flexibility while maintaining all existing functionality and providing clear upgrade paths for enhanced features.
+This update significantly improves the development experience while maintaining full production capabilities.

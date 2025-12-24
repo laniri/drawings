@@ -41,6 +41,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **Pillow** for core image processing and saliency map generation
 - **OpenCV** for advanced image processing (optional, with PIL fallback)
 - **NumPy 1.26.4** (downgraded for PyTorch compatibility)
+- **Boto3** for AWS services integration (optional for local development)
 
 ### Frontend
 - **React 18** with TypeScript
@@ -57,7 +58,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 - Python 3.11+
 - Node.js 18+
 
-### Development Setup
+### Backend Setup
 
 1. **Clone the repository**
    ```bash
@@ -94,6 +95,8 @@ A machine learning-powered application that analyzes children's drawings to iden
    # Start backend server
    uvicorn app.main:app --reload
    ```
+
+**Note**: AWS dependencies (boto3, botocore) are included in requirements.txt but are optional for local development. The system will work without AWS services and gracefully handle missing AWS dependencies.
 
 3. **Frontend Setup**
    ```bash
@@ -507,7 +510,15 @@ pip install reportlab>=4.0.0
    pip install "numpy>=1.25.2,<2.0.0"
    ```
 
-2. **OpenCV Import Errors**
+2. **AWS Dependencies Missing (Local Development)**
+   ```bash
+   # AWS services are optional for local development
+   # The system will work without boto3/botocore
+   # For production deployment with AWS features:
+   pip install boto3 botocore
+   ```
+
+3. **OpenCV Import Errors**
    ```bash
    # OpenCV is now optional - the system will work without it
    # For enhanced functionality, install OpenCV:
@@ -517,7 +528,7 @@ pip install reportlab>=4.0.0
    pip install -r requirements-enhanced.txt
    ```
 
-3. **MyPy Type Checking Issues**
+4. **MyPy Type Checking Issues**
    ```bash
    # The project uses relaxed MyPy configuration for development
    # If you encounter type checking errors, they are likely ignored by default
@@ -525,17 +536,17 @@ pip install reportlab>=4.0.0
    # Edit pyproject.toml and set warn_return_any = true, disallow_untyped_defs = true
    ```
 
-4. **Frontend Shows 0 Drawings**
+5. **Frontend Shows 0 Drawings**
    - Check if backend is running on port 8000
    - Verify Vite proxy configuration in `frontend/vite.config.ts`
    - Ensure API endpoints are accessible
 
-5. **Model Training Fails**
+6. **Model Training Fails**
    - Ensure sufficient drawings are uploaded (minimum 10 per age group)
    - Check that hybrid embeddings are generated before training
    - Verify database connectivity and subject category data
 
-6. **Vision Transformer Issues**
+7. **Vision Transformer Issues**
    - Ensure PyTorch and transformers are properly installed
    - Check that the embedding service initializes correctly
    - Verify image preprocessing pipeline

@@ -14,8 +14,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
 from sqlalchemy import create_engine, text
 
 from alembic import command
@@ -23,6 +21,18 @@ from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from app.core.config import settings
+
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
 from app.core.environment import EnvironmentType, get_current_environment
 from app.core.exceptions import ConfigurationError, StorageError
 from app.services.backup_service import BackupService
@@ -47,7 +57,7 @@ class DatabaseMigrationService:
 
         # S3 configuration for production
         self.s3_client = None
-        if self.env_config.environment == EnvironmentType.PRODUCTION:
+        if self.env_config.environment == EnvironmentType.PRODUCTION and HAS_AWS:
             try:
                 self.s3_client = boto3.client(
                     "s3", region_name=self.env_config.aws_region
@@ -57,6 +67,8 @@ class DatabaseMigrationService:
                 )
             except (NoCredentialsError, Exception) as e:
                 logger.warning(f"S3 client initialization failed: {str(e)}")
+        elif self.env_config.environment == EnvironmentType.PRODUCTION and not HAS_AWS:
+            logger.warning("AWS dependencies not available, S3 backup disabled")
 
         # Migration configuration
         self.alembic_cfg = self._get_alembic_config()
@@ -122,6 +134,11 @@ class DatabaseMigrationService:
 
     async def _upload_backup_to_s3(self, backup_path: str) -> Dict[str, Any]:
         """Upload backup file to S3"""
+        if not HAS_AWS or not self.s3_client:
+            raise StorageError(
+                "AWS dependencies not available or S3 client not initialized"
+            )
+
         try:
             backup_file = Path(backup_path)
 
@@ -514,7 +531,7 @@ class DatabaseMigrationService:
 
     async def _cleanup_old_s3_backups(self, retention_days: int = 30) -> None:
         """Clean up old S3 backups based on retention policy"""
-        if not self.s3_client or not self.env_config.s3_bucket_name:
+        if not HAS_AWS or not self.s3_client or not self.env_config.s3_bucket_name:
             return
 
         try:

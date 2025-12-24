@@ -37,3 +37,4 @@
 - **ReportLab**: Required for PDF generation (`pip install reportlab`)
 - **Pillow**: Core image processing and saliency map creation
 - **OpenCV**: Advanced image analysis (optional, with PIL fallback)
+- **Boto3**: AWS services for production deployment (optional for local development)
