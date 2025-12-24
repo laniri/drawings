@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "Temporary File Cleanup",
+  "description": "Evaluates temporary files (debug scripts, .md summary files) created during agent work and deletes those without long-term value",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "*.py",
+      "*.md",
+      "*.txt",
+      "*.log",
+      "*.tmp",
+      "*.debug",
+      "*_temp*",
+      "*_debug*",
+      "*summary*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new file has been created: {filePath}. Please evaluate if this file has long-term value for the project or if it's a temporary file that should be deleted. Consider:\n\n1. Is this a debug script or temporary analysis file?\n2. Is this a summary file that duplicates information available elsewhere?\n3. Does this file contain important project documentation or code?\n4. Is this file part of the core application functionality?\n\nIf the file appears to be temporary with no long-term value, please ask if usage is completed and if so  delete it and explain why. If it has value, explain what makes it worth keeping."
+  }
+}

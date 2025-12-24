@@ -204,7 +204,15 @@ docker-compose -f docker-compose.dev.yml down
 
 ## Testing
 
-The project uses pytest for comprehensive testing with property-based testing via Hypothesis.
+The project uses pytest for comprehensive testing with property-based testing via Hypothesis. The test suite includes automated fixtures, database isolation, and comprehensive test utilities.
+
+### Test Infrastructure
+
+The testing infrastructure provides:
+- **Isolated Test Database**: In-memory SQLite database for each test function
+- **Automatic Fixtures**: Database sessions, test clients, and sample data
+- **Environment Isolation**: Separate test environment with proper configuration
+- **Cleanup Management**: Automatic cleanup of test data and temporary files
 
 ### Test Configuration
 
@@ -213,6 +221,29 @@ The pytest configuration in `pytest.ini` includes:
 - **Fail-fast**: Stops after 5 test failures (`--maxfail=5`)
 - **Performance monitoring**: Shows 10 slowest tests (`--durations=10`)
 - **Async support**: Automatic asyncio mode for async tests
+- **Strict markers**: Ensures all test markers are properly defined
+
+### Test Fixtures
+
+The `tests/conftest.py` provides comprehensive fixtures:
+
+#### Database Fixtures
+- `test_engine`: Session-scoped SQLite engine for testing
+- `test_session_factory`: Session factory for test database
+- `db_session`: Function-scoped database session with automatic cleanup
+- `test_client`: FastAPI test client with database dependency override
+
+#### Utility Fixtures
+- `temp_file`: Temporary file with automatic cleanup
+- `temp_directory`: Temporary directory with automatic cleanup
+- `sample_drawing_data`: Valid drawing metadata for tests
+- `sample_embedding_data`: Sample embedding vectors for tests
+
+#### Environment Setup
+- `setup_test_environment`: Automatic test environment configuration
+- Sets `SKIP_MODEL_LOADING=true` for faster test execution
+- Creates and cleans up test upload directories
+- Configures test-specific environment variables
 
 ### Test Markers
 
@@ -248,7 +279,27 @@ pytest --cov=app --cov-report=html
 
 # Show test durations (10 slowest by default)
 pytest --durations=0  # Show all test durations
+
+# Run slow tests (when needed)
+pytest --runslow
+
+# Run tests in CI mode (skips ci_skip marked tests)
+CI=1 pytest
 ```
+
+### Test Database Isolation
+
+Each test function gets a fresh database:
+1. **Setup**: Creates all tables in in-memory SQLite database
+2. **Execution**: Test runs with isolated database session
+3. **Cleanup**: Rolls back changes and drops all tables
+4. **Isolation**: No test data persists between test functions
+
+This ensures:
+- **Fast execution**: In-memory database for speed
+- **Complete isolation**: No test interference
+- **Consistent state**: Each test starts with clean database
+- **Automatic cleanup**: No manual database management needed
 
 ### Property-Based Testing
 
@@ -257,11 +308,22 @@ The system includes extensive property-based tests using Hypothesis:
 - Data sufficiency warning generation tests
 - Subject encoding and embedding tests
 - Authentication and access control tests
+- Infrastructure deployment reproducibility tests
 
 Run property-based tests specifically:
 ```bash
 pytest tests/test_property_*.py -v
 ```
+
+### Test Development Guidelines
+
+When writing tests:
+
+1. **Use provided fixtures**: Leverage `db_session`, `test_client`, and utility fixtures
+2. **Mark appropriately**: Use `@pytest.mark.slow`, `@pytest.mark.unit`, etc.
+3. **Isolate tests**: Each test should be independent and not rely on others
+4. **Use sample data**: Leverage `sample_drawing_data` and `sample_embedding_data` fixtures
+5. **Clean up**: Fixtures handle cleanup automatically, but clean up any external resources
 
 ## Development Commands
 
@@ -286,7 +348,7 @@ pytest -m unit            # Run only unit tests
 pytest -m integration     # Run only integration tests
 pytest --durations=10     # Show 10 slowest tests (configured by default)
 
-# Type checking
+# Type checking (relaxed configuration for development)
 mypy app/
 ```
 
@@ -378,7 +440,15 @@ The API documentation is automatically generated and available at:
    pip install "numpy>=1.25.2,<2.0.0"
    ```
 
-2. **Frontend Shows 0 Drawings**
+2. **MyPy Type Checking Issues**
+   ```bash
+   # The project uses relaxed MyPy configuration for development
+   # If you encounter type checking errors, they are likely ignored by default
+   # To enable strict type checking (not recommended for development):
+   # Edit pyproject.toml and set warn_return_any = true, disallow_untyped_defs = true
+   ```
+
+3. **Frontend Shows 0 Drawings**
    - Check if backend is running on port 8000
    - Verify Vite proxy configuration in `frontend/vite.config.ts`
    - Ensure API endpoints are accessible

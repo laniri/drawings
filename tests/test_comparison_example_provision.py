@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import List, Dict, Any
 
-from app.core.database import get_db
 from app.models.database import Drawing, DrawingEmbedding, AnomalyAnalysis, AgeGroupModel
 from app.services.comparison_service import get_comparison_service
 from app.schemas.analysis import ComparisonExampleResponse
@@ -34,9 +33,9 @@ class ComparisonExampleProvisionMachine(RuleBasedStateMachine):
     drawings = Bundle('drawings')
     age_groups = Bundle('age_groups')
     
-    def __init__(self):
+    def __init__(self, db_session):
         super().__init__()
-        self.db = next(get_db())
+        self.db = db_session
         self.comparison_service = get_comparison_service()
         self.embedding_storage = get_embedding_storage()
         self.created_drawings = []
@@ -63,8 +62,6 @@ class ComparisonExampleProvisionMachine(RuleBasedStateMachine):
             self.db.commit()
         except Exception:
             self.db.rollback()
-        finally:
-            self.db.close()
     
     @initialize()
     def setup_age_groups(self):
@@ -439,12 +436,17 @@ def test_comparison_example_response_schema():
 class TestComparisonExampleProvision:
     """Test class for comparison example provision properties."""
     
-    def test_comparison_provision_properties(self):
+    def test_comparison_provision_properties(self, db_session):
         """Run the comparison provision state machine test."""
         from hypothesis.stateful import run_state_machine_as_test
         
+        # Create a custom machine class that uses the db_session
+        class TestMachine(ComparisonExampleProvisionMachine):
+            def __init__(self):
+                super().__init__(db_session)
+        
         # Run the state machine test
-        run_state_machine_as_test(ComparisonExampleProvisionMachine)
+        run_state_machine_as_test(TestMachine)
 
 
 if __name__ == "__main__":
