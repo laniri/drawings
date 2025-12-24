@@ -24,6 +24,7 @@ try:
     import boto3
     import docker
     from botocore.exceptions import ClientError, NoCredentialsError
+    from docker.errors import DockerException
 
     HAS_AWS = True
 except ImportError:
@@ -32,7 +33,7 @@ except ImportError:
     docker = None
     ClientError = Exception
     NoCredentialsError = Exception
-from docker.errors import DockerException
+    DockerException = Exception
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
