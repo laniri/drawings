@@ -6,12 +6,13 @@ project descriptions, and technical documentation links.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 
-from app.services.demo_service import get_demo_service, DemoService
 from app.schemas.common import SuccessResponse
+from app.services.demo_service import DemoService, get_demo_service
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +21,11 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def get_demo_page(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> HTMLResponse:
     """
     Get the complete demo page with all content.
-    
+
     Returns:
         HTML response with complete demo page content
     """
@@ -35,19 +36,19 @@ async def get_demo_page(
         medical_disclaimer = demo_service.get_medical_disclaimer()
         technical_links = demo_service.get_technical_links()
         statistics = demo_service.get_demo_statistics()
-        
+
         # Generate HTML content
         html_content = _generate_demo_html(
             samples=samples,
             project_description=project_description,
             medical_disclaimer=medical_disclaimer,
             technical_links=technical_links,
-            statistics=statistics
+            statistics=statistics,
         )
-        
+
         logger.info("Generated demo page successfully")
         return HTMLResponse(content=html_content)
-        
+
     except Exception as e:
         logger.error(f"Error generating demo page: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate demo page")
@@ -55,23 +56,22 @@ async def get_demo_page(
 
 @router.get("/samples", response_model=SuccessResponse)
 async def get_demo_samples(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> SuccessResponse:
     """
     Get all demo samples with analysis results.
-    
+
     Returns:
         List of demo samples with complete analysis data
     """
     try:
         samples = demo_service.get_demo_samples()
-        
+
         logger.info(f"Retrieved {len(samples)} demo samples")
         return SuccessResponse(
-            message=f"Retrieved {len(samples)} demo samples",
-            data={"samples": samples}
+            message=f"Retrieved {len(samples)} demo samples", data={"samples": samples}
         )
-        
+
     except Exception as e:
         logger.error(f"Error retrieving demo samples: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve demo samples")
@@ -79,30 +79,30 @@ async def get_demo_samples(
 
 @router.get("/samples/{sample_id}", response_model=SuccessResponse)
 async def get_demo_sample(
-    sample_id: int,
-    demo_service: DemoService = Depends(get_demo_service)
+    sample_id: int, demo_service: DemoService = Depends(get_demo_service)
 ) -> SuccessResponse:
     """
     Get a specific demo sample by ID.
-    
+
     Args:
         sample_id: ID of the demo sample
-        
+
     Returns:
         Demo sample with complete analysis data
     """
     try:
         sample = demo_service.get_demo_sample(sample_id)
-        
+
         if not sample:
-            raise HTTPException(status_code=404, detail=f"Demo sample {sample_id} not found")
-        
+            raise HTTPException(
+                status_code=404, detail=f"Demo sample {sample_id} not found"
+            )
+
         logger.info(f"Retrieved demo sample {sample_id}")
         return SuccessResponse(
-            message=f"Retrieved demo sample {sample_id}",
-            data=sample
+            message=f"Retrieved demo sample {sample_id}", data=sample
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -112,98 +112,96 @@ async def get_demo_sample(
 
 @router.get("/project-info", response_model=SuccessResponse)
 async def get_project_info(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> SuccessResponse:
     """
     Get comprehensive project information for demo page.
-    
+
     Returns:
         Project description with technical details and features
     """
     try:
         project_info = demo_service.get_project_description()
-        
+
         logger.info("Retrieved project information")
         return SuccessResponse(
-            message="Retrieved project information",
-            data=project_info
+            message="Retrieved project information", data=project_info
         )
-        
+
     except Exception as e:
         logger.error(f"Error retrieving project info: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve project information")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve project information"
+        )
 
 
 @router.get("/disclaimer", response_model=SuccessResponse)
 async def get_medical_disclaimer(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> SuccessResponse:
     """
     Get medical disclaimer and warnings for demo content.
-    
+
     Returns:
         Medical disclaimer with all required warnings
     """
     try:
         disclaimer = demo_service.get_medical_disclaimer()
-        
+
         logger.info("Retrieved medical disclaimer")
-        return SuccessResponse(
-            message="Retrieved medical disclaimer",
-            data=disclaimer
-        )
-        
+        return SuccessResponse(message="Retrieved medical disclaimer", data=disclaimer)
+
     except Exception as e:
         logger.error(f"Error retrieving medical disclaimer: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve medical disclaimer")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve medical disclaimer"
+        )
 
 
 @router.get("/technical-links", response_model=SuccessResponse)
 async def get_technical_links(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> SuccessResponse:
     """
     Get technical links and documentation references.
-    
+
     Returns:
         Technical links including GitHub repository and documentation
     """
     try:
         links = demo_service.get_technical_links()
-        
+
         logger.info("Retrieved technical links")
-        return SuccessResponse(
-            message="Retrieved technical links",
-            data=links
-        )
-        
+        return SuccessResponse(message="Retrieved technical links", data=links)
+
     except Exception as e:
         logger.error(f"Error retrieving technical links: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve technical links")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve technical links"
+        )
 
 
 @router.get("/statistics", response_model=SuccessResponse)
 async def get_demo_statistics(
-    demo_service: DemoService = Depends(get_demo_service)
+    demo_service: DemoService = Depends(get_demo_service),
 ) -> SuccessResponse:
     """
     Get demo-specific statistics and metrics.
-    
+
     Returns:
         Demo statistics including sample counts and distributions
     """
     try:
         stats = demo_service.get_demo_statistics()
-        
+
         logger.info("Retrieved demo statistics")
-        return SuccessResponse(
-            message="Retrieved demo statistics",
-            data=stats
-        )
-        
+        return SuccessResponse(message="Retrieved demo statistics", data=stats)
+
     except Exception as e:
         logger.error(f"Error retrieving demo statistics: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve demo statistics")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve demo statistics"
+        )
 
 
 def _generate_demo_html(
@@ -211,28 +209,36 @@ def _generate_demo_html(
     project_description: Dict[str, Any],
     medical_disclaimer: Dict[str, Any],
     technical_links: Dict[str, Any],
-    statistics: Dict[str, Any]
+    statistics: Dict[str, Any],
 ) -> str:
     """
     Generate complete HTML content for demo page.
-    
+
     Args:
         samples: Demo samples with analysis results
         project_description: Project information
         medical_disclaimer: Medical disclaimer content
         technical_links: Technical documentation links
         statistics: Demo statistics
-        
+
     Returns:
         Complete HTML content for demo page
     """
-    
+
     # Generate sample cards HTML
     sample_cards = ""
     for sample in samples:
-        anomaly_class = "anomaly" if sample.get("analysis_result", {}).get("is_anomaly", False) else "normal"
-        anomaly_badge = "🔍 Anomaly Detected" if sample.get("analysis_result", {}).get("is_anomaly", False) else "✅ Normal Pattern"
-        
+        anomaly_class = (
+            "anomaly"
+            if sample.get("analysis_result", {}).get("is_anomaly", False)
+            else "normal"
+        )
+        anomaly_badge = (
+            "🔍 Anomaly Detected"
+            if sample.get("analysis_result", {}).get("is_anomaly", False)
+            else "✅ Normal Pattern"
+        )
+
         sample_cards += f"""
         <div class="sample-card {anomaly_class}">
             <div class="sample-header">
@@ -277,9 +283,9 @@ def _generate_demo_html(
                         <h5>Key Regions Analyzed:</h5>
                         <ul>
         """
-        
+
         # Add key regions
-        for region in sample.get('interpretability', {}).get('key_regions', []):
+        for region in sample.get("interpretability", {}).get("key_regions", []):
             sample_cards += f"""
                             <li>
                                 <strong>{region.get('region', '')}:</strong> 
@@ -287,7 +293,7 @@ def _generate_demo_html(
                                 <span class="importance">(Importance: {region.get('importance', 0):.2f})</span>
                             </li>
             """
-        
+
         sample_cards += """
                         </ul>
                     </div>
@@ -295,7 +301,7 @@ def _generate_demo_html(
             </div>
         </div>
         """
-    
+
     # Generate statistics HTML
     stats_html = f"""
     <div class="demo-statistics">
@@ -317,7 +323,7 @@ def _generate_demo_html(
         </div>
     </div>
     """
-    
+
     # Complete HTML template
     html_content = f"""
     <!DOCTYPE html>
@@ -338,19 +344,19 @@ def _generate_demo_html(
                 <p class="primary-warning">{medical_disclaimer.get('primary_warning', '')}</p>
                 <div class="disclaimer-details">
     """
-    
-    for detail in medical_disclaimer.get('detailed_disclaimer', []):
+
+    for detail in medical_disclaimer.get("detailed_disclaimer", []):
         html_content += f"<p>• {detail}</p>"
-    
+
     html_content += f"""
                 </div>
                 <div class="recommendations">
                     <h4>Recommendations:</h4>
     """
-    
-    for rec in medical_disclaimer.get('recommendations', []):
+
+    for rec in medical_disclaimer.get("recommendations", []):
         html_content += f"<p>• {rec}</p>"
-    
+
     html_content += f"""
                 </div>
             </div>
@@ -365,10 +371,10 @@ def _generate_demo_html(
                     <h3>🚀 Key Features</h3>
                     <ul class="features-list">
     """
-    
-    for feature in project_description.get('key_features', []):
+
+    for feature in project_description.get("key_features", []):
         html_content += f"<li>{feature}</li>"
-    
+
     html_content += f"""
                     </ul>
                 </div>
@@ -435,7 +441,7 @@ def _generate_demo_html(
     </body>
     </html>
     """
-    
+
     return html_content
 
 

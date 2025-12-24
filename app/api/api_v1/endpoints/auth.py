@@ -7,12 +7,12 @@ Provides login, logout, and session management endpoints for admin authenticatio
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Request, Response, HTTPException, status, Form
-from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Form, HTTPException, Request, Response, status
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
-from app.services.auth_service import get_auth_service
 from app.core.config import settings
+from app.services.auth_service import get_auth_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,12 +23,14 @@ auth_service = get_auth_service()
 
 class LoginRequest(BaseModel):
     """Login request model."""
+
     password: str
     redirect_url: Optional[str] = None
 
 
 class LoginResponse(BaseModel):
     """Login response model."""
+
     success: bool
     message: str
     session_token: Optional[str] = None
@@ -37,6 +39,7 @@ class LoginResponse(BaseModel):
 
 class SessionStatus(BaseModel):
     """Session status model."""
+
     authenticated: bool
     session_info: Optional[dict] = None
     expires_in: Optional[int] = None
@@ -47,14 +50,14 @@ def _get_client_ip(request: Request) -> str:
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
-    
+
     real_ip = request.headers.get("X-Real-IP")
     if real_ip:
         return real_ip
-    
+
     if request.client:
         return request.client.host
-    
+
     return "unknown"
 
 
@@ -62,11 +65,11 @@ def _get_client_ip(request: Request) -> str:
 async def login_page(request: Request, redirect: Optional[str] = None):
     """
     Display login page.
-    
+
     Args:
         request: FastAPI request object
         redirect: URL to redirect to after successful login
-        
+
     Returns:
         HTML login page
     """
@@ -75,10 +78,14 @@ async def login_page(request: Request, redirect: Optional[str] = None):
     if session_token and auth_service.verify_session(session_token):
         redirect_url = redirect or "/api/v1/config/"
         return RedirectResponse(url=redirect_url, status_code=302)
-    
+
     # Generate login form HTML
-    redirect_input = f'<input type="hidden" name="redirect_url" value="{redirect}">' if redirect else ""
-    
+    redirect_input = (
+        f'<input type="hidden" name="redirect_url" value="{redirect}">'
+        if redirect
+        else ""
+    )
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -239,7 +246,7 @@ async def login_page(request: Request, redirect: Optional[str] = None):
     </body>
     </html>
     """
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -248,32 +255,31 @@ async def login(
     request: Request,
     response: Response,
     password: str = Form(...),
-    redirect_url: Optional[str] = Form(None)
+    redirect_url: Optional[str] = Form(None),
 ):
     """
     Process login form submission.
-    
+
     Args:
         request: FastAPI request object
         response: FastAPI response object
         password: Admin password
         redirect_url: URL to redirect to after successful login
-        
+
     Returns:
         Redirect response or error page
     """
     client_ip = _get_client_ip(request)
-    
+
     # Authenticate user
     session_token = auth_service.authenticate(password, client_ip)
-    
+
     if session_token:
         # Set session cookie
         response = RedirectResponse(
-            url=redirect_url or "/api/v1/config/",
-            status_code=302
+            url=redirect_url or "/api/v1/config/", status_code=302
         )
-        
+
         # Set secure cookie
         response.set_cookie(
             key="session_token",
@@ -281,22 +287,26 @@ async def login(
             max_age=3600,  # 1 hour
             httponly=True,
             secure=settings.is_production,  # HTTPS only in production
-            samesite="lax"
+            samesite="lax",
         )
-        
+
         logger.info(f"Successful login from {client_ip}")
         return response
     else:
         # Login failed - show error page
         error_message = "Invalid password. Please try again."
-        
+
         # Check if rate limited
         auth_service_instance = get_auth_service()
         if auth_service_instance._is_rate_limited(client_ip):
             error_message = "Too many failed attempts. Please try again later."
-        
-        redirect_input = f'<input type="hidden" name="redirect_url" value="{redirect_url}">' if redirect_url else ""
-        
+
+        redirect_input = (
+            f'<input type="hidden" name="redirect_url" value="{redirect_url}">'
+            if redirect_url
+            else ""
+        )
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -365,7 +375,7 @@ async def login(
         </body>
         </html>
         """
-        
+
         return HTMLResponse(content=html_content, status_code=401)
 
 
@@ -373,26 +383,26 @@ async def login(
 async def api_login(request: Request, login_data: LoginRequest):
     """
     API endpoint for programmatic login.
-    
+
     Args:
         request: FastAPI request object
         login_data: Login request data
-        
+
     Returns:
         Login response with session token
     """
     client_ip = _get_client_ip(request)
-    
+
     # Authenticate user
     session_token = auth_service.authenticate(login_data.password, client_ip)
-    
+
     if session_token:
         logger.info(f"Successful API login from {client_ip}")
         return LoginResponse(
             success=True,
             message="Login successful",
             session_token=session_token,
-            redirect_url=login_data.redirect_url
+            redirect_url=login_data.redirect_url,
         )
     else:
         # Check if rate limited
@@ -400,12 +410,11 @@ async def api_login(request: Request, login_data: LoginRequest):
         if auth_service_instance._is_rate_limited(client_ip):
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Too many failed login attempts. Please try again later."
+                detail="Too many failed login attempts. Please try again later.",
             )
-        
+
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
         )
 
 
@@ -413,24 +422,24 @@ async def api_login(request: Request, login_data: LoginRequest):
 async def logout(request: Request, response: Response):
     """
     Logout user and invalidate session.
-    
+
     Args:
         request: FastAPI request object
         response: FastAPI response object
-        
+
     Returns:
         Redirect to home page
     """
     session_token = request.cookies.get("session_token")
-    
+
     if session_token:
         auth_service.logout(session_token)
         logger.info("User logged out successfully")
-    
+
     # Clear session cookie and redirect
     response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie(key="session_token")
-    
+
     return response
 
 
@@ -438,24 +447,22 @@ async def logout(request: Request, response: Response):
 async def session_status(request: Request):
     """
     Get current session status.
-    
+
     Args:
         request: FastAPI request object
-        
+
     Returns:
         Session status information
     """
     session_token = request.cookies.get("session_token")
-    
+
     if not session_token:
         return SessionStatus(authenticated=False)
-    
+
     if auth_service.verify_session(session_token):
         session_info = auth_service.get_session_info(session_token)
         return SessionStatus(
-            authenticated=True,
-            session_info=session_info,
-            expires_in=3600  # 1 hour
+            authenticated=True, session_info=session_info, expires_in=3600  # 1 hour
         )
     else:
         return SessionStatus(authenticated=False)
@@ -465,16 +472,16 @@ async def session_status(request: Request):
 async def auth_stats(request: Request):
     """
     Get authentication service statistics (admin only).
-    
+
     Args:
         request: FastAPI request object
-        
+
     Returns:
         Authentication statistics
     """
     # This endpoint will be protected by the authentication middleware
     # Only authenticated admin users can access it
-    
+
     stats = auth_service.get_stats()
     return {
         "authentication_stats": stats,
@@ -484,7 +491,7 @@ async def auth_stats(request: Request):
             "/api/v1/analysis/batch",
             "/api/v1/models/*",
             "/api/v1/training/*",
-            "/api/v1/backup/*"
+            "/api/v1/backup/*",
         ],
         "public_routes": [
             "/",
@@ -492,6 +499,6 @@ async def auth_stats(request: Request):
             "/api/v1/drawings/*",
             "/api/v1/analysis/analyze/*",
             "/api/v1/documentation/*",
-            "/static/*"
-        ]
+            "/static/*",
+        ],
     }

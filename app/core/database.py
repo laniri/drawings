@@ -5,12 +5,13 @@ This module provides database engine configuration with SQLite WAL mode
 and session management for the application.
 """
 
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.engine import Engine
-import sqlite3
 import os
+import sqlite3
 from typing import Generator
+
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.models.database import Base
 
@@ -18,6 +19,7 @@ from app.models.database import Base
 def get_database_url() -> str:
     """Get database URL from environment configuration"""
     from app.core.config import settings
+
     return settings.DATABASE_URL
 
 
@@ -25,7 +27,7 @@ def get_database_url() -> str:
 def create_database_engine():
     """Create database engine with environment-aware configuration"""
     database_url = get_database_url()
-    
+
     return create_engine(
         database_url,
         connect_args={
@@ -69,7 +71,7 @@ def create_tables():
 def get_db() -> Generator[Session, None, None]:
     """
     Dependency function to get database session.
-    
+
     Yields:
         Session: SQLAlchemy database session
     """
@@ -84,12 +86,12 @@ def init_db():
     """Initialize the database by creating all tables."""
     # Get database URL for path extraction
     database_url = get_database_url()
-    
+
     # Ensure the database directory exists
     db_path = database_url.replace("sqlite:///", "")
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir)
-    
+
     # Create all tables
     create_tables()
