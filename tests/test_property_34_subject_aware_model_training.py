@@ -113,7 +113,7 @@ class TestSubjectAwareModelTraining:
             max_size=30
         )
     )
-    @settings(max_examples=20)
+    @settings(max_examples=20, deadline=None)  # Disable deadline for model training
     def test_hybrid_embedding_training_consistency(self, age_range, embedding_specs):
         """
         **Feature: children-drawing-anomaly-detection, Property 34: Subject-Aware Model Training**

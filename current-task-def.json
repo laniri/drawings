@@ -1,0 +1,126 @@
+{
+    "taskDefinition": {
+        "taskDefinitionArn": "arn:aws:ecs:eu-west-1:921400262514:task-definition/children-drawing-prod-task:3",
+        "containerDefinitions": [
+            {
+                "name": "app",
+                "image": "nginx:latest",
+                "cpu": 0,
+                "links": [],
+                "portMappings": [
+                    {
+                        "containerPort": 80,
+                        "hostPort": 80,
+                        "protocol": "tcp"
+                    }
+                ],
+                "essential": true,
+                "entryPoint": [],
+                "command": [],
+                "environment": [
+                    {
+                        "name": "ENABLE_METRICS",
+                        "value": "true"
+                    },
+                    {
+                        "name": "S3_BUCKET_DRAWINGS",
+                        "value": "children-drawing-production-drawings-921400262514"
+                    },
+                    {
+                        "name": "S3_BUCKET_MODELS",
+                        "value": "children-drawing-production-models-921400262514"
+                    },
+                    {
+                        "name": "ENABLE_SECRETS_MANAGER",
+                        "value": "true"
+                    },
+                    {
+                        "name": "ENVIRONMENT",
+                        "value": "production"
+                    },
+                    {
+                        "name": "AWS_DEFAULT_REGION",
+                        "value": "eu-west-1"
+                    },
+                    {
+                        "name": "S3_BUCKET_BACKUPS",
+                        "value": "children-drawing-production-backups-921400262514"
+                    }
+                ],
+                "environmentFiles": [],
+                "mountPoints": [],
+                "volumesFrom": [],
+                "secrets": [
+                    {
+                        "name": "ADMIN_PASSWORD_SECRET_ARN",
+                        "valueFrom": "arn:aws:secretsmanager:eu-west-1:921400262514:secret:children-drawing-prod-admin-password-tJoR5r"
+                    }
+                ],
+                "dnsServers": [],
+                "dnsSearchDomains": [],
+                "extraHosts": [],
+                "dockerSecurityOptions": [],
+                "dockerLabels": {},
+                "ulimits": [],
+                "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                        "awslogs-group": "/ecs/children-drawing-prod",
+                        "awslogs-region": "eu-west-1",
+                        "awslogs-stream-prefix": "ecs"
+                    },
+                    "secretOptions": []
+                },
+                "systemControls": [],
+                "credentialSpecs": []
+            }
+        ],
+        "family": "children-drawing-prod-task",
+        "taskRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-task-role",
+        "executionRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-execution-role",
+        "networkMode": "awsvpc",
+        "revision": 3,
+        "volumes": [],
+        "status": "ACTIVE",
+        "requiresAttributes": [
+            {
+                "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+            },
+            {
+                "name": "ecs.capability.execution-role-awslogs"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+            },
+            {
+                "name": "ecs.capability.secrets.asm.environment-variables"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.task-iam-role"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+            },
+            {
+                "name": "ecs.capability.task-eni"
+            }
+        ],
+        "placementConstraints": [],
+        "compatibilities": [
+            "EC2",
+            "MANAGED_INSTANCES",
+            "FARGATE"
+        ],
+        "requiresCompatibilities": [
+            "FARGATE"
+        ],
+        "cpu": "256",
+        "memory": "512",
+        "registeredAt": "2025-12-22T21:16:18.837000+02:00",
+        "registeredBy": "arn:aws:sts::921400262514:assumed-role/AWSReservedSSO_admin+Q_a3224891bbb3ac9d/itayAdmin"
+    },
+    "tags": []
+}

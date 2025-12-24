@@ -1,7 +1,7 @@
 # SageMakerTrainingService Algorithm Implementation
 
 **Source File**: `app/services/sagemaker_training_service.py`
-**Last Updated**: 2025-12-16 13:41:57
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
@@ -50,29 +50,29 @@ Consider profiling with representative datasets to determine scalability charact
 
 The following edge cases should be tested:
 
+- Very large values for job_id
+- Empty string for role_name
+- Special characters in s3_bucket
+- Special characters in s3_prefix
+- Special characters in sagemaker_job_name
+- Special characters in role_arn
+- Empty string for metadata_file
+- Empty string for s3_bucket
+- Special characters in role_name
+- Special characters in s3_output_uri
+- Zero value for job_id
+- Special characters in image_uri
+- Empty string for role_arn
 - Negative values for job_id
 - Special characters in s3_input_uri
 - Empty string for sagemaker_job_name
-- Empty string for s3_input_uri
-- Special characters in dataset_folder
-- Empty string for s3_prefix
-- Special characters in image_uri
-- Special characters in s3_prefix
-- Zero value for job_id
-- Empty string for role_name
-- Special characters in metadata_file
-- Empty string for dataset_folder
-- Special characters in s3_bucket
-- Special characters in sagemaker_job_name
 - Empty string for s3_output_uri
-- Special characters in s3_output_uri
-- Empty string for metadata_file
-- Empty string for role_arn
-- Special characters in role_arn
-- Very large values for job_id
+- Special characters in dataset_folder
 - Empty string for image_uri
-- Special characters in role_name
-- Empty string for s3_bucket
+- Special characters in metadata_file
+- Empty string for s3_input_uri
+- Empty string for s3_prefix
+- Empty string for dataset_folder
 
 ## Implementation Details
 
@@ -212,4 +212,4 @@ List SageMaker training jobs.
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:57*
+*Generated on: 2025-12-18 23:17:04*

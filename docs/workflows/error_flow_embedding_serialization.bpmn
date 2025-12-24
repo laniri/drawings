@@ -4,8 +4,8 @@
     <bpmn:startEvent id="start_0" name="Error Condition Detected"/>
     <bpmn:errorEvent id="error_event_1" name="Exception Error" error_type="Exception"/>
     <bpmn:task id="recovery_task_2" name="Handle Exception" recovery="True"/>
-    <bpmn:errorEvent id="error_event_3" name="pickle Error" error_type="pickle"/>
-    <bpmn:task id="recovery_task_4" name="Handle pickle" recovery="True"/>
+    <bpmn:errorEvent id="error_event_3" name="Exception Error" error_type="Exception"/>
+    <bpmn:task id="recovery_task_4" name="Handle Exception" recovery="True"/>
     <bpmn:errorEvent id="error_event_5" name="Exception Error" error_type="Exception"/>
     <bpmn:task id="recovery_task_6" name="Handle Exception" recovery="True"/>
     <bpmn:endEvent id="end_7" name="Error Resolved"/>

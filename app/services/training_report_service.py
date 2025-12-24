@@ -383,6 +383,9 @@ class TrainingReportGenerator:
                                    output_dir: Path) -> Dict[str, str]:
         """Generate all training visualizations."""
         try:
+            # Ensure output directory exists
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
             visualization_paths = {}
             
             # 1. Loss curves
@@ -910,6 +913,9 @@ Model Type: Autoencoder"""
     
     def _save_report_files(self, report_content: Dict, output_dir: Path) -> Dict[str, str]:
         """Save report content to various file formats."""
+        # Ensure output directory exists
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
         report_paths = {}
         
         # Save JSON report

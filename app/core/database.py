@@ -14,18 +14,30 @@ from typing import Generator
 
 from app.models.database import Base
 
-# Database configuration
-DATABASE_URL = "sqlite:///./drawings.db"
+
+def get_database_url() -> str:
+    """Get database URL from environment configuration"""
+    from app.core.config import settings
+    return settings.DATABASE_URL
+
 
 # Create engine with SQLite-specific configurations
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
-        "check_same_thread": False,  # Allow SQLite to be used with multiple threads
-        "timeout": 20,  # Connection timeout in seconds
-    },
-    echo=False,  # Set to True for SQL query logging during development
-)
+def create_database_engine():
+    """Create database engine with environment-aware configuration"""
+    database_url = get_database_url()
+    
+    return create_engine(
+        database_url,
+        connect_args={
+            "check_same_thread": False,  # Allow SQLite to be used with multiple threads
+            "timeout": 20,  # Connection timeout in seconds
+        },
+        echo=False,  # Set to True for SQL query logging during development
+    )
+
+
+# Initialize engine
+engine = create_database_engine()
 
 
 @event.listens_for(Engine, "connect")
@@ -70,8 +82,11 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db():
     """Initialize the database by creating all tables."""
+    # Get database URL for path extraction
+    database_url = get_database_url()
+    
     # Ensure the database directory exists
-    db_path = DATABASE_URL.replace("sqlite:///", "")
+    db_path = database_url.replace("sqlite:///", "")
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir)

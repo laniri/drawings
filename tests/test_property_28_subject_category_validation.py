@@ -80,10 +80,15 @@ def test_valid_subject_category_acceptance(age, subject, expert_label, drawing_t
     else:
         assert request.subject is None, "None subject should remain None"
     
-    # Verify other fields are preserved
+    # Verify other fields are preserved (accounting for whitespace normalization)
     assert request.expert_label == expert_label, "Expert label should be preserved"
     assert request.drawing_tool == drawing_tool, "Drawing tool should be preserved"
-    assert request.prompt == prompt, "Prompt should be preserved"
+    
+    # Prompt should be preserved unless it's whitespace-only (then converted to None)
+    if prompt is not None and prompt.strip() == "":
+        assert request.prompt is None, "Whitespace-only prompt should be converted to None"
+    else:
+        assert request.prompt == prompt, "Prompt should be preserved"
 
 
 @given(

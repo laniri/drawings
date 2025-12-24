@@ -14,7 +14,11 @@ from app.core.middleware import (
     ResourceMonitoringMiddleware,
     setup_error_monitoring
 )
+from app.core.metrics_middleware import MetricsCollectionMiddleware
+from app.core.auth_middleware import AuthenticationMiddleware
+from app.core.security_middleware import SecurityMiddleware
 from app.api.api_v1.api import api_router
+from app.api.api_v1.endpoints.auth import router as auth_router
 
 # Initialize error monitoring
 setup_error_monitoring()
@@ -25,6 +29,17 @@ app = FastAPI(
     description="Machine learning system for detecting anomalies in children's drawings",
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+# Add security middleware (first for rate limiting and security headers)
+security_middleware = SecurityMiddleware(app)
+app.add_middleware(SecurityMiddleware)
+
+# Add metrics collection middleware
+metrics_middleware = MetricsCollectionMiddleware(app)
+app.add_middleware(MetricsCollectionMiddleware)
+
+# Add authentication middleware (before other middleware)
+app.add_middleware(AuthenticationMiddleware)
 
 # Add error handling middleware (first to catch all errors)
 error_middleware = ErrorHandlingMiddleware(app)
@@ -38,6 +53,8 @@ resource_middleware = ResourceMonitoringMiddleware(app, max_concurrent_requests=
 app.add_middleware(ResourceMonitoringMiddleware, max_concurrent_requests=10)
 
 # Store middleware references in app state for metrics access
+app.state.security_middleware = security_middleware
+app.state.metrics_middleware = metrics_middleware
 app.state.error_middleware = error_middleware
 app.state.resource_middleware = resource_middleware
 
@@ -52,6 +69,13 @@ app.add_middleware(
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Include authentication router (without API prefix)
+app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+
+# Include demo router at root level for public access
+from app.api.api_v1.endpoints.demo import router as demo_router
+app.include_router(demo_router, prefix="/demo", tags=["demo"])
 
 # Mount static files for serving uploaded images and results
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -112,6 +136,10 @@ async def detailed_health_check():
         }
     }
     
+    # Add security statistics if available
+    if hasattr(app.state, 'security_middleware'):
+        health_info["security"] = app.state.security_middleware.get_rate_limit_stats()
+    
     # Add error statistics if available
     if hasattr(app.state, 'error_middleware'):
         health_info["errors"] = app.state.error_middleware.get_error_stats()
@@ -128,8 +156,12 @@ async def get_metrics():
     """Get system metrics for monitoring."""
     import psutil
     from datetime import datetime
+    from app.services.monitoring_service import get_monitoring_service
     
-    metrics = {
+    monitoring_service = get_monitoring_service()
+    
+    # Collect system metrics
+    system_metrics = {
         "timestamp": datetime.utcnow().isoformat(),
         "system": {
             "cpu_percent": psutil.cpu_percent(interval=0.1),
@@ -147,13 +179,84 @@ async def get_metrics():
     }
     
     # Add middleware statistics if available
+    if hasattr(app.state, 'security_middleware'):
+        system_metrics["security"] = app.state.security_middleware.get_rate_limit_stats()
+    
     if hasattr(app.state, 'error_middleware'):
-        metrics["errors"] = app.state.error_middleware.get_error_stats()
+        system_metrics["errors"] = app.state.error_middleware.get_error_stats()
     
     if hasattr(app.state, 'resource_middleware'):
-        metrics["resources"] = app.state.resource_middleware.get_resource_stats()
+        system_metrics["resources"] = app.state.resource_middleware.get_resource_stats()
     
-    return metrics
+    if hasattr(app.state, 'metrics_middleware'):
+        system_metrics["application"] = app.state.metrics_middleware.get_metrics_summary()
+    
+    # Add monitoring service statistics
+    system_metrics["monitoring"] = monitoring_service.get_service_stats()
+    
+    # Record these metrics to CloudWatch
+    monitoring_service.record_performance_metrics({
+        "cpu_usage": system_metrics["system"]["cpu_percent"],
+        "memory_usage": system_metrics["system"]["memory"]["percent"],
+        "disk_usage": system_metrics["system"]["disk"]["percent"]
+    })
+    
+    return system_metrics
+
+
+@app.get("/monitoring/logs")
+async def get_recent_logs(limit: int = 100):
+    """Get recent structured logs for monitoring."""
+    from app.services.monitoring_service import get_monitoring_service
+    
+    monitoring_service = get_monitoring_service()
+    
+    # Get recent log entries
+    recent_logs = list(monitoring_service._log_entries)[-limit:]
+    
+    return {
+        "logs": [
+            {
+                "correlation_id": log.correlation_id,
+                "timestamp": log.timestamp.isoformat(),
+                "level": log.level,
+                "message": log.message,
+                "component": log.component,
+                "operation": log.operation,
+                "success": log.success,
+                "error_message": log.error_message
+            }
+            for log in recent_logs
+        ],
+        "total_logs": len(monitoring_service._log_entries),
+        "limit": limit
+    }
+
+
+@app.get("/monitoring/alerts")
+async def get_recent_alerts(limit: int = 50):
+    """Get recent alerts for monitoring."""
+    from app.services.monitoring_service import get_monitoring_service
+    
+    monitoring_service = get_monitoring_service()
+    
+    # Get recent alerts
+    recent_alerts = list(monitoring_service._alert_history)[-limit:]
+    
+    return {
+        "alerts": [
+            {
+                "alert_id": alert.alert_id,
+                "correlation_id": alert.correlation_id,
+                "timestamp": alert.timestamp.isoformat() if alert.timestamp else None,
+                "success": alert.success,
+                "error_message": alert.error_message
+            }
+            for alert in recent_alerts
+        ],
+        "total_alerts": len(monitoring_service._alert_history),
+        "limit": limit
+    }
 
 
 if __name__ == "__main__":

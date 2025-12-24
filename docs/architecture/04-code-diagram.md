@@ -44,6 +44,9 @@ classDiagram
     class EmbeddingSerializationError {
     }
     class EmbeddingSerializer {
+        +serialize_hybrid_embedding
+        +deserialize_hybrid_embedding
+        +validate_hybrid_embedding
         +serialize_embedding
         +deserialize_embedding
         +validate_embedding
@@ -64,6 +67,8 @@ classDiagram
     }
     class EmbeddingStorage {
         -__init__
+        +store_hybrid_embedding
+        +retrieve_hybrid_embedding
         +store_embedding
         +retrieve_embedding
         +batch_store_embeddings
@@ -90,7 +95,10 @@ classDiagram
         +id
         +drawing_id
         +model_type
+        +embedding_type
         +embedding_vector
+        +visual_component
+        +subject_component
         +vector_dimension
         +created_timestamp
         +drawing
@@ -102,6 +110,9 @@ classDiagram
         +age_max
         +model_type
         +vision_model
+        +supports_subjects
+        +subject_categories
+        +embedding_type
         +parameters
         +sample_count
         +threshold
@@ -116,6 +127,10 @@ classDiagram
         +age_group_model_id
         +anomaly_score
         +normalized_score
+        +visual_anomaly_score
+        +subject_anomaly_score
+        +anomaly_attribution
+        +analysis_type
         +is_anomaly
         +confidence
         +analysis_timestamp
@@ -276,6 +291,9 @@ classDiagram
 
 **Methods**:
 
+- `serialize_hybrid_embedding()`: Serialize a hybrid embedding with component separation.
+- `deserialize_hybrid_embedding()`: Deserialize a hybrid embedding from components or full data.
+- `validate_hybrid_embedding()`: Validate a hybrid embedding for correctness.
 - `serialize_embedding()`: Serialize a numpy embedding array to bytes for database storage.
 - `deserialize_embedding()`: Deserialize bytes back to numpy embedding array.
 - `validate_embedding()`: Validate an embedding array for correctness.
@@ -310,6 +328,8 @@ classDiagram
 **Methods**:
 
 - `__init__()`: Initialize embedding storage.
+- `store_hybrid_embedding()`: Store a hybrid embedding with component separation.
+- `retrieve_hybrid_embedding()`: Retrieve a hybrid embedding with component reconstruction support.
 - `store_embedding()`: Store an embedding with serialization and caching.
 - `retrieve_embedding()`: Retrieve an embedding with caching support.
 - `batch_store_embeddings()`: Store multiple embeddings in batch.
@@ -381,6 +401,14 @@ classDiagram
 
 **Inherits from**: str, Enum
 
+### SubjectCategory
+
+**File**: `app/schemas/drawings.py`
+
+**Description**: Enumeration for drawing subject categories.
+
+**Inherits from**: str, Enum
+
 ### DrawingUploadRequest
 
 **File**: `app/schemas/drawings.py`
@@ -392,6 +420,7 @@ classDiagram
 **Methods**:
 
 - `validate_optional_strings()`: Validate optional string fields - convert empty strings to None.
+- `validate_subject_category()`: Validate subject category - convert empty strings to None, validate enum values.
 
 ### DrawingResponse
 
@@ -506,6 +535,86 @@ classDiagram
 **File**: `app/schemas/analysis.py`
 
 **Description**: Response model for analysis history of a drawing.
+
+**Inherits from**: BaseModel
+
+### InteractiveRegionResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for interactive saliency regions.
+
+**Inherits from**: BaseModel
+
+### AttentionPatchResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for Vision Transformer attention patches.
+
+**Inherits from**: BaseModel
+
+### InteractiveInterpretabilityResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for interactive interpretability data.
+
+**Inherits from**: BaseModel
+
+### SimplifiedExplanationResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for simplified, non-technical explanations.
+
+**Inherits from**: BaseModel
+
+### ConfidenceMetricsResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for confidence metrics and reliability scores.
+
+**Inherits from**: BaseModel
+
+### ExportRequest
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Request model for exporting interpretability results.
+
+**Inherits from**: BaseModel
+
+**Methods**:
+
+- `validate_format()`: Validate export format.
+
+### ExportResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for export operations.
+
+**Inherits from**: BaseModel
+
+### AnnotationRequest
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Request model for adding annotations to interpretability results.
+
+**Inherits from**: BaseModel
+
+**Methods**:
+
+- `validate_annotation_type()`: Validate annotation type.
+
+### ComparisonExamplesResponse
+
+**File**: `app/schemas/analysis.py`
+
+**Description**: Response model for comparison examples from the same age group.
 
 **Inherits from**: BaseModel
 
@@ -952,11 +1061,13 @@ classDiagram
 **Methods**:
 
 - `__init__()`:   Init   functionality.
-- `find_similar_normal_examples()`: Find similar normal examples from the same age group.
+- `find_similar_normal_examples()`: Find similar normal examples from the same age group and optionally same subject.
 - `_get_drawing_embedding()`: Get embedding for a drawing.
-- `_get_normal_drawings_in_age_group()`: Get normal drawings in the specified age group.
+- `_get_normal_drawings_in_age_group()`: Get normal drawings in the specified age group and optionally subject category.
 - `_calculate_cosine_similarity()`: Calculate cosine similarity between two embeddings.
 - `get_comparison_statistics()`: Get statistics about available comparison examples in an age group.
+- `get_subject_specific_examples()`: Get subject-specific examples for comparison and educational purposes.
+- `get_comparison_examples_with_fallback()`: Get comparison examples with fallback strategy when subject-specific examples are unavailable.
 
 ### ValidationResult
 
@@ -1086,8 +1197,12 @@ Raises:
 - `_load_json_metadata()`: Load metadata from JSON file.
 - `_match_files_with_metadata()`: Match image files with their metadata.
 - `_validate_dataset()`: Validate dataset consistency and quality.
+- `_is_stratification_viable()`: Check if stratification is mathematically viable.
+- `_create_age_subject_stratification_labels()`: Create stratification labels based on age and subject combinations.
 - `create_dataset_splits()`: Split dataset into train/validation/test sets.
+- `_safe_train_test_split()`: Perform train_test_split with robust error handling and fallback.
 - `prepare_dataset()`: Complete dataset preparation pipeline.
+- `validate_age_subject_combinations()`: Validate age-subject combinations for training readiness.
 - `validate_dataset_for_training()`: Validate dataset split for training readiness.
 
 ### InterpretabilityError
@@ -1167,6 +1282,9 @@ Raises:
 
 - `__init__()`: Initialize saliency map generator.
 - `generate_saliency_map()`: Generate saliency map for an image.
+- `generate_attribution_aware_saliency()`: Generate saliency map with attribution-aware highlighting.
+- `_create_center_focus_mask()`: Create a mask that emphasizes central regions.
+- `_create_attribution_visualization()`: Create attribution-aware saliency visualization.
 - `_generate_attention_saliency()`: Generate saliency using attention rollout.
 - `_generate_gradient_saliency()`: Generate saliency using gradient-based methods.
 - `_create_saliency_visualization()`: Create and save saliency map visualization.
@@ -1205,10 +1323,13 @@ Raises:
 - `_load_explanation_templates()`: Load templates for generating explanations.
 - `generate_explanation()`: Generate comprehensive explanation for anomaly detection result.
 - `_determine_severity()`: Determine anomaly severity based on normalized score.
-- `_generate_main_explanation()`: Generate the main explanation text.
+- `_generate_main_explanation()`: Generate the main explanation text with attribution context.
 - `_generate_detailed_analysis()`: Generate detailed analysis points.
 - `_generate_recommendations()`: Generate recommendations based on analysis.
 - `_analyze_metadata()`: Analyze drawing metadata for additional insights.
+- `explain_subject_aware_anomaly()`: Generate subject-aware anomaly explanation with detailed attribution.
+- `_generate_contextual_notes()`: Generate contextual notes based on attribution type.
+- `_generate_attribution_recommendations()`: Generate recommendations based on attribution type.
 
 ### ImportanceRegionDetector
 
@@ -1457,6 +1578,14 @@ Raises:
 
 **Inherits from**: EmbeddingServiceError
 
+### SubjectEncodingError
+
+**File**: `app/services/embedding_service.py`
+
+**Description**: Raised when subject encoding fails.
+
+**Inherits from**: EmbeddingServiceError
+
 ### DeviceManager
 
 **File**: `app/services/embedding_service.py`
@@ -1470,6 +1599,20 @@ Raises:
 - `device()`: Get the current device.
 - `device_info()`: Get device information.
 - `get_memory_usage()`: Get current memory usage if available.
+
+### SubjectEncoder
+
+**File**: `app/services/embedding_service.py`
+
+**Description**: Handles subject category encoding for hybrid embeddings.
+
+**Methods**:
+
+- `encode_subject_category()`: Encode a subject category into a 64-dimensional one-hot vector.
+- `decode_subject_encoding()`: Decode a one-hot encoded vector back to a subject category.
+- `get_supported_categories()`: Get list of all supported subject categories.
+- `get_category_count()`: Get the number of supported subject categories.
+- `validate_subject_category()`: Validate if a subject category is supported.
 
 ### VisionTransformerWrapper
 
@@ -1501,11 +1644,19 @@ Raises:
 - `_preprocess_image()`: Preprocess image for Vision Transformer input.
 - `_generate_cache_key()`: Generate a cache key for the embedding.
 - `_manage_cache()`: Manage embedding cache size.
-- `generate_embedding()`: Generate embedding for a single image.
-- `generate_batch_embeddings()`: Generate embeddings for multiple images in batches.
+- `generate_hybrid_embedding()`: Generate hybrid embedding combining visual features and subject encoding.
+- `_generate_visual_embedding()`: Generate visual embedding using Vision Transformer.
+- `separate_embedding_components()`: Separate hybrid embedding into visual and subject components.
+- `generate_embedding()`: Generate embedding for a single image (legacy method).
+- `batch_embed()`: Generate hybrid embeddings for multiple images in batches.
+- `generate_batch_embeddings()`: Generate embeddings for multiple images in batches (legacy method).
 - `get_embedding_dimension()`: Get the dimension of embeddings generated by this service.
+- `get_visual_embedding_dimension()`: Get the dimension of visual embeddings (768 for ViT).
+- `get_subject_encoding_dimension()`: Get the dimension of subject encodings (64).
 - `clear_cache()`: Clear the embedding cache.
+- `store_hybrid_embedding_for_db()`: Store a hybrid embedding for database persistence with component separation.
 - `store_embedding_for_db()`: Store an embedding for database persistence with serialization.
+- `retrieve_hybrid_embedding_from_db()`: Retrieve a hybrid embedding from database with component reconstruction.
 - `retrieve_embedding_from_db()`: Retrieve an embedding from database with caching support.
 - `invalidate_embedding_cache()`: Invalidate cached embedding for a specific drawing.
 - `get_storage_stats()`: Get embedding storage and cache statistics.
@@ -1632,14 +1783,20 @@ Raises:
 
 - `__init__()`:   Init   functionality.
 - `_get_model_path()`: Get the file path for a model.
-- `_get_embeddings_for_age_group()`: Retrieve embeddings for a specific age group.
+- `_get_embeddings_for_age_group()`: Retrieve hybrid embeddings for a specific age group.
+- `train_subject_aware_age_group_model()`: Train a subject-aware autoencoder model for a specific age group.
 - `train_age_group_model()`: Train an autoencoder model for a specific age group.
-- `load_model()`: Load a trained autoencoder model.
-- `compute_reconstruction_loss()`: Compute reconstruction loss for an embedding using a specific model.
-- `get_model_info()`: Get information about a specific model.
+- `load_model()`: Load a trained subject-aware autoencoder model.
+- `compute_reconstruction_loss()`: Compute reconstruction loss for a hybrid embedding using a specific model.
+- `compute_subject_aware_reconstruction_loss()`: Compute component-specific reconstruction losses for a hybrid embedding.
+- `get_model_info()`: Get information about a specific subject-aware model.
 - `list_models()`: List all age group models.
 - `_calculate_reconstruction_loss()`: Calculate reconstruction loss between original and reconstructed embeddings.
 - `_calculate_metrics()`: Calculate training metrics for embeddings.
+- `compute_anomaly_score()`: Compute subject-aware anomaly scores for a hybrid embedding.
+- `determine_attribution()`: Determine anomaly attribution based on component-specific reconstruction losses.
+- `compare_across_age_groups()`: Compare reconstruction loss across different age group models for age-related detection.
+- `validate_unified_subject_aware_architecture()`: Validate that all models use the unified subject-aware architecture.
 - `clear_model_cache()`: Clear the loaded models cache.
 
 ### SageMakerError
@@ -2104,6 +2261,70 @@ Returns:
 - `update()`: Update functionality.
 - `get()`: Get functionality.
 
+### DocumentationStatus
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Documentation generation status model.
+
+**Inherits from**: BaseModel
+
+### DocumentationMetrics
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Documentation metrics model.
+
+**Inherits from**: BaseModel
+
+### GenerationRequest
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Documentation generation request model.
+
+**Inherits from**: BaseModel
+
+### GenerationResult
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Documentation generation result model.
+
+**Inherits from**: BaseModel
+
+### SearchRequest
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Search request model.
+
+**Inherits from**: BaseModel
+
+### SearchResult
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Search result model.
+
+**Inherits from**: BaseModel
+
+### SearchResponse
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Search response model.
+
+**Inherits from**: BaseModel
+
+### NavigationContext
+
+**File**: `app/api/api_v1/endpoints/documentation.py`
+
+**Description**: Navigation context model.
+
+**Inherits from**: BaseModel
+
 ### BatchAnalysisTracker
 
 **File**: `app/api/api_v1/endpoints/analysis.py`
@@ -2141,6 +2362,9 @@ Returns:
 **Description**: Interface defined by EmbeddingSerializer
 
 **Methods**:
+- `serialize_hybrid_embedding(hybrid_embedding)`
+- `deserialize_hybrid_embedding(full_bytes, visual_bytes, subject_bytes)`
+- `validate_hybrid_embedding(embedding) -> bool`
 - `serialize_embedding(embedding) -> bytes`
 - `deserialize_embedding(serialized_data: bytes)`
 - `validate_embedding(embedding, expected_dimension) -> bool`
@@ -2166,6 +2390,8 @@ Returns:
 **Description**: Interface defined by EmbeddingStorage
 
 **Methods**:
+- `store_hybrid_embedding(self, drawing_id: int, model_type: str, hybrid_embedding, age, use_cache: bool)`
+- `retrieve_hybrid_embedding(self, drawing_id: int, model_type: str, full_data, visual_data, subject_data, age, use_cache: bool)`
 - `store_embedding(self, drawing_id: int, model_type: str, embedding, age, use_cache: bool)`
 - `retrieve_embedding(self, drawing_id: int, model_type: str, serialized_data, age, use_cache: bool)`
 - `batch_store_embeddings(self, embeddings_data, use_cache: bool)`
@@ -2230,6 +2456,18 @@ Returns:
 - `list_training_jobs(self, db: Session)`
 - `cancel_training_job(self, job_id: int, db: Session) -> bool`
 
+### ComparisonServiceInterface
+
+**Type**: Protocol
+
+**Description**: Interface defined by ComparisonService
+
+**Methods**:
+- `find_similar_normal_examples(self, target_drawing_id: int, age_group_min: float, age_group_max: float, db: Session, max_examples: int, similarity_threshold: float, subject_category)`
+- `get_comparison_statistics(self, age_group_min: float, age_group_max: float, db: Session)`
+- `get_subject_specific_examples(self, age_group_min: float, age_group_max: float, subject_category: str, db: Session, max_examples: int, include_anomalous: bool)`
+- `get_comparison_examples_with_fallback(self, target_drawing_id: int, age_group_min: float, age_group_max: float, subject_category, db: Session, max_examples: int)`
+
 ### DataPipelineServiceInterface
 
 **Type**: Protocol
@@ -2264,6 +2502,7 @@ Returns:
 - `load_dataset_from_folder(self, dataset_folder, metadata_file)`
 - `create_dataset_splits(self, files, metadata, split_config: SplitConfig) -> DatasetSplit`
 - `prepare_dataset(self, dataset_folder, metadata_file, split_config) -> DatasetSplit`
+- `validate_age_subject_combinations(self, dataset_split: DatasetSplit)`
 - `validate_dataset_for_training(self, dataset_split: DatasetSplit)`
 
 ### PatchImportanceScorerInterface
@@ -2338,6 +2577,19 @@ Returns:
 - `device_info(self) -> Dict`
 - `get_memory_usage(self)`
 
+### SubjectEncoderInterface
+
+**Type**: Protocol
+
+**Description**: Interface defined by SubjectEncoder
+
+**Methods**:
+- `encode_subject_category(cls, subject)`
+- `decode_subject_encoding(cls, encoding) -> SubjectCategory`
+- `get_supported_categories(cls)`
+- `get_category_count(cls) -> int`
+- `validate_subject_category(cls, subject) -> bool`
+
 ### VisionTransformerWrapperInterface
 
 **Type**: Protocol
@@ -2359,11 +2611,18 @@ Returns:
 - `initialize(self, use_cache: bool)`
 - `is_ready(self) -> bool`
 - `get_service_info(self) -> Dict`
+- `generate_hybrid_embedding(self, image, subject, age, use_cache: bool)`
+- `separate_embedding_components(self, hybrid_embedding)`
 - `generate_embedding(self, image, age, use_cache: bool)`
+- `batch_embed(self, images, subjects, ages, batch_size: int, use_cache: bool)`
 - `generate_batch_embeddings(self, images, ages, batch_size: int, use_cache: bool)`
-- `get_embedding_dimension(self, include_age: bool) -> int`
+- `get_embedding_dimension(self, include_age: bool, hybrid: bool) -> int`
+- `get_visual_embedding_dimension(self) -> int`
+- `get_subject_encoding_dimension(self) -> int`
 - `clear_cache(self)`
+- `store_hybrid_embedding_for_db(self, drawing_id: int, hybrid_embedding, subject, age, model_type: str)`
 - `store_embedding_for_db(self, drawing_id: int, embedding, age, model_type: str)`
+- `retrieve_hybrid_embedding_from_db(self, drawing_id: int, serialized_data, visual_component_data, subject_component_data, age, model_type: str)`
 - `retrieve_embedding_from_db(self, drawing_id: int, serialized_data, age, model_type: str)`
 - `invalidate_embedding_cache(self, drawing_id: int, age, model_type: str) -> bool`
 - `get_storage_stats(self)`
@@ -2375,8 +2634,8 @@ Returns:
 **Description**: Interface defined by EmbeddingPipeline
 
 **Methods**:
-- `process_drawing(self, image, age, drawing_id, use_cache: bool) -> Dict`
-- `process_batch(self, images, ages, drawing_ids, batch_size: int, use_cache: bool)`
+- `process_drawing(self, image, age, subject, drawing_id, use_cache: bool, use_hybrid: bool) -> Dict`
+- `process_batch(self, images, ages, subjects, drawing_ids, batch_size: int, use_cache: bool, use_hybrid: bool)`
 - `get_pipeline_stats(self) -> Dict`
 - `reset_stats(self)`
 
@@ -2411,11 +2670,17 @@ Returns:
 **Description**: Interface defined by ModelManager
 
 **Methods**:
+- `train_subject_aware_age_group_model(self, age_min: float, age_max: float, config: TrainingConfig, db: Session) -> Dict`
 - `train_age_group_model(self, age_min: float, age_max: float, config: TrainingConfig, db: Session) -> Dict`
 - `load_model(self, age_group_model_id: int, db: Session) -> AutoencoderModel`
 - `compute_reconstruction_loss(self, embedding, age_group_model_id: int, db: Session) -> float`
+- `compute_subject_aware_reconstruction_loss(self, embedding, age_group_model_id: int, db: Session)`
 - `get_model_info(self, age_group_model_id: int, db: Session) -> Dict`
 - `list_models(self, db: Session)`
+- `compute_anomaly_score(self, embedding, age_group_model_id: int, db: Session)`
+- `determine_attribution(self, embedding, age_group_model_id: int, db: Session) -> str`
+- `compare_across_age_groups(self, embedding, current_age: float, db: Session)`
+- `validate_unified_subject_aware_architecture(self, db: Session)`
 - `clear_model_cache(self)`
 
 ### SageMakerTrainingServiceInterface

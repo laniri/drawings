@@ -1,14 +1,14 @@
 # Children's Drawing Anomaly Detection System
 
 **Version**: 0.1.0  
-**Generated**: 2025-12-16 15:53:08
+**Generated**: 2025-12-18 23:20:46
 
 ## Description
 Machine learning system for detecting anomalies in children's drawings
 
 ## Base Information
 - **OpenAPI Version**: 3.1.0
-- **Total Endpoints**: 72
+- **Total Endpoints**: 105
 - **Documentation Format**: Enhanced with examples and specifications
 
 ## Quick Navigation
@@ -24,7 +24,7 @@ No authentication required for this API.
 ## Error Handling Summary
 Common error responses across 1 status codes:
 
-- **422**: Used by 49 endpoint(s)
+- **422**: Used by 71 endpoint(s)
 
 
 ## Endpoint Categories
@@ -49,11 +49,14 @@ Common error responses across 1 status codes:
 - [GET /api/v1/analysis/drawing/{drawing_id}](./endpoints/GET__api_v1_analysis_drawing_drawing_id.md)
 
 ### Interpretability
-- [GET /api/v1/interpretability/{analysis_id}/interactive](./endpoints/GET__api_v1_interpretability_analysis_id_interactive.md) - Interactive saliency analysis
-- [GET /api/v1/interpretability/{analysis_id}/simplified](./endpoints/GET__api_v1_interpretability_analysis_id_simplified.md) - Simplified explanations
-- [GET /api/v1/interpretability/{analysis_id}/confidence](./endpoints/GET__api_v1_interpretability_analysis_id_confidence.md) - Confidence metrics
-- [POST /api/v1/interpretability/{analysis_id}/export](./endpoints/POST__api_v1_interpretability_analysis_id_export.md) - Export results
-- [GET /api/v1/interpretability/examples/{age_group}](./endpoints/GET__api_v1_interpretability_examples_age_group.md) - Educational examples
+- [GET /api/v1/interpretability/{analysis_id}/interactive](./endpoints/GET__api_v1_interpretability_analysis_id_interactive.md)
+- [GET /api/v1/interpretability/{analysis_id}/simplified](./endpoints/GET__api_v1_interpretability_analysis_id_simplified.md)
+- [GET /api/v1/interpretability/{analysis_id}/confidence](./endpoints/GET__api_v1_interpretability_analysis_id_confidence.md)
+- [POST /api/v1/interpretability/{analysis_id}/export](./endpoints/POST__api_v1_interpretability_analysis_id_export.md)
+- [GET /api/v1/interpretability/examples](./endpoints/GET__api_v1_interpretability_examples.md)
+- [GET /api/v1/interpretability/examples/{age_group}](./endpoints/GET__api_v1_interpretability_examples_age_group.md)
+- [GET /api/v1/interpretability/{analysis_id}/attribution](./endpoints/GET__api_v1_interpretability_analysis_id_attribution.md)
+- [POST /api/v1/interpretability/{analysis_id}/annotate](./endpoints/POST__api_v1_interpretability_analysis_id_annotate.md)
 
 ### Models
 - [GET /api/v1/models/age-groups](./endpoints/GET__api_v1_models_age-groups.md)
@@ -92,7 +95,34 @@ Common error responses across 1 status codes:
 - [PUT /api/v1/config/age-grouping](./endpoints/PUT__api_v1_config_age-grouping.md)
 - [GET /api/v1/config/health](./endpoints/GET__api_v1_config_health.md)
 - [GET /api/v1/config/stats](./endpoints/GET__api_v1_config_stats.md)
+- [GET /api/v1/config/subjects](./endpoints/GET__api_v1_config_subjects.md)
+- [GET /api/v1/config/subjects/statistics](./endpoints/GET__api_v1_config_subjects_statistics.md)
+- [GET /api/v1/config/models/subject-aware](./endpoints/GET__api_v1_config_models_subject-aware.md)
 - [POST /api/v1/config/reset](./endpoints/POST__api_v1_config_reset.md)
+
+### Documentation
+- [GET /api/v1/documentation/status](./endpoints/GET__api_v1_documentation_status.md)
+- [GET /api/v1/documentation/metrics](./endpoints/GET__api_v1_documentation_metrics.md)
+- [POST /api/v1/documentation/generate](./endpoints/POST__api_v1_documentation_generate.md)
+- [POST /api/v1/documentation/generate/sync](./endpoints/POST__api_v1_documentation_generate_sync.md)
+- [GET /api/v1/documentation/categories](./endpoints/GET__api_v1_documentation_categories.md)
+- [GET /api/v1/documentation/files](./endpoints/GET__api_v1_documentation_files.md)
+- [DELETE /api/v1/documentation/cache](./endpoints/DELETE__api_v1_documentation_cache.md)
+- [GET /api/v1/documentation/validation](./endpoints/GET__api_v1_documentation_validation.md)
+- [POST /api/v1/documentation/validate](./endpoints/POST__api_v1_documentation_validate.md)
+- [GET /api/v1/documentation/preview/{category}](./endpoints/GET__api_v1_documentation_preview_category.md)
+- [POST /api/v1/documentation/batch/generate](./endpoints/POST__api_v1_documentation_batch_generate.md)
+- [POST /api/v1/documentation/batch/validate](./endpoints/POST__api_v1_documentation_batch_validate.md)
+- [GET /api/v1/documentation/schedule](./endpoints/GET__api_v1_documentation_schedule.md)
+- [POST /api/v1/documentation/schedule](./endpoints/POST__api_v1_documentation_schedule.md)
+- [POST /api/v1/documentation/search](./endpoints/POST__api_v1_documentation_search.md)
+- [GET /api/v1/documentation/search/suggestions](./endpoints/GET__api_v1_documentation_search_suggestions.md)
+- [GET /api/v1/documentation/search/statistics](./endpoints/GET__api_v1_documentation_search_statistics.md)
+- [POST /api/v1/documentation/search/index](./endpoints/POST__api_v1_documentation_search_index.md)
+- [GET /api/v1/documentation/navigation/{document_id}](./endpoints/GET__api_v1_documentation_navigation_document_id.md)
+- [GET /api/v1/documentation/navigation/sitemap](./endpoints/GET__api_v1_documentation_navigation_sitemap.md)
+- [GET /api/v1/documentation/navigation/cross-references](./endpoints/GET__api_v1_documentation_navigation_cross-references.md)
+- [POST /api/v1/documentation/navigation/rebuild](./endpoints/POST__api_v1_documentation_navigation_rebuild.md)
 
 ### Health
 - [GET /api/v1/health](./endpoints/GET__api_v1_health.md)

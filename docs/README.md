@@ -1,15 +1,19 @@
 # Children's Drawing Anomaly Detection System - Documentation
 
-**Generated**: 2025-12-16 13:40:02  
-**Version**: 1.0.0  
-**Status**: Auto-generated from codebase
+**Generated**: 2025-12-18 15:30:00  
+**Version**: 2.0.0  
+**Status**: Subject-Aware System - Fully Functional
 
 ## Quick Navigation
+
+### 🚀 Subject-Aware System (v2.0)
+- [Subject-Aware Upgrade Guide](./SUBJECT_AWARE_UPGRADE.md) - **NEW**: Complete upgrade documentation
+- [Subject-Aware Architecture](./architecture/08-subject-aware-system.md) - **NEW**: System architecture with hybrid embeddings
 
 ### 🏗️ Architecture
 - [System Overview](./architecture/01-system-context.md)
 - [Component Architecture](./architecture/06-backend-components.md)
-- [Database Schema](./database/schema.md)
+- [Database Schema](./database/schema.md) - **UPDATED**: Subject-aware schema
 
 ### 📡 API Reference
 - [API Overview](./api/README.md)
@@ -17,12 +21,15 @@
 - [Endpoint Documentation](./api/endpoints/)
 
 ### 🧮 Algorithms
+- [Hybrid Embedding System](./algorithms/01-hybrid-embeddings.md)
+- [Subject-Aware Anomaly Detection](./algorithms/02-subject-aware-detection.md)
 - [Score Normalization](./algorithms/07-score-normalization.md)
 - [Algorithm Implementations](./algorithms/implementations/)
 
 ### 🔄 Workflows
+- [Subject-Aware Analysis](./workflows/business/02-subject-aware-analysis.md) - **NEW**: Enhanced workflow with subject support
 - [Upload and Analysis](./workflows/business/01-drawing-upload-analysis.md)
-- [System Workflows](./workflows/README.md)
+- [System Workflows](./workflows/README.md) - **UPDATED**: Includes subject-aware workflows
 
 ### 🔌 Interfaces
 - [Service Interfaces](./interfaces/services/)

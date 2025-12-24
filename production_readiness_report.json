@@ -1,0 +1,299 @@
+{
+  "validation_timestamp": "2025-12-24T12:24:36.472222+00:00",
+  "validation_duration_seconds": 63.497449,
+  "environment": {
+    "python_version": "3.12.7 (v3.12.7:0b05ead877f, Sep 30 2024, 23:18:00) [Clang 13.0.0 (clang-1300.0.29.30)]",
+    "working_directory": "/Users/itay/Desktop/drawings",
+    "settings_environment": "unknown"
+  },
+  "results": {
+    "deployment_pipeline": {
+      "github_integration": true,
+      "docker_build": true,
+      "ecr_push": false,
+      "ecs_deployment": true,
+      "health_checks": false,
+      "rollback_capability": true,
+      "details": {
+        "workflow_files": [
+          ".github/workflows/frontend-ci.yml",
+          ".github/workflows/deploy-production.yml"
+        ],
+        "dockerfile_prod": "Dockerfile.prod",
+        "task_definitions": [
+          "new-task-def.json",
+          "current-task-def.json"
+        ],
+        "task_definition_valid": true,
+        "deploy_scripts": [
+          "deploy.log",
+          "deploy.sh",
+          "infrastructure/deploy.sh"
+        ],
+        "docker_available": true,
+        "dockerfile_syntax_check": "attempted"
+      }
+    },
+    "authentication": {
+      "service_initialization": true,
+      "password_verification": true,
+      "session_management": true,
+      "rate_limiting": true,
+      "secrets_manager_integration": true,
+      "public_access_control": true,
+      "details": {
+        "service_stats": {
+          "active_sessions": 0,
+          "session_timeout": 3600,
+          "max_login_attempts": 5,
+          "rate_limit_window": 300,
+          "rate_limited_ips": 0
+        }
+      }
+    },
+    "security": {
+      "service_initialization": true,
+      "iam_validation": true,
+      "s3_encryption": true,
+      "security_groups": true,
+      "vpc_configuration": true,
+      "encryption_in_transit": false,
+      "comprehensive_audit": true,
+      "details": {
+        "encryption_in_transit": {
+          "compliant": false,
+          "violations": [
+            "Minimum TLS version 1.2 is not secure"
+          ],
+          "warnings": [
+            "HTTPS enforcement not required in development"
+          ]
+        },
+        "audit_results": {
+          "components_audited": [
+            "encryption_in_transit",
+            "identity"
+          ],
+          "identity_info": {
+            "identity_available": false,
+            "reason": "STS client not available"
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "service_initialization": true,
+      "structured_logging": true,
+      "cloudwatch_integration": false,
+      "sns_alerting": false,
+      "performance_metrics": true,
+      "cost_monitoring": false,
+      "dashboard_creation": false,
+      "details": {
+        "error_logging": true,
+        "validation_error": "'MonitoringService' object has no attribute 'AlertLevel'"
+      }
+    },
+    "metrics": {
+      "service_initialization": true,
+      "analysis_recording": true,
+      "session_tracking": true,
+      "system_health": true,
+      "dashboard_stats": true,
+      "cloudwatch_integration": false,
+      "time_series_data": false,
+      "details": {
+        "dashboard_stats": {
+          "total_analyses": 1,
+          "daily_analyses": 1,
+          "weekly_analyses": 1,
+          "monthly_analyses": 1,
+          "average_processing_time": 1.5,
+          "active_sessions": 1,
+          "error_rate": 0.0,
+          "uptime_percentage": 0.0,
+          "geographic_distribution": {
+            "Unknown": 1
+          },
+          "last_updated": "2025-12-24T12:24:40.240388"
+        },
+        "validation_error": "can't compare offset-naive and offset-aware datetimes"
+      }
+    },
+    "backup_recovery": {
+      "service_initialization": true,
+      "database_backup": true,
+      "full_backup": true,
+      "data_export": true,
+      "backup_listing": true,
+      "restore_capability": true,
+      "cleanup_procedures": true,
+      "details": {
+        "database_backup": {
+          "backup_name": "db_backup_20251224_122440.db",
+          "backup_path": "backups/db_backup_20251224_122440.db",
+          "timestamp": "20251224_122440",
+          "size_bytes": 373219328,
+          "size_mb": 355.93,
+          "type": "database_only",
+          "status": "completed"
+        },
+        "data_export": {
+          "export_name": "data_export_20251224_122442",
+          "export_path": "backups/data_export_20251224_122442.json",
+          "format": "json",
+          "size_bytes": 67642242,
+          "size_mb": 64.51,
+          "record_counts": {
+            "drawings": 37832,
+            "age_group_models": 21,
+            "anomaly_analyses": 29971,
+            "interpretability_results": 29971
+          },
+          "includes_embeddings": false,
+          "status": "completed"
+        },
+        "backup_count": 3,
+        "full_backup": {
+          "backup_name": "full_backup_20251224_122455",
+          "backup_path": "backups/full_backup_20251224_122455.zip",
+          "timestamp": "20251224_122455",
+          "size_bytes": 75141622,
+          "size_mb": 71.66,
+          "includes_files": false,
+          "status": "completed"
+        }
+      }
+    },
+    "cost_compliance": {
+      "service_initialization": true,
+      "cost_estimation": true,
+      "budget_compliance": true,
+      "optimization_recommendations": true,
+      "fargate_optimization": true,
+      "s3_lifecycle": true,
+      "cloudfront_optimization": true,
+      "details": {
+        "cost_estimates": [
+          {
+            "service": "ECS Fargate",
+            "cost": 29.15,
+            "optimized": true
+          },
+          {
+            "service": "S3 Storage",
+            "cost": 2.0,
+            "optimized": true
+          },
+          {
+            "service": "CloudFront CDN",
+            "cost": 0.0,
+            "optimized": true
+          },
+          {
+            "service": "Route 53",
+            "cost": 0.5,
+            "optimized": false
+          },
+          {
+            "service": "CloudWatch",
+            "cost": 1.0,
+            "optimized": true
+          },
+          {
+            "service": "Secrets Manager",
+            "cost": 0.4,
+            "optimized": false
+          }
+        ],
+        "total_cost": 33.05,
+        "within_budget": true,
+        "recommendations": [
+          "Use ECS Fargate with minimal resource allocation (0.25 vCPU, 0.5 GB RAM) for cost-effective demo deployment",
+          "Implement S3 lifecycle policies to transition objects to Standard-IA after 30 days and Glacier after 90 days for long-term cost savings",
+          "Configure CloudFront with PriceClass_100 (North America and Europe only) and optimize caching for static assets to minimize origin requests",
+          "Use CloudWatch basic monitoring with 7-day log retention to minimize monitoring costs while maintaining essential visibility",
+          "Consider using Fargate Spot instances for additional 50-70% cost savings if application can tolerate occasional interruptions"
+        ],
+        "fargate_config": {
+          "cpu": 256,
+          "memory": 512,
+          "estimated_monthly_cost": 10.8
+        },
+        "s3_lifecycle_rules": 1,
+        "cloudfront_config": {
+          "default_cache_behavior": {
+            "DefaultTTL": 86400,
+            "MaxTTL": 31536000,
+            "MinTTL": 0,
+            "Compress": true,
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "static_cache_behavior": {
+            "PathPattern": "/static/*",
+            "DefaultTTL": 604800,
+            "MaxTTL": 31536000,
+            "MinTTL": 0,
+            "Compress": true
+          },
+          "price_class": "PriceClass_100"
+        },
+        "compliance_validation": {
+          "is_compliant": true,
+          "total_estimated_cost": 33.05,
+          "budget_limit": 40.0,
+          "target_range": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "cost_breakdown": [
+            {
+              "service": "ECS Fargate",
+              "cost": 29.15,
+              "optimized": true
+            },
+            {
+              "service": "S3 Storage",
+              "cost": 2.0,
+              "optimized": true
+            },
+            {
+              "service": "CloudFront CDN",
+              "cost": 0.0,
+              "optimized": true
+            },
+            {
+              "service": "Route 53",
+              "cost": 0.5,
+              "optimized": false
+            },
+            {
+              "service": "CloudWatch",
+              "cost": 1.0,
+              "optimized": true
+            },
+            {
+              "service": "Secrets Manager",
+              "cost": 0.4,
+              "optimized": false
+            }
+          ],
+          "recommendations": [
+            "Use ECS Fargate with minimal resource allocation (0.25 vCPU, 0.5 GB RAM) for cost-effective demo deployment",
+            "Implement S3 lifecycle policies to transition objects to Standard-IA after 30 days and Glacier after 90 days for long-term cost savings",
+            "Configure CloudFront with PriceClass_100 (North America and Europe only) and optimize caching for static assets to minimize origin requests",
+            "Use CloudWatch basic monitoring with 7-day log retention to minimize monitoring costs while maintaining essential visibility",
+            "Consider using Fargate Spot instances for additional 50-70% cost savings if application can tolerate occasional interruptions"
+          ]
+        }
+      }
+    },
+    "overall_status": "good",
+    "summary": {
+      "total_checks": 47,
+      "passed_checks": 38,
+      "success_rate": 80.9,
+      "validation_time": 63.497188
+    }
+  }
+}

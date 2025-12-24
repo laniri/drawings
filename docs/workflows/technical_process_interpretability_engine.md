@@ -17,11 +17,23 @@ Technical process workflow for interpretability_engine service
 | service_task_2 | serviceTask | Get Visual Feature Identifier | service=interpretability_engine, method=get_visual_feature_identifier |
 | service_task_3 | serviceTask | Get Explanation Generator | service=interpretability_engine, method=get_explanation_generator |
 | service_task_4 | serviceTask | Get Importance Region Detector | service=interpretability_engine, method=get_importance_region_detector |
-| service_task_5 | serviceTask | Get Saliency Overlay Generator | service=interpretability_engine, method=get_saliency_overlay_generator |
+| service_task_5 | serviceTask | Explain Anomaly | service=interpretability_engine, method=explain_anomaly |
 | end_6 | endEvent | Process Complete |  |
 
 ## Process Steps
 
+- get
+- get
+- get
+- generate_explanation
+- generate_attribution_aware_saliency
+- generate_saliency_map
+- get
+- explain_subject_aware_anomaly
+- error
+- get
+- get
+- get
 - _register_hooks
 - named_modules
 - register_forward_hook
@@ -104,6 +116,43 @@ Technical process workflow for interpretability_engine service
 - _generate_attention_saliency
 - _generate_gradient_saliency
 - cpu
+- generate_saliency_map
+- get
+- get
+- get
+- copy
+- update
+- info
+- clip
+- _create_attribution_visualization
+- error
+- _create_center_focus_mask
+- clip
+- _create_center_focus_mask
+- clip
+- sqrt
+- sqrt
+- exp
+- resize
+- get
+- astype
+- array
+- astype
+- fromarray
+- Draw
+- textbbox
+- rectangle
+- text
+- save
+- info
+- fromarray
+- convert
+- max
+- truetype
+- error
+- astype
+- max
+- load_default
 - compute_attention_importance
 - compute_gradient_importance
 - resize
@@ -175,6 +224,8 @@ Technical process workflow for interpretability_engine service
 - error
 - get
 - get
+- get
+- get
 - format
 - append
 - append
@@ -183,6 +234,11 @@ Technical process workflow for interpretability_engine service
 - append
 - get
 - get
+- get
+- get
+- get
+- append
+- append
 - extend
 - extend
 - extend
@@ -190,6 +246,35 @@ Technical process workflow for interpretability_engine service
 - append
 - append
 - lower
+- get
+- get
+- get
+- _generate_contextual_notes
+- _generate_attribution_recommendations
+- error
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- append
+- extend
+- extend
+- extend
+- extend
 - sort
 - any
 - percentile

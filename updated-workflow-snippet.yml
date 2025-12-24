@@ -1,0 +1,22 @@
+# Replace this in your .github/workflows/deploy-production.yml
+
+# OLD WAY (remove this):
+# - name: Configure AWS credentials
+#   uses: aws-actions/configure-aws-credentials@v4
+#   with:
+#     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#     aws-region: ${{ env.AWS_REGION }}
+
+# NEW WAY (use this instead):
+- name: Configure AWS credentials via OIDC
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActionsRole
+    role-session-name: GitHubActions-${{ github.run_id }}
+    aws-region: ${{ env.AWS_REGION }}
+
+# Add permissions at the job level:
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout

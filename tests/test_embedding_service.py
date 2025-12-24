@@ -130,6 +130,22 @@ class MockEmbeddingService:
             embedding = self.generate_embedding(image, age, use_cache)
             embeddings.append(embedding)
         return embeddings
+    
+    def generate_hybrid_embedding(self, image, subject=None, age=None, use_cache=True):
+        """Generate hybrid embedding combining visual features and subject encoding."""
+        if not self.is_ready():
+            raise EmbeddingGenerationError("Service not initialized. Call initialize() first.")
+        
+        # Simulate hybrid embedding generation (768 visual + 64 subject = 832 total)
+        visual_embedding = np.random.rand(768).astype(np.float32)
+        subject_embedding = np.random.rand(64).astype(np.float32)
+        hybrid_embedding = np.concatenate([visual_embedding, subject_embedding])
+        
+        if age is not None:
+            age_feature = np.array([age], dtype=np.float32)
+            hybrid_embedding = np.concatenate([hybrid_embedding, age_feature])
+            
+        return hybrid_embedding
 
 
 @given(

@@ -4,8 +4,10 @@
 
 - **Python 3.11+** - Core runtime
 - **FastAPI** - Web framework with automatic OpenAPI docs
-- **PyTorch** - Deep learning framework
-- **Vision Transformer (ViT)** - Feature extraction from drawings
+- **PyTorch** - Deep learning framework for subject-aware autoencoder models
+- **Vision Transformer (ViT)** - Visual feature extraction from drawings (768-dimensional)
+- **Subject Encoding System** - One-hot encoding for 64 predefined subject categories (64-dimensional)
+- **Hybrid Embeddings** - Concatenated visual and subject features (832-dimensional total)
 - **SQLAlchemy** - ORM with SQLite database
 - **Alembic** - Database migrations
 - **Pydantic** - Data validation and settings management

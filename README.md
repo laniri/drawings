@@ -4,31 +4,36 @@ A machine learning-powered application that analyzes children's drawings to iden
 
 ## ✅ System Status
 
-**Current Status**: Fully functional and trained
+**Current Status**: Fully functional and trained (v2.0.0 - Subject-Aware)
 - **37,778+ drawings** uploaded and processed
-- **8 trained autoencoder models** for age groups (2-3, 3-4, 4-5, 5-6, 6-7, 7-8, 8-9, 9-12 years)
-- **Vision Transformer embeddings** generated for all drawings
-- **Interactive interpretability** with guaranteed saliency maps for all drawings
+- **8 trained subject-aware autoencoder models** for age groups (2-3, 3-4, 4-5, 5-6, 6-7, 7-8, 8-9, 9-12 years)
+- **Hybrid embeddings** (832-dimensional: 768 visual + 64 subject) generated for all drawings
+- **Subject-aware anomaly detection** with 64 predefined subject categories
+- **Interactive interpretability** with guaranteed saliency maps and subject-specific comparisons
 - **Advanced export system** with multi-format support (PNG, PDF, JSON, CSV, HTML)
 - **Web interface** with 6 interpretability tabs and real-time features
 
 ## Features
 
-- **Drawing Upload & Analysis**: Support for PNG, JPEG, and BMP formats with metadata
-- **Age-Based Modeling**: Separate autoencoder models trained for different age groups
-- **Anomaly Detection**: Reconstruction loss-based scoring with configurable thresholds
-- **Interactive Interpretability**: Simplified gradient-based saliency maps with hoverable regions, zoom/pan, and detailed explanations guaranteed for all drawings
-- **Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with comprehensive reports and composite visualizations
-- **Web Interface**: Modern React frontend with Material-UI components
-- **REST API**: FastAPI backend with automatic OpenAPI documentation
-- **Real-time Dashboard**: System statistics, age distribution, and analysis results
+- **Drawing Upload & Analysis**: Support for PNG, JPEG, and BMP formats with metadata and subject categorization
+- **Subject-Aware Modeling**: 64 predefined subject categories (objects, living beings, nature, abstract concepts)
+- **Hybrid Embeddings**: 832-dimensional vectors combining visual features (768-dim ViT) and subject encoding (64-dim)
+- **Age-Based Modeling**: Separate subject-aware autoencoder models trained for different age groups
+- **Anomaly Detection**: Reconstruction loss-based scoring with subject-contextualized thresholds
+- **Interactive Interpretability**: Subject-aware saliency maps with hoverable regions, zoom/pan, and subject-specific comparisons
+- **Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with subject-aware comprehensive reports
+- **Web Interface**: Modern React frontend with Material-UI components and subject category selection
+- **REST API**: FastAPI backend with automatic OpenAPI documentation and subject-aware endpoints
+- **Real-time Dashboard**: System statistics, age distribution, subject distribution, and analysis results
 
 ## Technology Stack
 
 ### Backend
 - **Python 3.11+** with FastAPI web framework
 - **PyTorch** for deep learning models and autoencoder training
-- **Vision Transformer (ViT)** for feature extraction from drawings
+- **Vision Transformer (ViT)** for visual feature extraction (768-dimensional)
+- **Subject Encoding System** for categorical features (64-dimensional one-hot encoding)
+- **Hybrid Embeddings** combining visual and subject features (832-dimensional total)
 - **SQLAlchemy** with SQLite database for data persistence
 - **Alembic** for database migrations
 - **Pydantic** for data validation and settings management
@@ -130,12 +135,12 @@ The system comes with pre-trained models, but you can retrain them:
    ```
 
 This will:
-- Generate ViT embeddings for all drawings (769-dimensional vectors)
-- Train autoencoder models for 3 age groups:
+- Generate hybrid ViT embeddings for all drawings (832-dimensional vectors: 768 visual + 64 subject)
+- Train subject-aware autoencoder models for 3 age groups:
   - Early childhood (3.0-6.0 years)
   - Middle childhood (6.0-9.0 years)  
   - Late childhood (9.0-12.0 years)
-- Set up anomaly detection thresholds
+- Set up subject-contextualized anomaly detection thresholds
 
 ### Manual Training Steps
 
@@ -146,15 +151,15 @@ If you prefer manual control:
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-2. **Generate embeddings for existing drawings**
+2. **Generate hybrid embeddings for existing drawings**
    ```bash
-   # For each drawing, generate embeddings
+   # For each drawing, generate hybrid embeddings (visual + subject)
    curl -X POST "http://localhost:8000/api/v1/analysis/embeddings/{drawing_id}"
    ```
 
-3. **Train age group models**
+3. **Train subject-aware age group models**
    ```bash
-   # Train models via API
+   # Train models via API with subject-aware architecture
    curl -X POST "http://localhost:8000/api/v1/models/train" \
         -H "Content-Type: application/json" \
         -d '{"age_min": 3.0, "age_max": 6.0, "min_samples": 10}'
@@ -244,24 +249,25 @@ npm run build
    - Monitor recent analyses and anomaly detection results
 
 2. **Upload Drawings** 
-   - Upload individual drawings with age and subject metadata
+   - Upload individual drawings with age, subject, and metadata
    - Supported formats: PNG, JPEG, BMP (max 10MB)
+   - Subject categories: 64 predefined categories including objects, living beings, nature, abstract concepts
 
 3. **Analysis Results**
-   - View anomaly scores and confidence levels with 6 interactive tabs:
-     - **Interactive Analysis**: Hoverable saliency regions with click-to-zoom
-     - **Saliency Map**: Original + saliency overlays with adjustable opacity
-     - **Confidence**: Detailed confidence metrics and reliability warnings
-     - **Comparison**: Similar examples from same age group
-     - **History**: Historical analysis tracking and trends
-     - **Annotations**: User annotation tools for regions
-   - Export results in multiple formats (PNG, PDF, JSON, CSV, HTML)
-   - Browse analysis history with comprehensive interpretability
+   - View subject-aware anomaly scores and confidence levels with 6 interactive tabs:
+     - **Interactive Analysis**: Hoverable saliency regions with click-to-zoom and subject-specific insights
+     - **Saliency Map**: Original + saliency overlays with adjustable opacity and subject context
+     - **Confidence**: Detailed confidence metrics with subject-aware reliability warnings
+     - **Comparison**: Similar examples from same age group and subject category
+     - **History**: Historical analysis tracking and subject-aware trends
+     - **Annotations**: User annotation tools for regions with subject context
+   - Export results in multiple formats with subject-aware comprehensive reports (PNG, PDF, JSON, CSV, HTML)
+   - Browse analysis history with subject-contextualized interpretability
 
 4. **Configuration**
-   - View trained models and their statistics
-   - Adjust system thresholds and parameters
-   - Monitor model performance
+   - View trained subject-aware models and their statistics
+   - Adjust system thresholds and subject-specific parameters
+   - Monitor model performance across different subject categories
 
 ### API Usage
 
@@ -280,13 +286,13 @@ curl "http://localhost:8000/api/v1/drawings/"
 # Get model information
 curl "http://localhost:8000/api/v1/models/age-groups"
 
-# Get interactive interpretability data
+# Get subject-aware interactive interpretability data
 curl "http://localhost:8000/api/v1/interpretability/522/interactive"
 
-# Export analysis results
+# Export subject-aware analysis results
 curl -X POST "http://localhost:8000/api/v1/interpretability/522/export" \
      -H "Content-Type: application/json" \
-     -d '{"format": "pdf", "export_options": {}}'
+     -d '{"format": "pdf", "export_options": {"include_subject_context": true}}'
 ```
 
 ## API Documentation
@@ -313,8 +319,8 @@ The API documentation is automatically generated and available at:
 
 3. **Model Training Fails**
    - Ensure sufficient drawings are uploaded (minimum 10 per age group)
-   - Check that embeddings are generated before training
-   - Verify database connectivity
+   - Check that hybrid embeddings are generated before training
+   - Verify database connectivity and subject category data
 
 4. **Vision Transformer Issues**
    - Ensure PyTorch and transformers are properly installed

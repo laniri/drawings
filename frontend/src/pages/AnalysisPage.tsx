@@ -286,7 +286,7 @@ const AnalysisPage: React.FC = () => {
                     {(analysis.confidence * 100).toFixed(1)}%
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Confidence
+                    Analysis Confidence
                   </Typography>
                 </Box>
               </Grid>
@@ -376,8 +376,8 @@ const AnalysisPage: React.FC = () => {
                   )}
                 </Grid>
                 
-                {/* Attribution Explanation */}
-                {analysis.anomaly_attribution && (
+                {/* Attribution Explanation - Only show for anomalies */}
+                {analysis.anomaly_attribution && analysis.is_anomaly && (
                   <Alert severity="info" sx={{ mt: 2 }}>
                     <Typography variant="body2">
                       <strong>Attribution Explanation:</strong>{' '}

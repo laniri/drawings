@@ -223,6 +223,28 @@ class APIError(Exception):
         super().__init__(f"{status_code}: {detail}")
 ```
 
+### Data Sufficiency Analysis
+
+The data sufficiency analysis endpoints handle invalid parameters gracefully:
+
+#### Invalid Age Ranges (Graceful Handling)
+When age ranges are invalid (age_min >= age_max), the system returns valid responses with zero samples rather than errors:
+
+```json
+{
+  "age_min": 10.0,
+  "age_max": 10.0,
+  "sample_count": 0,
+  "is_sufficient": false,
+  "recommended_min_samples": 100,
+  "data_quality_score": 0.0,
+  "subjects_distribution": {},
+  "age_distribution": []
+}
+```
+
+This graceful handling ensures API stability and allows clients to handle edge cases without exception handling.
+
 ## Error Code Reference
 
 | Error Code | HTTP Status | Description |

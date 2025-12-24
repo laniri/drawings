@@ -27,15 +27,30 @@ Error handling workflow for model_manager
 - Exception
 - Exception
 - Exception
+- Exception
+- json
+- Exception
+- Exception
+- Exception
+- Exception
 - AutoencoderTrainingError
 - ModelManagerError
 - ModelManagerError
+- ModelManagerError
 - AutoencoderTrainingError
 - ModelLoadingError
 - ModelLoadingError
 - ModelLoadingError
 - ModelManagerError
+- ModelManagerError
+- ModelManagerError
+- ModelManagerError
 - ModelLoadingError
+- ModelManagerError
+- ModelManagerError
+- ModelManagerError
+- ModelManagerError
+- ModelManagerError
 - ModelManagerError
 
 ## BPMN Diagram

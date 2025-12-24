@@ -31,7 +31,7 @@ C4Component
         Component(comp_16, "Threshold Manager", "Python", "Threshold Management Service for configurable anomaly detection thresholds.")
         Component(comp_17, "Data Sufficiency Service", "Python", "Data Sufficiency Service for Children's Drawing Anomaly Detection System")
         Component(comp_18, "API Router", "FastAPI", "HTTP request routing and validation")
-        Component(comp_19, "API Endpoints", "FastAPI", "Collection of 8 API endpoint modules")
+        Component(comp_19, "API Endpoints", "FastAPI", "Collection of 10 API endpoint modules")
         Component(comp_20, "Data Models", "SQLAlchemy", "Database schema and ORM models")
         Component(comp_21, "Data Schemas", "Pydantic", "Request/response validation schemas")
         Component(comp_22, "Core Configuration", "Pydantic Settings", "Application configuration and settings management")
@@ -130,8 +130,10 @@ C4Component
 **Description**: Comparison service for finding similar normal examples.
 
 **Responsibilities**:
-- Find similar normal examples from the same age group.
+- Find similar normal examples from the same age group and optionally same subject.
 - Get statistics about available comparison examples in an age group.
+- Get subject-specific examples for comparison and educational purposes.
+- Get comparison examples with fallback strategy when subject-specific examples are unavailable.
 
 **Interfaces**:
 - Comparison Service API
@@ -260,7 +262,7 @@ C4Component
 - Get the current device.
 - Get device information.
 - Get current memory usage if available.
-- Load the Vision Transformer model with optional caching.
+- Encode a subject category into a 64-dimensional one-hot vector.
 
 **Interfaces**:
 - Embedding Service API
@@ -443,7 +445,7 @@ C4Component
 
 **Technology**: FastAPI
 
-**Description**: Collection of 8 API endpoint modules
+**Description**: Collection of 10 API endpoint modules
 
 **Responsibilities**:
 - Business logic orchestration

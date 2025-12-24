@@ -26,6 +26,7 @@ app/
 │       └── endpoints/            # Individual endpoint modules
 │           ├── analysis.py       # Analysis operations
 │           ├── config.py         # Configuration management
+│           ├── database.py       # Database management operations
 │           ├── drawings.py       # Drawing upload/retrieval
 │           ├── interpretability.py # Advanced interpretability features
 │           └── models.py         # ML model operations
@@ -48,16 +49,16 @@ app/
 │   ├── data_pipeline.py          # Data processing pipeline
 │   ├── data_sufficiency_service.py # Training data validation
 │   ├── dataset_preparation.py    # Dataset preparation for training
-│   ├── embedding_service.py      # Feature extraction with ViT
+│   ├── embedding_service.py      # Hybrid feature extraction (ViT + subject encoding)
 │   ├── file_storage.py           # File management
 │   ├── health_monitor.py         # System health monitoring
-│   ├── interpretability_engine.py # Saliency map generation
+│   ├── interpretability_engine.py # Subject-aware saliency map generation
 │   ├── local_training_environment.py # Local model training
 │   ├── model_deployment_service.py # Model deployment management
-│   ├── model_manager.py          # ML model lifecycle
+│   ├── model_manager.py          # Subject-aware ML model lifecycle
 │   ├── sagemaker_training_service.py # AWS SageMaker integration
 │   ├── score_normalizer.py       # Anomaly score normalization
-│   ├── threshold_manager.py      # Threshold configuration
+│   ├── threshold_manager.py      # Subject-contextualized threshold configuration
 │   ├── training_config.py        # Training configuration management
 │   └── training_report_service.py # Training progress reporting
 └── utils/                        # Utility functions

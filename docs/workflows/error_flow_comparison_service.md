@@ -28,6 +28,8 @@ Error handling workflow for comparison_service
 - Exception
 - Exception
 - Exception
+- Exception
+- Exception
 
 ## BPMN Diagram
 

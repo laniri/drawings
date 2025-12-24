@@ -45,6 +45,11 @@ class ResourceError(DrawingAnalysisException):
     pass
 
 
+class SecurityError(DrawingAnalysisException):
+    """Raised when security validation fails."""
+    pass
+
+
 # HTTP Exception mappings
 def create_http_exception(
     status_code: int,
@@ -111,6 +116,15 @@ def resource_error_to_http(error: ResourceError) -> HTTPException:
     """Convert ResourceError to HTTP 503."""
     return create_http_exception(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        message=error.message,
+        details=error.details
+    )
+
+
+def security_error_to_http(error: SecurityError) -> HTTPException:
+    """Convert SecurityError to HTTP 403."""
+    return create_http_exception(
+        status_code=status.HTTP_403_FORBIDDEN,
         message=error.message,
         details=error.details
     )

@@ -5,12 +5,16 @@
     <bpmn:userTask id="user_task_1" name="Click  =&amp;gt; analysisMutation.mutate" actor="user"/>
     <bpmn:userTask id="user_task_2" name="Click  =&amp;gt; analysisMutation.mutate" actor="user"/>
     <bpmn:userTask id="user_task_3" name="Click  =&amp;gt; analysisMutation.mutate" actor="user"/>
-    <bpmn:userTask id="user_task_4" name="Change (_, newValue) =&amp;gt; setActiveTab(newValue)" actor="user"/>
-    <bpmn:userTask id="user_task_5" name="Change (e) =&amp;gt; setShowSaliency(e.target.checked)" actor="user"/>
+    <bpmn:userTask id="user_task_4" name="Click (_, explanation) =&amp;gt; {
+                          setSelectedRegionExplanation(explanation)
+                        " actor="user"/>
+    <bpmn:userTask id="user_task_5" name="Change (_, newValue) =&amp;gt; setActiveTab(newValue)" actor="user"/>
     <bpmn:serviceTask id="system_task_6" name="Update ActiveTab" actor="system"/>
-    <bpmn:serviceTask id="system_task_7" name="Update ShowSaliency" actor="system"/>
-    <bpmn:serviceTask id="system_task_8" name="Update SaliencyOpacity" actor="system"/>
-    <bpmn:endEvent id="end_9" name="Journey Complete"/>
+    <bpmn:serviceTask id="system_task_7" name="Update SelectedRegionExplanation" actor="system"/>
+    <bpmn:serviceTask id="system_task_8" name="Update CurrentExplanationLevel" actor="system"/>
+    <bpmn:serviceTask id="system_task_9" name="Update SelectedRegionExplanation" actor="system"/>
+    <bpmn:serviceTask id="system_task_10" name="Update ShowSaliency" actor="system"/>
+    <bpmn:endEvent id="end_11" name="Journey Complete"/>
     <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="user_task_1"/>
     <bpmn:sequenceFlow id="flow_1" sourceRef="user_task_1" targetRef="user_task_2"/>
     <bpmn:sequenceFlow id="flow_2" sourceRef="user_task_2" targetRef="user_task_3"/>
@@ -19,6 +23,8 @@
     <bpmn:sequenceFlow id="flow_5" sourceRef="user_task_5" targetRef="system_task_6"/>
     <bpmn:sequenceFlow id="flow_6" sourceRef="system_task_6" targetRef="system_task_7"/>
     <bpmn:sequenceFlow id="flow_7" sourceRef="system_task_7" targetRef="system_task_8"/>
-    <bpmn:sequenceFlow id="flow_8" sourceRef="system_task_8" targetRef="end_9"/>
+    <bpmn:sequenceFlow id="flow_8" sourceRef="system_task_8" targetRef="system_task_9"/>
+    <bpmn:sequenceFlow id="flow_9" sourceRef="system_task_9" targetRef="system_task_10"/>
+    <bpmn:sequenceFlow id="flow_10" sourceRef="system_task_10" targetRef="end_11"/>
   </bpmn:process>
 </bpmn:definitions>

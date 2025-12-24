@@ -59,6 +59,11 @@ Args:
 Returns:
     Data information for the age group
 
+**Error Handling**: 
+- Invalid age ranges (age_min >= age_max) are handled gracefully
+- Returns AgeGroupDataInfo with sample_count=0 and is_sufficient=False for invalid ranges
+- Does not raise exceptions for malformed age parameters
+
 **Signature**: `analyze_age_group_data(age_min, age_max, db)`
 
 ### generate_data_warnings

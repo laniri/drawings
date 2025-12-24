@@ -1,7 +1,7 @@
 # ScoreNormalizer Algorithm Implementation
 
 **Source File**: `app/services/score_normalizer.py`
-**Last Updated**: 2025-12-16 13:41:56
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
@@ -50,44 +50,44 @@ Returns:
 
 ### Accuracy Metrics
 
-- False Positive Rate
 - AUC-ROC
+- False Positive Rate
 - True Positive Rate
 
 ### Edge Cases
 
 The following edge cases should be tested:
 
-- Very large values for age_group_model_id
-- Very large scores
-- Special characters in confidence_method
-- Zero value for raw_score
-- Very large values for threshold
-- Very large values for raw_score
-- Zero value for threshold
-- Empty string for method
-- Negative values for scores_and_ages
-- Zero value for scores
-- Single-element scores_and_ages
-- Negative values for normalized_score
-- Negative values for raw_score
-- Special characters in normalization_method
-- Very large scores_and_ages
-- Negative values for threshold
-- Zero value for scores_and_ages
-- Negative values for scores
-- Empty string for normalization_method
-- Zero value for age_group_model_id
-- Empty scores_and_ages
 - Very large values for scores
+- Single-element scores_and_ages
+- Very large scores_and_ages
+- Empty scores_and_ages
+- Single-element scores
+- Very large scores
+- Negative values for scores
+- Negative values for age_group_model_id
 - Zero value for normalized_score
+- Empty string for normalization_method
+- Negative values for threshold
+- Negative values for scores_and_ages
+- Very large values for threshold
+- Empty scores
+- Zero value for threshold
+- Very large values for raw_score
+- Zero value for scores_and_ages
+- Special characters in confidence_method
 - Special characters in method
 - Empty string for confidence_method
-- Negative values for age_group_model_id
-- Empty scores
+- Negative values for normalized_score
+- Zero value for age_group_model_id
+- Zero value for scores
+- Special characters in normalization_method
+- Very large values for age_group_model_id
+- Negative values for raw_score
 - Very large values for scores_and_ages
-- Single-element scores
+- Empty string for method
 - Very large values for normalized_score
+- Zero value for raw_score
 
 ## Implementation Details
 
@@ -235,4 +235,4 @@ Returns:
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:56*
+*Generated on: 2025-12-18 23:17:04*

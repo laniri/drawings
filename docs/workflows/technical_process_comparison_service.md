@@ -27,10 +27,12 @@ Technical process workflow for comparison_service service
 - items
 - sort
 - warning
-- info
 - _get_drawing_embedding
 - _calculate_cosine_similarity
 - error
+- info
+- _get_normal_drawings_in_age_group
+- info
 - append
 - first
 - first
@@ -42,13 +44,14 @@ Technical process workflow for comparison_service service
 - filter
 - query
 - query
+- filter
 - limit
 - all
+- filter
 - error
+- join
 - order_by
 - asc
-- filter
-- join
 - join
 - query
 - norm
@@ -70,6 +73,26 @@ Technical process workflow for comparison_service service
 - join
 - query
 - query
+- limit
+- all
+- append
+- limit
+- all
+- error
+- order_by
+- append
+- asc
+- order_by
+- filter
+- desc
+- filter
+- join
+- join
+- query
+- query
+- find_similar_normal_examples
+- find_similar_normal_examples
+- error
 
 ## BPMN Diagram
 

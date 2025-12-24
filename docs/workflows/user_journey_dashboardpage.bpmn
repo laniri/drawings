@@ -4,11 +4,17 @@
     <bpmn:startEvent id="start_0" name="User Starts Journey"/>
     <bpmn:userTask id="user_task_1" name="Click  =&amp;gt; navigate(&amp;apos;/upload&amp;apos;)" actor="user"/>
     <bpmn:userTask id="user_task_2" name="Click  =&amp;gt; navigate(`/analysis/${analysis.id" actor="user"/>
-    <bpmn:serviceTask id="system_task_3" name="GET Request to /api/analysis/stats" actor="system"/>
-    <bpmn:endEvent id="end_4" name="Journey Complete"/>
+    <bpmn:userTask id="user_task_3" name="Change (e) =&amp;gt; setSubjectFilter(e.target.value)" actor="user"/>
+    <bpmn:userTask id="user_task_4" name="Change (_, newValue) =&amp;gt; setChartTab(newValue)" actor="user"/>
+    <bpmn:serviceTask id="system_task_5" name="Update SubjectFilter" actor="system"/>
+    <bpmn:serviceTask id="system_task_6" name="Update ChartTab" actor="system"/>
+    <bpmn:endEvent id="end_7" name="Journey Complete"/>
     <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="user_task_1"/>
     <bpmn:sequenceFlow id="flow_1" sourceRef="user_task_1" targetRef="user_task_2"/>
-    <bpmn:sequenceFlow id="flow_2" sourceRef="user_task_2" targetRef="system_task_3"/>
-    <bpmn:sequenceFlow id="flow_3" sourceRef="system_task_3" targetRef="end_4"/>
+    <bpmn:sequenceFlow id="flow_2" sourceRef="user_task_2" targetRef="user_task_3"/>
+    <bpmn:sequenceFlow id="flow_3" sourceRef="user_task_3" targetRef="user_task_4"/>
+    <bpmn:sequenceFlow id="flow_4" sourceRef="user_task_4" targetRef="system_task_5"/>
+    <bpmn:sequenceFlow id="flow_5" sourceRef="system_task_5" targetRef="system_task_6"/>
+    <bpmn:sequenceFlow id="flow_6" sourceRef="system_task_6" targetRef="end_7"/>
   </bpmn:process>
 </bpmn:definitions>

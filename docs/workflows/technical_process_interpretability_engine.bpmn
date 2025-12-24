@@ -6,7 +6,7 @@
     <bpmn:serviceTask id="service_task_2" name="Get Visual Feature Identifier" service="interpretability_engine" method="get_visual_feature_identifier"/>
     <bpmn:serviceTask id="service_task_3" name="Get Explanation Generator" service="interpretability_engine" method="get_explanation_generator"/>
     <bpmn:serviceTask id="service_task_4" name="Get Importance Region Detector" service="interpretability_engine" method="get_importance_region_detector"/>
-    <bpmn:serviceTask id="service_task_5" name="Get Saliency Overlay Generator" service="interpretability_engine" method="get_saliency_overlay_generator"/>
+    <bpmn:serviceTask id="service_task_5" name="Explain Anomaly" service="interpretability_engine" method="explain_anomaly"/>
     <bpmn:endEvent id="end_6" name="Process Complete"/>
     <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="service_task_1"/>
     <bpmn:sequenceFlow id="flow_1" sourceRef="service_task_1" targetRef="service_task_2"/>

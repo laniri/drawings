@@ -15,14 +15,18 @@ Error handling workflow for embedding_serialization
 | start_0 | startEvent | Error Condition Detected |  |
 | error_event_1 | errorEvent | Exception Error | error_type=Exception |
 | recovery_task_2 | task | Handle Exception | recovery=True |
-| error_event_3 | errorEvent | pickle Error | error_type=pickle |
-| recovery_task_4 | task | Handle pickle | recovery=True |
+| error_event_3 | errorEvent | Exception Error | error_type=Exception |
+| recovery_task_4 | task | Handle Exception | recovery=True |
 | error_event_5 | errorEvent | Exception Error | error_type=Exception |
 | recovery_task_6 | task | Handle Exception | recovery=True |
 | end_7 | endEvent | Error Resolved |  |
 
 ## Error Conditions
 
+- Exception
+- Exception
+- Exception
+- Exception
 - Exception
 - pickle
 - Exception
@@ -33,6 +37,15 @@ Error handling workflow for embedding_serialization
 - Exception
 - Exception
 - Exception
+- Exception
+- Exception
+- EmbeddingSerializationError
+- EmbeddingSerializationError
+- EmbeddingSerializationError
+- raise
+- EmbeddingSerializationError
+- EmbeddingSerializationError
+- EmbeddingSerializationError
 - EmbeddingSerializationError
 - EmbeddingSerializationError
 - EmbeddingSerializationError

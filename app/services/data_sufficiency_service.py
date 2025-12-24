@@ -204,7 +204,7 @@ class DataSufficiencyAnalyzer:
                 data_info = self.analyze_age_group_data(age_min, age_max, db)
                 
                 # Check for insufficient data
-                if data_info.sample_count < self.critical_threshold:
+                if data_info.sample_count <= self.critical_threshold:
                     warnings.append(DataSufficiencyWarning(
                         warning_type="insufficient_data",
                         severity="critical",

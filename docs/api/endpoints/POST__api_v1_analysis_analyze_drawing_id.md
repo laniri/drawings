@@ -8,7 +8,7 @@ Analyze specific drawing for anomalies.
 
 This endpoint performs anomaly detection on a single drawing,
 generating embeddings, computing anomaly scores, and providing
-interpretability results for all drawings (both normal and anomalous).
+interpretability results if the drawing is flagged as anomalous.
 
 ## Parameters
 - **drawing_id** (path): No description

@@ -1,0 +1,37 @@
+{
+  "enabled": true,
+  "name": "Documentation Sync",
+  "description": "Monitors changes to source files and automatically updates documentation in README.md or docs/ folder to keep documentation in sync with code changes",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "app/**/*.py",
+      "frontend/src/**/*.ts",
+      "frontend/src/**/*.tsx",
+      "alembic/versions/*.py",
+      "tests/**/*.py",
+      "frontend/src/test/**/*.tsx",
+      "requirements.txt",
+      "requirements-dev.txt",
+      "package.json",
+      "pyproject.toml",
+      "docker-compose*.yml",
+      "Dockerfile*",
+      ".env.example",
+      "alembic.ini",
+      "pytest.ini",
+      "setup.py",
+      "vite.config.ts",
+      "tsconfig.json",
+      "infrastructure/**/*.sh",
+      "infrastructure/**/*.json",
+      "scripts/**/*.py",
+      "scripts/**/*.sh"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source code or configuration files have been modified. Please analyze the changes and update the documentation accordingly:\n\n1. **Check if README.md needs updates** for:\n   - New features or functionality\n   - Changed installation/setup instructions\n   - Modified API endpoints or usage examples\n   - Updated dependencies or requirements\n   - New environment variables or configuration options\n\n2. **Check if docs/ folder needs updates** (if it exists) for:\n   - Technical documentation changes\n   - API documentation updates\n   - Architecture or design changes\n   - New deployment procedures\n\n3. **Specific areas to review**:\n   - Installation and setup instructions\n   - API endpoint documentation\n   - Configuration options and environment variables\n   - Development workflow and commands\n   - Testing procedures\n   - Deployment instructions\n   - Architecture overview\n   - Troubleshooting guides\n\n4. **For this project specifically, consider**:\n   - Machine learning model changes\n   - Drawing analysis workflow updates\n   - Frontend component changes\n   - Database schema modifications\n   - Docker configuration changes\n   - AWS deployment updates\n\nPlease update the relevant documentation files to reflect any significant changes, ensuring developers and users have accurate, up-to-date information."
+  }
+}

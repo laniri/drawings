@@ -58,6 +58,8 @@ Technical process workflow for training_config service
 - copy
 - items
 - items
+- dumps
+- items
 - _validate_config
 - append
 - append
@@ -73,6 +75,9 @@ Technical process workflow for training_config service
 - append
 - _config_to_dict
 - create
+- items
+- dumps
+- items
 
 ## BPMN Diagram
 

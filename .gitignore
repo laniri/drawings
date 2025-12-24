@@ -113,6 +113,9 @@ stringent_cleaned_dataset/*
 .nuxt
 dist
 
+#training output reports
+outputs/training_reports/
+
 # Gatsby files
 .cache/
 public

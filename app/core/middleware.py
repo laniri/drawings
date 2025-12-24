@@ -6,6 +6,7 @@ import logging
 import time
 import traceback
 import uuid
+import psutil
 from typing import Callable, Dict, Any
 from contextlib import asynccontextmanager
 
@@ -29,6 +30,7 @@ from app.core.exceptions import (
     configuration_error_to_http,
     resource_error_to_http,
 )
+from app.services.monitoring_service import get_monitoring_service, AlertLevel
 
 # Configure logging
 logging.basicConfig(
@@ -44,6 +46,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp):
         super().__init__(app)
         self.error_counts: Dict[str, int] = {}
+        self.monitoring_service = get_monitoring_service()
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with comprehensive error handling."""
@@ -51,11 +54,20 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id
         
-        # Log request start
+        # Log request start with structured logging
         start_time = time.time()
-        logger.info(
-            f"Request started - ID: {request_id}, Method: {request.method}, "
-            f"URL: {request.url}, Client: {request.client.host if request.client else 'unknown'}"
+        self.monitoring_service.log_structured(
+            level="INFO",
+            message=f"Request started: {request.method} {request.url}",
+            correlation_id=request_id,
+            component="error_middleware",
+            operation="request_start",
+            details={
+                "method": request.method,
+                "url": str(request.url),
+                "client_ip": request.client.host if request.client else "unknown",
+                "user_agent": request.headers.get("user-agent", "unknown")
+            }
         )
         
         try:
@@ -64,10 +76,25 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             
             # Log successful completion
             duration = time.time() - start_time
-            logger.info(
-                f"Request completed - ID: {request_id}, Status: {response.status_code}, "
-                f"Duration: {duration:.3f}s"
+            self.monitoring_service.log_structured(
+                level="INFO",
+                message=f"Request completed successfully",
+                correlation_id=request_id,
+                component="error_middleware",
+                operation="request_complete",
+                details={
+                    "status_code": response.status_code,
+                    "duration_seconds": duration,
+                    "response_size": response.headers.get("content-length", "unknown")
+                }
             )
+            
+            # Record performance metrics
+            self.monitoring_service.record_performance_metrics({
+                "response_time": duration,
+                "request_count": 1,
+                "success_count": 1 if response.status_code < 400 else 0
+            }, correlation_id=request_id)
             
             return response
             
@@ -79,11 +106,42 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             # Track error counts
             self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
             
-            # Log the error
-            logger.error(
-                f"Application error - ID: {request_id}, Type: {error_type}, "
-                f"Message: {e.message}, Duration: {duration:.3f}s, Details: {e.details}"
+            # Log the error with structured logging
+            self.monitoring_service.log_error(
+                message=f"Application error: {e.message}",
+                error_type=error_type,
+                correlation_id=request_id,
+                details={
+                    "error_details": e.details,
+                    "duration_seconds": duration,
+                    "request_method": request.method,
+                    "request_url": str(request.url)
+                }
             )
+            
+            # Send alert if appropriate
+            if self.monitoring_service.should_send_alert(error_type, request_id):
+                self.monitoring_service.send_alert(
+                    level=AlertLevel.ERROR,
+                    message=f"Application error: {error_type} - {e.message}",
+                    correlation_id=request_id,
+                    details={
+                        "error_type": error_type,
+                        "error_message": e.message,
+                        "error_details": e.details,
+                        "request_info": {
+                            "method": request.method,
+                            "url": str(request.url),
+                            "duration": duration
+                        }
+                    }
+                )
+            
+            # Record error metrics
+            self.monitoring_service.record_performance_metrics({
+                "error_count": 1,
+                "response_time": duration
+            }, correlation_id=request_id)
             
             # Convert to appropriate HTTP exception
             http_exception = self._convert_to_http_exception(e)
@@ -92,9 +150,18 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         except HTTPException as e:
             # Handle FastAPI HTTP exceptions
             duration = time.time() - start_time
-            logger.warning(
-                f"HTTP exception - ID: {request_id}, Status: {e.status_code}, "
-                f"Detail: {e.detail}, Duration: {duration:.3f}s"
+            
+            self.monitoring_service.log_structured(
+                level="WARNING",
+                message=f"HTTP exception: {e.detail}",
+                correlation_id=request_id,
+                component="error_middleware",
+                operation="http_exception",
+                details={
+                    "status_code": e.status_code,
+                    "detail": e.detail,
+                    "duration_seconds": duration
+                }
             )
             
             return await self._create_error_response(request_id, e)
@@ -107,12 +174,42 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             # Track error counts
             self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
             
-            # Log the full traceback for debugging
-            logger.error(
-                f"Unexpected error - ID: {request_id}, Type: {error_type}, "
-                f"Message: {str(e)}, Duration: {duration:.3f}s\n"
-                f"Traceback: {traceback.format_exc()}"
+            # Log the error with full traceback
+            self.monitoring_service.log_error(
+                message=f"Unexpected error: {str(e)}",
+                error_type=error_type,
+                correlation_id=request_id,
+                details={
+                    "traceback": traceback.format_exc(),
+                    "duration_seconds": duration,
+                    "request_method": request.method,
+                    "request_url": str(request.url)
+                }
             )
+            
+            # Send critical alert for unexpected errors
+            self.monitoring_service.send_alert(
+                level=AlertLevel.CRITICAL,
+                message=f"Unexpected system error: {error_type}",
+                correlation_id=request_id,
+                details={
+                    "error_type": error_type,
+                    "error_message": str(e),
+                    "traceback": traceback.format_exc(),
+                    "request_info": {
+                        "method": request.method,
+                        "url": str(request.url),
+                        "duration": duration
+                    }
+                }
+            )
+            
+            # Record critical error metrics
+            self.monitoring_service.record_performance_metrics({
+                "critical_error_count": 1,
+                "error_count": 1,
+                "response_time": duration
+            }, correlation_id=request_id)
             
             # Return generic internal server error
             http_exception = HTTPException(
@@ -217,16 +314,42 @@ class ResourceMonitoringMiddleware(BaseHTTPMiddleware):
         self.max_concurrent_requests = max_concurrent_requests
         self.active_requests = 0
         self.queued_requests = 0
+        self.monitoring_service = get_monitoring_service()
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Monitor resources and queue requests if necessary."""
+        request_id = getattr(request.state, 'request_id', str(uuid.uuid4()))
+        
         # Check if we're at capacity
         if self.active_requests >= self.max_concurrent_requests:
             self.queued_requests += 1
-            logger.warning(
-                f"Request queued - Active: {self.active_requests}, "
-                f"Queued: {self.queued_requests}, Max: {self.max_concurrent_requests}"
+            
+            # Log resource limit hit
+            self.monitoring_service.log_structured(
+                level="WARNING",
+                message="Request queued due to resource limits",
+                correlation_id=request_id,
+                component="resource_middleware",
+                operation="request_queue",
+                details={
+                    "active_requests": self.active_requests,
+                    "queued_requests": self.queued_requests,
+                    "max_concurrent": self.max_concurrent_requests
+                }
             )
+            
+            # Send alert if queue is getting large
+            if self.queued_requests > 5:
+                self.monitoring_service.send_alert(
+                    level=AlertLevel.WARNING,
+                    message=f"High request queue: {self.queued_requests} requests queued",
+                    correlation_id=request_id,
+                    details={
+                        "active_requests": self.active_requests,
+                        "queued_requests": self.queued_requests,
+                        "max_concurrent": self.max_concurrent_requests
+                    }
+                )
             
             # Return 503 Service Unavailable with retry information
             return JSONResponse(
@@ -243,13 +366,50 @@ class ResourceMonitoringMiddleware(BaseHTTPMiddleware):
         
         # Process the request
         self.active_requests += 1
+        
+        # Collect system metrics before processing
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory_percent = psutil.virtual_memory().percent
+        
         try:
             response = await call_next(request)
+            
+            # Record system performance metrics
+            self.monitoring_service.record_performance_metrics({
+                "cpu_usage": cpu_percent,
+                "memory_usage": memory_percent,
+                "active_requests": self.active_requests,
+                "queued_requests": self.queued_requests
+            }, correlation_id=request_id)
+            
+            # Check for performance threshold violations
+            self._check_performance_thresholds(cpu_percent, memory_percent, request_id)
+            
             return response
         finally:
             self.active_requests -= 1
             if self.queued_requests > 0:
                 self.queued_requests -= 1
+    
+    def _check_performance_thresholds(self, cpu_percent: float, memory_percent: float, correlation_id: str):
+        """Check if performance metrics exceed thresholds and send alerts."""
+        thresholds = self.monitoring_service.performance_thresholds
+        
+        if cpu_percent > thresholds.get('cpu_usage', 80.0):
+            self.monitoring_service.send_performance_alert(
+                metric_name="cpu_usage",
+                current_value=cpu_percent,
+                threshold=thresholds['cpu_usage'],
+                correlation_id=correlation_id
+            )
+        
+        if memory_percent > thresholds.get('memory_usage', 85.0):
+            self.monitoring_service.send_performance_alert(
+                metric_name="memory_usage",
+                current_value=memory_percent,
+                threshold=thresholds['memory_usage'],
+                correlation_id=correlation_id
+            )
     
     def get_resource_stats(self) -> Dict[str, int]:
         """Get current resource usage statistics."""
@@ -280,6 +440,9 @@ async def error_context(operation_name: str):
 
 def setup_error_monitoring():
     """Set up error monitoring and alerting."""
+    # Get monitoring service instance
+    monitoring_service = get_monitoring_service()
+    
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
@@ -299,4 +462,21 @@ def setup_error_monitoring():
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
     
-    logger.info("Error monitoring initialized")
+    # Initialize monitoring service components
+    monitoring_service.create_cloudwatch_dashboard()
+    monitoring_service.setup_cost_monitoring()
+    
+    # Log initialization
+    monitoring_service.log_structured(
+        level="INFO",
+        message="Error monitoring and alerting system initialized",
+        component="middleware",
+        operation="setup_monitoring",
+        details={
+            "cloudwatch_enabled": monitoring_service._cloudwatch_client is not None,
+            "sns_enabled": monitoring_service._sns_client is not None,
+            "cost_threshold": monitoring_service.cost_threshold
+        }
+    )
+    
+    logger.info("Error monitoring initialized with CloudWatch and SNS integration")

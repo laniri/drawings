@@ -119,8 +119,8 @@ class DrawingUploadRequest(BaseModel):
     @field_validator('drawing_tool', 'prompt')
     @classmethod
     def validate_optional_strings(cls, v):
-        """Validate optional string fields - convert empty strings to None."""
-        if v is not None and v.strip() == "":
+        """Validate optional string fields - convert empty/whitespace-only strings to None."""
+        if v is not None and isinstance(v, str) and v.strip() == "":
             return None
         return v
     

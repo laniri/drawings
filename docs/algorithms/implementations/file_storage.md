@@ -1,7 +1,7 @@
 # FileStorageService Algorithm Implementation
 
 **Source File**: `app/services/file_storage.py`
-**Last Updated**: 2025-12-16 13:41:57
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
@@ -53,23 +53,23 @@ Consider profiling with representative datasets to determine scalability charact
 
 The following edge cases should be tested:
 
-- Empty string for base_upload_dir
-- Empty string for file_path
-- Empty string for base_url
-- Negative values for max_age_days
-- Special characters in original_filename
-- Special characters in prefix
-- Special characters in directory
-- Empty string for prefix
-- Empty string for original_filename
-- Empty string for base_static_dir
-- Special characters in file_path
-- Zero value for max_age_days
-- Special characters in base_static_dir
+- Very large values for max_age_days
 - Empty string for directory
 - Special characters in base_upload_dir
+- Empty string for prefix
+- Zero value for max_age_days
+- Special characters in prefix
+- Empty string for file_path
+- Special characters in directory
+- Negative values for max_age_days
+- Empty string for base_static_dir
+- Special characters in original_filename
+- Special characters in file_path
+- Empty string for base_url
+- Special characters in base_static_dir
+- Empty string for base_upload_dir
 - Special characters in base_url
-- Very large values for max_age_days
+- Empty string for original_filename
 
 ## Implementation Details
 
@@ -190,4 +190,4 @@ Returns:
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:57*
+*Generated on: 2025-12-18 23:17:04*

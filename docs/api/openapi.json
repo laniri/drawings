@@ -681,6 +681,441 @@
         }
       }
     },
+    "/api/v1/interpretability/{analysis_id}/interactive": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Interactive Interpretability",
+        "description": "Get interactive saliency data with hoverable regions and click explanations.\n\nThis endpoint provides enhanced interpretability data that supports\ninteractive user interfaces with hover explanations and click-to-zoom functionality.",
+        "operationId": "get_interactive_interpretability_api_v1_interpretability__analysis_id__interactive_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InteractiveInterpretabilityResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/{analysis_id}/simplified": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Simplified Explanation",
+        "description": "Get simplified, non-technical explanations suitable for educators and parents.\n\nThis endpoint provides explanations adapted for different user roles\nwith accessible language and clear recommendations.",
+        "operationId": "get_simplified_explanation_api_v1_interpretability__analysis_id__simplified_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "user_role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "educator",
+              "title": "User Role"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimplifiedExplanationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/{analysis_id}/confidence": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Confidence Metrics",
+        "description": "Get confidence metrics and reliability scores for interpretability results.\n\nThis endpoint provides detailed confidence information to help users\nassess the trustworthiness of the analysis and interpretations.",
+        "operationId": "get_confidence_metrics_api_v1_interpretability__analysis_id__confidence_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfidenceMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/{analysis_id}/export": {
+      "post": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Export Interpretability Results",
+        "description": "Export interpretability results in multiple formats (PDF, PNG, CSV, JSON, HTML).\n\nThis endpoint allows users to export comprehensive interpretability reports\nwith customizable options for different use cases.",
+        "operationId": "export_interpretability_results_api_v1_interpretability__analysis_id__export_post",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/examples": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Example Patterns",
+        "description": "Get example interpretation patterns for educational purposes.\n\nThis endpoint provides a gallery of common interpretation patterns\nwith explanations suitable for different user roles.",
+        "operationId": "get_example_patterns_api_v1_interpretability_examples_get",
+        "parameters": [
+          {
+            "name": "age_group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Group"
+            }
+          },
+          {
+            "name": "user_role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "educator",
+              "title": "User Role"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Get Example Patterns Api V1 Interpretability Examples Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/examples/{age_group}": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Comparison Examples",
+        "description": "Get comparison examples for educational purposes from a specific age group.\n\nThis endpoint provides examples of normal and anomalous drawings\nto help users understand typical patterns and variations. Now supports\nfiltering by subject category for more targeted comparisons.",
+        "operationId": "get_comparison_examples_api_v1_interpretability_examples__age_group__get",
+        "parameters": [
+          {
+            "name": "age_group",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Age Group"
+            }
+          },
+          {
+            "name": "example_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "both",
+              "title": "Example Type"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 5,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonExamplesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/{analysis_id}/attribution": {
+      "get": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Get Anomaly Attribution",
+        "description": "Get detailed anomaly attribution breakdown (age vs subject vs visual).\n\nThis endpoint provides detailed information about what contributed\nto the anomaly detection: age-related factors, subject-specific factors,\nor visual characteristics.",
+        "operationId": "get_anomaly_attribution_api_v1_interpretability__analysis_id__attribution_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretability/{analysis_id}/annotate": {
+      "post": {
+        "tags": [
+          "interpretability"
+        ],
+        "summary": "Add Annotation",
+        "description": "Add user annotations to interpretability results.\n\nThis endpoint allows users to add their own notes and observations\nto interpretability results for future reference.",
+        "operationId": "add_annotation_api_v1_interpretability__analysis_id__annotate_post",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/models/age-groups": {
       "get": {
         "tags": [
@@ -2031,6 +2466,94 @@
         }
       }
     },
+    "/api/v1/config/subjects": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Supported Subject Categories",
+        "description": "Get list of supported subject categories.\n\nThis endpoint returns all supported subject categories that can be used\nwhen uploading drawings, along with usage statistics.",
+        "operationId": "get_supported_subject_categories_api_v1_config_subjects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/subjects/statistics": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Subject Specific Statistics",
+        "description": "Get subject-specific statistics and analysis data.\n\nThis endpoint provides detailed statistics about drawings and analyses\nfor specific subject categories or overall subject-related metrics.",
+        "operationId": "get_subject_specific_statistics_api_v1_config_subjects_statistics_get",
+        "parameters": [
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/models/subject-aware": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Get Subject Aware Model Status",
+        "description": "Get status of subject-aware model capabilities.\n\nThis endpoint provides information about the current subject-aware\nmodeling capabilities and model status.",
+        "operationId": "get_subject_aware_model_status_api_v1_config_models_subject_aware_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/config/reset": {
       "post": {
         "tags": [
@@ -2049,6 +2572,803 @@
               "default": false,
               "title": "Confirm"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/status": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Documentation Status",
+        "description": "Get current documentation generation status.\n\nReturns real-time status of documentation generation including progress,\ncurrent task, and any errors or warnings.",
+        "operationId": "get_documentation_status_api_v1_documentation_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/metrics": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Documentation Metrics",
+        "description": "Get comprehensive documentation metrics.\n\nReturns metrics about documentation files, generation history,\nsuccess rates, and validation status.",
+        "operationId": "get_documentation_metrics_api_v1_documentation_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationMetrics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/generate": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Generate Documentation",
+        "description": "Trigger documentation generation.\n\nStarts documentation generation process in the background.\nUse the status endpoint to monitor progress.",
+        "operationId": "generate_documentation_api_v1_documentation_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/generate/sync": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Generate Documentation Sync",
+        "description": "Generate documentation synchronously.\n\nRuns documentation generation and waits for completion.\nUse this for smaller generation tasks or when immediate results are needed.",
+        "operationId": "generate_documentation_sync_api_v1_documentation_generate_sync_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/categories": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Documentation Categories",
+        "description": "Get available documentation categories.\n\nReturns list of available documentation categories that can be generated.",
+        "operationId": "get_documentation_categories_api_v1_documentation_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/files": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Documentation Files",
+        "description": "Get list of documentation files with metadata.\n\nReturns comprehensive list of documentation files with metadata,\nfiltering, and search capabilities.",
+        "operationId": "get_documentation_files_api_v1_documentation_files_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by category",
+              "title": "Category"
+            },
+            "description": "Filter by category"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search in file names and content",
+              "title": "Search"
+            },
+            "description": "Search in file names and content"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/cache": {
+      "delete": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Clear Documentation Cache",
+        "description": "Clear documentation generation cache.\n\nForces regeneration of all documentation by clearing the cache.",
+        "operationId": "clear_documentation_cache_api_v1_documentation_cache_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/validation": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Validation Status",
+        "description": "Get comprehensive validation status for all documentation.\n\nReturns detailed validation results including errors, warnings,\nand quality metrics.",
+        "operationId": "get_validation_status_api_v1_documentation_validation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/validate": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Validate Documentation",
+        "description": "Run validation on documentation.\n\nValidates documentation for technical accuracy, link integrity,\naccessibility compliance, and formatting consistency.",
+        "operationId": "validate_documentation_api_v1_documentation_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Categories"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/preview/{category}": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Preview Documentation Changes",
+        "description": "Preview documentation changes before generation.\n\nShows what would be generated for a specific category or file\nwithout actually writing the files.",
+        "operationId": "preview_documentation_changes_api_v1_documentation_preview__category__get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Category"
+            }
+          },
+          {
+            "name": "file_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Specific file to preview",
+              "title": "File Path"
+            },
+            "description": "Specific file to preview"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/batch/generate": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Batch Generate Documentation",
+        "description": "Batch generate multiple documentation categories with scheduling.\n\nAllows generating multiple categories in sequence with different\nconfigurations for each category.",
+        "operationId": "batch_generate_documentation_api_v1_documentation_batch_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/batch/validate": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Batch Validate Documentation",
+        "description": "Batch validate multiple documentation categories.\n\nRuns validation on multiple categories in parallel for faster processing.",
+        "operationId": "batch_validate_documentation_api_v1_documentation_batch_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "title": "Categories"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/schedule": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Generation Schedule",
+        "description": "Get current generation schedule and queue.\n\nReturns information about scheduled and queued generation tasks.",
+        "operationId": "get_generation_schedule_api_v1_documentation_schedule_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Schedule Generation",
+        "description": "Schedule documentation generation for later execution.\n\nAllows scheduling generation tasks for specific times or intervals.",
+        "operationId": "schedule_generation_api_v1_documentation_schedule_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/search": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Search Documentation",
+        "description": "Search documentation with advanced filtering and faceting.\n\nProvides full-text search across all documentation with relevance scoring,\nfaceted filtering, and intelligent suggestions.",
+        "operationId": "search_documentation_api_v1_documentation_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/search/suggestions": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Search Suggestions",
+        "description": "Get search suggestions for autocomplete.\n\nProvides intelligent search suggestions based on indexed content\nand common search patterns.",
+        "operationId": "get_search_suggestions_api_v1_documentation_search_suggestions_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Partial query for suggestions",
+              "title": "Query"
+            },
+            "description": "Partial query for suggestions"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Maximum number of suggestions",
+              "default": 10,
+              "title": "Limit"
+            },
+            "description": "Maximum number of suggestions"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/search/statistics": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Search Statistics",
+        "description": "Get search index statistics.\n\nReturns comprehensive statistics about the search index including\ndocument counts, index size, and performance metrics.",
+        "operationId": "get_search_statistics_api_v1_documentation_search_statistics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/search/index": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Rebuild Search Index",
+        "description": "Rebuild the search index.\n\nRebuilds the search index from all documentation files.\nUse force=true to completely rebuild the index.",
+        "operationId": "rebuild_search_index_api_v1_documentation_search_index_post",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force complete reindexing",
+              "default": false,
+              "title": "Force"
+            },
+            "description": "Force complete reindexing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/navigation/{document_id}": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Navigation Context",
+        "description": "Get navigation context for a document.\n\nReturns comprehensive navigation context including breadcrumbs,\ncross-references, related content, and sequential navigation.",
+        "operationId": "get_navigation_context_api_v1_documentation_navigation__document_id__get",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/navigation/sitemap": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Sitemap",
+        "description": "Get complete documentation sitemap.\n\nReturns hierarchical sitemap of all documentation organized by type\nand category with metadata.",
+        "operationId": "get_sitemap_api_v1_documentation_navigation_sitemap_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/navigation/cross-references": {
+      "get": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Get Cross Reference Report",
+        "description": "Get cross-reference analysis report.\n\nReturns comprehensive analysis of cross-references including\nbroken links, most referenced documents, and orphaned content.",
+        "operationId": "get_cross_reference_report_api_v1_documentation_navigation_cross_references_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documentation/navigation/rebuild": {
+      "post": {
+        "tags": [
+          "documentation"
+        ],
+        "summary": "Rebuild Navigation Structure",
+        "description": "Rebuild navigation structure.\n\nRebuilds the navigation structure and cross-reference index\nfrom all documentation files.",
+        "operationId": "rebuild_navigation_structure_api_v1_documentation_navigation_rebuild_post",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force complete rebuild",
+              "default": false,
+              "title": "Force"
+            },
+            "description": "Force complete rebuild"
           }
         ],
         "responses": {
@@ -2944,6 +4264,47 @@
         "title": "AnalysisResultResponse",
         "description": "Complete analysis result including drawing, analysis, and interpretability."
       },
+      "AnnotationRequest": {
+        "properties": {
+          "region_id": {
+            "type": "string",
+            "title": "Region Id",
+            "description": "ID of the region being annotated"
+          },
+          "annotation_text": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Annotation Text",
+            "description": "User annotation text"
+          },
+          "annotation_type": {
+            "type": "string",
+            "title": "Annotation Type",
+            "description": "Type: note, question, concern, etc."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Optional user identifier"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_id",
+          "annotation_text",
+          "annotation_type"
+        ],
+        "title": "AnnotationRequest",
+        "description": "Request model for adding annotations to interpretability results."
+      },
       "AnomalyAnalysisResponse": {
         "properties": {
           "id": {
@@ -2957,7 +4318,7 @@
           "anomaly_score": {
             "type": "number",
             "title": "Anomaly Score",
-            "description": "Raw anomaly score"
+            "description": "Overall reconstruction loss on full 832-dimensional embedding"
           },
           "normalized_score": {
             "type": "number",
@@ -2965,6 +4326,60 @@
             "minimum": 0.0,
             "title": "Normalized Score",
             "description": "Normalized anomaly score (0-100 scale: 0=no anomaly, 100=maximal anomaly)"
+          },
+          "visual_anomaly_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visual Anomaly Score",
+            "description": "Visual component reconstruction loss (dims 0-767)"
+          },
+          "subject_anomaly_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Anomaly Score",
+            "description": "Subject component reconstruction loss (dims 768-831)"
+          },
+          "anomaly_attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anomaly Attribution",
+            "description": "Primary anomaly source: 'visual', 'subject', 'both', or 'age'"
+          },
+          "analysis_type": {
+            "type": "string",
+            "title": "Analysis Type",
+            "description": "Type of analysis performed",
+            "default": "subject_aware"
+          },
+          "subject_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Category",
+            "description": "Subject category used in analysis"
           },
           "is_anomaly": {
             "type": "boolean",
@@ -3012,6 +4427,52 @@
         ],
         "title": "AnomalyAnalysisResponse",
         "description": "Response model for anomaly analysis results."
+      },
+      "AttentionPatchResponse": {
+        "properties": {
+          "patch_id": {
+            "type": "string",
+            "title": "Patch Id",
+            "description": "Unique identifier for the patch"
+          },
+          "coordinates": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Coordinates",
+            "description": "Patch coordinates [x, y, width, height]"
+          },
+          "attention_weight": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Attention Weight",
+            "description": "Attention weight for this patch"
+          },
+          "layer_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Layer Index",
+            "description": "Transformer layer index"
+          },
+          "head_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Head Index",
+            "description": "Attention head index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patch_id",
+          "coordinates",
+          "attention_weight",
+          "layer_index",
+          "head_index"
+        ],
+        "title": "AttentionPatchResponse",
+        "description": "Response model for Vision Transformer attention patches."
       },
       "BatchAnalysisRequest": {
         "properties": {
@@ -3303,6 +4764,106 @@
         "title": "ComparisonExampleResponse",
         "description": "Response model for comparison examples."
       },
+      "ComparisonExamplesResponse": {
+        "properties": {
+          "normal_examples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Normal Examples",
+            "description": "Normal drawings from same age group"
+          },
+          "anomalous_examples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Anomalous Examples",
+            "description": "Other anomalous examples"
+          },
+          "explanation_context": {
+            "type": "string",
+            "title": "Explanation Context",
+            "description": "Context for the comparisons"
+          },
+          "age_group": {
+            "type": "string",
+            "title": "Age Group",
+            "description": "Age group for the examples"
+          },
+          "total_available": {
+            "type": "integer",
+            "title": "Total Available",
+            "description": "Total examples available in this age group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "normal_examples",
+          "anomalous_examples",
+          "explanation_context",
+          "age_group",
+          "total_available"
+        ],
+        "title": "ComparisonExamplesResponse",
+        "description": "Response model for comparison examples from the same age group."
+      },
+      "ConfidenceMetricsResponse": {
+        "properties": {
+          "overall_confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall Confidence",
+            "description": "Overall confidence in the analysis"
+          },
+          "explanation_reliability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Explanation Reliability",
+            "description": "Reliability of the explanation"
+          },
+          "model_certainty": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Model Certainty",
+            "description": "Model's certainty in the prediction"
+          },
+          "data_sufficiency": {
+            "type": "string",
+            "title": "Data Sufficiency",
+            "description": "Sufficient/Limited/Insufficient data quality"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "Confidence-related warnings"
+          },
+          "technical_details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Technical Details",
+            "description": "Technical confidence metrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overall_confidence",
+          "explanation_reliability",
+          "model_certainty",
+          "data_sufficiency"
+        ],
+        "title": "ConfidenceMetricsResponse",
+        "description": "Response model for confidence metrics and reliability scores."
+      },
       "ConfigurationUpdateRequest": {
         "properties": {
           "threshold_percentile": {
@@ -3358,6 +4919,141 @@
         "type": "object",
         "title": "ConfigurationUpdateRequest",
         "description": "Request model for updating system configuration."
+      },
+      "DocumentationMetrics": {
+        "properties": {
+          "total_files": {
+            "type": "integer",
+            "title": "Total Files",
+            "description": "Total number of documentation files"
+          },
+          "last_generated": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Generated",
+            "description": "Last generation timestamp"
+          },
+          "generation_count": {
+            "type": "integer",
+            "title": "Generation Count",
+            "description": "Total number of generations"
+          },
+          "average_duration": {
+            "type": "number",
+            "title": "Average Duration",
+            "description": "Average generation duration in seconds"
+          },
+          "success_rate": {
+            "type": "number",
+            "title": "Success Rate",
+            "description": "Success rate percentage"
+          },
+          "file_breakdown": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "File Breakdown",
+            "description": "Files by category"
+          },
+          "validation_status": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Validation Status",
+            "description": "Validation results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_files",
+          "generation_count",
+          "average_duration",
+          "success_rate"
+        ],
+        "title": "DocumentationMetrics",
+        "description": "Documentation metrics model."
+      },
+      "DocumentationStatus": {
+        "properties": {
+          "is_generating": {
+            "type": "boolean",
+            "title": "Is Generating",
+            "description": "Whether documentation is currently being generated"
+          },
+          "current_task": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Task",
+            "description": "Current generation task"
+          },
+          "progress": {
+            "type": "integer",
+            "title": "Progress",
+            "description": "Generation progress percentage (0-100)",
+            "default": 0
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time",
+            "description": "Generation start time"
+          },
+          "last_update": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Update",
+            "description": "Last status update time"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Generation errors"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "Generation warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_generating"
+        ],
+        "title": "DocumentationStatus",
+        "description": "Documentation generation status model."
       },
       "DrawingListResponse": {
         "properties": {
@@ -3489,6 +5185,196 @@
         "title": "ExpertLabel",
         "description": "Enumeration for expert labels on drawings."
       },
+      "ExportRequest": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "description": "Export format: pdf, png, csv, json, html"
+          },
+          "include_annotations": {
+            "type": "boolean",
+            "title": "Include Annotations",
+            "description": "Include user annotations",
+            "default": true
+          },
+          "include_comparisons": {
+            "type": "boolean",
+            "title": "Include Comparisons",
+            "description": "Include comparison examples",
+            "default": true
+          },
+          "simplified_version": {
+            "type": "boolean",
+            "title": "Simplified Version",
+            "description": "Use simplified explanations",
+            "default": false
+          },
+          "export_options": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Export Options",
+            "description": "Additional export options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "format"
+        ],
+        "title": "ExportRequest",
+        "description": "Request model for exporting interpretability results."
+      },
+      "ExportResponse": {
+        "properties": {
+          "export_id": {
+            "type": "string",
+            "title": "Export Id",
+            "description": "Unique identifier for the export"
+          },
+          "file_path": {
+            "type": "string",
+            "title": "File Path",
+            "description": "Path to the exported file"
+          },
+          "file_url": {
+            "type": "string",
+            "title": "File Url",
+            "description": "URL to download the exported file"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "description": "Export format used"
+          },
+          "file_size": {
+            "type": "integer",
+            "title": "File Size",
+            "description": "File size in bytes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Export creation timestamp"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Export expiration timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "export_id",
+          "file_path",
+          "file_url",
+          "format",
+          "file_size",
+          "created_at"
+        ],
+        "title": "ExportResponse",
+        "description": "Response model for export operations."
+      },
+      "GenerationRequest": {
+        "properties": {
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories",
+            "description": "Specific categories to generate"
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "description": "Force regeneration even if no changes detected",
+            "default": false
+          },
+          "validate_after": {
+            "type": "boolean",
+            "title": "Validate After",
+            "description": "Run validation after generation",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "GenerationRequest",
+        "description": "Documentation generation request model."
+      },
+      "GenerationResult": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether generation was successful"
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration",
+            "description": "Generation duration in seconds"
+          },
+          "generated_files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Generated Files",
+            "description": "List of generated files"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Generation errors"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "Generation warnings"
+          },
+          "validation_result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Result",
+            "description": "Validation results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "duration"
+        ],
+        "title": "GenerationResult",
+        "description": "Documentation generation result model."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3546,6 +5432,107 @@
         ],
         "title": "HealthCheckResponse",
         "description": "Health check response model."
+      },
+      "InteractiveInterpretabilityResponse": {
+        "properties": {
+          "saliency_regions": {
+            "items": {
+              "$ref": "#/components/schemas/InteractiveRegionResponse"
+            },
+            "type": "array",
+            "title": "Saliency Regions",
+            "description": "Interactive regions with hover explanations"
+          },
+          "attention_patches": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionPatchResponse"
+            },
+            "type": "array",
+            "title": "Attention Patches",
+            "description": "Vision Transformer attention patch data"
+          },
+          "region_explanations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Region Explanations",
+            "description": "Explanations for each interactive region"
+          },
+          "confidence_scores": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Confidence Scores",
+            "description": "Confidence scores for each explanation"
+          },
+          "interaction_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Interaction Metadata",
+            "description": "Metadata for interactive features"
+          }
+        },
+        "type": "object",
+        "required": [
+          "saliency_regions",
+          "attention_patches",
+          "region_explanations",
+          "confidence_scores"
+        ],
+        "title": "InteractiveInterpretabilityResponse",
+        "description": "Response model for interactive interpretability data."
+      },
+      "InteractiveRegionResponse": {
+        "properties": {
+          "region_id": {
+            "type": "string",
+            "title": "Region Id",
+            "description": "Unique identifier for the region"
+          },
+          "bounding_box": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Bounding Box",
+            "description": "Bounding box coordinates [x1, y1, x2, y2]"
+          },
+          "importance_score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Importance Score",
+            "description": "Importance score for this region"
+          },
+          "spatial_location": {
+            "type": "string",
+            "title": "Spatial Location",
+            "description": "Spatial description (e.g., 'top-left', 'center')"
+          },
+          "hover_explanation": {
+            "type": "string",
+            "title": "Hover Explanation",
+            "description": "Explanation shown on hover"
+          },
+          "click_explanation": {
+            "type": "string",
+            "title": "Click Explanation",
+            "description": "Detailed explanation shown on click"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_id",
+          "bounding_box",
+          "importance_score",
+          "spatial_location",
+          "hover_explanation",
+          "click_explanation"
+        ],
+        "title": "InteractiveRegionResponse",
+        "description": "Response model for interactive saliency regions."
       },
       "InterpretabilityResponse": {
         "properties": {
@@ -3766,6 +5753,257 @@
         ],
         "title": "ModelTrainingRequest",
         "description": "Request model for training a new age group model."
+      },
+      "SearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Search query string"
+          },
+          "doc_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Types",
+            "description": "Filter by document types"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Filter by tags"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Maximum number of results",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "description": "Result offset for pagination",
+            "default": 0
+          },
+          "include_content": {
+            "type": "boolean",
+            "title": "Include Content",
+            "description": "Include content snippets",
+            "default": true
+          },
+          "highlight": {
+            "type": "boolean",
+            "title": "Highlight",
+            "description": "Highlight search terms",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "SearchRequest",
+        "description": "Search request model."
+      },
+      "SearchResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            },
+            "type": "array",
+            "title": "Results",
+            "description": "Search results"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total number of results"
+          },
+          "query_time": {
+            "type": "number",
+            "title": "Query Time",
+            "description": "Query execution time in seconds"
+          },
+          "facets": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Facets",
+            "description": "Faceted search results"
+          },
+          "suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggestions",
+            "description": "Search suggestions"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Original query"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_count",
+          "query_time",
+          "query"
+        ],
+        "title": "SearchResponse",
+        "description": "Search response model."
+      },
+      "SearchResult": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Document ID"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Document title"
+          },
+          "doc_type": {
+            "type": "string",
+            "title": "Doc Type",
+            "description": "Document type"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Document URL"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Relevance score"
+          },
+          "snippet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snippet",
+            "description": "Content snippet"
+          },
+          "highlights": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Highlights",
+            "description": "Highlighted excerpts"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Document tags"
+          },
+          "last_modified": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Modified",
+            "description": "Last modification time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "doc_type",
+          "url",
+          "score",
+          "last_modified"
+        ],
+        "title": "SearchResult",
+        "description": "Search result model."
+      },
+      "SimplifiedExplanationResponse": {
+        "properties": {
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "Simple, non-technical explanation"
+          },
+          "key_findings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Findings",
+            "description": "Main points in accessible language"
+          },
+          "visual_indicators": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Visual Indicators",
+            "description": "Simple visual cues and their meanings"
+          },
+          "confidence_level": {
+            "type": "string",
+            "title": "Confidence Level",
+            "description": "High/Medium/Low confidence description"
+          },
+          "age_appropriate_context": {
+            "type": "string",
+            "title": "Age Appropriate Context",
+            "description": "Context appropriate for the age group"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommendations",
+            "description": "Simple recommendations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "key_findings",
+          "visual_indicators",
+          "confidence_level",
+          "age_appropriate_context"
+        ],
+        "title": "SimplifiedExplanationResponse",
+        "description": "Response model for simplified, non-technical explanations."
       },
       "SuccessResponse": {
         "properties": {

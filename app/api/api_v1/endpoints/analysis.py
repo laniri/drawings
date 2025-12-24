@@ -415,8 +415,8 @@ async def perform_single_analysis(drawing_id: int, db: Session, force_reanalysis
                 interpretability=_convert_interpretability_to_response(interpretability),
                 comparison_examples=comparison_examples
             )
-    
-    # Get or generate embedding
+    else:
+        logger.info(f"Force reanalysis requested for drawing {drawing_id}, creating new analysis")
     embedding_record = db.query(DrawingEmbedding).filter(
         DrawingEmbedding.drawing_id == drawing_id
     ).order_by(desc(DrawingEmbedding.created_timestamp)).first()
@@ -516,11 +516,6 @@ async def perform_single_analysis(drawing_id: int, db: Session, force_reanalysis
         visual_anomaly_score = anomaly_scores["visual_anomaly_score"]
         subject_anomaly_score = anomaly_scores["subject_anomaly_score"]
         
-        # Determine anomaly attribution
-        anomaly_attribution = model_manager.determine_attribution(
-            embedding_data, age_group_model.id, db
-        )
-        
         # Normalize score
         normalized_score = score_normalizer.normalize_score(
             anomaly_score, age_group_model.id, db
@@ -531,9 +526,38 @@ async def perform_single_analysis(drawing_id: int, db: Session, force_reanalysis
             anomaly_score, drawing.age_years, db
         )
         
-        # Calculate confidence (simple heuristic based on distance from threshold)
+        # Log the anomaly determination
+        logger.info(f"Drawing {drawing_id}: is_anomaly={is_anomaly}, anomaly_score={anomaly_score}, threshold_used={threshold_used}")
+        
+        # Determine anomaly attribution only for anomalous drawings (AFTER is_anomaly is final)
+        if is_anomaly:
+            logger.info(f"Drawing {drawing_id}: Determining attribution for anomalous drawing")
+            anomaly_attribution = model_manager.determine_attribution(
+                embedding_data, age_group_model.id, db
+            )
+            logger.info(f"Drawing {drawing_id}: Attribution determined as: {anomaly_attribution}")
+        else:
+            # No attribution needed for normal drawings
+            logger.info(f"Drawing {drawing_id}: Setting attribution to None for normal drawing")
+            anomaly_attribution = None
+        
+        # Calculate confidence based on distance from threshold
+        # For threshold-adjacent cases, confidence should be lower
         if threshold_used > 0:
-            confidence = min(1.0, abs(anomaly_score - threshold_used) / threshold_used)
+            distance_from_threshold = abs(anomaly_score - threshold_used)
+            relative_distance = distance_from_threshold / threshold_used
+            
+            # Use a more intuitive confidence calculation
+            # - High confidence when far from threshold (either direction)
+            # - Low confidence when very close to threshold
+            if relative_distance < 0.01:  # Very close to threshold (within 1%)
+                confidence = 0.1  # Low confidence for threshold-adjacent cases
+            elif relative_distance < 0.05:  # Close to threshold (within 5%)
+                confidence = 0.3  # Medium-low confidence
+            elif relative_distance < 0.1:  # Moderately close (within 10%)
+                confidence = 0.6  # Medium confidence
+            else:  # Far from threshold
+                confidence = min(0.95, 0.5 + relative_distance)  # High confidence, capped at 95%
         else:
             confidence = 0.5
         
@@ -586,11 +610,30 @@ async def perform_single_analysis(drawing_id: int, db: Session, force_reanalysis
         saliency_map = _create_simple_saliency_map(image, anomaly_score, is_anomaly)
         saliency_map.save(saliency_path)
         
-        # Generate explanation based on analysis results
+        # Generate explanation based on analysis results with accurate score descriptions
         if is_anomaly:
-            explanation_text = f"Analysis of this drawing reveals patterns that deviate from typical developmental expectations for a {drawing.age_years}-year-old child. The anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates significant differences in drawing characteristics such as spatial organization, detail complexity, or symbolic representation compared to age-matched peers."
+            if normalized_score >= 80:
+                score_description = "high"
+            elif normalized_score >= 60:
+                score_description = "moderately high"
+            else:
+                score_description = "moderate"
+            
+            explanation_text = f"Analysis of this drawing reveals patterns that deviate from typical developmental expectations for a {drawing.age_years}-year-old child. The {score_description} anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates significant differences in drawing characteristics such as spatial organization, detail complexity, or symbolic representation compared to age-matched peers."
         else:
-            explanation_text = f"This drawing demonstrates age-appropriate developmental patterns for a {drawing.age_years}-year-old child. The low anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates the drawing aligns well with expected developmental milestones in areas such as fine motor control, spatial awareness, and symbolic thinking."
+            if normalized_score < 40:
+                score_description = "low"
+                explanation_text = f"This drawing demonstrates age-appropriate developmental patterns for a {drawing.age_years}-year-old child. The {score_description} anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates the drawing aligns well with expected developmental milestones in areas such as fine motor control, spatial awareness, and symbolic thinking."
+            elif normalized_score < 60:
+                score_description = "moderate"
+                explanation_text = f"This drawing demonstrates age-appropriate developmental patterns for a {drawing.age_years}-year-old child. The {score_description} anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates the drawing aligns well with expected developmental milestones in areas such as fine motor control, spatial awareness, and symbolic thinking."
+            elif normalized_score < 90:
+                score_description = "moderately elevated but still within normal range"
+                explanation_text = f"This drawing demonstrates age-appropriate developmental patterns for a {drawing.age_years}-year-old child. The {score_description} anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates the drawing aligns with expected developmental milestones, though some features show slight variation from typical patterns."
+            else:
+                # Very high scores (90-100) that are still technically normal
+                score_description = "very high but still within normal range"
+                explanation_text = f"This drawing shows patterns that are very close to the anomaly threshold for a {drawing.age_years}-year-old child. While technically classified as normal, the {score_description} anomaly score of {anomaly_score:.3f} (normalized: {normalized_score:.1f}/100) indicates several features that stand out from typical age-expected patterns. This drawing may warrant closer examination or discussion with a professional to understand the specific characteristics that contribute to the elevated score."
         
         # Create realistic importance regions based on image analysis
         regions = _analyze_image_regions(image, anomaly_score, is_anomaly)
@@ -980,21 +1023,21 @@ async def get_analysis_result(analysis_id: int, db: Session = Depends(get_db)):
         AgeGroupModel.id == analysis.age_group_model_id
     ).first()
     
-    # Recalculate normalized score to ensure 0-100 scale compatibility
-    try:
-        recalculated_normalized_score = score_normalizer.normalize_score(
-            analysis.anomaly_score, analysis.age_group_model_id, db
-        )
-    except Exception as e:
-        logger.warning(f"Failed to recalculate normalized score for analysis {analysis.id}: {e}")
-        # Fallback: if stored score is negative, use 0; if > 100, use 100; otherwise use stored value
-        recalculated_normalized_score = max(0.0, min(100.0, analysis.normalized_score))
+    # Use the stored normalized score for consistency with explanation text and attribution
+    # The stored score was used for the original analysis and explanation generation
+    stored_normalized_score = analysis.normalized_score
+    
+    # Only validate that the score is within reasonable bounds (0-100)
+    if stored_normalized_score < 0 or stored_normalized_score > 100:
+        logger.warning(f"Analysis {analysis.id} has out-of-bounds normalized score: {stored_normalized_score}")
+        # Clamp to valid range
+        stored_normalized_score = max(0.0, min(100.0, stored_normalized_score))
     
     analysis_response = AnomalyAnalysisResponse(
         id=analysis.id,
         drawing_id=analysis.drawing_id,
         anomaly_score=analysis.anomaly_score,
-        normalized_score=recalculated_normalized_score,
+        normalized_score=stored_normalized_score,
         visual_anomaly_score=getattr(analysis, 'visual_anomaly_score', None),
         subject_anomaly_score=getattr(analysis, 'subject_anomaly_score', None),
         anomaly_attribution=getattr(analysis, 'anomaly_attribution', None),

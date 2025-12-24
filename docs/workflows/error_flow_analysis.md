@@ -31,6 +31,8 @@ Error handling workflow for analysis
 - Exception
 - Exception
 - Exception
+- Exception
+- Exception
 - HTTPException
 - Exception
 - Exception

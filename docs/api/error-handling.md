@@ -6,7 +6,7 @@ The following error responses are used across multiple endpoints:
 
 ### 422 - Unprocessable Entity - Validation error
 
-**Used by**: 49 endpoint(s)
+**Used by**: 71 endpoint(s)
 
 ## Error Response Schemas
 

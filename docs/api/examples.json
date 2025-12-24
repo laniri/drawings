@@ -567,6 +567,11 @@
                 "drawing_id": 42,
                 "anomaly_score": 3.14,
                 "normalized_score": 3.14,
+                "visual_anomaly_score": {},
+                "subject_anomaly_score": {},
+                "anomaly_attribution": {},
+                "analysis_type": "example_string",
+                "subject_category": {},
                 "is_anomaly": true,
                 "confidence": 3.14,
                 "age_group": "example_string",
@@ -740,6 +745,11 @@
                     "drawing_id": 42,
                     "anomaly_score": 3.14,
                     "normalized_score": 3.14,
+                    "visual_anomaly_score": {},
+                    "subject_anomaly_score": {},
+                    "anomaly_attribution": {},
+                    "analysis_type": "example_string",
+                    "subject_category": {},
                     "is_anomaly": true,
                     "confidence": 3.14,
                     "age_group": "example_string",
@@ -785,6 +795,11 @@
                     "drawing_id": 42,
                     "anomaly_score": 3.14,
                     "normalized_score": 3.14,
+                    "visual_anomaly_score": {},
+                    "subject_anomaly_score": {},
+                    "anomaly_attribution": {},
+                    "analysis_type": "example_string",
+                    "subject_category": {},
                     "is_anomaly": true,
                     "confidence": 3.14,
                     "age_group": "example_string",
@@ -896,6 +911,11 @@
                 "drawing_id": 42,
                 "anomaly_score": 3.14,
                 "normalized_score": 3.14,
+                "visual_anomaly_score": {},
+                "subject_anomaly_score": {},
+                "anomaly_attribution": {},
+                "analysis_type": "example_string",
+                "subject_category": {},
                 "is_anomaly": true,
                 "confidence": 3.14,
                 "age_group": "example_string",
@@ -1053,6 +1073,11 @@
                   "drawing_id": 42,
                   "anomaly_score": 3.14,
                   "normalized_score": 3.14,
+                  "visual_anomaly_score": {},
+                  "subject_anomaly_score": {},
+                  "anomaly_attribution": {},
+                  "analysis_type": "example_string",
+                  "subject_category": {},
                   "is_anomaly": true,
                   "confidence": 3.14,
                   "age_group": "example_string",
@@ -1065,6 +1090,11 @@
                   "drawing_id": 42,
                   "anomaly_score": 3.14,
                   "normalized_score": 3.14,
+                  "visual_anomaly_score": {},
+                  "subject_anomaly_score": {},
+                  "anomaly_attribution": {},
+                  "analysis_type": "example_string",
+                  "subject_category": {},
                   "is_anomaly": true,
                   "confidence": 3.14,
                   "age_group": "example_string",
@@ -1109,6 +1139,603 @@
         "description": "Get all analyses for a specific drawing.\n\nThis endpoint returns the analysis history for a drawing,\nordered by most recent first.",
         "tags": [
           "analysis"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/{analysis_id}/interactive": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/{analysis_id}/interactive",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "saliency_regions": [
+                {
+                  "region_id": "example_string",
+                  "bounding_box": [
+                    42,
+                    42
+                  ],
+                  "importance_score": 3.14,
+                  "spatial_location": "example_string",
+                  "hover_explanation": "example_string",
+                  "click_explanation": "example_string"
+                },
+                {
+                  "region_id": "example_string",
+                  "bounding_box": [
+                    42,
+                    42
+                  ],
+                  "importance_score": 3.14,
+                  "spatial_location": "example_string",
+                  "hover_explanation": "example_string",
+                  "click_explanation": "example_string"
+                }
+              ],
+              "attention_patches": [
+                {
+                  "patch_id": "example_string",
+                  "coordinates": [
+                    42,
+                    42
+                  ],
+                  "attention_weight": 3.14,
+                  "layer_index": 42,
+                  "head_index": 42
+                },
+                {
+                  "patch_id": "example_string",
+                  "coordinates": [
+                    42,
+                    42
+                  ],
+                  "attention_weight": 3.14,
+                  "layer_index": 42,
+                  "head_index": 42
+                }
+              ],
+              "region_explanations": {},
+              "confidence_scores": {},
+              "interaction_metadata": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Interactive Interpretability",
+        "description": "Get interactive saliency data with hoverable regions and click explanations.\n\nThis endpoint provides enhanced interpretability data that supports\ninteractive user interfaces with hover explanations and click-to-zoom functionality.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/{analysis_id}/simplified": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          },
+          "query": {
+            "user_role": "example_user_role"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/{analysis_id}/simplified",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "summary": "example_string",
+              "key_findings": [
+                "example_string",
+                "example_string"
+              ],
+              "visual_indicators": [
+                {},
+                {}
+              ],
+              "confidence_level": "example_string",
+              "age_appropriate_context": "example_string",
+              "recommendations": [
+                "example_string",
+                "example_string"
+              ]
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Simplified Explanation",
+        "description": "Get simplified, non-technical explanations suitable for educators and parents.\n\nThis endpoint provides explanations adapted for different user roles\nwith accessible language and clear recommendations.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/{analysis_id}/confidence": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/{analysis_id}/confidence",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "overall_confidence": 3.14,
+              "explanation_reliability": 3.14,
+              "model_certainty": 3.14,
+              "data_sufficiency": "example_string",
+              "warnings": [
+                "example_string",
+                "example_string"
+              ],
+              "technical_details": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Confidence Metrics",
+        "description": "Get confidence metrics and reliability scores for interpretability results.\n\nThis endpoint provides detailed confidence information to help users\nassess the trustworthiness of the analysis and interpretations.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "POST /api/v1/interpretability/{analysis_id}/export": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "request_body": {
+          "application/json": {
+            "format": "example_string",
+            "include_annotations": true,
+            "include_comparisons": true,
+            "simplified_version": true,
+            "export_options": {}
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/interpretability/{analysis_id}/export",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "export_id": "example_string",
+              "file_path": "example_string",
+              "file_url": "example_string",
+              "format": "example_string",
+              "file_size": 42,
+              "created_at": "example_string",
+              "expires_at": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Export Interpretability Results",
+        "description": "Export interpretability results in multiple formats (PDF, PNG, CSV, JSON, HTML).\n\nThis endpoint allows users to export comprehensive interpretability reports\nwith customizable options for different use cases.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/examples": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "age_group": "example_age_group",
+            "user_role": "example_user_role"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/examples",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": [
+              {},
+              {}
+            ]
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Example Patterns",
+        "description": "Get example interpretation patterns for educational purposes.\n\nThis endpoint provides a gallery of common interpretation patterns\nwith explanations suitable for different user roles.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/examples/{age_group}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "age_group": "example_age_group"
+          },
+          "query": {
+            "example_type": "example_example_type",
+            "subject": "example_subject",
+            "limit": 10
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/examples/{age_group}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "normal_examples": [
+                {},
+                {}
+              ],
+              "anomalous_examples": [
+                {},
+                {}
+              ],
+              "explanation_context": "example_string",
+              "age_group": "example_string",
+              "total_available": 42
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Comparison Examples",
+        "description": "Get comparison examples for educational purposes from a specific age group.\n\nThis endpoint provides examples of normal and anomalous drawings\nto help users understand typical patterns and variations. Now supports\nfiltering by subject category for more targeted comparisons.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "GET /api/v1/interpretability/{analysis_id}/attribution": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/interpretability/{analysis_id}/attribution",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Anomaly Attribution",
+        "description": "Get detailed anomaly attribution breakdown (age vs subject vs visual).\n\nThis endpoint provides detailed information about what contributed\nto the anomaly detection: age-related factors, subject-specific factors,\nor visual characteristics.",
+        "tags": [
+          "interpretability"
+        ]
+      }
+    },
+    "POST /api/v1/interpretability/{analysis_id}/annotate": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "analysis_id": 42
+          }
+        },
+        "request_body": {
+          "application/json": {
+            "region_id": "example_string",
+            "annotation_text": "example_string",
+            "annotation_type": "example_string",
+            "user_id": {}
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/interpretability/{analysis_id}/annotate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Add Annotation",
+        "description": "Add user annotations to interpretability results.\n\nThis endpoint allows users to add their own notes and observations\nto interpretability results for future reference.",
+        "tags": [
+          "interpretability"
         ]
       }
     },
@@ -2952,6 +3579,121 @@
         ]
       }
     },
+    "GET /api/v1/config/subjects": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/subjects",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Supported Subject Categories",
+        "description": "Get list of supported subject categories.\n\nThis endpoint returns all supported subject categories that can be used\nwhen uploading drawings, along with usage statistics.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/config/subjects/statistics": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "subject": "example_subject"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/subjects/statistics",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Subject Specific Statistics",
+        "description": "Get subject-specific statistics and analysis data.\n\nThis endpoint provides detailed statistics about drawings and analyses\nfor specific subject categories or overall subject-related metrics.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/config/models/subject-aware": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/config/models/subject-aware",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Subject Aware Model Status",
+        "description": "Get status of subject-aware model capabilities.\n\nThis endpoint provides information about the current subject-aware\nmodeling capabilities and model status.",
+        "tags": [
+          "configuration"
+        ]
+      }
+    },
     "POST /api/v1/config/reset": {
       "request_examples": {
         "parameters": {
@@ -3008,6 +3750,1134 @@
         "description": "Reset system configuration and models.\n\nWARNING: This endpoint deactivates all models and clears caches.\nUse with caution in production environments.",
         "tags": [
           "configuration"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/status": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/status",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "is_generating": true,
+              "current_task": {},
+              "progress": 42,
+              "start_time": {},
+              "last_update": {},
+              "errors": [
+                "example_string",
+                "example_string"
+              ],
+              "warnings": [
+                "example_string",
+                "example_string"
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Documentation Status",
+        "description": "Get current documentation generation status.\n\nReturns real-time status of documentation generation including progress,\ncurrent task, and any errors or warnings.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/metrics": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/metrics",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "total_files": 42,
+              "last_generated": {},
+              "generation_count": 42,
+              "average_duration": 3.14,
+              "success_rate": 3.14,
+              "file_breakdown": {},
+              "validation_status": {}
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Documentation Metrics",
+        "description": "Get comprehensive documentation metrics.\n\nReturns metrics about documentation files, generation history,\nsuccess rates, and validation status.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/generate": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "categories": {},
+            "force": true,
+            "validate_after": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/generate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "success": true,
+              "duration": 3.14,
+              "generated_files": [
+                "example_string",
+                "example_string"
+              ],
+              "errors": [
+                "example_string",
+                "example_string"
+              ],
+              "warnings": [
+                "example_string",
+                "example_string"
+              ],
+              "validation_result": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Generate Documentation",
+        "description": "Trigger documentation generation.\n\nStarts documentation generation process in the background.\nUse the status endpoint to monitor progress.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/generate/sync": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "categories": {},
+            "force": true,
+            "validate_after": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/generate/sync",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "success": true,
+              "duration": 3.14,
+              "generated_files": [
+                "example_string",
+                "example_string"
+              ],
+              "errors": [
+                "example_string",
+                "example_string"
+              ],
+              "warnings": [
+                "example_string",
+                "example_string"
+              ],
+              "validation_result": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Generate Documentation Sync",
+        "description": "Generate documentation synchronously.\n\nRuns documentation generation and waits for completion.\nUse this for smaller generation tasks or when immediate results are needed.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/categories": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/categories",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Documentation Categories",
+        "description": "Get available documentation categories.\n\nReturns list of available documentation categories that can be generated.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/files": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "category": "example_category",
+            "search": "example_search"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/files",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Documentation Files",
+        "description": "Get list of documentation files with metadata.\n\nReturns comprehensive list of documentation files with metadata,\nfiltering, and search capabilities.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "DELETE /api/v1/documentation/cache": {
+      "request_examples": {
+        "complete_request": {
+          "method": "DELETE",
+          "url": "/api/v1/documentation/cache",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Clear Documentation Cache",
+        "description": "Clear documentation generation cache.\n\nForces regeneration of all documentation by clearing the cache.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/validation": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/validation",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Validation Status",
+        "description": "Get comprehensive validation status for all documentation.\n\nReturns detailed validation results including errors, warnings,\nand quality metrics.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/validate": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {}
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/validate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Validate Documentation",
+        "description": "Run validation on documentation.\n\nValidates documentation for technical accuracy, link integrity,\naccessibility compliance, and formatting consistency.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/preview/{category}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "category": "example_category"
+          },
+          "query": {
+            "file_path": "example_file_path"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/preview/{category}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Preview Documentation Changes",
+        "description": "Preview documentation changes before generation.\n\nShows what would be generated for a specific category or file\nwithout actually writing the files.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/batch/generate": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {}
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/batch/generate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Batch Generate Documentation",
+        "description": "Batch generate multiple documentation categories with scheduling.\n\nAllows generating multiple categories in sequence with different\nconfigurations for each category.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/batch/validate": {
+      "request_examples": {
+        "request_body": {
+          "application/json": [
+            "example_string",
+            "example_string"
+          ]
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/batch/validate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Batch Validate Documentation",
+        "description": "Batch validate multiple documentation categories.\n\nRuns validation on multiple categories in parallel for faster processing.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/schedule": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/schedule",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Generation Schedule",
+        "description": "Get current generation schedule and queue.\n\nReturns information about scheduled and queued generation tasks.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/schedule": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {}
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/schedule",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Schedule Generation",
+        "description": "Schedule documentation generation for later execution.\n\nAllows scheduling generation tasks for specific times or intervals.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/search": {
+      "request_examples": {
+        "request_body": {
+          "application/json": {
+            "query": "example_string",
+            "doc_types": {},
+            "tags": {},
+            "limit": 42,
+            "offset": 42,
+            "include_content": true,
+            "highlight": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/search",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {
+              "results": [
+                {
+                  "id": "example_string",
+                  "title": "example_string",
+                  "doc_type": "example_string",
+                  "url": "example_string",
+                  "score": 3.14,
+                  "snippet": {},
+                  "highlights": [
+                    "example_string",
+                    "example_string"
+                  ],
+                  "tags": [
+                    "example_string",
+                    "example_string"
+                  ],
+                  "last_modified": "example_string"
+                },
+                {
+                  "id": "example_string",
+                  "title": "example_string",
+                  "doc_type": "example_string",
+                  "url": "example_string",
+                  "score": 3.14,
+                  "snippet": {},
+                  "highlights": [
+                    "example_string",
+                    "example_string"
+                  ],
+                  "tags": [
+                    "example_string",
+                    "example_string"
+                  ],
+                  "last_modified": "example_string"
+                }
+              ],
+              "total_count": 42,
+              "query_time": 3.14,
+              "facets": {},
+              "suggestions": [
+                "example_string",
+                "example_string"
+              ],
+              "query": "example_string"
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Search Documentation",
+        "description": "Search documentation with advanced filtering and faceting.\n\nProvides full-text search across all documentation with relevance scoring,\nfaceted filtering, and intelligent suggestions.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/search/suggestions": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "query": "example_query",
+            "limit": 10
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/search/suggestions",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Search Suggestions",
+        "description": "Get search suggestions for autocomplete.\n\nProvides intelligent search suggestions based on indexed content\nand common search patterns.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/search/statistics": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/search/statistics",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Search Statistics",
+        "description": "Get search index statistics.\n\nReturns comprehensive statistics about the search index including\ndocument counts, index size, and performance metrics.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/search/index": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "force": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/search/index",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Rebuild Search Index",
+        "description": "Rebuild the search index.\n\nRebuilds the search index from all documentation files.\nUse force=true to completely rebuild the index.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/navigation/{document_id}": {
+      "request_examples": {
+        "parameters": {
+          "path": {
+            "document_id": "example_document_id"
+          }
+        },
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/navigation/{document_id}",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Navigation Context",
+        "description": "Get navigation context for a document.\n\nReturns comprehensive navigation context including breadcrumbs,\ncross-references, related content, and sequential navigation.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/navigation/sitemap": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/navigation/sitemap",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Sitemap",
+        "description": "Get complete documentation sitemap.\n\nReturns hierarchical sitemap of all documentation organized by type\nand category with metadata.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "GET /api/v1/documentation/navigation/cross-references": {
+      "request_examples": {
+        "complete_request": {
+          "method": "GET",
+          "url": "/api/v1/documentation/navigation/cross-references",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Get Cross Reference Report",
+        "description": "Get cross-reference analysis report.\n\nReturns comprehensive analysis of cross-references including\nbroken links, most referenced documents, and orphaned content.",
+        "tags": [
+          "documentation"
+        ]
+      }
+    },
+    "POST /api/v1/documentation/navigation/rebuild": {
+      "request_examples": {
+        "parameters": {
+          "query": {
+            "force": true
+          }
+        },
+        "complete_request": {
+          "method": "POST",
+          "url": "/api/v1/documentation/navigation/rebuild",
+          "headers": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+      },
+      "response_examples": {
+        "200": {
+          "description": "Successful Response",
+          "status_code": "200",
+          "content": {
+            "application/json": {}
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "status_code": "422",
+          "content": {
+            "application/json": {
+              "detail": [
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                },
+                {
+                  "loc": [
+                    {},
+                    {}
+                  ],
+                  "msg": "example_string",
+                  "type": "example_string"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "endpoint_info": {
+        "summary": "Rebuild Navigation Structure",
+        "description": "Rebuild navigation structure.\n\nRebuilds the navigation structure and cross-reference index\nfrom all documentation files.",
+        "tags": [
+          "documentation"
         ]
       }
     },
@@ -3986,8 +5856,8 @@
     }
   },
   "generation_info": {
-    "timestamp": "2025-12-16T15:53:08.822902",
-    "total_endpoints": 72,
-    "examples_generated": 72
+    "timestamp": "2025-12-18T23:20:46.185733",
+    "total_endpoints": 105,
+    "examples_generated": 105
   }
 }

@@ -1,11 +1,19 @@
 # DatasetPreparationService Algorithm Implementation
 
 **Source File**: `app/services/dataset_preparation.py`
-**Last Updated**: 2025-12-16 13:41:57
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
 Service for preparing datasets for training.
+
+## Mathematical Formulation
+
+*This section provides the mathematical foundation and formal specification of the algorithm.*
+
+### Mathematical Formulations
+
+labels: Stratification labels
 
 ## Computational Complexity Analysis
 
@@ -60,7 +68,20 @@ Raises:
     metadata: List of metadata objects
     
 Raises:
-    ValidationError: If dataset validation fails Split dataset into train/validation/test sets
+    ValidationError: If dataset validation fails Check if stratification is mathematically viable
+- Args:
+    labels: Stratification labels
+    test_ratio: Test set ratio
+    val_ratio: Validation set ratio
+    
+Returns:
+    True if stratification is viable, False otherwise Create stratification labels based on age and subject combinations
+- Args:
+    metadata: List of metadata objects
+    split_config: Configuration for splitting
+    
+Returns:
+    Tuple of (stratification_labels, warnings) Split dataset into train/validation/test sets
 - Args:
     files: List of image files
     metadata: List of metadata objects
@@ -70,14 +91,27 @@ Returns:
     DatasetSplit object containing the splits
     
 Raises:
-    ValidationError: If splitting fails Complete dataset preparation pipeline
+    ValidationError: If splitting fails Perform train_test_split with robust error handling and fallback
+- Args:
+    indices: Array indices to split
+    test_size: Size of test set
+    random_state: Random seed
+    stratify: Optional stratification labels
+    
+Returns:
+    Tuple of (train_indices, test_indices) Complete dataset preparation pipeline
 - Args:
     dataset_folder: Path to folder containing drawing images
     metadata_file: Path to metadata file
     split_config: Optional split configuration
     
 Returns:
-    DatasetSplit object with train/validation/test splits Validate dataset split for training readiness
+    DatasetSplit object with train/validation/test splits Validate age-subject combinations for training readiness
+- Args:
+    dataset_split: Dataset split to validate
+    
+Returns:
+    Dictionary with validation results and age-subject specific warnings Validate dataset split for training readiness
 - Args:
     dataset_split: Dataset split to validate
     
@@ -100,21 +134,42 @@ Returns:
 
 The following edge cases should be tested:
 
-- Very large image_files
-- Empty string for metadata_file
-- Empty files
-- Single-element files
-- Empty metadata
-- Special characters in metadata_file
-- Special characters in metadata_dict
-- Single-element metadata
-- Empty string for dataset_folder
 - Empty string for metadata_dict
-- Very large files
+- Negative values for random_state
+- Empty files
+- Very large values for random_state
 - Very large metadata
-- Empty image_files
-- Single-element image_files
+- Empty labels
+- Empty string for metadata_file
+- Very large values for val_ratio
+- Very large values for test_ratio
+- Empty stratify
+- Single-element stratify
+- Single-element indices
+- Empty indices
+- Zero value for val_ratio
+- Very large image_files
+- Zero value for test_ratio
+- Zero value for random_state
+- Very large values for test_size
+- Very large stratify
+- Very large files
+- Zero value for test_size
 - Special characters in dataset_folder
+- Very large labels
+- Single-element metadata
+- Empty image_files
+- Special characters in metadata_file
+- Negative values for test_size
+- Negative values for test_ratio
+- Very large indices
+- Single-element labels
+- Single-element files
+- Special characters in metadata_dict
+- Negative values for val_ratio
+- Empty metadata
+- Empty string for dataset_folder
+- Single-element image_files
 
 ## Implementation Details
 
@@ -191,6 +246,22 @@ Returns:
 
 **Returns:** DatasetSplit
 
+#### `validate_age_subject_combinations`
+
+Validate age-subject combinations for training readiness.
+
+Args:
+    dataset_split: Dataset split to validate
+    
+Returns:
+    Dictionary with validation results and age-subject specific warnings
+
+**Parameters:**
+- `self` (Any)
+- `dataset_split` (DatasetSplit)
+
+**Returns:** Dict[str, Any]
+
 #### `validate_dataset_for_training`
 
 Validate dataset split for training readiness.
@@ -213,6 +284,12 @@ Returns:
 
 ```latex
 \section{DatasetPreparationService Algorithm}
+
+\subsection{_is_stratification_viable Method}
+
+\begin{align}
+labels: Stratification labels
+\end{align}
 ```
 
 ## References and Standards
@@ -224,4 +301,4 @@ Returns:
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:57*
+*Generated on: 2025-12-18 23:17:04*

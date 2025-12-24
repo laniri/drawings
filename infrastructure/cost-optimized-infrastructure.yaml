@@ -1,0 +1,534 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cost-optimized infrastructure for Children Drawing Anomaly Detection System - Demo/Development'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: demo
+    AllowedValues: [demo, dev, staging]
+    Description: Environment name (cost-optimized for demo/dev)
+
+  S3BucketPrefix:
+    Type: String
+    Description: Prefix for S3 bucket names
+    Default: children-drawing-demo
+    MinLength: 3
+    MaxLength: 20
+    AllowedPattern: ^[a-z0-9-]*$
+
+  ECRRepositoryURI:
+    Type: String
+    Description: ECR repository URI for the application container
+    Default: ""
+
+  EnableNATGateway:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Enable NAT Gateway (adds ~$32/month cost)
+
+  CostAlertEmail:
+    Type: String
+    Description: Email address for cost alerts
+    Default: ""
+
+Conditions:
+  HasECRRepository: !Not [!Equals [!Ref ECRRepositoryURI, ""]]
+  EnableNAT: !Equals [!Ref EnableNATGateway, "true"]
+  HasCostAlert: !Not [!Equals [!Ref CostAlertEmail, ""]]
+
+Resources:
+  # ============================================================================
+  # Minimal VPC Setup (Cost Optimized)
+  # ============================================================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-vpc
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: CostOptimized
+          Value: "true"
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-igw
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  # Single Public Subnet (Cost Optimized)
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-public-subnet-1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-public-subnet-2
+
+  # Optional NAT Gateway (disabled by default for cost savings)
+  NatGatewayEIP:
+    Type: AWS::EC2::EIP
+    Condition: EnableNAT
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Condition: EnableNAT
+    Properties:
+      AllocationId: !GetAtt NatGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+
+  # Route Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-public-routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  # ============================================================================
+  # Security Groups (Minimal)
+  # ============================================================================
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-ecs-sg
+      GroupDescription: Security group for ECS tasks (cost-optimized)
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          CidrIp: 0.0.0.0/0
+          Description: HTTP from anywhere (demo only)
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: HTTP from anywhere
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS from anywhere
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-ecs-sg
+
+  # ============================================================================
+  # S3 Buckets (Cost Optimized)
+  # ============================================================================
+  DrawingsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${S3BucketPrefix}-${Environment}-drawings-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # Cost optimization: Immediate transition to IA for demo
+      LifecycleConfiguration:
+        Rules:
+          - Id: CostOptimization
+            Status: Enabled
+            TransitionInDays: 1
+            StorageClass: STANDARD_IA
+          - Id: DeleteOldObjects
+            Status: Enabled
+            ExpirationInDays: 90
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-drawings-bucket
+        - Key: CostOptimized
+          Value: "true"
+
+  # Single bucket for models and backups (cost optimization)
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${S3BucketPrefix}-${Environment}-data-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: CostOptimization
+            Status: Enabled
+            TransitionInDays: 7
+            StorageClass: STANDARD_IA
+          - Id: ArchiveOldData
+            Status: Enabled
+            TransitionInDays: 30
+            StorageClass: GLACIER
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-data-bucket
+
+  # ============================================================================
+  # IAM Roles (Minimal)
+  # ============================================================================
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-ecs-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub ${DrawingsBucket}/*
+                  - !Sub ${DataBucket}/*
+                  - !GetAtt DrawingsBucket.Arn
+                  - !GetAtt DataBucket.Arn
+
+  # ============================================================================
+  # ECS Cluster (Cost Optimized)
+  # ============================================================================
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${AWS::StackName}-cluster
+      CapacityProviders:
+        - FARGATE_SPOT  # Use Spot for cost savings
+        - FARGATE
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: FARGATE_SPOT
+          Weight: 2
+        - CapacityProvider: FARGATE
+          Weight: 1
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-cluster
+        - Key: CostOptimized
+          Value: "true"
+
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/${AWS::StackName}
+      RetentionInDays: 7  # Shorter retention for cost savings
+
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${AWS::StackName}-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256  # Minimal CPU for cost optimization
+      Memory: 512  # Minimal memory for cost optimization
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: app
+          Image: !If 
+            - HasECRRepository
+            - !Ref ECRRepositoryURI
+            - nginx:latest
+          PortMappings:
+            - ContainerPort: 8000
+              Protocol: tcp
+          Environment:
+            - Name: ENVIRONMENT
+              Value: !Ref Environment
+            - Name: AWS_DEFAULT_REGION
+              Value: !Ref AWS::Region
+            - Name: S3_BUCKET_DRAWINGS
+              Value: !Ref DrawingsBucket
+            - Name: S3_BUCKET_MODELS
+              Value: !Ref DataBucket
+            - Name: S3_BUCKET_BACKUPS
+              Value: !Ref DataBucket
+            - Name: ENABLE_METRICS
+              Value: "false"  # Disable custom metrics for cost savings
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ECSLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - curl -f http://localhost:8000/health || exit 1
+            Interval: 60  # Longer interval for cost savings
+            Timeout: 10
+            Retries: 2
+            StartPeriod: 120
+
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${AWS::StackName}-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      PlatformVersion: LATEST
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          Subnets:
+            - !Ref PublicSubnet1
+            - !Ref PublicSubnet2
+          AssignPublicIp: ENABLED  # Required for public subnets without NAT
+      DeploymentConfiguration:
+        MaximumPercent: 100  # Cost optimization: no extra tasks during deployment
+        MinimumHealthyPercent: 0
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-service
+        - Key: CostOptimized
+          Value: "true"
+
+  # ============================================================================
+  # CloudFront Distribution (Free Tier Optimized)
+  # ============================================================================
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - Id: ECSOrigin
+            DomainName: !Sub ${ECSService}.${AWS::Region}.elb.amazonaws.com
+            CustomOriginConfig:
+              HTTPPort: 8000
+              OriginProtocolPolicy: http-only
+        DefaultCacheBehavior:
+          TargetOriginId: ECSOrigin
+          ViewerProtocolPolicy: allow-all  # Allow HTTP for demo
+          AllowedMethods: [DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          ForwardedValues:
+            QueryString: true
+            Headers: [Authorization, Content-Type]
+            Cookies:
+              Forward: all
+          DefaultTTL: 0
+          MaxTTL: 86400
+          MinTTL: 0
+        CacheBehaviors:
+          - PathPattern: /static/*
+            TargetOriginId: ECSOrigin
+            ViewerProtocolPolicy: allow-all
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            DefaultTTL: 3600
+            MaxTTL: 86400
+            MinTTL: 0
+        Enabled: true
+        HttpVersion: http2
+        PriceClass: PriceClass_100  # Use only North America and Europe
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        Comment: !Sub Cost-optimized CloudFront for ${AWS::StackName}
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-cloudfront
+        - Key: CostOptimized
+          Value: "true"
+
+  # ============================================================================
+  # Cost Monitoring
+  # ============================================================================
+  CostAlertTopic:
+    Type: AWS::SNS::Topic
+    Condition: HasCostAlert
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-cost-alerts
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref CostAlertEmail
+
+  CostBudget:
+    Type: AWS::Budgets::Budget
+    Condition: HasCostAlert
+    Properties:
+      Budget:
+        BudgetName: !Sub ${AWS::StackName}-monthly-budget
+        BudgetLimit:
+          Amount: 15  # Lower budget for demo environment
+          Unit: USD
+        TimeUnit: MONTHLY
+        BudgetType: COST
+        CostFilters:
+          TagKey:
+            - Environment
+          TagValue:
+            - !Ref Environment
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref CostAlertEmail
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref CostAlertEmail
+
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${AWS::StackName}-VPC-ID
+
+  PublicSubnet1Id:
+    Description: Public Subnet 1 ID
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet1-ID
+
+  PublicSubnet2Id:
+    Description: Public Subnet 2 ID
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet2-ID
+
+  ECSClusterName:
+    Description: ECS Cluster Name
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ECS-Cluster
+
+  ECSServiceName:
+    Description: ECS Service Name
+    Value: !Ref ECSService
+    Export:
+      Name: !Sub ${AWS::StackName}-ECS-Service
+
+  CloudFrontDistributionDNS:
+    Description: CloudFront Distribution DNS Name
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub ${AWS::StackName}-CloudFront-DNS
+
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub ${AWS::StackName}-CloudFront-ID
+
+  DrawingsBucketName:
+    Description: S3 Bucket for Drawings
+    Value: !Ref DrawingsBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-Drawings-Bucket
+
+  DataBucketName:
+    Description: S3 Bucket for Models and Backups
+    Value: !Ref DataBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-Data-Bucket
+
+  ApplicationURL:
+    Description: Application URL (CloudFront)
+    Value: !Sub https://${CloudFrontDistribution.DomainName}
+    Export:
+      Name: !Sub ${AWS::StackName}-Application-URL
+
+  EstimatedMonthlyCost:
+    Description: Estimated monthly cost in USD
+    Value: "$8-15 (ECS Fargate Spot) + $2-5 (S3) + $0 (CloudFront free tier) = $10-20 total"

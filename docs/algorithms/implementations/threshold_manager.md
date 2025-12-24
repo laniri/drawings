@@ -1,7 +1,7 @@
 # ThresholdManager Algorithm Implementation
 
 **Source File**: `app/services/threshold_manager.py`
-**Last Updated**: 2025-12-16 13:41:56
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
@@ -43,32 +43,32 @@ Consider profiling with representative datasets to determine scalability charact
 
 ### Accuracy Metrics
 
-- False Positive Rate
 - AUC-ROC
+- False Positive Rate
 - True Positive Rate
 
 ### Edge Cases
 
 The following edge cases should be tested:
 
-- Very large values for age
 - Zero value for age
-- Negative values for age
-- Negative values for anomaly_score
-- Very large values for age_group_model_id
-- Empty scores
-- Very large values for percentile
-- Zero value for age_group_model_id
-- Negative values for new_threshold
-- Very large values for anomaly_score
-- Very large scores
-- Zero value for anomaly_score
-- Single-element scores
-- Very large values for new_threshold
 - Negative values for percentile
-- Zero value for new_threshold
+- Negative values for age
 - Negative values for age_group_model_id
+- Zero value for anomaly_score
+- Very large values for age_group_model_id
+- Very large values for age
 - Zero value for percentile
+- Single-element scores
+- Very large values for percentile
+- Negative values for new_threshold
+- Negative values for anomaly_score
+- Very large values for anomaly_score
+- Very large values for new_threshold
+- Zero value for new_threshold
+- Zero value for age_group_model_id
+- Empty scores
+- Very large scores
 
 ## Implementation Details
 
@@ -252,4 +252,4 @@ Clear the threshold calculation cache.
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:56*
+*Generated on: 2025-12-18 23:17:04*

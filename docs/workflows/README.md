@@ -19,12 +19,26 @@ User journey workflows document the end-to-end user experience and interactions 
 - **[User Journey - refs](user_journey_refs.md)**: User journey workflow for refs component
 - **[User Journey - accept](user_journey_accept.md)**: User journey workflow for accept component
 - **[User Journey - global](user_journey_global.md)**: User journey workflow for global component
+- **[User Journey - InteractiveInterpretability.test](user_journey_interactiveinterpretability.test.md)**: User journey workflow for InteractiveInterpretability.test component
+- **[User Journey - SubjectCategorySelect](user_journey_subjectcategoryselect.md)**: User journey workflow for SubjectCategorySelect component
 - **[User Journey - AnalysisPage](user_journey_analysispage.md)**: User journey workflow for AnalysisPage component
 - **[User Journey - UploadPage](user_journey_uploadpage.md)**: User journey workflow for UploadPage component
+- **[User Journey - DocumentationPage](user_journey_documentationpage.md)**: User journey workflow for DocumentationPage component
 - **[User Journey - BatchProcessingPage](user_journey_batchprocessingpage.md)**: User journey workflow for BatchProcessingPage component
 - **[User Journey - ConfigurationPage](user_journey_configurationpage.md)**: User journey workflow for ConfigurationPage component
 - **[User Journey - DashboardPage](user_journey_dashboardpage.md)**: User journey workflow for DashboardPage component
 - **[User Journey - Layout](user_journey_layout.md)**: User journey workflow for Layout component
+- **[User Journey - AdaptiveExplanationSystem](user_journey_adaptiveexplanationsystem.md)**: User journey workflow for AdaptiveExplanationSystem component
+- **[User Journey - HistoricalInterpretationTracker](user_journey_historicalinterpretationtracker.md)**: User journey workflow for HistoricalInterpretationTracker component
+- **[User Journey - ExplanationLevelToggle](user_journey_explanationleveltoggle.md)**: User journey workflow for ExplanationLevelToggle component
+- **[User Journey - InterpretabilityEducationHub](user_journey_interpretabilityeducationhub.md)**: User journey workflow for InterpretabilityEducationHub component
+- **[User Journey - ComparativeAnalysisPanel](user_journey_comparativeanalysispanel.md)**: User journey workflow for ComparativeAnalysisPanel component
+- **[User Journey - ContextualHelpSystem](user_journey_contextualhelpsystem.md)**: User journey workflow for ContextualHelpSystem component
+- **[User Journey - InterpretabilityTutorial](user_journey_interpretabilitytutorial.md)**: User journey workflow for InterpretabilityTutorial component
+- **[User Journey - ExportToolbar](user_journey_exporttoolbar.md)**: User journey workflow for ExportToolbar component
+- **[User Journey - InteractiveInterpretabilityViewer](user_journey_interactiveinterpretabilityviewer.md)**: User journey workflow for InteractiveInterpretabilityViewer component
+- **[User Journey - AnnotationTools](user_journey_annotationtools.md)**: User journey workflow for AnnotationTools component
+- **[User Journey - ExampleGallery](user_journey_examplegallery.md)**: User journey workflow for ExampleGallery component
 
 ## Technical Process
 
@@ -76,8 +90,10 @@ Error handling workflows document exception handling and recovery processes.
 - **[Error Flow - Model Deployment Service](error_flow_model_deployment_service.md)**: Error handling workflow for model_deployment_service
 - **[Error Flow - Threshold Manager](error_flow_threshold_manager.md)**: Error handling workflow for threshold_manager
 - **[Error Flow - Data Sufficiency Service](error_flow_data_sufficiency_service.md)**: Error handling workflow for data_sufficiency_service
+- **[Error Flow - Documentation](error_flow_documentation.md)**: Error handling workflow for documentation
 - **[Error Flow - Backup](error_flow_backup.md)**: Error handling workflow for backup
 - **[Error Flow - Config](error_flow_config.md)**: Error handling workflow for config
+- **[Error Flow - Interpretability](error_flow_interpretability.md)**: Error handling workflow for interpretability
 - **[Error Flow - Health](error_flow_health.md)**: Error handling workflow for health
 - **[Error Flow - Training](error_flow_training.md)**: Error handling workflow for training
 

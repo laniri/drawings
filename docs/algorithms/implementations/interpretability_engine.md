@@ -1,7 +1,7 @@
 # SaliencyOverlayGenerator Algorithm Implementation
 
 **Source File**: `app/services/interpretability_engine.py`
-**Last Updated**: 2025-12-16 13:41:57
+**Last Updated**: 2025-12-18 23:17:04
 
 ## Overview
 
@@ -48,39 +48,39 @@ Consider profiling with representative datasets to determine scalability charact
 
 ### Accuracy Metrics
 
-- False Positive Rate
 - AUC-ROC
+- False Positive Rate
 - True Positive Rate
 
 ### Edge Cases
 
 The following edge cases should be tested:
 
-- Special characters in colormap
+- Special characters in overlay_type
 - Very large values for alpha
-- Very large values for threshold
+- Zero value for line_width
+- Empty saliency_map
+- Zero value for contour_color
+- Special characters in colormap
 - Negative values for highlight_color
-- Empty string for overlay_type
-- Very large values for highlight_color
-- Zero value for alpha
-- Empty original_image
-- Single-element saliency_map
-- Zero value for threshold
-- Very large values for contour_color
-- Zero value for highlight_color
-- Negative values for contour_color
-- Negative values for alpha
+- Empty string for colormap
 - Negative values for threshold
-- Very large saliency_map
+- Negative values for contour_color
 - Very large original_image
 - Single-element original_image
-- Negative values for line_width
-- Zero value for line_width
-- Zero value for contour_color
-- Special characters in overlay_type
-- Empty string for colormap
+- Very large values for threshold
+- Zero value for threshold
 - Very large values for line_width
-- Empty saliency_map
+- Empty original_image
+- Zero value for alpha
+- Very large values for contour_color
+- Very large values for highlight_color
+- Empty string for overlay_type
+- Very large saliency_map
+- Single-element saliency_map
+- Zero value for highlight_color
+- Negative values for alpha
+- Negative values for line_width
 
 ## Implementation Details
 
@@ -193,4 +193,4 @@ Returns:
 ---
 
 *This documentation was automatically generated from source code analysis.*
-*Generated on: 2025-12-16 13:41:57*
+*Generated on: 2025-12-18 23:17:04*

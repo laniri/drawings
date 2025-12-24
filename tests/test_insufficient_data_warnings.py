@@ -143,7 +143,7 @@ def test_insufficient_data_warning_generation(drawing_data):
         warnings = analyzer.generate_data_warnings([(age_min, age_max)], db)
         
         # Property: Warnings should be generated based on sample count thresholds
-        if sample_count < analyzer.critical_threshold:
+        if sample_count <= analyzer.critical_threshold:
             # Should have critical warning
             critical_warnings = [w for w in warnings if w.severity == "critical"]
             assert len(critical_warnings) > 0, f"Expected critical warning for {sample_count} samples"
@@ -216,7 +216,12 @@ def test_age_group_merging_suggestions(groups_data):
             
             # Generate ages for this group
             for i in range(sample_count):
-                age = age_min + (age_max - age_min) * (i / max(sample_count - 1, 1))
+                # Generate age within [age_min, age_max) to match SQL query logic
+                if sample_count == 1:
+                    age = age_min + (age_max - age_min) * 0.5  # Middle of range
+                else:
+                    # Distribute evenly but ensure last age < age_max
+                    age = age_min + (age_max - age_min) * (i / sample_count)
                 subject = "person" if i % 2 == 0 else "house"
                 all_ages.append(age)
                 all_subjects.append(subject)
@@ -291,8 +296,12 @@ def test_data_quality_score_calculation(sample_count, age_range):
         subjects = ["person", "house", "tree", "animal"]
         
         for i in range(sample_count):
-            # Distribute ages across the range
-            age = age_min + (age_max - age_min) * (i / max(sample_count - 1, 1))
+            # Distribute ages across the range within [age_min, age_max)
+            if sample_count == 1:
+                age = age_min + (age_max - age_min) * 0.5  # Middle of range
+            else:
+                # Distribute evenly but ensure last age < age_max
+                age = age_min + (age_max - age_min) * (i / sample_count)
             subject = subjects[i % len(subjects)]  # Rotate through subjects
             
             drawing = Drawing(
@@ -337,17 +346,38 @@ def test_data_quality_score_calculation(sample_count, age_range):
         db.close()
 
 
-@given(
-    age_groups=st.lists(age_group_strategy(), min_size=1, max_size=5),
-    sample_counts=st.lists(st.integers(min_value=0, max_value=100), min_size=1, max_size=5)
-)
+@st.composite
+def non_overlapping_age_groups_strategy(draw):
+    """Generate non-overlapping age groups with sample counts."""
+    num_groups = draw(st.integers(min_value=1, max_value=3))  # Reduced to avoid too much filtering
+    
+    groups = []
+    sample_counts = []
+    
+    current_age = draw(st.floats(min_value=2.0, max_value=10.0))
+    
+    for _ in range(num_groups):
+        age_min = current_age
+        age_span = draw(st.floats(min_value=0.5, max_value=2.0))
+        age_max = age_min + age_span
+        sample_count = draw(st.integers(min_value=0, max_value=100))
+        
+        groups.append((age_min, age_max))
+        sample_counts.append(sample_count)
+        
+        # Leave gap between groups to ensure no overlap
+        current_age = age_max + draw(st.floats(min_value=0.1, max_value=1.0))
+    
+    return groups, sample_counts
+
+
+@given(data=non_overlapping_age_groups_strategy())
 @settings(max_examples=30, deadline=None)
-def test_warning_severity_consistency(age_groups, sample_counts):
+def test_warning_severity_consistency(data):
     """
     Property: Warning severity should be consistent with sample count thresholds.
     """
-    # Ensure lists have same length
-    assume(len(age_groups) == len(sample_counts))
+    age_groups, sample_counts = data
     
     # Create test database
     db = create_test_database()
@@ -357,7 +387,12 @@ def test_warning_severity_consistency(age_groups, sample_counts):
         drawing_id = 0
         for (age_min, age_max), sample_count in zip(age_groups, sample_counts):
             for i in range(sample_count):
-                age = age_min + (age_max - age_min) * (i / max(sample_count - 1, 1))
+                # Generate age within [age_min, age_max) to match SQL query logic
+                if sample_count == 1:
+                    age = age_min + (age_max - age_min) * 0.5  # Middle of range
+                else:
+                    # Distribute evenly but ensure last age < age_max
+                    age = age_min + (age_max - age_min) * (i / sample_count)
                 drawing = Drawing(
                     filename=f"test_drawing_{drawing_id}.png",
                     file_path=f"/test/path/test_drawing_{drawing_id}.png",
@@ -384,12 +419,12 @@ def test_warning_severity_consistency(age_groups, sample_counts):
                 warnings_by_group[key] = []
             warnings_by_group[key].append(warning)
         
-        # Verify severity consistency
+        # Verify severity consistency (age groups are non-overlapping)
         for (age_min, age_max), sample_count in zip(age_groups, sample_counts):
             group_warnings = warnings_by_group.get((age_min, age_max), [])
             insufficient_warnings = [w for w in group_warnings if w.warning_type == "insufficient_data"]
             
-            if sample_count < analyzer.critical_threshold:
+            if sample_count <= analyzer.critical_threshold:
                 # Should have critical warning
                 critical_warnings = [w for w in insufficient_warnings if w.severity == "critical"]
                 assert len(critical_warnings) > 0, f"Missing critical warning for {sample_count} samples"
@@ -486,12 +521,22 @@ def test_error_handling_for_invalid_age_groups():
         analyzer = DataSufficiencyAnalyzer()
         
         # Test with invalid age range (min >= max)
-        with pytest.raises(Exception):  # Should raise some kind of error
-            analyzer.analyze_age_group_data(10.0, 10.0, db)
+        # Should handle gracefully and return 0 samples
+        data_info = analyzer.analyze_age_group_data(10.0, 10.0, db)
+        assert data_info.sample_count == 0
+        assert not data_info.is_sufficient
+        assert data_info.age_min == 10.0
+        assert data_info.age_max == 10.0
         
         # Test with age range outside valid bounds
-        # This might not raise an error but should handle gracefully
+        # This should also handle gracefully
         data_info = analyzer.analyze_age_group_data(0.0, 1.0, db)
+        assert data_info.sample_count == 0
+        assert not data_info.is_sufficient
+        
+        # Test with reversed age range (max < min)
+        # Should also handle gracefully
+        data_info = analyzer.analyze_age_group_data(10.0, 5.0, db)
         assert data_info.sample_count == 0
         assert not data_info.is_sufficient
         

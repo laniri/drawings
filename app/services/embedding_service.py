@@ -202,9 +202,10 @@ class SubjectEncoder:
             # Convert string to SubjectCategory enum if needed
             if isinstance(subject, str):
                 try:
-                    # Try to find matching enum by value
+                    # Strip whitespace and try to find matching enum by value
+                    subject_stripped = subject.strip()
                     for category in SubjectCategory:
-                        if category.value.lower() == subject.lower():
+                        if category.value.lower() == subject_stripped.lower():
                             subject = category
                             break
                     else:

@@ -27,6 +27,7 @@ Error handling workflow for dataset_preparation
 - Exception
 - json
 - Exception
+- Exception
 - ValueError
 - ValueError
 - ValueError
@@ -45,8 +46,6 @@ Error handling workflow for dataset_preparation
 - ValidationError
 - ValidationError
 - ValidationError
-- else
-- else
 - ValidationError
 
 ## BPMN Diagram

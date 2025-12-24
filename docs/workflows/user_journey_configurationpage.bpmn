@@ -9,9 +9,9 @@
     <bpmn:userTask id="user_task_5" name="Submit Submit(onSubmit)" actor="user"/>
     <bpmn:serviceTask id="system_task_6" name="GET Request to /api/config/" actor="system"/>
     <bpmn:serviceTask id="system_task_7" name="GET Request to /api/models/age-groups" actor="system"/>
-    <bpmn:serviceTask id="system_task_8" name="PUT Request to /api/config/threshold" actor="system"/>
-    <bpmn:serviceTask id="system_task_9" name="PUT Request to /api/config/age-grouping" actor="system"/>
-    <bpmn:serviceTask id="system_task_10" name="PUT Request to /api/config/" actor="system"/>
+    <bpmn:serviceTask id="system_task_8" name="GET Request to /api/config/subject-statistics" actor="system"/>
+    <bpmn:serviceTask id="system_task_9" name="PUT Request to /api/config/threshold" actor="system"/>
+    <bpmn:serviceTask id="system_task_10" name="PUT Request to /api/config/age-grouping" actor="system"/>
     <bpmn:endEvent id="end_11" name="Journey Complete"/>
     <bpmn:sequenceFlow id="flow_0" sourceRef="start_0" targetRef="user_task_1"/>
     <bpmn:sequenceFlow id="flow_1" sourceRef="user_task_1" targetRef="user_task_2"/>
