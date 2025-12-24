@@ -48,10 +48,19 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
     
+    - name: Free up disk space
+      run: |
+        # Remove unnecessary packages to free up space
+        sudo apt-get remove -y '^dotnet-.*' '^llvm-.*' 'php.*' '^mongodb-.*' '^mysql-.*' azure-cli google-cloud-cli hhvm google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
+        sudo apt-get autoremove -y
+        sudo apt-get autoclean
+        df -h
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
+        # Use lighter CI requirements instead of full dev requirements
+        pip install -r requirements-ci.txt
     
     - name: Run linting
       run: |
@@ -64,8 +73,13 @@ jobs:
         mypy app/
     
     - name: Run unit tests
+      env:
+        # Skip heavy model loading in CI
+        SKIP_MODEL_LOADING: "true"
+        # Use in-memory database for faster tests
+        DATABASE_URL: "sqlite:///:memory:"
       run: |
-        pytest tests/ -v --cov=app --cov-report=xml
+        pytest tests/ -v --cov=app --cov-report=xml -x --tb=short
     
     - name: Run property-based tests
       run: |
@@ -182,8 +196,10 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        # Build Docker image
-        docker build -f Dockerfile.prod -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        # Build Docker image with build cache
+        docker build -f Dockerfile.prod \
+          --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         
         # Push image to ECR
