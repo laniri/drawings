@@ -65,14 +65,14 @@ jobs:
         pytest tests/test_property_*.py -v --tb=short
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
     
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
@@ -100,7 +100,7 @@ jobs:
         output: 'trivy-results.sarif'
     
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
@@ -111,7 +111,7 @@ jobs:
         safety check --json --output safety-report.json || true
     
     - name: Upload security scan artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
@@ -175,7 +175,7 @@ jobs:
         output: 'docker-trivy-results.sarif'
     
     - name: Upload Docker scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'docker-trivy-results.sarif'
@@ -562,7 +562,7 @@ jobs:
         echo "Message: ${{ steps.outcome.outputs.message }}"
     
     - name: Update GitHub deployment status
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const status = '${{ steps.outcome.outputs.status }}' === 'success' ? 'success' : 'failure';
@@ -580,7 +580,7 @@ jobs:
     
     - name: Create GitHub issue on failure
       if: steps.outcome.outputs.status == 'failure'
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const title = `Deployment Failed: ${context.sha.substring(0, 7)}`;

@@ -116,6 +116,9 @@ dist
 #training output reports
 outputs/training_reports/
 
+#git setup files
+*oidc*
+
 # Gatsby files
 .cache/
 public
