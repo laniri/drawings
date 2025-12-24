@@ -202,6 +202,67 @@ docker-compose -f docker-compose.dev.yml down
 └── docker-compose.yml            # Docker configuration
 ```
 
+## Testing
+
+The project uses pytest for comprehensive testing with property-based testing via Hypothesis.
+
+### Test Configuration
+
+The pytest configuration in `pytest.ini` includes:
+- **Test discovery**: Automatically finds `test_*.py` files in the `tests/` directory
+- **Fail-fast**: Stops after 5 test failures (`--maxfail=5`)
+- **Performance monitoring**: Shows 10 slowest tests (`--durations=10`)
+- **Async support**: Automatic asyncio mode for async tests
+
+### Test Markers
+
+Tests are organized using markers:
+- `slow`: Marks tests as slow (skip with `-m "not slow"`)
+- `integration`: Integration tests that require full system setup
+- `unit`: Fast unit tests for individual components
+- `ci_skip`: Tests to skip in CI environment (for local-only tests)
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Skip slow tests (recommended for development)
+pytest -m "not slow"
+
+# Run only unit tests
+pytest -m unit
+
+# Run only integration tests
+pytest -m integration
+
+# Run specific test file
+pytest tests/test_input_validation.py
+
+# Run tests with coverage
+pytest --cov=app --cov-report=html
+
+# Show test durations (10 slowest by default)
+pytest --durations=0  # Show all test durations
+```
+
+### Property-Based Testing
+
+The system includes extensive property-based tests using Hypothesis:
+- Input validation consistency tests
+- Data sufficiency warning generation tests
+- Subject encoding and embedding tests
+- Authentication and access control tests
+
+Run property-based tests specifically:
+```bash
+pytest tests/test_property_*.py -v
+```
+
 ## Development Commands
 
 ### Backend
@@ -218,7 +279,12 @@ isort app/
 flake8 app/
 
 # Run tests
-pytest
+pytest                    # Run all tests
+pytest -v                 # Verbose output
+pytest -m "not slow"      # Skip slow tests
+pytest -m unit            # Run only unit tests
+pytest -m integration     # Run only integration tests
+pytest --durations=10     # Show 10 slowest tests (configured by default)
 
 # Type checking
 mypy app/
