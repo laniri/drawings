@@ -38,15 +38,17 @@ class TestDatabaseMigrationService:
             mock_env.return_value.s3_bucket_name = "test-bucket"
             
             with patch('app.services.database_migration_service.BackupService'):
-                with patch('app.services.database_migration_service.boto3.client') as mock_boto3:
-                    mock_s3_client = MagicMock()
-                    mock_boto3.return_value = mock_s3_client
-                    
-                    service = DatabaseMigrationService()
-                    
-                    assert service.env_config.environment == EnvironmentType.PRODUCTION
-                    assert service.s3_client == mock_s3_client
-                    mock_boto3.assert_called_once_with('s3', region_name='eu-west-1')
+                # Mock HAS_AWS to be True and provide a mock boto3
+                with patch('app.services.database_migration_service.HAS_AWS', True):
+                    with patch('app.services.database_migration_service.boto3') as mock_boto3_module:
+                        mock_s3_client = MagicMock()
+                        mock_boto3_module.client.return_value = mock_s3_client
+                        
+                        service = DatabaseMigrationService()
+                        
+                        assert service.env_config.environment == EnvironmentType.PRODUCTION
+                        assert service.s3_client == mock_s3_client
+                        mock_boto3_module.client.assert_called_once_with('s3', region_name='eu-west-1')
     
     @pytest.mark.asyncio
     async def test_create_automated_backup_local(self):
