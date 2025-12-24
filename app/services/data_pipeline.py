@@ -19,6 +19,7 @@ from app.core.exceptions import ImageProcessingError, ValidationError
 # Optional OpenCV import for advanced image processing
 try:
     import cv2
+
     HAS_OPENCV = True
 except ImportError:
     HAS_OPENCV = False
