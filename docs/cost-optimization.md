@@ -165,6 +165,12 @@ The system includes comprehensive property-based testing for cost compliance:
 
 ### Common Issues
 
+**AWS Client Not Available (Local Development):**
+- Expected behavior for local development
+- Cost optimization service provides local estimates
+- All cost calculation and recommendation features work without AWS
+- AWS integration only required for production resource management
+
 **High ECS Costs:**
 - Check CPU/memory utilization
 - Verify task count and scaling policies

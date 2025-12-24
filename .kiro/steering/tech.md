@@ -18,8 +18,16 @@
 - **Transformers** - Hugging Face library for ViT models
 - **Scikit-learn** - Machine learning utilities
 - **Pandas** - Data manipulation and analysis
-- **Boto3** - AWS SDK for production deployment (optional for local development)
+- **Boto3** - AWS SDK for production deployment (optional for local development, graceful fallback)
 - **Docker** - Containerization support
+
+## Optional Dependencies
+
+### AWS Services (Production Only)
+- **Boto3/Botocore** - AWS SDK for cloud services integration
+- **Graceful Fallback** - All AWS-dependent services work without AWS clients in local development
+- **Services Affected**: Cost optimization, monitoring, security validation, database migration
+- **Local Behavior**: Provides local estimates and recommendations without AWS integration
 
 ## Frontend Stack
 
@@ -142,3 +150,9 @@ docker-compose -f docker-compose.dev.yml down
 ### Configuration Errors with Custom Percentiles
 - **Fixed**: Robust handling of arbitrary percentile values (not just 90%, 95%, 99%)
 - **Support**: Any percentile between 50.0 and 99.9 is now supported
+
+### AWS Dependencies Missing (Local Development)
+- **Expected**: AWS services are optional for local development
+- **Behavior**: Cost optimization, monitoring, and security services provide local functionality
+- **Fallback**: All core features work without AWS clients
+- **Production**: AWS integration required for cloud resource management
