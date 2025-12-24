@@ -1769,9 +1769,10 @@ curl -X POST "http://localhost:8000/api/v1/drawings/upload" \\
   -F "age=5"
 ```'''
         
+        default_description = "API documentation for the Children's Drawing Anomaly Detection System"
         overview_content = f"""# {schema['info']['title']} - API Documentation
 
-{schema['info'].get('description', 'API documentation for the Children\'s Drawing Anomaly Detection System')}
+{schema['info'].get('description', default_description)}
 
 **Version**: {schema['info']['version']}  
 **OpenAPI Version**: {schema['openapi']}  

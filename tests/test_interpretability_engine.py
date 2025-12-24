@@ -448,8 +448,9 @@ def test_bounding_box_detection_completeness(dimensions, num_regions):
         # Verify numerical properties
         assert bbox_info['area'] > 0, f"Bounding box {i} area should be positive"
         assert bbox_info['importance_score'] >= 0, f"Bounding box {i} importance should be non-negative"
-        assert bbox_info['max_importance'] >= bbox_info['importance_score'], \
-            f"Bounding box {i} max importance should be >= mean importance"
+        # Use larger tolerance for floating-point comparison (max can be slightly less than mean due to numerical precision)
+        assert bbox_info['max_importance'] >= bbox_info['importance_score'] - 1e-6, \
+            f"Bounding box {i} max importance ({bbox_info['max_importance']}) should be >= mean importance ({bbox_info['importance_score']})"
         assert bbox_info['aspect_ratio'] > 0, f"Bounding box {i} aspect ratio should be positive"
 
 
