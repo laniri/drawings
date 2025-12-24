@@ -466,7 +466,7 @@ The system is designed to work with minimal dependencies, but offers enhanced fu
 ### Enhanced Image Processing (OpenCV)
 ```bash
 # Install OpenCV for advanced image processing
-pip install opencv-python>=4.8.1.78
+pip install opencv-python>=4.8.0,<4.10.0
 
 # Or install all enhanced features
 pip install -r requirements-enhanced.txt
@@ -520,11 +520,22 @@ pip install reportlab>=4.0.0
 
 3. **OpenCV Import Errors**
    ```bash
-   # OpenCV is now optional - the system will work without it
-   # For enhanced functionality, install OpenCV:
-   pip install opencv-python>=4.8.1.78
+   # OpenCV is optional - the system will work without it using PIL fallbacks
+   # Common OpenCV issues and solutions:
    
-   # Or install all enhanced features:
+   # Issue: "No module named 'cv2'"
+   # Solution: Install OpenCV for enhanced functionality
+   pip install opencv-python>=4.8.0,<4.10.0
+   
+   # Issue: "ImportError: libGL.so.1: cannot open shared object file"
+   # Solution: Install system graphics libraries (Linux)
+   sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
+   
+   # Issue: OpenCV import fails with other system library errors
+   # Solution: The system will automatically fall back to PIL-based processing
+   # Check logs for specific error details if needed
+   
+   # Install all enhanced features including OpenCV:
    pip install -r requirements-enhanced.txt
    ```
 

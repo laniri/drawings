@@ -16,6 +16,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.exceptions import ImageProcessingError, ValidationError
 
+logger = logging.getLogger(__name__)
+
 # Optional OpenCV import for advanced image processing
 try:
     import cv2
@@ -24,8 +26,11 @@ try:
 except ImportError:
     HAS_OPENCV = False
     cv2 = None
-
-logger = logging.getLogger(__name__)
+except Exception as e:
+    # Handle other OpenCV-related errors (e.g., missing system libraries)
+    logger.warning(f"OpenCV import failed: {e}")
+    HAS_OPENCV = False
+    cv2 = None
 
 
 class ValidationResult(BaseModel):

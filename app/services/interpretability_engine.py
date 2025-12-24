@@ -20,6 +20,18 @@ try:
 except ImportError:
     HAS_OPENCV = False
     cv2 = None
+except Exception as e:
+    # Handle other OpenCV-related errors (e.g., missing system libraries)
+    import logging
+
+    logging.getLogger(__name__).warning(f"OpenCV import failed: {e}")
+    HAS_OPENCV = False
+    cv2 = None
+except Exception as e:
+    # Handle other OpenCV-related errors (e.g., missing system libraries)
+    logger.warning(f"OpenCV import failed: {e}")
+    HAS_OPENCV = False
+    cv2 = None
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt

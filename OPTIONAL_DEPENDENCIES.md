@@ -9,13 +9,22 @@ The Children's Drawing Anomaly Detection System has been updated to make several
 ### 1. OpenCV Made Optional
 
 **Files Modified:**
-- `app/services/data_pipeline.py` - Added optional OpenCV import with `HAS_OPENCV` flag
-- `app/services/interpretability_engine.py` - Added optional OpenCV import and fallback functions
+- `app/services/data_pipeline.py` - Added comprehensive OpenCV import error handling with `HAS_OPENCV` flag
+- `app/services/interpretability_engine.py` - Added comprehensive OpenCV import error handling and fallback functions
 - `requirements.txt` - Moved OpenCV to optional section with comments
 - `requirements-enhanced.txt` - New file for enhanced functionality
 - `pyproject.toml` - Added `enhanced` optional dependency group
 - `.github/workflows/deploy-production.yml` - Removed OpenCV system dependencies from CI
 - `Dockerfile.prod` - Simplified system dependencies
+
+**Enhanced Error Handling:**
+The system now handles various OpenCV import failures gracefully:
+- Missing package (`ImportError`)
+- Missing system libraries (e.g., `libGL.so.1`, `libglib2.0-0`)
+- Version compatibility issues
+- Platform-specific import errors
+
+All OpenCV failures result in automatic fallback to PIL-based processing with appropriate logging.
 
 ### 2. AWS Dependencies Made Optional
 
@@ -162,6 +171,19 @@ pip install boto3 botocore
 # Error: No module named 'cv2'
 # Solution: This is expected and handled gracefully
 # The system will use PIL fallbacks automatically
+
+# Error: ImportError: libGL.so.1: cannot open shared object file
+# Solution: Install system graphics libraries (Linux)
+sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
+
+# Error: ImportError: libgthread-2.0.so.0: cannot open shared object file
+# Solution: Install GLib libraries (Linux)
+sudo apt-get install -y libglib2.0-0
+
+# Error: Various OpenCV system library errors
+# Solution: The system automatically detects and logs these errors,
+# then falls back to PIL-based processing. Check application logs
+# for specific error details if troubleshooting is needed.
 ```
 
 ### Performance Differences
