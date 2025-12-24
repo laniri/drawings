@@ -50,10 +50,37 @@ jobs:
     
     - name: Free up disk space
       run: |
-        # Remove unnecessary packages to free up space
-        sudo apt-get remove -y '^dotnet-.*' '^llvm-.*' 'php.*' '^mongodb-.*' '^mysql-.*' azure-cli google-cloud-cli hhvm google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri
+        # Show initial disk usage
+        echo "=== Initial Disk Usage ==="
+        df -h
+        
+        # Remove unnecessary packages to free up space (ignore errors for missing packages)
+        echo "=== Removing unnecessary packages ==="
+        sudo apt-get remove -y --ignore-missing \
+          '^dotnet-.*' \
+          '^llvm-.*' \
+          'php.*' \
+          '^mongodb-.*' \
+          azure-cli \
+          google-cloud-cli \
+          google-chrome-stable \
+          firefox \
+          powershell \
+          mono-devel \
+          libgl1-mesa-dri || true
+        
+        # Clean up package cache
         sudo apt-get autoremove -y
         sudo apt-get autoclean
+        
+        # Remove some large directories if they exist
+        sudo rm -rf /usr/share/dotnet || true
+        sudo rm -rf /usr/local/lib/android || true
+        sudo rm -rf /opt/ghc || true
+        sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+        
+        # Show final disk usage
+        echo "=== Final Disk Usage ==="
         df -h
     
     - name: Install dependencies
