@@ -10,12 +10,19 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
 
-import cv2
 import numpy as np
 from PIL import Image, ImageOps
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.exceptions import ImageProcessingError, ValidationError
+
+# Optional OpenCV import for advanced image processing
+try:
+    import cv2
+    HAS_OPENCV = True
+except ImportError:
+    HAS_OPENCV = False
+    cv2 = None
 
 logger = logging.getLogger(__name__)
 

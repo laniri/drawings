@@ -12,7 +12,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import cv2
+# Optional OpenCV import for advanced image processing
+try:
+    import cv2
+    HAS_OPENCV = True
+except ImportError:
+    HAS_OPENCV = False
+    cv2 = None
+
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,6 +36,130 @@ from app.services.embedding_service import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _resize_with_pil(image_array: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
+    """
+    Fallback image resizing using PIL when OpenCV is not available.
+    
+    Args:
+        image_array: Input image as numpy array
+        target_size: Target size as (width, height)
+        
+    Returns:
+        Resized image as numpy array
+    """
+    # Convert numpy array to PIL Image
+    if image_array.dtype != np.uint8:
+        # Normalize to 0-255 range if needed
+        if image_array.max() <= 1.0:
+            image_array = (image_array * 255).astype(np.uint8)
+        else:
+            image_array = image_array.astype(np.uint8)
+    
+    pil_image = Image.fromarray(image_array)
+    resized_pil = pil_image.resize(target_size, Image.Resampling.LANCZOS)
+    return np.array(resized_pil)
+
+
+def _rgb_to_grayscale(image_array: np.ndarray) -> np.ndarray:
+    """
+    Fallback RGB to grayscale conversion when OpenCV is not available.
+    
+    Args:
+        image_array: RGB image as numpy array
+        
+    Returns:
+        Grayscale image as numpy array
+    """
+    if len(image_array.shape) == 3:
+        # Use standard RGB to grayscale weights
+        return np.dot(image_array[...,:3], [0.299, 0.587, 0.114]).astype(image_array.dtype)
+    return image_array
+
+
+def _simple_edge_detection(gray_image: np.ndarray) -> np.ndarray:
+    """
+    Simple edge detection fallback when OpenCV Canny is not available.
+    
+    Args:
+        gray_image: Grayscale image as numpy array
+        
+    Returns:
+        Binary edge map
+    """
+    # Simple Sobel-like edge detection
+    kernel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    kernel_y = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
+    
+    # Pad image
+    padded = np.pad(gray_image, 1, mode='edge')
+    
+    # Apply kernels
+    edges_x = np.zeros_like(gray_image)
+    edges_y = np.zeros_like(gray_image)
+    
+    for i in range(gray_image.shape[0]):
+        for j in range(gray_image.shape[1]):
+            patch = padded[i:i+3, j:j+3]
+            edges_x[i, j] = np.sum(patch * kernel_x)
+            edges_y[i, j] = np.sum(patch * kernel_y)
+    
+    # Combine edges
+    edges = np.sqrt(edges_x**2 + edges_y**2)
+    
+    # Threshold (simple approach)
+    threshold = np.mean(edges) + np.std(edges)
+    return (edges > threshold).astype(np.uint8) * 255
+
+
+def _safe_resize(image_array: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
+    """
+    Safe image resizing with OpenCV fallback to PIL.
+    
+    Args:
+        image_array: Input image as numpy array
+        target_size: Target size as (width, height)
+        
+    Returns:
+        Resized image as numpy array
+    """
+    if HAS_OPENCV and cv2 is not None:
+        return cv2.resize(image_array, target_size, interpolation=cv2.INTER_CUBIC)
+    else:
+        return _resize_with_pil(image_array, target_size)
+
+
+def _safe_rgb_to_gray(image_array: np.ndarray) -> np.ndarray:
+    """
+    Safe RGB to grayscale conversion with OpenCV fallback.
+    
+    Args:
+        image_array: RGB image as numpy array
+        
+    Returns:
+        Grayscale image as numpy array
+    """
+    if HAS_OPENCV and cv2 is not None:
+        return cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
+    else:
+        return _rgb_to_grayscale(image_array)
+
+
+def _safe_edge_detection(gray_image: np.ndarray) -> np.ndarray:
+    """
+    Safe edge detection with OpenCV fallback.
+    
+    Args:
+        gray_image: Grayscale image as numpy array
+        
+    Returns:
+        Binary edge map
+    """
+    if HAS_OPENCV and cv2 is not None:
+        return cv2.Canny(gray_image, 50, 150)
+    else:
+        return _simple_edge_detection(gray_image)
 
 
 class InterpretabilityError(Exception):
