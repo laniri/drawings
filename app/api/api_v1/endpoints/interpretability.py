@@ -1202,7 +1202,6 @@ async def _export_as_pdf(
                 and os.path.exists(interpretability.saliency_map_path)
                 and y_pos - img_height > 50
             ):
-
                 try:
                     saliency_img = Image.open(interpretability.saliency_map_path)
                     if saliency_img.mode != "RGB":

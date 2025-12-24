@@ -533,9 +533,11 @@ async def perform_single_analysis(
             from app.utils.embedding_serialization import EmbeddingSerializer
 
             # Serialize hybrid embedding with component separation
-            full_bytes, visual_bytes, subject_bytes = (
-                EmbeddingSerializer.serialize_hybrid_embedding(embedding_data)
-            )
+            (
+                full_bytes,
+                visual_bytes,
+                subject_bytes,
+            ) = EmbeddingSerializer.serialize_hybrid_embedding(embedding_data)
 
             embedding_record = DrawingEmbedding(
                 drawing_id=drawing_id,
@@ -1300,9 +1302,11 @@ async def generate_embedding(drawing_id: int, db: Session = Depends(get_db)):
         from app.utils.embedding_serialization import EmbeddingSerializer
 
         # Serialize hybrid embedding with component separation
-        full_bytes, visual_bytes, subject_bytes = (
-            EmbeddingSerializer.serialize_hybrid_embedding(embedding_data)
-        )
+        (
+            full_bytes,
+            visual_bytes,
+            subject_bytes,
+        ) = EmbeddingSerializer.serialize_hybrid_embedding(embedding_data)
 
         embedding_record = DrawingEmbedding(
             drawing_id=drawing_id,

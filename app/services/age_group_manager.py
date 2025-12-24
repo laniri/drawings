@@ -144,7 +144,6 @@ class AgeGroupManager:
                 and total_samples < self.config.min_samples_per_group
                 and (merge_end - group_start) < self.config.max_age_span
             ):
-
                 next_group = age_groups[j]
                 total_samples += next_group["sample_count"]
                 merge_end = next_group["age_end"]

@@ -43,9 +43,9 @@ class DatasetSplit:
     validation_metadata: List[DrawingMetadata]
     test_files: List[Path]
     test_metadata: List[DrawingMetadata]
-    subject_stratification_warnings: List[DataSufficiencyWarning] = (
-        None  # Warnings about age-subject combinations
-    )
+    subject_stratification_warnings: List[
+        DataSufficiencyWarning
+    ] = None  # Warnings about age-subject combinations
 
     @property
     def train_count(self) -> int:
@@ -551,9 +551,10 @@ class DatasetPreparationService:
         stratification_warnings = []
 
         if len(files) >= 10:  # Need minimum samples for stratification
-            stratify_labels, stratification_warnings = (
-                self._create_age_subject_stratification_labels(metadata, split_config)
-            )
+            (
+                stratify_labels,
+                stratification_warnings,
+            ) = self._create_age_subject_stratification_labels(metadata, split_config)
 
         # Perform the actual splitting with robust error handling
         try:

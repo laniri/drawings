@@ -305,14 +305,14 @@ async def comprehensive_security_audit(
                 # Handle nested results (like S3 buckets)
                 if component_name == "s3_buckets":
                     for bucket_name, bucket_result in result.items():
-                        components[f"s3_bucket_{bucket_name}"] = (
-                            SecurityValidationResponse(
-                                is_compliant=bucket_result.is_compliant,
-                                violations=bucket_result.violations,
-                                warnings=bucket_result.warnings,
-                                recommendations=bucket_result.recommendations,
-                                details=bucket_result.details,
-                            )
+                        components[
+                            f"s3_bucket_{bucket_name}"
+                        ] = SecurityValidationResponse(
+                            is_compliant=bucket_result.is_compliant,
+                            violations=bucket_result.violations,
+                            warnings=bucket_result.warnings,
+                            recommendations=bucket_result.recommendations,
+                            details=bucket_result.details,
                         )
 
                         total_violations += len(bucket_result.violations)
@@ -398,9 +398,9 @@ async def get_compliance_report(
 
         if format.lower() == "csv":
             # Return CSV format indication
-            compliance_data["csv_download_url"] = (
-                "/api/v1/security/compliance/download?format=csv"
-            )
+            compliance_data[
+                "csv_download_url"
+            ] = "/api/v1/security/compliance/download?format=csv"
         elif format.lower() == "html":
             # Return HTML format indication
             compliance_data["html_view_url"] = "/api/v1/security/compliance/view"

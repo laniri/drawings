@@ -142,10 +142,12 @@ async def submit_local_training_job(config: TrainingConfig, db: Session) -> int:
     """Submit local training job."""
     try:
         # Prepare training data
-        train_embeddings, val_embeddings, test_embeddings = (
-            local_training_service.prepare_training_data(
-                config.dataset_folder, config.metadata_file, config
-            )
+        (
+            train_embeddings,
+            val_embeddings,
+            test_embeddings,
+        ) = local_training_service.prepare_training_data(
+            config.dataset_folder, config.metadata_file, config
         )
 
         # Start training job

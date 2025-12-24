@@ -59,9 +59,10 @@ async def get_cost_estimate():
     """
     try:
         estimates = cost_optimization_service.estimate_monthly_costs()
-        total_cost, is_within_budget = (
-            cost_optimization_service.get_total_estimated_cost()
-        )
+        (
+            total_cost,
+            is_within_budget,
+        ) = cost_optimization_service.get_total_estimated_cost()
 
         return CostEstimateResponse(
             total_monthly_cost=total_cost,

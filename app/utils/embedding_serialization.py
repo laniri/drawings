@@ -135,7 +135,6 @@ class EmbeddingSerializer:
                     and isinstance(subject_component, np.ndarray)
                     and subject_component.shape == (64,)
                 ):
-
                     # Reconstruct hybrid embedding
                     hybrid_embedding = np.concatenate(
                         [
@@ -594,9 +593,11 @@ class EmbeddingStorage:
                 raise EmbeddingSerializationError("Invalid hybrid embedding provided")
 
             # Serialize with component separation
-            full_bytes, visual_bytes, subject_bytes = (
-                self.serializer.serialize_hybrid_embedding(hybrid_embedding)
-            )
+            (
+                full_bytes,
+                visual_bytes,
+                subject_bytes,
+            ) = self.serializer.serialize_hybrid_embedding(hybrid_embedding)
 
             # Cache if requested
             if use_cache:

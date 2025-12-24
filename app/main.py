@@ -188,9 +188,9 @@ async def get_metrics():
 
     # Add middleware statistics if available
     if hasattr(app.state, "security_middleware"):
-        system_metrics["security"] = (
-            app.state.security_middleware.get_rate_limit_stats()
-        )
+        system_metrics[
+            "security"
+        ] = app.state.security_middleware.get_rate_limit_stats()
 
     if hasattr(app.state, "error_middleware"):
         system_metrics["errors"] = app.state.error_middleware.get_error_stats()
@@ -199,9 +199,9 @@ async def get_metrics():
         system_metrics["resources"] = app.state.resource_middleware.get_resource_stats()
 
     if hasattr(app.state, "metrics_middleware"):
-        system_metrics["application"] = (
-            app.state.metrics_middleware.get_metrics_summary()
-        )
+        system_metrics[
+            "application"
+        ] = app.state.metrics_middleware.get_metrics_summary()
 
     # Add monitoring service statistics
     system_metrics["monitoring"] = monitoring_service.get_service_stats()

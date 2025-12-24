@@ -728,9 +728,9 @@ async def _run_documentation_generation(
             for i, category in enumerate(categories):
                 try:
                     doc_type = DocumentationType(category)
-                    _generation_status["current_task"] = (
-                        f"Generating {category} documentation"
-                    )
+                    _generation_status[
+                        "current_task"
+                    ] = f"Generating {category} documentation"
                     _generation_status["progress"] = 30 + (i * 40 // len(categories))
                     _generation_status["last_update"] = datetime.now()
 
@@ -839,9 +839,9 @@ async def _run_batch_generation(
 
     for i, batch_req in enumerate(batch_requests):
         try:
-            _generation_status["current_task"] = (
-                f"Batch {i+1}/{len(batch_requests)}: {batch_req.get('name', 'Unnamed')}"
-            )
+            _generation_status[
+                "current_task"
+            ] = f"Batch {i+1}/{len(batch_requests)}: {batch_req.get('name', 'Unnamed')}"
             _generation_status["progress"] = int((i / len(batch_requests)) * 100)
             _generation_status["last_update"] = datetime.now()
 

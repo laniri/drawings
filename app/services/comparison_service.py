@@ -457,9 +457,9 @@ class ComparisonService:
                 else:
                     # No subject-specific examples found, try fallback
                     result["fallback_used"] = True
-                    result["fallback_reason"] = (
-                        f"No normal examples found for subject '{subject_category}'"
-                    )
+                    result[
+                        "fallback_reason"
+                    ] = f"No normal examples found for subject '{subject_category}'"
 
             # Fallback: get examples without subject filter
             examples = self.find_similar_normal_examples(
@@ -478,9 +478,9 @@ class ComparisonService:
 
             if not examples and not result["fallback_used"]:
                 result["fallback_used"] = True
-                result["fallback_reason"] = (
-                    f"No normal examples found in age group {age_group_min}-{age_group_max}"
-                )
+                result[
+                    "fallback_reason"
+                ] = f"No normal examples found in age group {age_group_min}-{age_group_max}"
 
             return result
 
