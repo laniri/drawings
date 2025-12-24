@@ -6,9 +6,16 @@ including database setup, test client configuration, and common test utilities.
 """
 
 import os
+import sys
 import tempfile
 import pytest
 from typing import Generator
+
+# Add the project root to Python path if not already there
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi.testclient import TestClient

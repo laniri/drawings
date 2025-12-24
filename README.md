@@ -78,6 +78,9 @@ A machine learning-powered application that analyzes children's drawings to iden
    # Install Python dependencies
    pip install -r requirements-dev.txt
    
+   # Install the package in development mode for proper imports
+   pip install -e .
+   
    # Copy environment file
    cp .env.example .env
    
