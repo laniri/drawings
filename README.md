@@ -207,13 +207,14 @@ docker-compose -f docker-compose.dev.yml down
 
 ## Testing
 
-The project uses pytest for comprehensive testing with property-based testing via Hypothesis. The test suite includes automated fixtures, database isolation, and comprehensive test utilities.
+The project uses pytest for comprehensive testing with property-based testing via Hypothesis. The test suite includes automated fixtures, database isolation, and comprehensive test utilities with robust import handling.
 
 ### Test Infrastructure
 
 The testing infrastructure provides:
 - **Isolated Test Database**: In-memory SQLite database for each test function
-- **Automatic Fixtures**: Database sessions, test clients, and sample data
+- **Robust Import Handling**: Delayed imports with graceful failure handling for missing dependencies
+- **Automatic Fixtures**: Database sessions, test clients, and sample data with dependency injection
 - **Environment Isolation**: Separate test environment with proper configuration
 - **Cleanup Management**: Automatic cleanup of test data and temporary files
 
@@ -228,13 +229,18 @@ The pytest configuration in `pytest.ini` includes:
 
 ### Test Fixtures
 
-The `tests/conftest.py` provides comprehensive fixtures:
+The `tests/conftest.py` provides comprehensive fixtures with robust error handling:
+
+#### Core Infrastructure
+- `app_modules`: Session-scoped fixture that handles delayed imports and provides all required modules
+- **Import Safety**: Gracefully handles missing dependencies with `pytest.skip()` for unavailable modules
+- **Path Management**: Ensures proper Python path setup before importing application modules
 
 #### Database Fixtures
-- `test_engine`: Session-scoped SQLite engine for testing
-- `test_session_factory`: Session factory for test database
-- `db_session`: Function-scoped database session with automatic cleanup
-- `test_client`: FastAPI test client with database dependency override
+- `test_engine`: Session-scoped SQLite engine for testing with proper pragma configuration
+- `test_session_factory`: Session factory for test database with dependency injection
+- `db_session`: Function-scoped database session with automatic cleanup and table management
+- `test_client`: FastAPI test client with database dependency override and proper cleanup
 
 #### Utility Fixtures
 - `temp_file`: Temporary file with automatic cleanup
@@ -292,17 +298,28 @@ CI=1 pytest
 
 ### Test Database Isolation
 
-Each test function gets a fresh database:
-1. **Setup**: Creates all tables in in-memory SQLite database
-2. **Execution**: Test runs with isolated database session
-3. **Cleanup**: Rolls back changes and drops all tables
-4. **Isolation**: No test data persists between test functions
+Each test function gets a fresh database with robust setup:
+1. **Module Loading**: Delayed import of all required modules with error handling
+2. **Setup**: Creates all tables in in-memory SQLite database with proper configuration
+3. **Execution**: Test runs with isolated database session and dependency injection
+4. **Cleanup**: Rolls back changes and drops all tables for complete isolation
+5. **Error Handling**: Graceful handling of import failures and missing dependencies
 
 This ensures:
 - **Fast execution**: In-memory database for speed
-- **Complete isolation**: No test interference
-- **Consistent state**: Each test starts with clean database
+- **Complete isolation**: No test interference between functions
+- **Consistent state**: Each test starts with clean database and fresh imports
 - **Automatic cleanup**: No manual database management needed
+- **Robust imports**: Handles missing dependencies gracefully with proper error messages
+
+### Import Safety and Error Handling
+
+The test infrastructure includes robust import handling:
+- **Delayed Imports**: Modules are imported only when needed, after proper path setup
+- **Graceful Failures**: Missing dependencies result in test skips rather than failures
+- **Dependency Injection**: All fixtures receive required modules through the `app_modules` fixture
+- **Path Management**: Ensures project root is in Python path before any imports
+- **Error Messages**: Clear error messages when imports fail with specific module information
 
 ### Property-Based Testing
 
@@ -323,10 +340,12 @@ pytest tests/test_property_*.py -v
 When writing tests:
 
 1. **Use provided fixtures**: Leverage `db_session`, `test_client`, and utility fixtures
-2. **Mark appropriately**: Use `@pytest.mark.slow`, `@pytest.mark.unit`, etc.
-3. **Isolate tests**: Each test should be independent and not rely on others
-4. **Use sample data**: Leverage `sample_drawing_data` and `sample_embedding_data` fixtures
-5. **Clean up**: Fixtures handle cleanup automatically, but clean up any external resources
+2. **Handle imports properly**: Use the `app_modules` fixture for accessing application modules
+3. **Mark appropriately**: Use `@pytest.mark.slow`, `@pytest.mark.unit`, etc.
+4. **Isolate tests**: Each test should be independent and not rely on others
+5. **Use sample data**: Leverage `sample_drawing_data` and `sample_embedding_data` fixtures
+6. **Clean up**: Fixtures handle cleanup automatically, but clean up any external resources
+7. **Import safety**: Don't import application modules at module level; use fixtures instead
 
 ## Development Commands
 

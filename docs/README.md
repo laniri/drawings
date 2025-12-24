@@ -39,6 +39,9 @@
 - [Docker Deployment](./deployment/docker.md)
 - [Environment Setup](./deployment/environment-setup.md)
 
+### 🧪 Testing
+- [Testing Documentation](./testing.md) - **NEW**: Comprehensive testing guide with robust fixtures and property-based testing
+
 ## Documentation Standards
 
 This documentation follows industry standards:

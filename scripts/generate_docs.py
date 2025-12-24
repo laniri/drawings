@@ -1755,6 +1755,20 @@ class APIDocumentationGenerator:
     
     def _generate_api_overview(self, schema: Dict[str, Any]):
         """Generate comprehensive API overview documentation."""
+        
+        # Define the curl examples separately to avoid f-string backslash issues
+        curl_examples = '''### cURL Examples
+```bash
+# Get API health status
+curl -X GET "http://localhost:8000/api/v1/health"
+
+# Upload a drawing for analysis
+curl -X POST "http://localhost:8000/api/v1/drawings/upload" \\
+  -H "Content-Type: multipart/form-data" \\
+  -F "file=@drawing.png" \\
+  -F "age=5"
+```'''
+        
         overview_content = f"""# {schema['info']['title']} - API Documentation
 
 {schema['info'].get('description', 'API documentation for the Children\'s Drawing Anomaly Detection System')}
@@ -1891,17 +1905,13 @@ API requests may be subject to rate limiting. Check response headers for rate li
 
 ## SDKs and Tools
 
-### cURL Examples
-```bash
-# Get API health status
-curl -X GET "http://localhost:8000/api/v1/health"
-
-# Upload a drawing for analysis
-curl -X POST "http://localhost:8000/api/v1/drawings/upload" \\
-  -H "Content-Type: multipart/form-data" \\
-  -F "file=@drawing.png" \\
-  -F "age=5"
-```
+"""
+        
+        # Add the curl examples (defined separately to avoid f-string backslash issues)
+        overview_content += curl_examples
+        
+        # Add Python examples
+        overview_content += """
 
 ### Python Example
 ```python

@@ -90,16 +90,27 @@ jobs:
         pip install -r requirements-ci.txt
         # Install the package in development mode for proper imports
         pip install -e .
+        # Verify installation
+        pip show children-drawing-anomaly-detection
     
     - name: Debug package installation
       run: |
-        python -c "import sys; print('Python path:', sys.path)"
-        python -c "
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo "Python path:"
+        python -c "import sys; print('\n'.join(sys.path))"
+        echo "Checking if app directory exists:"
+        ls -la app/
+        echo "Testing import with PYTHONPATH:"
+        PYTHONPATH=. python -c "
         try:
             from app.models.database import Base
             print('✅ Import successful!')
         except Exception as e:
             print('❌ Import failed:', e)
+            import traceback
+            traceback.print_exc()
         "
     
     - name: Run linting
@@ -118,6 +129,8 @@ jobs:
         SKIP_MODEL_LOADING: "true"
         # Use in-memory database for faster tests
         DATABASE_URL: "sqlite:///:memory:"
+        # Add current directory to Python path
+        PYTHONPATH: "."
       run: |
         pytest tests/ -v --cov=app --cov-report=xml -x --tb=short
     
