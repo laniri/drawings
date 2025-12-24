@@ -4,6 +4,8 @@
 
 This document outlines the cost optimization strategies implemented for the Children's Drawing Anomaly Detection System AWS production deployment. The system is designed to operate within a target budget of $26-36/month for demo usage.
 
+**Note**: AWS dependencies are optional for local development. The cost optimization service will work without AWS clients and provide local cost estimates and recommendations. AWS integration is only required for production deployments with actual AWS resource management.
+
 ## Cost Optimization Strategies
 
 ### 1. ECS Fargate Resource Optimization
@@ -79,31 +81,31 @@ Rules:
 ```http
 GET /api/v1/cost-optimization/estimate
 ```
-Returns detailed cost breakdown and compliance status.
+Returns detailed cost breakdown and compliance status. Works in both local and AWS-integrated modes.
 
 ### Optimization Configuration
 ```http
 GET /api/v1/cost-optimization/optimization
 ```
-Returns optimized configurations for ECS, S3, and CloudFront.
+Returns optimized configurations for ECS, S3, and CloudFront. Provides recommendations regardless of AWS client availability.
 
 ### Compliance Validation
 ```http
 GET /api/v1/cost-optimization/compliance
 ```
-Validates current costs against budget requirements.
+Validates current costs against budget requirements. Returns local estimates when AWS clients are unavailable.
 
 ### Apply S3 Lifecycle
 ```http
 POST /api/v1/cost-optimization/apply-s3-lifecycle/{bucket_name}
 ```
-Applies lifecycle optimization to a specific S3 bucket.
+Applies lifecycle optimization to a specific S3 bucket. Requires AWS integration (production only).
 
 ### Setup Cost Monitoring
 ```http
 POST /api/v1/cost-optimization/setup-monitoring
 ```
-Configures cost monitoring and budget alerts.
+Configures cost monitoring and budget alerts. Requires AWS integration (production only).
 
 ## Infrastructure Templates
 

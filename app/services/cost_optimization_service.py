@@ -12,8 +12,18 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
+
 from pydantic import BaseModel
 
 from app.core.config import get_settings
@@ -76,6 +86,10 @@ class CostOptimizationService:
 
     def _initialize_aws_clients(self):
         """Initialize AWS service clients."""
+        if not HAS_AWS:
+            logger.warning("AWS dependencies not available, cost optimization disabled")
+            return
+
         try:
             session = boto3.Session(region_name=settings.aws_region)
             self._ecs_client = session.client("ecs")

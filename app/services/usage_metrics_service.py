@@ -14,8 +14,17 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
 
 from app.core.config import settings
 from app.core.exceptions import ConfigurationError

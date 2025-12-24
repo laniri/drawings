@@ -20,6 +20,7 @@ The Children's Drawing Anomaly Detection System has been updated to make several
 ### 2. AWS Dependencies Made Optional
 
 **Files Modified:**
+- `app/services/cost_optimization_service.py` - Added optional AWS import with `HAS_AWS` flag
 - `app/services/database_migration_service.py` - Added optional AWS import with `HAS_AWS` flag
 - `app/services/monitoring_service.py` - Added optional AWS import handling
 - `app/services/security_service.py` - Added optional AWS import with graceful fallback behavior
@@ -50,6 +51,7 @@ except ImportError:
 - `_safe_edge_detection()` - Safe edge detection with fallback
 
 **AWS Service Fallbacks:**
+- Cost optimization service works without AWS clients for local development
 - Database migration service works without AWS S3 backup
 - Monitoring service operates without CloudWatch integration
 - Security service provides validation without AWS clients
@@ -104,6 +106,7 @@ pip install -e .[enhanced]
 | Contour Detection | Basic regions | Precise contours | ✓ | ✓ |
 | Saliency Maps | PIL-based | OpenCV overlays | ✓ | ✓ |
 | Database Backups | Local only | Local + S3 | ✓ | ✓ |
+| Cost Optimization | Local only | AWS integration | ✓ | ✓ |
 | Monitoring | Local logs | CloudWatch | ✓ | ✓ |
 | Alerting | Local only | SNS alerts | ✓ | ✓ |
 | Performance | Good | Optimized | Good | Enhanced |

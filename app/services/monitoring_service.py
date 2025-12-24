@@ -22,8 +22,17 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
 
 from app.core.config import settings
 from app.core.exceptions import ConfigurationError
@@ -163,7 +172,7 @@ class MonitoringService:
             if os.getenv("SNS_ALERT_TOPIC_ARN"):
                 should_initialize = True
 
-            if should_initialize:
+            if should_initialize and HAS_AWS:
                 region = os.getenv("AWS_REGION", "eu-west-1")
 
                 # CloudWatch for custom metrics
@@ -176,6 +185,10 @@ class MonitoringService:
                 self._sns_client = boto3.client("sns", region_name=region)
 
                 logger.info(f"Initialized AWS monitoring services in region: {region}")
+            elif should_initialize and not HAS_AWS:
+                logger.warning(
+                    "AWS dependencies not available, monitoring services disabled"
+                )
             else:
                 logger.info(
                     "Running in local mode or monitoring disabled - AWS services disabled"

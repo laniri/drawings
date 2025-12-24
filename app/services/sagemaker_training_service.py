@@ -19,9 +19,19 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import boto3
-import docker
-from botocore.exceptions import ClientError, NoCredentialsError
+# Optional AWS dependencies
+try:
+    import boto3
+    import docker
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    docker = None
+    ClientError = Exception
+    NoCredentialsError = Exception
 from docker.errors import DockerException
 from sqlalchemy.orm import Session
 

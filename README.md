@@ -96,7 +96,7 @@ A machine learning-powered application that analyzes children's drawings to iden
    uvicorn app.main:app --reload
    ```
 
-**Note**: AWS dependencies (boto3, botocore) are included in requirements.txt but are optional for local development. The system will work without AWS services and gracefully handle missing AWS dependencies. All AWS-dependent services (monitoring, security validation, database migration) include fallback behavior for local development.
+**Note**: AWS dependencies (boto3, botocore) are included in requirements.txt but are optional for local development. The system will work without AWS services and gracefully handle missing AWS dependencies. All AWS-dependent services (cost optimization, monitoring, security validation, database migration) include fallback behavior for local development.
 
 3. **Frontend Setup**
    ```bash
