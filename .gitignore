@@ -49,7 +49,16 @@ venv.bak/
 # Uploads and static files
 uploads/
 static/
-models/
+# ML model files (but not Python models directory)
+*.pkl
+*.pth
+*.pt
+*.h5
+*.onnx
+*.tflite
+*.pb
+/models/
+!app/models/
 
 # Logs
 *.log
