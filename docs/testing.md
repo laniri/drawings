@@ -451,6 +451,18 @@ pytest --durations=10
 pip install -r requirements-dev.txt
 ```
 
+#### AWS Dependencies in Tests
+```bash
+# AWS-dependent tests are automatically skipped when boto3/botocore are unavailable
+# Tests use @pytest.mark.skipif(not HAS_AWS, reason="AWS dependencies not available")
+
+# To run AWS-dependent tests, install AWS dependencies:
+pip install boto3 botocore
+
+# Or install all enhanced features:
+pip install -r requirements-enhanced.txt
+```
+
 ### Debugging Tests
 
 #### Verbose Output

@@ -22,6 +22,7 @@ The Children's Drawing Anomaly Detection System has been updated to make several
 **Files Modified:**
 - `app/services/database_migration_service.py` - Added optional AWS import with `HAS_AWS` flag
 - `app/services/monitoring_service.py` - Added optional AWS import handling
+- `app/services/security_service.py` - Added optional AWS import with graceful fallback behavior
 - `requirements.txt` - AWS dependencies remain required but gracefully handled when missing
 
 **New Import Pattern:**
@@ -51,6 +52,7 @@ except ImportError:
 **AWS Service Fallbacks:**
 - Database migration service works without AWS S3 backup
 - Monitoring service operates without CloudWatch integration
+- Security service provides validation without AWS clients
 - Local development doesn't require AWS credentials
 - Production features gracefully degrade when AWS is unavailable
 

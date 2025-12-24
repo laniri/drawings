@@ -10,11 +10,20 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
-
 from app.core.config import settings
 from app.core.exceptions import ConfigurationError, SecurityError
+
+# Optional AWS dependencies
+try:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+
+    HAS_AWS = True
+except ImportError:
+    HAS_AWS = False
+    boto3 = None
+    ClientError = Exception
+    NoCredentialsError = Exception
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +80,7 @@ class SecurityService:
     def _initialize(self):
         """Initialize the security service."""
         try:
-            if settings.is_production:
+            if settings.is_production and HAS_AWS:
                 # In production, use AWS clients
                 region = settings.aws_region or "us-east-1"
 
@@ -81,6 +90,11 @@ class SecurityService:
                 self._sts_client = boto3.client("sts", region_name=region)
 
                 logger.info("Initialized AWS security clients")
+            elif settings.is_production and not HAS_AWS:
+                logger.warning(
+                    "Production environment detected but AWS dependencies not available"
+                )
+                logger.info("Security service running in limited mode")
             else:
                 logger.info("Security service initialized for local development")
 
