@@ -90,12 +90,16 @@ jobs:
         pip install -r requirements-ci.txt
     
     - name: Run linting
+      env:
+        PYTHONPATH: .
       run: |
         flake8 app/
         black --check app/
         isort --check-only app/
     
     - name: Run type checking
+      env:
+        PYTHONPATH: .
       run: |
         mypy app/
     
@@ -105,6 +109,8 @@ jobs:
         SKIP_MODEL_LOADING: "true"
         # Use in-memory database for faster tests
         DATABASE_URL: "sqlite:///:memory:"
+        # Add current directory to Python path
+        PYTHONPATH: .
       run: |
         pytest tests/ -v --cov=app --cov-report=xml -x --tb=short
     
