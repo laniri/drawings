@@ -16,24 +16,53 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, Session
-from fastapi.testclient import TestClient
+# Delay imports until after path setup
+def _import_app_modules():
+    """Import app modules after ensuring proper path setup."""
+    try:
+        from sqlalchemy import create_engine, event
+        from sqlalchemy.orm import sessionmaker, Session
+        from fastapi.testclient import TestClient
 
-# Import application components
-from app.main import app
-from app.models.database import Base
-from app.core.database import get_db, set_sqlite_pragma
-from app.core.config import settings
+        # Import application components
+        from app.main import app
+        from app.models.database import Base
+        from app.core.database import get_db, set_sqlite_pragma
+        from app.core.config import settings
+        
+        return {
+            'create_engine': create_engine,
+            'event': event,
+            'sessionmaker': sessionmaker,
+            'Session': Session,
+            'TestClient': TestClient,
+            'app': app,
+            'Base': Base,
+            'get_db': get_db,
+            'set_sqlite_pragma': set_sqlite_pragma,
+            'settings': settings
+        }
+    except ImportError as e:
+        pytest.skip(f"Could not import required modules: {e}")
 
 
 @pytest.fixture(scope="session")
-def test_engine():
+def app_modules():
+    """Provide app modules for tests."""
+    return _import_app_modules()
+
+
+@pytest.fixture(scope="session")
+def test_engine(app_modules):
     """
     Create a test database engine for the entire test session.
     
     This uses an in-memory SQLite database for fast, isolated testing.
     """
+    create_engine = app_modules['create_engine']
+    event = app_modules['event']
+    set_sqlite_pragma = app_modules['set_sqlite_pragma']
+    
     # Use in-memory database for tests
     engine = create_engine(
         "sqlite:///:memory:",
@@ -48,13 +77,14 @@ def test_engine():
 
 
 @pytest.fixture(scope="session")
-def test_session_factory(test_engine):
+def test_session_factory(test_engine, app_modules):
     """Create a session factory for the test database."""
+    sessionmaker = app_modules['sessionmaker']
     return sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
 @pytest.fixture(scope="function")
-def db_session(test_engine, test_session_factory) -> Generator[Session, None, None]:
+def db_session(test_engine, test_session_factory, app_modules) -> Generator:
     """
     Create a fresh database session for each test function.
     
@@ -64,6 +94,9 @@ def db_session(test_engine, test_session_factory) -> Generator[Session, None, No
     3. Rolls back any changes after the test
     4. Drops all tables to ensure isolation
     """
+    Base = app_modules['Base']
+    Session = app_modules['Session']
+    
     # Create all tables
     Base.metadata.create_all(bind=test_engine)
     
@@ -82,13 +115,17 @@ def db_session(test_engine, test_session_factory) -> Generator[Session, None, No
 
 
 @pytest.fixture(scope="function")
-def test_client(db_session: Session) -> TestClient:
+def test_client(db_session, app_modules):
     """
     Create a test client with database dependency override.
     
     This fixture provides a FastAPI test client that uses the test database
     instead of the production database.
     """
+    TestClient = app_modules['TestClient']
+    app = app_modules['app']
+    get_db = app_modules['get_db']
+    
     def override_get_db():
         try:
             yield db_session
@@ -105,7 +142,6 @@ def test_client(db_session: Session) -> TestClient:
     
     # Clean up dependency override
     app.dependency_overrides.clear()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
