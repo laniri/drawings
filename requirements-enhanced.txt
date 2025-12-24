@@ -1,0 +1,11 @@
+# Enhanced functionality requirements
+# Install with: pip install -r requirements-enhanced.txt
+
+# Include base requirements
+-r requirements.txt
+
+# Enhanced image processing
+opencv-python>=4.8.1.78
+
+# Additional ML libraries for advanced features
+reportlab>=4.0.0  # PDF generation for comprehensive reports

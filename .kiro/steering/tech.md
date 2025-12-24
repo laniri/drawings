@@ -11,8 +11,9 @@
 - **SQLAlchemy** - ORM with SQLite database
 - **Alembic** - Database migrations
 - **Pydantic** - Data validation and settings management
-- **ReportLab** - PDF generation for comprehensive export reports
-- **Pillow & OpenCV** - Image processing and simplified saliency map generation
+- **ReportLab** - PDF generation for comprehensive export reports (optional)
+- **Pillow** - Core image processing and saliency map generation
+- **OpenCV** - Advanced image processing (optional, with PIL fallback)
 - **NumPy 1.26.4** - Downgraded for PyTorch compatibility (avoid 2.x)
 - **Transformers** - Hugging Face library for ViT models
 - **Scikit-learn** - Machine learning utilities

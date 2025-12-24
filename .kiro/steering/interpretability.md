@@ -35,5 +35,5 @@
 ## Dependencies
 
 - **ReportLab**: Required for PDF generation (`pip install reportlab`)
-- **Pillow**: Image processing and saliency map creation
-- **OpenCV**: Advanced image analysis (optional)
+- **Pillow**: Core image processing and saliency map creation
+- **OpenCV**: Advanced image analysis (optional, with PIL fallback)

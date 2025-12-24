@@ -37,8 +37,9 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **SQLAlchemy** with SQLite database for data persistence
 - **Alembic** for database migrations
 - **Pydantic** for data validation and settings management
-- **ReportLab** for PDF generation and comprehensive export reports
-- **Pillow & OpenCV** for image processing and simplified saliency map generation
+- **ReportLab** for PDF generation and comprehensive export reports (optional)
+- **Pillow** for core image processing and saliency map generation
+- **OpenCV** for advanced image processing (optional, with PIL fallback)
 - **NumPy 1.26.4** (downgraded for PyTorch compatibility)
 
 ### Frontend
@@ -77,6 +78,9 @@ A machine learning-powered application that analyzes children's drawings to iden
    
    # Install Python dependencies
    pip install -r requirements-dev.txt
+   
+   # Optional: Install enhanced features (OpenCV, ReportLab)
+   pip install -r requirements-enhanced.txt
    
    # Install the package in development mode for proper imports
    pip install -e .
@@ -452,6 +456,47 @@ The API documentation is automatically generated and available at:
 - Interactive API explorer with request/response examples
 - Complete endpoint documentation with schemas
 
+## Optional Dependencies
+
+The system is designed to work with minimal dependencies, but offers enhanced functionality with optional packages. See [OPTIONAL_DEPENDENCIES.md](OPTIONAL_DEPENDENCIES.md) for detailed information.
+
+### Enhanced Image Processing (OpenCV)
+```bash
+# Install OpenCV for advanced image processing
+pip install opencv-python>=4.8.1.78
+
+# Or install all enhanced features
+pip install -r requirements-enhanced.txt
+```
+
+**Benefits of OpenCV:**
+- Advanced contour detection for region analysis
+- High-quality image resizing with cubic interpolation
+- Canny edge detection for drawing complexity analysis
+- Enhanced saliency map overlays with precise contour drawing
+
+**Fallback without OpenCV:**
+- PIL-based image resizing (Lanczos interpolation)
+- Simple gradient-based edge detection
+- Basic saliency map generation
+- All core functionality remains available
+
+### PDF Generation (ReportLab)
+```bash
+# Install ReportLab for comprehensive PDF reports
+pip install reportlab>=4.0.0
+```
+
+**Benefits of ReportLab:**
+- Professional PDF export reports
+- Multi-page analysis summaries
+- Embedded charts and visualizations
+- Subject-aware comprehensive documentation
+
+**Fallback without ReportLab:**
+- PNG, JSON, CSV, and HTML exports remain available
+- Web-based report viewing through the interface
+
 ## Troubleshooting
 
 ### Common Issues
@@ -462,7 +507,17 @@ The API documentation is automatically generated and available at:
    pip install "numpy>=1.25.2,<2.0.0"
    ```
 
-2. **MyPy Type Checking Issues**
+2. **OpenCV Import Errors**
+   ```bash
+   # OpenCV is now optional - the system will work without it
+   # For enhanced functionality, install OpenCV:
+   pip install opencv-python>=4.8.1.78
+   
+   # Or install all enhanced features:
+   pip install -r requirements-enhanced.txt
+   ```
+
+3. **MyPy Type Checking Issues**
    ```bash
    # The project uses relaxed MyPy configuration for development
    # If you encounter type checking errors, they are likely ignored by default
@@ -470,17 +525,17 @@ The API documentation is automatically generated and available at:
    # Edit pyproject.toml and set warn_return_any = true, disallow_untyped_defs = true
    ```
 
-3. **Frontend Shows 0 Drawings**
+4. **Frontend Shows 0 Drawings**
    - Check if backend is running on port 8000
    - Verify Vite proxy configuration in `frontend/vite.config.ts`
    - Ensure API endpoints are accessible
 
-3. **Model Training Fails**
+5. **Model Training Fails**
    - Ensure sufficient drawings are uploaded (minimum 10 per age group)
    - Check that hybrid embeddings are generated before training
    - Verify database connectivity and subject category data
 
-4. **Vision Transformer Issues**
+6. **Vision Transformer Issues**
    - Ensure PyTorch and transformers are properly installed
    - Check that the embedding service initializes correctly
    - Verify image preprocessing pipeline

@@ -7,7 +7,7 @@ sqlalchemy>=2.0.23
 alembic>=1.13.0
 python-multipart>=0.0.6
 pillow>=10.1.0
-opencv-python>=4.8.1.78
+# opencv-python>=4.8.1.78  # Optional: Advanced image processing (fallback to PIL if not available)
 torch>=2.1.0
 transformers>=4.35.0
 numpy>=1.25.2,<2.0.0
@@ -27,3 +27,7 @@ omegaconf>=2.3.0
 boto3>=1.34.0
 botocore>=1.34.0
 docker>=6.1.0
+
+# Optional dependencies for enhanced functionality
+# Install with: pip install opencv-python>=4.8.1.78
+# Provides: Advanced image processing, contour detection, enhanced saliency maps

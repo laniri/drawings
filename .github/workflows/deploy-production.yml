@@ -72,10 +72,6 @@ jobs:
         sudo apt-get autoremove -y
         sudo apt-get autoclean
         
-        # Install OpenCV dependencies for headless operation
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
-        
         # Remove some large directories if they exist
         sudo rm -rf /usr/share/dotnet || true
         sudo rm -rf /usr/local/lib/android || true
@@ -134,9 +130,6 @@ jobs:
         DATABASE_URL: "sqlite:///:memory:"
         # Add current directory to Python path
         PYTHONPATH: "."
-        # OpenCV headless mode
-        DISPLAY: ":99"
-        QT_QPA_PLATFORM: "offscreen"
       run: |
         # Run tests excluding all documentation generator tests temporarily
         pytest tests/ -v --cov=app --cov-report=xml -x --tb=short \
