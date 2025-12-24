@@ -6,7 +6,7 @@ Property-based tests for database model consistency.
 """
 
 import pytest
-from hypothesis import given, strategies as st, settings
+from hypothesis import given, strategies as st, settings, HealthCheck
 from datetime import datetime
 
 from app.models.database import Drawing
@@ -25,7 +25,7 @@ drawing_metadata_strategy = st.fixed_dictionaries({
 
 
 @given(metadata=drawing_metadata_strategy)
-@settings(max_examples=100, deadline=None)
+@settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_metadata_persistence_property(db_session, metadata):
     """
     **Feature: children-drawing-anomaly-detection, Property 3: Metadata Persistence**
@@ -71,7 +71,7 @@ def test_metadata_persistence_property(db_session, metadata):
     metadata1=drawing_metadata_strategy,
     metadata2=drawing_metadata_strategy
 )
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_multiple_drawings_metadata_independence(db_session, metadata1, metadata2):
     """
     Test that metadata for different drawings is stored independently.
@@ -118,7 +118,7 @@ def test_multiple_drawings_metadata_independence(db_session, metadata1, metadata
 
 
 @given(metadata=drawing_metadata_strategy)
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_optional_metadata_handling(db_session, metadata):
     """
     Test that optional metadata fields (None values) are handled correctly.
