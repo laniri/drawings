@@ -99,9 +99,10 @@ class TestDatabaseMigrationService:
                 })
                 mock_backup_service_class.return_value = mock_backup_service
                 
-                with patch('app.services.database_migration_service.boto3.client') as mock_boto3:
-                    mock_s3_client = MagicMock()
-                    mock_boto3.return_value = mock_s3_client
+                with patch('app.services.database_migration_service.HAS_AWS', True):
+                    with patch('app.services.database_migration_service.boto3') as mock_boto3_module:
+                        mock_s3_client = MagicMock()
+                        mock_boto3_module.client.return_value = mock_s3_client
                     
                     service = DatabaseMigrationService()
                     service._get_migration_info = AsyncMock(return_value={
