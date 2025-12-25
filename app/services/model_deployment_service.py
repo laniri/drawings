@@ -497,7 +497,10 @@ class ModelValidator:
             }
 
             # Check file existence and integrity
-            model_file = self.export_dir / f"{export_metadata.model_id}.{export_metadata.export_format}"
+            model_file = (
+                self.export_dir
+                / f"{export_metadata.model_id}.{export_metadata.export_format}"
+            )
             if not model_file.exists():
                 validation_result["errors"].append(
                     f"Model file not found: {model_file}"
