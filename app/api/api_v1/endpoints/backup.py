@@ -145,7 +145,7 @@ async def upload_backup(file: UploadFile = File(...)):
 @router.post("/export", summary="Export system data")
 async def export_data(
     format: str = Query(
-        default="json", regex="^(json|csv)$", description="Export format"
+        default="json", pattern="^(json|csv)$", description="Export format"
     ),
     include_embeddings: bool = Query(
         default=False, description="Include embedding vectors"
