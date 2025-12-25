@@ -198,7 +198,9 @@ class BackupService:
             try:
                 # Connect to source database and ensure all data is committed
                 source_conn = sqlite3.connect(str(self.db_path))
-                source_conn.execute("PRAGMA wal_checkpoint(FULL)")  # Flush WAL to main DB
+                source_conn.execute(
+                    "PRAGMA wal_checkpoint(FULL)"
+                )  # Flush WAL to main DB
                 source_conn.commit()  # Ensure all transactions are committed
                 source_conn.close()
                 logger.info("Source database transactions committed and WAL flushed")
@@ -234,38 +236,50 @@ class BackupService:
             # CRITICAL FIX: Verify backup contains actual data, not just valid SQLite structure
             try:
                 test_conn = sqlite3.connect(str(backup_path))
-                
+
                 # Check that tables exist
-                cursor = test_conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                cursor = test_conn.execute(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                )
                 table_count = cursor.fetchone()[0]
-                
+
                 if table_count == 0:
                     test_conn.close()
                     raise StorageError("Backup file contains no user tables")
-                
+
                 # Check that tables contain data
                 total_rows = 0
-                cursor = test_conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                cursor = test_conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                )
                 tables = cursor.fetchall()
-                
+
                 for (table_name,) in tables:
                     try:
                         cursor = test_conn.execute(f"SELECT COUNT(*) FROM {table_name}")
                         row_count = cursor.fetchone()[0]
                         total_rows += row_count
-                        logger.info(f"Backup verification: Table '{table_name}' has {row_count} rows")
+                        logger.info(
+                            f"Backup verification: Table '{table_name}' has {row_count} rows"
+                        )
                     except sqlite3.Error as e:
-                        logger.warning(f"Could not count rows in table {table_name}: {e}")
-                
+                        logger.warning(
+                            f"Could not count rows in table {table_name}: {e}"
+                        )
+
                 test_conn.close()
-                
+
                 if total_rows == 0:
                     logger.warning("Backup file contains tables but no data rows")
                 else:
-                    logger.info(f"Backup verification: {table_count} tables with {total_rows} total rows")
-                    
+                    logger.info(
+                        f"Backup verification: {table_count} tables with {total_rows} total rows"
+                    )
+
             except sqlite3.Error as e:
-                raise StorageError(f"Backup file is not a valid SQLite database: {str(e)}")
+                raise StorageError(
+                    f"Backup file is not a valid SQLite database: {str(e)}"
+                )
 
             backup_info = {
                 "backup_name": backup_name,
@@ -576,36 +590,48 @@ class BackupService:
                 # CRITICAL FIX: Comprehensive backup validation before restore
                 try:
                     test_conn = sqlite3.connect(str(backup_path))
-                    
+
                     # Check that backup has tables
-                    cursor = test_conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                    cursor = test_conn.execute(
+                        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    )
                     table_count = cursor.fetchone()[0]
-                    
+
                     if table_count == 0:
                         test_conn.close()
                         raise StorageError("Backup file contains no user tables")
-                    
+
                     # Check that tables contain data
                     total_rows = 0
-                    cursor = test_conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                    cursor = test_conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    )
                     tables = cursor.fetchall()
-                    
+
                     for (table_name,) in tables:
                         try:
-                            cursor = test_conn.execute(f"SELECT COUNT(*) FROM {table_name}")
+                            cursor = test_conn.execute(
+                                f"SELECT COUNT(*) FROM {table_name}"
+                            )
                             row_count = cursor.fetchone()[0]
                             total_rows += row_count
-                            logger.info(f"Backup validation: Table '{table_name}' has {row_count} rows")
+                            logger.info(
+                                f"Backup validation: Table '{table_name}' has {row_count} rows"
+                            )
                         except sqlite3.Error as e:
-                            logger.warning(f"Could not count rows in table {table_name}: {e}")
-                    
+                            logger.warning(
+                                f"Could not count rows in table {table_name}: {e}"
+                            )
+
                     test_conn.close()
-                    
+
                     if total_rows == 0:
                         logger.warning("Backup file contains tables but no data rows")
                     else:
-                        logger.info(f"Backup validation: {table_count} tables with {total_rows} total rows")
-                        
+                        logger.info(
+                            f"Backup validation: {table_count} tables with {total_rows} total rows"
+                        )
+
                 except sqlite3.Error as e:
                     raise StorageError(
                         f"Backup file is not a valid SQLite database: {str(e)}"
@@ -638,36 +664,50 @@ class BackupService:
                 # Verify restored database has the expected data
                 try:
                     restored_conn = sqlite3.connect(str(self.db_path))
-                    
+
                     # Check that restored database has tables
-                    cursor = restored_conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                    cursor = restored_conn.execute(
+                        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    )
                     restored_table_count = cursor.fetchone()[0]
-                    
+
                     if restored_table_count == 0:
                         restored_conn.close()
                         raise StorageError("Restored database contains no user tables")
-                    
+
                     # Check that restored tables contain data
                     restored_total_rows = 0
-                    cursor = restored_conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+                    cursor = restored_conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                    )
                     restored_tables = cursor.fetchall()
-                    
+
                     for (table_name,) in restored_tables:
                         try:
-                            cursor = restored_conn.execute(f"SELECT COUNT(*) FROM {table_name}")
+                            cursor = restored_conn.execute(
+                                f"SELECT COUNT(*) FROM {table_name}"
+                            )
                             row_count = cursor.fetchone()[0]
                             restored_total_rows += row_count
-                            logger.info(f"Restored verification: Table '{table_name}' has {row_count} rows")
+                            logger.info(
+                                f"Restored verification: Table '{table_name}' has {row_count} rows"
+                            )
                         except sqlite3.Error as e:
-                            logger.warning(f"Could not count rows in restored table {table_name}: {e}")
-                    
+                            logger.warning(
+                                f"Could not count rows in restored table {table_name}: {e}"
+                            )
+
                     restored_conn.close()
-                    
+
                     if restored_total_rows == 0:
-                        raise StorageError("Restored database contains tables but no data rows")
+                        raise StorageError(
+                            "Restored database contains tables but no data rows"
+                        )
                     else:
-                        logger.info(f"Restore verification: {restored_table_count} tables with {restored_total_rows} total rows")
-                        
+                        logger.info(
+                            f"Restore verification: {restored_table_count} tables with {restored_total_rows} total rows"
+                        )
+
                 except sqlite3.Error as e:
                     raise StorageError(f"Restored database validation failed: {str(e)}")
 
