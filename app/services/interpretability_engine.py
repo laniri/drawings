@@ -1205,17 +1205,17 @@ class VisualFeatureIdentifier:
             # Fallback edge detection using PIL/numpy
             # Simple gradient-based edge detection
             from PIL import Image, ImageFilter
-            
+
             # Convert numpy array to PIL Image
             if gray_image.dtype != np.uint8:
                 gray_image = (gray_image * 255).astype(np.uint8)
-            
-            pil_image = Image.fromarray(gray_image, mode='L')
-            
+
+            pil_image = Image.fromarray(gray_image, mode="L")
+
             # Apply edge detection filter
             edges = pil_image.filter(ImageFilter.FIND_EDGES)
             edges_array = np.array(edges)
-            
+
             # Calculate edge density
             return float(np.sum(edges_array > 50) / edges_array.size)
 
@@ -2366,30 +2366,36 @@ class SaliencyOverlayGenerator:
             else:
                 # Fallback contour detection using PIL
                 from PIL import ImageDraw
-                
+
                 overlay_image = pil_image.copy()
                 draw = ImageDraw.Draw(overlay_image)
-                
+
                 # Simple contour approximation by finding edges of binary regions
                 # This is a simplified approach compared to OpenCV's contour detection
-                binary_pil = Image.fromarray(binary_mask, mode='L')
-                
+                binary_pil = Image.fromarray(binary_mask, mode="L")
+
                 # Find approximate contours by scanning for edge pixels
                 binary_array = np.array(binary_pil)
                 height, width = binary_array.shape
-                
+
                 # Simple edge detection for contour approximation
                 for y in range(1, height - 1):
                     for x in range(1, width - 1):
                         if binary_array[y, x] > 0:
                             # Check if this is an edge pixel
                             neighbors = [
-                                binary_array[y-1, x], binary_array[y+1, x],
-                                binary_array[y, x-1], binary_array[y, x+1]
+                                binary_array[y - 1, x],
+                                binary_array[y + 1, x],
+                                binary_array[y, x - 1],
+                                binary_array[y, x + 1],
                             ]
                             if any(n == 0 for n in neighbors):
                                 # This is an edge pixel, draw a small circle
-                                draw.ellipse([x-1, y-1, x+1, y+1], outline=contour_color, width=line_width)
+                                draw.ellipse(
+                                    [x - 1, y - 1, x + 1, y + 1],
+                                    outline=contour_color,
+                                    width=line_width,
+                                )
 
             return overlay_image
 
@@ -3203,17 +3209,17 @@ class InterpretabilityPipeline:
             # Fallback edge detection using PIL/numpy
             # Simple gradient-based edge detection
             from PIL import Image, ImageFilter
-            
+
             # Convert numpy array to PIL Image
             if gray_image.dtype != np.uint8:
                 gray_image = (gray_image * 255).astype(np.uint8)
-            
-            pil_image = Image.fromarray(gray_image, mode='L')
-            
+
+            pil_image = Image.fromarray(gray_image, mode="L")
+
             # Apply edge detection filter
             edges = pil_image.filter(ImageFilter.FIND_EDGES)
             edges_array = np.array(edges)
-            
+
             # Calculate edge density
             return float(np.sum(edges_array > 50) / edges_array.size)
 
@@ -3398,27 +3404,33 @@ class SaliencyOverlayGenerator:
             else:
                 # Fallback contour detection using PIL
                 from PIL import ImageDraw
-                
+
                 overlay_image = original_image.copy()
                 draw = ImageDraw.Draw(overlay_image)
-                
+
                 # Simple contour approximation by finding edges of binary regions
                 binary_array = binary_mask
                 height, width = binary_array.shape
-                
+
                 # Simple edge detection for contour approximation
                 for y in range(1, height - 1):
                     for x in range(1, width - 1):
                         if binary_array[y, x] > 0:
                             # Check if this is an edge pixel
                             neighbors = [
-                                binary_array[y-1, x], binary_array[y+1, x],
-                                binary_array[y, x-1], binary_array[y, x+1]
+                                binary_array[y - 1, x],
+                                binary_array[y + 1, x],
+                                binary_array[y, x - 1],
+                                binary_array[y, x + 1],
                             ]
                             if any(n == 0 for n in neighbors):
                                 # This is an edge pixel, draw a small circle
-                                draw.ellipse([x-1, y-1, x+1, y+1], outline=contour_color, width=line_width)
-                
+                                draw.ellipse(
+                                    [x - 1, y - 1, x + 1, y + 1],
+                                    outline=contour_color,
+                                    width=line_width,
+                                )
+
                 return overlay_image
 
         except Exception as e:
