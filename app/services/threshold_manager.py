@@ -174,9 +174,9 @@ class ThresholdManager:
             # Calculate thresholds for multiple confidence levels
             thresholds = {}
             for conf_level in self.config.confidence_levels:
-                thresholds[
-                    f"percentile_{conf_level}"
-                ] = self.calculate_percentile_threshold(scores_array, conf_level)
+                thresholds[f"percentile_{conf_level}"] = (
+                    self.calculate_percentile_threshold(scores_array, conf_level)
+                )
 
             # Always calculate the requested percentile if it's not already in confidence_levels
             primary_threshold_key = f"percentile_{percentile}"

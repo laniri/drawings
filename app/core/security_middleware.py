@@ -38,7 +38,9 @@ class RateLimitRule:
 class SecurityHeaders:
     """Security headers configuration."""
 
-    content_security_policy: str = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    content_security_policy: str = (
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    )
     x_frame_options: str = "DENY"
     x_content_type_options: str = "nosniff"
     x_xss_protection: str = "1; mode=block"
@@ -379,20 +381,20 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """
         # Only add HTTPS headers in production
         if settings.is_production:
-            response.headers[
-                "Strict-Transport-Security"
-            ] = self.security_headers.strict_transport_security
+            response.headers["Strict-Transport-Security"] = (
+                self.security_headers.strict_transport_security
+            )
 
         # Always add these headers
         response.headers["X-Frame-Options"] = self.security_headers.x_frame_options
-        response.headers[
-            "X-Content-Type-Options"
-        ] = self.security_headers.x_content_type_options
+        response.headers["X-Content-Type-Options"] = (
+            self.security_headers.x_content_type_options
+        )
         response.headers["X-XSS-Protection"] = self.security_headers.x_xss_protection
         response.headers["Referrer-Policy"] = self.security_headers.referrer_policy
-        response.headers[
-            "Content-Security-Policy"
-        ] = self.security_headers.content_security_policy
+        response.headers["Content-Security-Policy"] = (
+            self.security_headers.content_security_policy
+        )
 
         # Add custom security headers
         response.headers["X-Powered-By"] = "Drawing Analysis System"

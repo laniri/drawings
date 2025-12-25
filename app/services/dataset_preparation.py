@@ -43,9 +43,9 @@ class DatasetSplit:
     validation_metadata: List[DrawingMetadata]
     test_files: List[Path]
     test_metadata: List[DrawingMetadata]
-    subject_stratification_warnings: List[
-        DataSufficiencyWarning
-    ] = None  # Warnings about age-subject combinations
+    subject_stratification_warnings: List[DataSufficiencyWarning] = (
+        None  # Warnings about age-subject combinations
+    )
 
     @property
     def train_count(self) -> int:

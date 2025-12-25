@@ -354,6 +354,12 @@ When writing tests:
 6. **Clean up**: Fixtures handle cleanup automatically, but clean up any external resources
 7. **Import safety**: Don't import application modules at module level; use fixtures instead
 
+### Recent Test Infrastructure Improvements
+
+**Model Export Compatibility Testing** (December 2025): Enhanced test reliability for model deployment services by fixing directory synchronization between `ModelExporter` and `ModelValidator` services. This improvement eliminates potential test failures due to directory mismatches and ensures consistent validation behavior across all export formats.
+
+For detailed testing documentation, see [docs/testing.md](docs/testing.md).
+
 ## Development Commands
 
 ### Backend

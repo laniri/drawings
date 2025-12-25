@@ -1653,41 +1653,41 @@ class ExplanationGenerator:
         if "age_years" in metadata:
             age = metadata["age_years"]
             if age < 5 and severity in ["high", "medium"]:
-                insights[
-                    "age_consideration"
-                ] = "Young age may contribute to developmental variations."
+                insights["age_consideration"] = (
+                    "Young age may contribute to developmental variations."
+                )
             elif age > 12 and severity == "high":
-                insights[
-                    "age_consideration"
-                ] = "Older age makes significant deviations more noteworthy."
+                insights["age_consideration"] = (
+                    "Older age makes significant deviations more noteworthy."
+                )
 
         # Subject-related insights
         if "subject" in metadata and metadata["subject"]:
             subject = metadata["subject"].lower()
             if "person" in subject or "human" in subject:
-                insights[
-                    "subject_insight"
-                ] = "Human figure drawings can reveal developmental patterns."
+                insights["subject_insight"] = (
+                    "Human figure drawings can reveal developmental patterns."
+                )
             elif "house" in subject:
-                insights[
-                    "subject_insight"
-                ] = "House drawings often reflect spatial understanding."
+                insights["subject_insight"] = (
+                    "House drawings often reflect spatial understanding."
+                )
             elif "tree" in subject:
-                insights[
-                    "subject_insight"
-                ] = "Tree drawings can indicate emotional expression."
+                insights["subject_insight"] = (
+                    "Tree drawings can indicate emotional expression."
+                )
 
         # Expert label insights
         if "expert_label" in metadata and metadata["expert_label"]:
             label = metadata["expert_label"]
             if label == "concern" and severity in ["low", "minimal"]:
-                insights[
-                    "expert_comparison"
-                ] = "AI assessment differs from expert concern - review recommended."
+                insights["expert_comparison"] = (
+                    "AI assessment differs from expert concern - review recommended."
+                )
             elif label == "normal" and severity == "high":
-                insights[
-                    "expert_comparison"
-                ] = "AI detected anomalies in expert-labeled normal drawing."
+                insights["expert_comparison"] = (
+                    "AI detected anomalies in expert-labeled normal drawing."
+                )
 
         return insights
 
@@ -1776,9 +1776,9 @@ class ExplanationGenerator:
                     f"This drawing shows deviations from typical patterns for {age_group} "
                     f"children drawing {subject}, but the specific source is unclear."
                 )
-                explanation[
-                    "secondary_explanation"
-                ] = f"Further analysis may be needed to determine the primary source of the anomaly."
+                explanation["secondary_explanation"] = (
+                    f"Further analysis may be needed to determine the primary source of the anomaly."
+                )
 
             # Add contextual information
             explanation["contextual_notes"] = self._generate_contextual_notes(
@@ -1786,10 +1786,10 @@ class ExplanationGenerator:
             )
 
             # Add recommendations based on attribution
-            explanation[
-                "attribution_recommendations"
-            ] = self._generate_attribution_recommendations(
-                attribution, subject, age_group
+            explanation["attribution_recommendations"] = (
+                self._generate_attribution_recommendations(
+                    attribution, subject, age_group
+                )
             )
 
             return explanation
@@ -3127,29 +3127,29 @@ class InterpretabilityPipeline:
             visualizations = {}
 
             # Create different overlay types
-            visualizations[
-                "heatmap_overlay"
-            ] = self.overlay_generator.create_heatmap_overlay(
-                image, saliency_result["saliency_map"]
+            visualizations["heatmap_overlay"] = (
+                self.overlay_generator.create_heatmap_overlay(
+                    image, saliency_result["saliency_map"]
+                )
             )
 
-            visualizations[
-                "contour_overlay"
-            ] = self.overlay_generator.create_contour_overlay(
-                image, saliency_result["saliency_map"]
+            visualizations["contour_overlay"] = (
+                self.overlay_generator.create_contour_overlay(
+                    image, saliency_result["saliency_map"]
+                )
             )
 
-            visualizations[
-                "side_by_side"
-            ] = self.overlay_generator.create_side_by_side_comparison(
-                image, saliency_result["saliency_map"], overlay_type="heatmap"
+            visualizations["side_by_side"] = (
+                self.overlay_generator.create_side_by_side_comparison(
+                    image, saliency_result["saliency_map"], overlay_type="heatmap"
+                )
             )
 
             # Create highlighted regions
             if bounding_boxes:
-                visualizations[
-                    "highlighted_regions"
-                ] = self.region_detector.create_region_highlights(image, bounding_boxes)
+                visualizations["highlighted_regions"] = (
+                    self.region_detector.create_region_highlights(image, bounding_boxes)
+                )
 
             # Export results if requested
             exported_files = {}
@@ -3157,17 +3157,17 @@ class InterpretabilityPipeline:
                 base_filename = export_options.get("filename", "analysis")
 
                 if export_options.get("export_report", False):
-                    exported_files[
-                        "report"
-                    ] = self.exporter.export_comprehensive_report(
-                        image, saliency_result, explanation, base_filename
+                    exported_files["report"] = (
+                        self.exporter.export_comprehensive_report(
+                            image, saliency_result, explanation, base_filename
+                        )
                     )
 
                 if export_options.get("export_interactive", False):
-                    exported_files[
-                        "interactive_data"
-                    ] = self.exporter.export_interactive_data(
-                        saliency_result, explanation, base_filename
+                    exported_files["interactive_data"] = (
+                        self.exporter.export_interactive_data(
+                            saliency_result, explanation, base_filename
+                        )
                     )
 
                 if export_options.get("export_slides", False):

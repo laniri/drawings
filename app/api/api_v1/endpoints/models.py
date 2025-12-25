@@ -668,9 +668,7 @@ async def analyze_specific_age_group(
                     else (
                         "good"
                         if data_info.data_quality_score > 0.6
-                        else "fair"
-                        if data_info.data_quality_score > 0.4
-                        else "poor"
+                        else "fair" if data_info.data_quality_score > 0.4 else "poor"
                     )
                 ),
             },
