@@ -70,8 +70,18 @@ class TestEnvironmentConfigurationDetection:
         if s3_bucket and (s3_bucket.startswith('-') or s3_bucket.endswith('-') or '--' in s3_bucket):
             assume(False)
         
-        # Set up environment variables
-        env_vars = {}
+        # Set up environment variables, excluding DATABASE_URL to test natural behavior
+        env_vars = {
+            # Keep essential environment variables from current environment
+            "PATH": os.environ.get("PATH", ""),
+            "PYTHONPATH": os.environ.get("PYTHONPATH", ""),
+            "HOME": os.environ.get("HOME", ""),
+            "USER": os.environ.get("USER", ""),
+            # Test-specific variables
+            "SKIP_MODEL_LOADING": "true",
+            "TESTING": "true"
+        }
+        
         if app_environment:
             env_vars[EnvironmentDetector.ENV_VAR_ENVIRONMENT] = app_environment
         if aws_region:
@@ -79,7 +89,9 @@ class TestEnvironmentConfigurationDetection:
         if s3_bucket:
             env_vars[EnvironmentDetector.ENV_VAR_S3_BUCKET] = s3_bucket
         
-        with patch.dict(os.environ, env_vars, clear=False):
+        # Note: Deliberately NOT setting DATABASE_URL to test natural environment detection
+        
+        with patch.dict(os.environ, env_vars, clear=True):
             # Test environment detection
             detected_env = EnvironmentDetector.detect_environment()
             
@@ -100,7 +112,7 @@ class TestEnvironmentConfigurationDetection:
             else:
                 assert storage_backend == StorageBackend.LOCAL
             
-            # Test database URL generation
+            # Test database URL generation (without DATABASE_URL override)
             db_url = EnvironmentDetector.get_database_url(detected_env)
             assert db_url.startswith("sqlite:///")
             if detected_env == EnvironmentType.PRODUCTION:
@@ -198,20 +210,36 @@ class TestEnvironmentConfigurationDetection:
         """
         Test that different environment configurations maintain proper isolation.
         """
-        # Test local environment
-        with patch.dict(os.environ, {EnvironmentDetector.ENV_VAR_ENVIRONMENT: "local"}, clear=False):
+        # Base environment variables needed for tests
+        base_env = {
+            "PATH": os.environ.get("PATH", ""),
+            "PYTHONPATH": os.environ.get("PYTHONPATH", ""),
+            "HOME": os.environ.get("HOME", ""),
+            "USER": os.environ.get("USER", ""),
+            "SKIP_MODEL_LOADING": "true",
+            "TESTING": "true"
+        }
+        
+        # Test local environment (without DATABASE_URL to test natural behavior)
+        local_env = base_env.copy()
+        local_env[EnvironmentDetector.ENV_VAR_ENVIRONMENT] = "local"
+        
+        with patch.dict(os.environ, local_env, clear=True):
             local_config = EnvironmentDetector.create_config()
             
             assert local_config.environment == EnvironmentType.LOCAL
             assert local_config.storage_backend == StorageBackend.LOCAL
             assert "drawings.db" in local_config.database_url
         
-        # Test production environment
-        with patch.dict(os.environ, {
+        # Test production environment (without DATABASE_URL to test natural behavior)
+        prod_env = base_env.copy()
+        prod_env.update({
             EnvironmentDetector.ENV_VAR_ENVIRONMENT: "production",
             EnvironmentDetector.ENV_VAR_S3_BUCKET: "test-production-bucket",
             EnvironmentDetector.ENV_VAR_AWS_REGION: "eu-west-1"
-        }, clear=False):
+        })
+        
+        with patch.dict(os.environ, prod_env, clear=True):
             prod_config = EnvironmentDetector.create_config()
             
             assert prod_config.environment == EnvironmentType.PRODUCTION
