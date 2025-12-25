@@ -246,40 +246,54 @@ class TestMonitoringAndAlertingReliability:
     
     def setup_method(self):
         """Set up test environment."""
-        # Mock CloudWatch and SNS clients
-        self.cloudwatch_patcher = patch('boto3.client')
-        self.mock_boto3 = self.cloudwatch_patcher.start()
-        
-        # Create mock clients
-        self.mock_cloudwatch = MagicMock()
-        self.mock_sns = MagicMock()
-        
-        def mock_client(service_name, **kwargs):
-            if service_name == 'cloudwatch':
-                return self.mock_cloudwatch
-            elif service_name == 'sns':
-                return self.mock_sns
-            else:
-                return MagicMock()
-        
-        self.mock_boto3.side_effect = mock_client
-        
-        # Mock successful AWS responses
-        self.mock_cloudwatch.put_metric_data.return_value = {
-            'ResponseMetadata': {'HTTPStatusCode': 200}
-        }
-        self.mock_sns.publish.return_value = {
-            'ResponseMetadata': {'HTTPStatusCode': 200},
-            'MessageId': 'test-message-id'
-        }
-        
-        # Create temporary log directory
+        # Create temporary log directory first
         self.temp_dir = tempfile.mkdtemp()
         self.log_file = Path(self.temp_dir) / "test_monitoring.log"
         
+        # Only patch boto3 if it's available, otherwise skip AWS mocking
+        try:
+            import boto3
+            # Mock CloudWatch and SNS clients
+            self.cloudwatch_patcher = patch('boto3.client')
+            self.mock_boto3 = self.cloudwatch_patcher.start()
+            
+            # Create mock clients
+            self.mock_cloudwatch = MagicMock()
+            self.mock_sns = MagicMock()
+            
+            def mock_client(service_name, **kwargs):
+                if service_name == 'cloudwatch':
+                    return self.mock_cloudwatch
+                elif service_name == 'sns':
+                    return self.mock_sns
+                else:
+                    return MagicMock()
+            
+            self.mock_boto3.side_effect = mock_client
+            
+            # Mock successful AWS responses
+            self.mock_cloudwatch.put_metric_data.return_value = {
+                'ResponseMetadata': {'HTTPStatusCode': 200}
+            }
+            self.mock_sns.publish.return_value = {
+                'ResponseMetadata': {'HTTPStatusCode': 200},
+                'MessageId': 'test-message-id'
+            }
+            
+            self.has_boto3 = True
+        except ImportError:
+            # boto3 not available, skip AWS mocking
+            self.cloudwatch_patcher = None
+            self.mock_boto3 = None
+            self.mock_cloudwatch = MagicMock()
+            self.mock_sns = MagicMock()
+            self.has_boto3 = False
+        
     def teardown_method(self):
         """Clean up test environment."""
-        self.cloudwatch_patcher.stop()
+        # Only stop patcher if it was started
+        if self.cloudwatch_patcher is not None:
+            self.cloudwatch_patcher.stop()
         
         # Clean up temporary files
         if self.temp_dir and Path(self.temp_dir).exists():
