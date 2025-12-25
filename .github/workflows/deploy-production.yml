@@ -309,7 +309,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    
+      actions:  read    # Required to read GitHub Actions status
+      statuses: read     # Required to view commit/build status
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
