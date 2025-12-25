@@ -13,6 +13,7 @@ import tempfile
 import sqlite3
 import json
 import asyncio
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -26,6 +27,8 @@ from sqlalchemy.orm import sessionmaker
 from app.core.environment import EnvironmentDetector, EnvironmentType, reset_environment_config
 from app.services.backup_service import BackupService
 from app.models.database import Base, Drawing, AgeGroupModel, AnomalyAnalysis
+
+logger = logging.getLogger(__name__)
 
 
 class TestBackupAndRecoveryIntegrity:
@@ -97,10 +100,39 @@ class TestBackupAndRecoveryIntegrity:
             )
             
             session.add(analysis)
+            
+            # CRITICAL FIX: Ensure all data is committed and flushed to disk
             session.commit()
             
         finally:
             session.close()
+            
+        # CRITICAL FIX: Force SQLite to write all data to disk
+        # This ensures the database file contains actual data before backup
+        try:
+            conn = sqlite3.connect(str(db_path))
+            conn.execute("PRAGMA wal_checkpoint(FULL)")  # Flush WAL to main DB
+            conn.execute("PRAGMA synchronous = FULL")    # Ensure data is written to disk
+            conn.commit()
+            conn.close()
+            
+            # Verify data was actually written
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.execute("SELECT COUNT(*) FROM drawings")
+            drawing_count = cursor.fetchone()[0]
+            cursor = conn.execute("SELECT COUNT(*) FROM age_group_models")
+            model_count = cursor.fetchone()[0]
+            cursor = conn.execute("SELECT COUNT(*) FROM anomaly_analyses")
+            analysis_count = cursor.fetchone()[0]
+            conn.close()
+            
+            logger.info(f"Test database created with {drawing_count} drawings, {model_count} models, {analysis_count} analyses")
+            
+            if drawing_count == 0 or model_count == 0 or analysis_count == 0:
+                raise RuntimeError("Test database was not properly populated with data")
+                
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Failed to verify test database creation: {e}")
     
     def _get_database_content(self, db_path: Path) -> Dict[str, List[Dict]]:
         """Extract all data from database for comparison"""
