@@ -103,27 +103,30 @@ class TestDatabaseMigrationService:
                     with patch('app.services.database_migration_service.boto3') as mock_boto3_module:
                         mock_s3_client = MagicMock()
                         mock_boto3_module.client.return_value = mock_s3_client
-                    
-                    service = DatabaseMigrationService()
-                    service._get_migration_info = AsyncMock(return_value={
-                        'current_revision': 'abc123',
-                        'head_revision': 'abc123',
-                        'is_up_to_date': True
-                    })
-                    service._upload_backup_to_s3 = AsyncMock(return_value={
-                        's3_uploaded': True,
-                        's3_bucket': 'test-bucket',
-                        's3_key': 'database-backups/production/test_backup.db',
-                        's3_url': 's3://test-bucket/database-backups/production/test_backup.db'
-                    })
-                    
-                    result = await service.create_automated_backup()
-                    
-                    assert result['backup_name'] == 'test_backup.db'
-                    assert result['status'] == 'completed'
-                    assert result['environment'] == 'production'
-                    assert result['s3_uploaded'] is True
-                    assert result['s3_bucket'] == 'test-bucket'
+                        
+                        service = DatabaseMigrationService()
+                        # Manually set the s3_client since the patching might not work during init
+                        service.s3_client = mock_s3_client
+                        
+                        service._get_migration_info = AsyncMock(return_value={
+                            'current_revision': 'abc123',
+                            'head_revision': 'abc123',
+                            'is_up_to_date': True
+                        })
+                        service._upload_backup_to_s3 = AsyncMock(return_value={
+                            's3_uploaded': True,
+                            's3_bucket': 'test-bucket',
+                            's3_key': 'database-backups/production/test_backup.db',
+                            's3_url': 's3://test-bucket/database-backups/production/test_backup.db'
+                        })
+                        
+                        result = await service.create_automated_backup()
+                        
+                        assert result['backup_name'] == 'test_backup.db'
+                        assert result['status'] == 'completed'
+                        assert result['environment'] == 'production'
+                        assert result['s3_uploaded'] is True
+                        assert result['s3_bucket'] == 'test-bucket'
     
     def test_schema_comparison_identical(self):
         """Test schema comparison with identical schemas"""
