@@ -48,29 +48,31 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
     
-    - name: Free up disk space
-      run: |
-        # Show initial disk usage
-        echo "=== Initial Disk Usage ==="
-        df -h
-        
-        # Remove large directories directly (more reliable than package removal)
-        echo "=== Removing large directories ==="
-        sudo rm -rf /usr/share/dotnet || true
-        sudo rm -rf /usr/local/lib/android || true
-        sudo rm -rf /opt/ghc || true
-        sudo rm -rf /opt/hostedtoolcache/CodeQL || true
-        sudo rm -rf /usr/local/share/powershell || true
-        sudo rm -rf /usr/local/share/chromium || true
-        
-        # Clean up package cache
-        echo "=== Cleaning package cache ==="
-        sudo apt-get autoremove -y || true
-        sudo apt-get autoclean || true
-        
-        # Show final disk usage
-        echo "=== Final Disk Usage ==="
-        df -h
+    # TEMPORARY: Disable disk cleanup to unblock CI pipeline
+    # Issue #32: Disk cleanup step hanging even with simplified approach
+    # - name: Free up disk space
+    #   run: |
+    #     # Show initial disk usage
+    #     echo "=== Initial Disk Usage ==="
+    #     df -h
+    #     
+    #     # Remove large directories directly (more reliable than package removal)
+    #     echo "=== Removing large directories ==="
+    #     sudo rm -rf /usr/share/dotnet || true
+    #     sudo rm -rf /usr/local/lib/android || true
+    #     sudo rm -rf /opt/ghc || true
+    #     sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+    #     sudo rm -rf /usr/local/share/powershell || true
+    #     sudo rm -rf /usr/local/share/chromium || true
+    #     
+    #     # Clean up package cache
+    #     echo "=== Cleaning package cache ==="
+    #     sudo apt-get autoremove -y || true
+    #     sudo apt-get autoclean || true
+    #     
+    #     # Show final disk usage
+    #     echo "=== Final Disk Usage ==="
+    #     df -h
     
     - name: Install dependencies
       run: |
