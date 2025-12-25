@@ -634,17 +634,22 @@ Returns:
 
 ### create_contour_overlay
 
-Create contour overlay showing important region boundaries.
+Create contour overlay showing important region boundaries with enhanced fallback support.
 
 Args:
     original_image: Original drawing image
     saliency_map: 2D saliency map
     threshold: Threshold for contour detection
-    contour_color: RGB color for contour lines
+    contour_color: RGB color for contours
     line_width: Width of contour lines
     
 Returns:
     PIL Image with contour overlay
+
+Implementation Notes:
+    - Supports both OpenCV and PIL-based contour detection
+    - Automatic fallback ensures consistent functionality across environments
+    - Visual output remains consistent regardless of backend implementation
 
 **Signature**: `create_contour_overlay(original_image: Union[<ast.Attribute object at 0x110772390>, <ast.Attribute object at 0x110772490>], saliency_map: np.ndarray, threshold: float, contour_color: Tuple[int, int, int], line_width: int) -> Image.Image`
 

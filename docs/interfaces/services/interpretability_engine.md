@@ -240,7 +240,7 @@ Returns:
 
 ### create_contour_overlay
 
-Create contour overlay showing important regions.
+Create contour overlay showing important regions with automatic OpenCV/PIL detection.
 
 Args:
     original_image: Original drawing image
@@ -251,6 +251,11 @@ Args:
     
 Returns:
     PIL Image with contour overlay
+    
+Implementation:
+    - Uses OpenCV contour detection when available for precise boundaries
+    - Falls back to PIL-based edge pixel detection for contour approximation
+    - Maintains visual consistency between both implementations
 
 **Signature**: `create_contour_overlay(original_image, saliency_map, threshold, contour_color, line_width)`
 

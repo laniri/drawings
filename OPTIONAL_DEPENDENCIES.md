@@ -59,6 +59,12 @@ except ImportError:
 - `_safe_rgb_to_gray()` - Safe grayscale conversion with fallback
 - `_safe_edge_detection()` - Safe edge detection with fallback
 
+**Enhanced Contour Detection Fallback:**
+- `create_contour_overlay()` - Now includes comprehensive PIL fallback for contour detection
+- Automatic detection of OpenCV availability with graceful degradation
+- PIL-based edge pixel detection for contour approximation when OpenCV unavailable
+- Maintains visual consistency between OpenCV and PIL implementations
+
 **AWS Service Fallbacks:**
 - Cost optimization service works without AWS clients for local development
 - Database migration service works without AWS S3 backup
@@ -99,10 +105,10 @@ pip install -e .[enhanced]
 ```
 
 **Additional Features:**
-- Advanced contour detection
+- Advanced contour detection with precise boundary algorithms
 - High-quality image resizing (cubic interpolation)
 - Canny edge detection for complexity analysis
-- Enhanced saliency map overlays
+- Enhanced saliency map overlays with accurate contour drawing
 - PDF report generation (ReportLab)
 
 ## Functionality Comparison
@@ -112,7 +118,7 @@ pip install -e .[enhanced]
 | Image Resizing | PIL Lanczos | OpenCV Cubic | ✓ | ✓ |
 | Grayscale Conversion | NumPy weights | OpenCV optimized | ✓ | ✓ |
 | Edge Detection | Simple gradients | Canny algorithm | ✓ | ✓ |
-| Contour Detection | Basic regions | Precise contours | ✓ | ✓ |
+| Contour Detection | PIL edge approximation | Precise OpenCV contours | ✓ | ✓ |
 | Saliency Maps | PIL-based | OpenCV overlays | ✓ | ✓ |
 | Database Backups | Local only | Local + S3 | ✓ | ✓ |
 | Cost Optimization | Local only | AWS integration | ✓ | ✓ |
@@ -189,13 +195,15 @@ sudo apt-get install -y libglib2.0-0
 ### Performance Differences
 - PIL fallbacks may be slightly slower for large images
 - Edge detection may be less precise without Canny algorithm
-- Contour detection uses simplified region analysis
+- Contour detection uses PIL-based edge pixel approximation instead of OpenCV's precise contour algorithms
+- Visual results remain consistent between OpenCV and PIL implementations
 
 ### Feature Limitations
-- Without OpenCV: Basic saliency overlays
+- Without OpenCV: PIL-based saliency overlays with edge pixel approximation for contours
 - Without ReportLab: No PDF exports (other formats available)
 - Without AWS: No S3 backups, CloudWatch monitoring, or SNS alerts
 - All core ML functionality remains unchanged regardless of optional dependencies
+- Contour detection maintains visual consistency across both OpenCV and PIL implementations
 
 ## Future Considerations
 

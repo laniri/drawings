@@ -5,10 +5,10 @@
 
 ## Overview
 
-Generates overlay visualizations combining original images with saliency maps.
+Generates overlay visualizations combining original images with saliency maps with robust OpenCV fallback support.
 
 This class provides methods to create various types of visual overlays
-that highlight important regions identified by the interpretability engine.
+that highlight important regions identified by the interpretability engine. The implementation includes comprehensive fallback mechanisms for OpenCV functionality, automatically using PIL-based alternatives when OpenCV is not available.
 
 ## Computational Complexity Analysis
 
@@ -84,6 +84,17 @@ The following edge cases should be tested:
 
 ## Implementation Details
 
+### OpenCV Fallback Mechanisms
+
+The interpretability engine includes comprehensive fallback support for OpenCV functionality:
+
+- **Image Resizing**: Falls back to PIL Lanczos interpolation when OpenCV cubic interpolation is unavailable
+- **Grayscale Conversion**: Uses NumPy-based RGB to grayscale conversion with standard weights (0.299, 0.587, 0.114)
+- **Edge Detection**: Implements gradient-based edge detection using Sobel-like kernels when Canny edge detection is unavailable
+- **Complexity Calculation**: Automatically detects OpenCV availability and uses appropriate grayscale conversion method
+
+All fallback implementations maintain functional compatibility while providing graceful degradation when OpenCV is not available.
+
 ### Methods
 
 #### `create_heatmap_overlay`
@@ -110,7 +121,7 @@ Returns:
 
 #### `create_contour_overlay`
 
-Create contour overlay showing important region boundaries.
+Create contour overlay showing important region boundaries with automatic OpenCV/PIL detection.
 
 Args:
     original_image: Original drawing image
@@ -121,6 +132,12 @@ Args:
     
 Returns:
     PIL Image with contour overlay
+
+Implementation Details:
+    - Automatically detects OpenCV availability using HAS_OPENCV flag
+    - OpenCV path: Uses cv2.findContours() for precise boundary detection
+    - PIL fallback: Implements edge pixel scanning for contour approximation
+    - Both implementations maintain visual consistency and proper overlay generation
 
 **Parameters:**
 - `self` (Any)

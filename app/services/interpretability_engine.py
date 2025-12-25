@@ -827,9 +827,12 @@ class SaliencyMapGenerator:
 
             # Resize saliency map to match image size
             image_size = original_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize saliency map
             if saliency_resized.max() > 0:
@@ -935,9 +938,12 @@ class SaliencyMapGenerator:
 
             # Resize saliency map to match image size
             image_size = original_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize saliency map
             if saliency_resized.max() > 0:
@@ -1175,7 +1181,10 @@ class VisualFeatureIdentifier:
         """Analyze basic properties of the image."""
         # Convert to grayscale for analysis
         if len(image.shape) == 3:
-            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            if HAS_OPENCV and cv2 is not None:
+                gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = _rgb_to_grayscale(image)
         else:
             gray = image
 
@@ -1189,13 +1198,31 @@ class VisualFeatureIdentifier:
 
     def _calculate_edge_density(self, gray_image: np.ndarray) -> float:
         """Calculate edge density in the image."""
-        edges = cv2.Canny(gray_image, 50, 150)
-        return float(np.sum(edges > 0) / edges.size)
+        if HAS_OPENCV and cv2 is not None:
+            edges = cv2.Canny(gray_image, 50, 150)
+            return float(np.sum(edges > 0) / edges.size)
+        else:
+            # Fallback edge detection using PIL/numpy
+            # Simple gradient-based edge detection
+            from PIL import Image, ImageFilter
+            
+            # Convert numpy array to PIL Image
+            if gray_image.dtype != np.uint8:
+                gray_image = (gray_image * 255).astype(np.uint8)
+            
+            pil_image = Image.fromarray(gray_image, mode='L')
+            
+            # Apply edge detection filter
+            edges = pil_image.filter(ImageFilter.FIND_EDGES)
+            edges_array = np.array(edges)
+            
+            # Calculate edge density
+            return float(np.sum(edges_array > 50) / edges_array.size)
 
     def _calculate_complexity(self, image: np.ndarray) -> float:
         """Calculate overall drawing complexity."""
         if len(image.shape) == 3:
-            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            gray = convert_to_grayscale(image)
         else:
             gray = image
 
@@ -1239,7 +1266,10 @@ class VisualFeatureIdentifier:
     def _analyze_shape_characteristics(self, region_image: np.ndarray) -> Dict:
         """Analyze shape characteristics of a region."""
         if len(region_image.shape) == 3:
-            gray = cv2.cvtColor(region_image, cv2.COLOR_RGB2GRAY)
+            if HAS_OPENCV and cv2 is not None:
+                gray = cv2.cvtColor(region_image, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = _rgb_to_grayscale(region_image)
         else:
             gray = region_image
 
@@ -2231,9 +2261,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = pil_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize saliency map
             if saliency_resized.max() > 0:
@@ -2297,9 +2330,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = pil_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize and threshold
             if saliency_resized.max() > 0:
@@ -2310,22 +2346,50 @@ class SaliencyOverlayGenerator:
             # Create binary mask
             binary_mask = (saliency_normalized > threshold).astype(np.uint8) * 255
 
-            # Find contours
-            contours, _ = cv2.findContours(
-                binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-            )
+            if HAS_OPENCV and cv2 is not None:
+                # Find contours using OpenCV
+                contours, _ = cv2.findContours(
+                    binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                )
 
-            # Convert PIL to OpenCV format for drawing
-            image_cv = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+                # Convert PIL to OpenCV format for drawing
+                image_cv = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
-            # Draw contours
-            cv2.drawContours(
-                image_cv, contours, -1, contour_color[::-1], line_width
-            )  # BGR format
+                # Draw contours
+                cv2.drawContours(
+                    image_cv, contours, -1, contour_color[::-1], line_width
+                )  # BGR format
 
-            # Convert back to PIL
-            image_rgb = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
-            overlay_image = Image.fromarray(image_rgb)
+                # Convert back to PIL
+                image_rgb = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+                overlay_image = Image.fromarray(image_rgb)
+            else:
+                # Fallback contour detection using PIL
+                from PIL import ImageDraw
+                
+                overlay_image = pil_image.copy()
+                draw = ImageDraw.Draw(overlay_image)
+                
+                # Simple contour approximation by finding edges of binary regions
+                # This is a simplified approach compared to OpenCV's contour detection
+                binary_pil = Image.fromarray(binary_mask, mode='L')
+                
+                # Find approximate contours by scanning for edge pixels
+                binary_array = np.array(binary_pil)
+                height, width = binary_array.shape
+                
+                # Simple edge detection for contour approximation
+                for y in range(1, height - 1):
+                    for x in range(1, width - 1):
+                        if binary_array[y, x] > 0:
+                            # Check if this is an edge pixel
+                            neighbors = [
+                                binary_array[y-1, x], binary_array[y+1, x],
+                                binary_array[y, x-1], binary_array[y, x+1]
+                            ]
+                            if any(n == 0 for n in neighbors):
+                                # This is an edge pixel, draw a small circle
+                                draw.ellipse([x-1, y-1, x+1, y+1], outline=contour_color, width=line_width)
 
             return overlay_image
 
@@ -2369,9 +2433,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = pil_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize saliency map
             if saliency_resized.max() > 0:
@@ -3129,13 +3196,35 @@ class InterpretabilityPipeline:
 
     def _calculate_edge_density(self, gray_image: np.ndarray) -> float:
         """Calculate edge density in the image."""
-        edges = cv2.Canny(gray_image, 50, 150)
-        return float(np.sum(edges > 0) / edges.size)
+        if HAS_OPENCV and cv2 is not None:
+            edges = cv2.Canny(gray_image, 50, 150)
+            return float(np.sum(edges > 0) / edges.size)
+        else:
+            # Fallback edge detection using PIL/numpy
+            # Simple gradient-based edge detection
+            from PIL import Image, ImageFilter
+            
+            # Convert numpy array to PIL Image
+            if gray_image.dtype != np.uint8:
+                gray_image = (gray_image * 255).astype(np.uint8)
+            
+            pil_image = Image.fromarray(gray_image, mode='L')
+            
+            # Apply edge detection filter
+            edges = pil_image.filter(ImageFilter.FIND_EDGES)
+            edges_array = np.array(edges)
+            
+            # Calculate edge density
+            return float(np.sum(edges_array > 50) / edges_array.size)
 
     def _calculate_complexity(self, image: np.ndarray) -> float:
         """Calculate overall drawing complexity."""
         if len(image.shape) == 3:
-            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            if HAS_OPENCV and cv2 is not None:
+                gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            else:
+                # Convert RGB to grayscale using PIL fallback
+                gray = _rgb_to_grayscale(image)
         else:
             gray = image
 
@@ -3214,9 +3303,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = original_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize saliency map
             if saliency_resized.max() > 0:
@@ -3275,9 +3367,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = original_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize and threshold
             if saliency_resized.max() > 0:
@@ -3287,18 +3382,44 @@ class SaliencyOverlayGenerator:
 
             binary_mask = (saliency_normalized > threshold).astype(np.uint8) * 255
 
-            # Find contours
-            contours, _ = cv2.findContours(
-                binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-            )
+            if HAS_OPENCV and cv2 is not None:
+                # Find contours using OpenCV
+                contours, _ = cv2.findContours(
+                    binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                )
 
-            # Draw contours on image
-            image_with_contours = np.array(original_image)
-            cv2.drawContours(
-                image_with_contours, contours, -1, contour_color, line_width
-            )
+                # Draw contours on image
+                image_with_contours = np.array(original_image)
+                cv2.drawContours(
+                    image_with_contours, contours, -1, contour_color, line_width
+                )
 
-            return Image.fromarray(image_with_contours)
+                return Image.fromarray(image_with_contours)
+            else:
+                # Fallback contour detection using PIL
+                from PIL import ImageDraw
+                
+                overlay_image = original_image.copy()
+                draw = ImageDraw.Draw(overlay_image)
+                
+                # Simple contour approximation by finding edges of binary regions
+                binary_array = binary_mask
+                height, width = binary_array.shape
+                
+                # Simple edge detection for contour approximation
+                for y in range(1, height - 1):
+                    for x in range(1, width - 1):
+                        if binary_array[y, x] > 0:
+                            # Check if this is an edge pixel
+                            neighbors = [
+                                binary_array[y-1, x], binary_array[y+1, x],
+                                binary_array[y, x-1], binary_array[y, x+1]
+                            ]
+                            if any(n == 0 for n in neighbors):
+                                # This is an edge pixel, draw a small circle
+                                draw.ellipse([x-1, y-1, x+1, y+1], outline=contour_color, width=line_width)
+                
+                return overlay_image
 
         except Exception as e:
             logger.error(f"Failed to create contour overlay: {str(e)}")
@@ -3338,9 +3459,12 @@ class SaliencyOverlayGenerator:
 
             # Resize saliency map to match image size
             image_size = original_image.size  # (W, H)
-            saliency_resized = cv2.resize(
-                saliency_map, image_size, interpolation=cv2.INTER_CUBIC
-            )
+            if HAS_OPENCV and cv2 is not None:
+                saliency_resized = cv2.resize(
+                    saliency_map, image_size, interpolation=cv2.INTER_CUBIC
+                )
+            else:
+                saliency_resized = _resize_with_pil(saliency_map, image_size)
 
             # Normalize and create mask
             if saliency_resized.max() > 0:

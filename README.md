@@ -473,16 +473,16 @@ pip install -r requirements-enhanced.txt
 ```
 
 **Benefits of OpenCV:**
-- Advanced contour detection for region analysis
+- Advanced contour detection with precise boundary algorithms
 - High-quality image resizing with cubic interpolation
 - Canny edge detection for drawing complexity analysis
-- Enhanced saliency map overlays with precise contour drawing
+- Enhanced saliency map overlays with accurate contour drawing
 
 **Fallback without OpenCV:**
 - PIL-based image resizing (Lanczos interpolation)
 - Simple gradient-based edge detection
-- Basic saliency map generation
-- All core functionality remains available
+- PIL-based contour approximation using edge pixel detection
+- All core functionality remains available with consistent visual results
 
 ### PDF Generation (ReportLab)
 ```bash
