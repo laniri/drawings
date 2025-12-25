@@ -464,8 +464,9 @@ class ModelExporter:
 class ModelValidator:
     """Service for validating model compatibility and integrity."""
 
-    def __init__(self):
+    def __init__(self, export_dir: Optional[Path] = None):
         self.compatibility_version = "1.0"
+        self.export_dir = export_dir or Path("exports/models")
         logger.info("Model Validator initialized")
 
     def validate_exported_model(
@@ -496,9 +497,7 @@ class ModelValidator:
             }
 
             # Check file existence and integrity
-            model_file = Path(
-                f"exports/models/{export_metadata.model_id}.{export_metadata.export_format}"
-            )
+            model_file = self.export_dir / f"{export_metadata.model_id}.{export_metadata.export_format}"
             if not model_file.exists():
                 validation_result["errors"].append(
                     f"Model file not found: {model_file}"
@@ -723,7 +722,7 @@ class ModelDeploymentService:
         self.backup_dir.mkdir(parents=True, exist_ok=True)
 
         self.exporter = ModelExporter()
-        self.validator = ModelValidator()
+        self.validator = ModelValidator(export_dir=self.exporter.export_dir)
 
         logger.info("Model Deployment Service initialized")
 
@@ -979,11 +978,11 @@ def get_model_exporter() -> ModelExporter:
     return _model_exporter
 
 
-def get_model_validator() -> ModelValidator:
+def get_model_validator(export_dir: Optional[Path] = None) -> ModelValidator:
     """Get the global model validator instance."""
     global _model_validator
-    if _model_validator is None:
-        _model_validator = ModelValidator()
+    if _model_validator is None or export_dir is not None:
+        _model_validator = ModelValidator(export_dir)
     return _model_validator
 
 

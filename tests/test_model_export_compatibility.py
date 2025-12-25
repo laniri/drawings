@@ -247,13 +247,14 @@ def test_model_validation_after_export(architecture, age_group, export_format):
     
     # Initialize services
     exporter = ModelExporter()
-    validator = ModelValidator()
+    validator = ModelValidator(export_dir=exporter.export_dir)
     
     with tempfile.TemporaryDirectory() as temp_dir:
         # Override export directory
         original_export_dir = exporter.export_dir
         exporter.export_dir = Path(temp_dir) / "exports"
         exporter.export_dir.mkdir(parents=True, exist_ok=True)
+        validator.export_dir = exporter.export_dir
         
         try:
             # Export model
@@ -336,7 +337,7 @@ def test_export_format_consistency(architecture, age_group):
             assert pytorch_metadata.model_type == pickle_metadata.model_type
             
             # Both exports should be valid
-            validator = ModelValidator()
+            validator = ModelValidator(export_dir=exporter.export_dir)
             
             pytorch_validation = validator.validate_exported_model(pytorch_metadata)
             pickle_validation = validator.validate_exported_model(pickle_metadata)
