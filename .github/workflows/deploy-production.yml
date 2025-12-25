@@ -54,29 +54,19 @@ jobs:
         echo "=== Initial Disk Usage ==="
         df -h
         
-        # Remove unnecessary packages to free up space (ignore errors for missing packages)
-        echo "=== Removing unnecessary packages ==="
-        sudo apt-get remove -y --ignore-missing \
-          '^dotnet-.*' \
-          '^llvm-.*' \
-          'php.*' \
-          '^mongodb-.*' \
-          azure-cli \
-          google-cloud-cli \
-          google-chrome-stable \
-          firefox \
-          powershell \
-          mono-devel || true
-        
-        # Clean up package cache
-        sudo apt-get autoremove -y
-        sudo apt-get autoclean
-        
-        # Remove some large directories if they exist
+        # Remove large directories directly (more reliable than package removal)
+        echo "=== Removing large directories ==="
         sudo rm -rf /usr/share/dotnet || true
         sudo rm -rf /usr/local/lib/android || true
         sudo rm -rf /opt/ghc || true
         sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+        sudo rm -rf /usr/local/share/powershell || true
+        sudo rm -rf /usr/local/share/chromium || true
+        
+        # Clean up package cache
+        echo "=== Cleaning package cache ==="
+        sudo apt-get autoremove -y || true
+        sudo apt-get autoclean || true
         
         # Show final disk usage
         echo "=== Final Disk Usage ==="
