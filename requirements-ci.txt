@@ -49,3 +49,7 @@ omegaconf==2.3.0
 
 # Protobuf version fix for TensorFlow compatibility
 protobuf==3.20.3
+
+# AWS SDK for monitoring tests (optional in production, required for CI tests)
+boto3==1.35.0
+botocore==1.35.0
