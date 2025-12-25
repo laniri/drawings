@@ -343,6 +343,9 @@ class VisionTransformerWrapper:
         self._model_hash = None
         self._cache_dir = Path("static/models")
         self._cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Check if model loading should be skipped (for testing)
+        self._skip_model_loading = os.getenv("SKIP_MODEL_LOADING", "false").lower() == "true"
 
     def _get_model_hash(self) -> str:
         """Generate a hash for the model configuration."""
@@ -355,6 +358,14 @@ class VisionTransformerWrapper:
 
     def load_model(self, use_cache: bool = True) -> None:
         """Load the Vision Transformer model with optional caching."""
+        # Skip model loading in test environment
+        if os.getenv("SKIP_MODEL_LOADING", "false").lower() == "true":
+            logger.info("Skipping model loading (SKIP_MODEL_LOADING=true)")
+            # Create mock objects for testing
+            self.model = None
+            self.processor = None
+            return
+            
         try:
             self._model_hash = self._get_model_hash()
             cache_path = self._get_cache_path()

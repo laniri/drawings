@@ -15,7 +15,7 @@ import sys
 import json
 import tempfile
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from hypothesis import given, strategies as st, settings, assume
 from unittest.mock import Mock, patch, MagicMock
 import pytest

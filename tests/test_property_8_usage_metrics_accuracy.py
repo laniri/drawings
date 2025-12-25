@@ -7,7 +7,7 @@ Property-based test for usage metrics accuracy.
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hypothesis import given, strategies as st, settings
 from app.services.usage_metrics_service import UsageMetricsService
 

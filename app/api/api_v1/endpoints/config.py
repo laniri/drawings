@@ -247,7 +247,7 @@ async def health_check(db: Session = Depends(get_db)):
     """
     try:
         import os
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         # Check database connectivity
         try:
@@ -299,7 +299,7 @@ async def health_check(db: Session = Depends(get_db)):
 
         return HealthCheckResponse(
             status=overall_status,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             version="1.0.0",  # Would come from app metadata
             database=database_status,
             models=models_status,

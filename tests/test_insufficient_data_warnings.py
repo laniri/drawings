@@ -8,7 +8,7 @@ Property-based tests for insufficient data warning generation.
 import pytest
 import tempfile
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from hypothesis import given, strategies as st, settings, assume
 from typing import Dict, List, Any, Tuple
 import numpy as np
@@ -100,7 +100,7 @@ def populate_database_with_drawings(db, drawing_data: Dict):
             file_path=f"/test/path/test_drawing_{i}.png",
             age_years=age,
             subject=subject,
-            upload_timestamp=datetime.utcnow()
+            upload_timestamp=datetime.now(timezone.utc)
         )
         db.add(drawing)
     
@@ -233,7 +233,7 @@ def test_age_group_merging_suggestions(groups_data):
                 file_path=f"/test/path/test_drawing_{i}.png",
                 age_years=age,
                 subject=subject,
-                upload_timestamp=datetime.utcnow()
+                upload_timestamp=datetime.now(timezone.utc)
             )
             db.add(drawing)
         
@@ -309,7 +309,7 @@ def test_data_quality_score_calculation(sample_count, age_range):
                 file_path=f"/test/path/test_drawing_{i}.png",
                 age_years=age,
                 subject=subject,
-                upload_timestamp=datetime.utcnow()
+                upload_timestamp=datetime.now(timezone.utc)
             )
             db.add(drawing)
         
@@ -398,7 +398,7 @@ def test_warning_severity_consistency(data):
                     file_path=f"/test/path/test_drawing_{drawing_id}.png",
                     age_years=age,
                     subject="person",
-                    upload_timestamp=datetime.utcnow()
+                    upload_timestamp=datetime.now(timezone.utc)
                 )
                 db.add(drawing)
                 drawing_id += 1
@@ -558,7 +558,7 @@ def test_merging_suggestion_improvement_scores():
                 file_path=f"/test/drawing_1_{i}.png",
                 age_years=5.0 + i * 0.04,  # Ages 5.0-6.0
                 subject="person",
-                upload_timestamp=datetime.utcnow()
+                upload_timestamp=datetime.now(timezone.utc)
             )
             db.add(drawing)
         
@@ -568,7 +568,7 @@ def test_merging_suggestion_improvement_scores():
                 file_path=f"/test/drawing_2_{i}.png",
                 age_years=6.0 + i * 0.033,  # Ages 6.0-7.0
                 subject="house",
-                upload_timestamp=datetime.utcnow()
+                upload_timestamp=datetime.now(timezone.utc)
             )
             db.add(drawing)
         

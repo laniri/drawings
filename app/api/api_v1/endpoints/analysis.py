@@ -4,7 +4,7 @@ Analysis operation API endpoints.
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -206,7 +206,7 @@ class BatchAnalysisTracker:
             "status": "processing",
             "results": [],
             "errors": [],
-            "started_at": datetime.utcnow(),
+            "started_at": datetime.now(timezone.utc),
             "completed_at": None,
         }
 
@@ -1086,7 +1086,7 @@ async def process_batch_analysis(
                 error_info = {
                     "drawing_id": drawing_id,
                     "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 batch_tracker.add_error(batch_id, error_info)
                 logger.error(
@@ -1095,7 +1095,7 @@ async def process_batch_analysis(
 
         # Mark batch as completed
         batch_tracker.update_batch(
-            batch_id, status="completed", completed_at=datetime.utcnow()
+            batch_id, status="completed", completed_at=datetime.now(timezone.utc)
         )
 
         batch_info = batch_tracker.get_batch(batch_id)
@@ -1106,7 +1106,7 @@ async def process_batch_analysis(
 
     except Exception as e:
         batch_tracker.update_batch(
-            batch_id, status=f"failed: {str(e)}", completed_at=datetime.utcnow()
+            batch_id, status=f"failed: {str(e)}", completed_at=datetime.now(timezone.utc)
         )
         logger.error(f"Batch analysis {batch_id} failed: {str(e)}")
 

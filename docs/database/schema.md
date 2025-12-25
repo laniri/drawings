@@ -22,7 +22,7 @@ This document describes the database schema for the Children's Drawing Anomaly D
 | expert_label | VARCHAR | Yes | None | Expert assessment: "normal", "concern", "severe" |
 | drawing_tool | VARCHAR | Yes | None | Tool used for drawing (optional) |
 | prompt | TEXT | Yes | None | Drawing prompt or instructions (optional) |
-| upload_timestamp | DATETIME | Yes | datetime.utcnow | Timestamp of drawing upload |
+| upload_timestamp | DATETIME | Yes | utc_now | Timestamp of drawing upload |
 
 ### Subject Categories
 
@@ -56,7 +56,7 @@ The `subject` field supports 64 predefined categories:
 | visual_component | BLOB | Yes | None | **NEW**: 768-dimensional visual features (ViT) |
 | subject_component | BLOB | Yes | None | **NEW**: 64-dimensional subject encoding (one-hot) |
 | vector_dimension | INTEGER | No | 832 | **NEW**: Fixed at 832 dimensions for hybrid embeddings |
-| created_timestamp | DATETIME | Yes | datetime.utcnow | Timestamp of embedding generation |
+| created_timestamp | DATETIME | Yes | utc_now | Timestamp of embedding generation |
 
 ### Hybrid Embedding Structure
 
@@ -85,7 +85,7 @@ The `subject` field supports 64 predefined categories:
 | parameters | TEXT | No | None | **UPDATED**: Model hyperparameters (832-dim input) |
 | sample_count | INTEGER | No | None | Number of training samples used |
 | threshold | FLOAT | No | None | **UPDATED**: Subject-aware anomaly threshold |
-| created_timestamp | DATETIME | Yes | datetime.utcnow | Model creation timestamp |
+| created_timestamp | DATETIME | Yes | utc_now | Model creation timestamp |
 | is_active | BOOLEAN | Yes | True | Whether model is currently active |
 
 ### Subject-Aware Model Architecture
@@ -128,7 +128,7 @@ The `subject` field supports 64 predefined categories:
 | is_anomaly | BOOLEAN | No | None | Anomaly classification based on threshold |
 | confidence | FLOAT | No | None | **UPDATED**: Subject-aware confidence score |
 | subject_category | VARCHAR | Yes | None | **NEW**: Subject category for analysis context |
-| analysis_timestamp | DATETIME | Yes | datetime.utcnow | Timestamp of analysis completion |
+| analysis_timestamp | DATETIME | Yes | utc_now | Timestamp of analysis completion |
 
 ### Subject-Aware Analysis
 
@@ -158,7 +158,7 @@ The `subject` field supports 64 predefined categories:
 | importance_regions | TEXT | Yes | None | JSON data for interactive regions |
 | subject_comparisons | TEXT | Yes | None | **NEW**: Subject-specific comparison data |
 | confidence_breakdown | TEXT | Yes | None | **NEW**: Subject-aware confidence metrics |
-| created_timestamp | DATETIME | Yes | datetime.utcnow | Interpretability generation timestamp |
+| created_timestamp | DATETIME | Yes | utc_now | Interpretability generation timestamp |
 
 ### Subject-Aware Interpretability Features
 
@@ -214,7 +214,7 @@ The `subject` field supports 64 predefined categories:
 | model_parameters_path | VARCHAR | No | None | Path to saved model parameters |
 | metrics_summary | TEXT | No | None | **UPDATED**: Subject-stratified metrics summary |
 | report_file_path | VARCHAR | No | None | Path to detailed training report |
-| created_timestamp | DATETIME | Yes | datetime.utcnow | Report generation timestamp |
+| created_timestamp | DATETIME | Yes | utc_now | Report generation timestamp |
 
 ### Subject-Aware Training Metrics
 

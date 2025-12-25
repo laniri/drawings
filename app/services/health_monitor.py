@@ -7,7 +7,7 @@ import logging
 import os
 import sqlite3
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -81,7 +81,7 @@ class HealthMonitor:
                     status="critical",
                     message=f"Health check error: {str(result)}",
                     details={"error_type": type(result).__name__},
-                    last_check=datetime.utcnow(),
+                    last_check=datetime.now(timezone.utc),
                 )
             elif isinstance(result, HealthStatus):
                 self.health_checks[result.name] = result
@@ -90,7 +90,7 @@ class HealthMonitor:
 
     async def _check_database(self) -> HealthStatus:
         """Check database connectivity and health."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Test database connection
@@ -115,7 +115,7 @@ class HealthMonitor:
 
             conn.close()
 
-            response_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            response_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
             status = "healthy"
             message = "Database is accessible"
@@ -148,7 +148,7 @@ class HealthMonitor:
 
     async def _check_file_storage(self) -> HealthStatus:
         """Check file storage accessibility and space."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             upload_dir = Path(settings.UPLOAD_DIR)
@@ -215,7 +215,7 @@ class HealthMonitor:
 
     async def _check_system_resources(self) -> HealthStatus:
         """Check system resource usage."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Get system metrics
@@ -291,7 +291,7 @@ class HealthMonitor:
 
     async def _check_ml_models(self) -> HealthStatus:
         """Check ML model availability and status."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Check if required ML libraries are available
@@ -349,7 +349,7 @@ class HealthMonitor:
 
     async def _check_api_endpoints(self) -> HealthStatus:
         """Check API endpoint responsiveness."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # This is a basic check - in a real implementation you might
@@ -388,7 +388,7 @@ class HealthMonitor:
 
     def get_metrics_history(self, hours: int = 1) -> List[Dict[str, Any]]:
         """Get metrics history for the specified number of hours."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
 
         recent_metrics = [
             asdict(m) for m in self.metrics_history if m.timestamp >= cutoff_time

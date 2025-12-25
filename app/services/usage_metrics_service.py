@@ -11,7 +11,7 @@ import threading
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 # Optional AWS dependencies
@@ -101,7 +101,7 @@ class UsageMetricsService:
 
         # CloudWatch client
         self._cloudwatch_client = None
-        self._start_time = datetime.utcnow()
+        self._start_time = datetime.now(timezone.utc)
 
         # Initialize service
         self._initialize()
@@ -141,7 +141,7 @@ class UsageMetricsService:
             user_session_id: Optional session ID for user tracking
         """
         with self._lock:
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(timezone.utc)
 
             # Create analysis metric
             metric = AnalysisMetric(
@@ -211,8 +211,8 @@ class UsageMetricsService:
         with self._lock:
             session = SessionMetric(
                 session_id=session_id,
-                start_time=datetime.utcnow(),
-                last_activity=datetime.utcnow(),
+                start_time=datetime.now(timezone.utc),
+                last_activity=datetime.now(timezone.utc),
                 ip_address=ip_address,
                 user_agent=user_agent,
                 geographic_info=geographic_info,
@@ -231,7 +231,7 @@ class UsageMetricsService:
         with self._lock:
             if session_id in self._session_metrics:
                 session = self._session_metrics[session_id]
-                session.last_activity = datetime.utcnow()
+                session.last_activity = datetime.now(timezone.utc)
                 session.page_views += 1
                 logger.debug(f"Updated session activity: {session_id}")
 
@@ -245,7 +245,7 @@ class UsageMetricsService:
         with self._lock:
             if session_id in self._session_metrics:
                 session = self._session_metrics[session_id]
-                duration = (datetime.utcnow() - session.start_time).total_seconds()
+                duration = (datetime.now(timezone.utc) - session.start_time).total_seconds()
 
                 # Send session metrics to CloudWatch
                 self._send_cloudwatch_metrics(
@@ -284,10 +284,10 @@ class UsageMetricsService:
             response_time: Average response time in seconds
         """
         with self._lock:
-            uptime_seconds = int((datetime.utcnow() - self._start_time).total_seconds())
+            uptime_seconds = int((datetime.now(timezone.utc) - self._start_time).total_seconds())
 
             metric = SystemHealthMetric(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
                 error_count=error_count,
@@ -328,7 +328,7 @@ class UsageMetricsService:
             Dictionary containing dashboard statistics
         """
         with self._lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
 
             # Calculate total analyses
             total_analyses = len(self._analysis_metrics)
@@ -556,7 +556,7 @@ class UsageMetricsService:
             # Add timestamp to all metrics
             for metric in metrics:
                 if "Timestamp" not in metric:
-                    metric["Timestamp"] = datetime.utcnow()
+                    metric["Timestamp"] = datetime.now(timezone.utc)
 
             # Send metrics to CloudWatch
             response = self._cloudwatch_client.put_metric_data(
@@ -581,7 +581,7 @@ class UsageMetricsService:
             days_to_keep: Number of days of metrics to keep in memory
         """
         with self._lock:
-            cutoff_date = datetime.utcnow() - timedelta(days=days_to_keep)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
 
             # Clean analysis metrics
             original_count = len(self._analysis_metrics)
@@ -624,7 +624,7 @@ class UsageMetricsService:
                 "daily_stats_count": len(self._daily_stats),
                 "cloudwatch_enabled": self._cloudwatch_client is not None,
                 "service_uptime_seconds": int(
-                    (datetime.utcnow() - self._start_time).total_seconds()
+                    (datetime.now(timezone.utc) - self._start_time).total_seconds()
                 ),
                 "namespace": self.namespace,
             }

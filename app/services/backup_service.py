@@ -8,7 +8,7 @@ import logging
 import shutil
 import sqlite3
 import zipfile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -34,14 +34,31 @@ class BackupService:
         self.backup_dir = Path(backup_dir)
         self.backup_dir.mkdir(exist_ok=True)
 
-        # Database path
-        self.db_path = Path(settings.DATABASE_URL.replace("sqlite:///", ""))
+        # Database path - handle different URL formats
+        db_url = settings.DATABASE_URL
+        if db_url.startswith("sqlite:///"):
+            self.db_path = Path(db_url.replace("sqlite:///", ""))
+        elif db_url.startswith("sqlite://"):
+            # Handle in-memory databases or relative paths
+            db_path_str = db_url.replace("sqlite://", "")
+            if db_path_str == ":memory:":
+                # For in-memory databases, we can't backup directly
+                self.db_path = None
+            else:
+                self.db_path = Path(db_path_str)
+        else:
+            # Fallback for other database types
+            self.db_path = Path("drawings.db")
 
         # Backup retention settings
         self.max_backup_age_days = 30
         self.max_backup_count = 10
 
         logger.info(f"BackupService initialized - Backup dir: {self.backup_dir}")
+        if self.db_path:
+            logger.info(f"Database path: {self.db_path}")
+        else:
+            logger.warning("In-memory database detected - backup operations may be limited")
 
     async def create_full_backup(self, include_files: bool = True) -> Dict[str, Any]:
         """
@@ -54,7 +71,7 @@ class BackupService:
             Backup information dictionary
         """
         try:
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             backup_name = f"full_backup_{timestamp}"
             backup_path = self.backup_dir / f"{backup_name}.zip"
 
@@ -162,19 +179,39 @@ class BackupService:
     async def create_database_backup(self) -> Dict[str, Any]:
         """Create a database-only backup."""
         try:
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             backup_name = f"db_backup_{timestamp}.db"
             backup_path = self.backup_dir / backup_name
 
             logger.info(f"Creating database backup: {backup_name}")
 
+            if self.db_path is None:
+                raise StorageError("Cannot backup in-memory database")
+
             if not self.db_path.exists():
                 raise StorageError(f"Database file not found: {self.db_path}")
 
-            # Copy database file
-            shutil.copy2(self.db_path, backup_path)
+            # Ensure the database file is not locked by closing any connections
+            # and copying with retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    # Copy database file
+                    shutil.copy2(self.db_path, backup_path)
+                    break
+                except (OSError, IOError) as e:
+                    if attempt == max_retries - 1:
+                        raise StorageError(f"Failed to copy database after {max_retries} attempts: {str(e)}")
+                    logger.warning(f"Database copy attempt {attempt + 1} failed: {str(e)}, retrying...")
+                    await asyncio.sleep(0.1)  # Brief delay before retry
 
+            # Verify the backup was created and is not empty
+            if not backup_path.exists():
+                raise StorageError("Backup file was not created")
+            
             backup_size = backup_path.stat().st_size
+            if backup_size == 0:
+                raise StorageError("Backup file is empty")
 
             backup_info = {
                 "backup_name": backup_name,
@@ -207,7 +244,7 @@ class BackupService:
             Export information dictionary
         """
         try:
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             export_name = f"data_export_{timestamp}"
 
             if format.lower() == "json":
@@ -233,7 +270,7 @@ class BackupService:
 
         export_data = {
             "export_info": {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "format": "json",
                 "includes_embeddings": include_embeddings,
             },
@@ -410,6 +447,9 @@ class BackupService:
 
             logger.info(f"Restoring from backup: {backup_path}")
 
+            if self.db_path is None:
+                raise StorageError("Cannot restore to in-memory database")
+
             # Create backup of current state before restore (if database exists)
             current_backup = None
             if self.db_path.exists():
@@ -437,7 +477,22 @@ class BackupService:
                     if "database.db" in backup_zip.namelist():
                         backup_zip.extract("database.db", self.backup_dir)
                         temp_db = self.backup_dir / "database.db"
-                        shutil.move(temp_db, self.db_path)
+                        
+                        # Ensure target directory exists
+                        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+                        
+                        # Move with retry logic
+                        max_retries = 3
+                        for attempt in range(max_retries):
+                            try:
+                                shutil.move(temp_db, self.db_path)
+                                break
+                            except (OSError, IOError) as e:
+                                if attempt == max_retries - 1:
+                                    raise StorageError(f"Failed to restore database after {max_retries} attempts: {str(e)}")
+                                logger.warning(f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying...")
+                                await asyncio.sleep(0.1)
+                        
                         restore_info["restored_components"].append("database")
                         logger.info("Database restored")
 
@@ -452,7 +507,42 @@ class BackupService:
 
             elif backup_path.suffix == ".db":
                 # Database-only restore
-                shutil.copy2(backup_path, self.db_path)
+                # Ensure target directory exists
+                self.db_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Verify backup file is valid before restore
+                backup_size = backup_path.stat().st_size
+                if backup_size == 0:
+                    raise StorageError("Backup file is empty")
+                
+                # Test if backup file is a valid SQLite database
+                try:
+                    test_conn = sqlite3.connect(str(backup_path))
+                    test_conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    test_conn.close()
+                except sqlite3.Error as e:
+                    raise StorageError(f"Backup file is not a valid SQLite database: {str(e)}")
+                
+                # Copy with retry logic
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        shutil.copy2(backup_path, self.db_path)
+                        break
+                    except (OSError, IOError) as e:
+                        if attempt == max_retries - 1:
+                            raise StorageError(f"Failed to restore database after {max_retries} attempts: {str(e)}")
+                        logger.warning(f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying...")
+                        await asyncio.sleep(0.1)
+                
+                # Verify the restored database
+                if not self.db_path.exists():
+                    raise StorageError("Database was not restored successfully")
+                
+                restored_size = self.db_path.stat().st_size
+                if restored_size == 0:
+                    raise StorageError("Restored database is empty")
+                
                 restore_info["restored_components"].append("database")
                 logger.info("Database restored")
 

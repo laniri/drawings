@@ -62,6 +62,21 @@ cd children-drawing-anomaly-detection
 4. Set up file storage paths
 5. Configure ML model paths
 
+#### Database Configuration
+The system supports flexible SQLite database URL formats:
+```bash
+# Standard absolute path (recommended for production)
+DATABASE_URL=sqlite:///./drawings.db
+
+# Alternative format for relative paths
+DATABASE_URL=sqlite://drawings.db
+
+# In-memory database (testing only - limited backup support)
+DATABASE_URL=sqlite://:memory:
+```
+
+**Note**: The backup service automatically detects the database URL format and handles different SQLite configurations. In-memory databases have limited backup capabilities and will log appropriate warnings.
+
 ### Service Management
 ```bash
 # Start services

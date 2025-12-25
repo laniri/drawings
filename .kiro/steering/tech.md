@@ -4,7 +4,7 @@
 
 - **Python 3.11+** - Core runtime
 - **FastAPI** - Web framework with automatic OpenAPI docs
-- **PyTorch** - Deep learning framework for subject-aware autoencoder models
+- **PyTorch 2.2.2+** - Deep learning framework for subject-aware autoencoder models
 - **Vision Transformer (ViT)** - Visual feature extraction from drawings (768-dimensional)
 - **Subject Encoding System** - One-hot encoding for 64 predefined subject categories (64-dimensional)
 - **Hybrid Embeddings** - Concatenated visual and subject features (832-dimensional total)
@@ -14,7 +14,7 @@
 - **ReportLab** - PDF generation for comprehensive export reports (optional)
 - **Pillow** - Core image processing and saliency map generation
 - **OpenCV** - Advanced image processing (optional, with PIL fallback)
-- **NumPy 1.26.4** - Downgraded for PyTorch compatibility (avoid 2.x)
+- **NumPy 1.26.4** - Compatible with PyTorch 2.2.2+ (avoid NumPy 2.x for stability)
 - **Transformers** - Hugging Face library for ViT models
 - **Scikit-learn** - Machine learning utilities
 - **Pandas** - Data manipulation and analysis

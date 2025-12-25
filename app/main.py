@@ -102,7 +102,7 @@ async def health_check():
 async def detailed_health_check():
     """Detailed health check with system information."""
     import os
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     import psutil
 
@@ -123,7 +123,7 @@ async def detailed_health_check():
     health_info = {
         "status": "healthy",
         "service": "drawing-anomaly-detection",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": settings.VERSION,
         "system": {
             "cpu_percent": psutil.cpu_percent(interval=1),
@@ -160,7 +160,7 @@ async def detailed_health_check():
 @app.get("/metrics")
 async def get_metrics():
     """Get system metrics for monitoring."""
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     import psutil
 
@@ -170,7 +170,7 @@ async def get_metrics():
 
     # Collect system metrics
     system_metrics = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "system": {
             "cpu_percent": psutil.cpu_percent(interval=0.1),
             "memory": {

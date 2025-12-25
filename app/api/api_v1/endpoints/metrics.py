@@ -52,12 +52,12 @@ async def get_system_health() -> Dict[str, Any]:
 
         # Add additional system information
         import os
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         import psutil
 
         system_info = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "process_id": os.getpid(),
             "system": {
                 "cpu_count": psutil.cpu_count(),
@@ -82,7 +82,7 @@ async def get_system_health() -> Dict[str, Any]:
         return {
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 

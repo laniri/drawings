@@ -15,7 +15,7 @@ import tempfile
 import threading
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -798,7 +798,7 @@ class SageMakerTrainingService:
         """
         try:
             # Create unique job name
-            timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
             sagemaker_job_name = f"{config.job_name}-{timestamp}"
 
             # Prepare hyperparameters
@@ -843,7 +843,7 @@ class SageMakerTrainingService:
                 config_parameters=json.dumps(asdict(config)),
                 dataset_path=config.dataset_folder,
                 status="pending",
-                start_timestamp=datetime.utcnow(),
+                start_timestamp=datetime.now(timezone.utc),
                 sagemaker_job_arn=sagemaker_job_arn,
             )
 
@@ -856,7 +856,7 @@ class SageMakerTrainingService:
                 "sagemaker_job_name": sagemaker_job_name,
                 "sagemaker_job_arn": sagemaker_job_arn,
                 "config": config,
-                "start_time": datetime.utcnow(),
+                "start_time": datetime.now(timezone.utc),
             }
 
             logger.info(
@@ -899,7 +899,7 @@ class SageMakerTrainingService:
                         training_job.status = status.lower()
 
                         if status in ["Completed", "Failed", "Stopped"]:
-                            training_job.end_timestamp = datetime.utcnow()
+                            training_job.end_timestamp = datetime.now(timezone.utc)
 
                             if status == "Completed":
                                 # Download and process results
@@ -1078,7 +1078,7 @@ class SageMakerTrainingService:
             )
             if training_job:
                 training_job.status = "stopped"
-                training_job.end_timestamp = datetime.utcnow()
+                training_job.end_timestamp = datetime.now(timezone.utc)
                 db.commit()
 
             logger.info(f"Cancelled SageMaker training job: {job_name}")

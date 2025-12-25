@@ -8,7 +8,7 @@ saliency maps, simplified explanations, confidence metrics, and export functiona
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -487,7 +487,7 @@ async def add_annotation(
             "text": annotation_request.annotation_text,
             "type": annotation_request.annotation_type,
             "user_id": annotation_request.user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Store in explanation_text field as JSON (simplified approach)
@@ -969,7 +969,7 @@ async def _export_interpretability_data(
         export_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate filename
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         base_filename = f"interpretability_analysis_{analysis.id}_{timestamp}"
         filename = f"{base_filename}.{export_request.format}"
         file_path = export_dir / filename
@@ -1015,7 +1015,7 @@ async def _export_interpretability_data(
         file_url = f"/static/exports/{filename}"
 
         # Set expiration (24 hours from now)
-        expires_at = datetime.utcnow() + timedelta(hours=24)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
         return ExportResponse(
             export_id=export_id,
@@ -1023,7 +1023,7 @@ async def _export_interpretability_data(
             file_url=file_url,
             format=export_request.format,
             file_size=file_size,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             expires_at=expires_at,
         )
 
@@ -1271,7 +1271,7 @@ async def _export_as_pdf(
         c.drawString(
             50,
             20,
-            f"Export Date: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC",
+            f"Export Date: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
         )
 
         # Save PDF
@@ -1327,7 +1327,7 @@ async def _export_as_json(
                 "importance_regions": interpretability.importance_regions,
             },
             "export_metadata": {
-                "export_timestamp": datetime.utcnow().isoformat(),
+                "export_timestamp": datetime.now(timezone.utc).isoformat(),
                 "export_options": export_request.export_options,
             },
         }

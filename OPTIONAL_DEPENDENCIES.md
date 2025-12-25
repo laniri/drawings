@@ -1,5 +1,14 @@
 # Optional Dependencies Guide
 
+## Recent Updates
+
+### Security Update (December 2024)
+- **python-multipart**: Updated from `>=0.0.6` to `>=0.0.18` to address **CVE-2024-53981**
+  - **Issue**: Denial of Service vulnerability in multipart form parsing
+  - **Impact**: Potential excessive logging and CPU load from malicious requests
+  - **Fix**: Version 0.0.18 includes proper boundary parsing to prevent DoS attacks
+  - **Files Updated**: `requirements.txt`, `requirements-ci.txt`, `pyproject.toml`
+
 ## Overview
 
 The Children's Drawing Anomaly Detection System has been updated to make several dependencies optional, improving deployment flexibility and reducing installation complexity. The system now provides graceful fallbacks for OpenCV functionality using PIL and NumPy, and AWS services are optional for local development.

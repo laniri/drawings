@@ -5,7 +5,7 @@ This module contains request and response models for drawing upload,
 retrieval, and management operations.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Optional
 

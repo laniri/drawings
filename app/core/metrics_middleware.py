@@ -8,7 +8,7 @@ to CloudWatch for monitoring and alerting purposes.
 import time
 import uuid
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict
 
 from fastapi import Request, Response
@@ -42,7 +42,7 @@ class MetricsCollectionMiddleware(BaseHTTPMiddleware):
         self.session_tracking = {}
 
         # Performance tracking
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         self.total_requests = 0
         self.total_errors = 0
         self.total_analyses = 0
@@ -63,7 +63,7 @@ class MetricsCollectionMiddleware(BaseHTTPMiddleware):
         # Track session
         if session_id:
             self.session_tracking[session_id] = {
-                "last_seen": datetime.utcnow(),
+                "last_seen": datetime.now(timezone.utc),
                 "client_ip": client_ip,
                 "request_count": self.session_tracking.get(session_id, {}).get(
                     "request_count", 0
@@ -205,7 +205,7 @@ class MetricsCollectionMiddleware(BaseHTTPMiddleware):
 
     def get_metrics_summary(self) -> Dict[str, Any]:
         """Get comprehensive metrics summary."""
-        uptime = datetime.utcnow() - self.start_time
+        uptime = datetime.now(timezone.utc) - self.start_time
 
         # Calculate averages
         avg_response_time = (
@@ -220,7 +220,7 @@ class MetricsCollectionMiddleware(BaseHTTPMiddleware):
         )
 
         # Active sessions (last 30 minutes)
-        cutoff_time = datetime.utcnow() - timedelta(minutes=30)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=30)
         active_sessions = sum(
             1
             for session_data in self.session_tracking.values()
@@ -257,7 +257,7 @@ class MetricsCollectionMiddleware(BaseHTTPMiddleware):
 
     def cleanup_old_sessions(self, hours_to_keep: int = 24):
         """Clean up old session data."""
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours_to_keep)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_to_keep)
 
         old_sessions = [
             session_id

@@ -9,7 +9,7 @@ This service implements cost optimization features including:
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
 # Optional AWS dependencies

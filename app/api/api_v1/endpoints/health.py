@@ -2,7 +2,7 @@
 Health check and monitoring endpoints.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Query
@@ -19,7 +19,7 @@ async def basic_health_check():
     return {
         "status": "healthy",
         "service": "drawing-anomaly-detection",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -35,7 +35,7 @@ async def detailed_health_check():
         return {
             "status": overall_status,
             "service": "drawing-anomaly-detection",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "components": {
                 name: {
                     "status": check.status,
@@ -156,7 +156,7 @@ async def get_current_alerts():
         alerts = health_monitor.get_alerts()
 
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "alert_count": len(alerts),
             "alerts": alerts,
         }
@@ -230,7 +230,7 @@ async def get_system_status():
 
         return {
             "overall_status": overall_status,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "components": component_summary,
             "alert_count": len(alerts),
             "critical_alerts": len([a for a in alerts if a["severity"] == "critical"]),

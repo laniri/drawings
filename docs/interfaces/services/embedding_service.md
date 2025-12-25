@@ -47,6 +47,8 @@ Wrapper for Vision Transformer model with caching and optimization.
 
 Load the Vision Transformer model with optional caching.
 
+**Test Environment**: When `SKIP_MODEL_LOADING=true` environment variable is set, this method will skip actual model loading and create mock objects for faster test execution.
+
 **Signature**: `load_model(use_cache)`
 
 ### is_loaded

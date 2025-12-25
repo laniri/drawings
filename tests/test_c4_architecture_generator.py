@@ -9,7 +9,7 @@ import pytest
 import tempfile
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from hypothesis import given, strategies as st, settings, assume
 from unittest.mock import Mock, patch, MagicMock
 import json
@@ -151,7 +151,7 @@ services:
     requirements = temp_dir / "requirements.txt"
     requirements.write_text('''
 fastapi==0.104.1
-uvicorn==0.24.0
+uvicorn==0.40.0
 sqlalchemy==2.0.23
 torch==2.1.0
 transformers==4.35.0

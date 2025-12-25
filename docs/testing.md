@@ -113,11 +113,17 @@ db_session (function) ← test_client (function)
 - `sample_drawing_data`: Valid drawing metadata for testing
 - `sample_embedding_data`: Sample embedding vectors for testing
 
-#### Environment Setup
-- `setup_test_environment`: Configures test environment variables
-  - Sets `SKIP_MODEL_LOADING=true` for faster execution
-  - Configures test database URL
-  - Creates and manages test upload directories
+### Test Environment Variables
+
+The test infrastructure uses several environment variables for configuration:
+
+- `SKIP_MODEL_LOADING=true` - Skips heavy Vision Transformer model loading for faster test execution
+- `DATABASE_URL=sqlite:///:memory:` - Uses in-memory database for tests
+- `TESTING=true` - Indicates test environment mode
+
+These are automatically set by the `setup_test_environment` fixture and should not need manual configuration.
+
+**Model Loading Behavior**: When `SKIP_MODEL_LOADING=true` is set, the embedding service creates mock objects (`model = None`, `processor = None`) instead of loading the actual Vision Transformer model. This significantly speeds up test execution while maintaining API compatibility for testing business logic.
 
 ## Test Categories
 
@@ -382,6 +388,8 @@ def test_file_operations(temp_file, temp_directory):
 - Mock model operations for unit tests
 - Load models only when actually needed
 
+**Implementation Details**: The embedding service checks for the `SKIP_MODEL_LOADING` environment variable in its `load_model()` method. When set to `true`, it creates mock objects (`self.model = None`, `self.processor = None`) instead of loading the actual Vision Transformer model, which can take several seconds and consume significant memory. This optimization is automatically enabled in the test environment.
+
 #### Parallel Execution
 ```bash
 # Run tests in parallel (requires pytest-xdist)
@@ -497,6 +505,127 @@ pytest tests/test_specific.py::test_function -v -s --pdb
 10. **Maintenance**: Keep tests up-to-date with code changes
 
 ## Recent Test Infrastructure Improvements
+
+### Enhanced Import Handling for CI/CD (December 2025)
+
+**Robust AWS Dependency Management**: Improved test reliability in environments without AWS services
+
+**Key Improvements**:
+- **Graceful AWS Dependency Handling**: Tests now gracefully handle missing AWS dependencies (boto3, botocore) in CI environments
+- **Mock Class Generation**: Automatic creation of mock classes (`AlertLevel`, `LogEntry`, `AlertResult`, `MetricResult`) when AWS services are unavailable
+- **Robust Import Strategy**: Enhanced error handling for optional dependencies with clear fallback behavior
+- **CI/CD Compatibility**: Monitoring and alerting tests run reliably in environments without AWS credentials or dependencies
+- **Defensive Test Setup**: Test setup methods now check for boto3 availability before attempting to patch AWS clients
+
+**Benefits**:
+- Tests no longer fail due to missing AWS dependencies in CI environments
+- Improved test reliability across different deployment environments (local, CI, Docker)
+- Better separation between local development and CI testing requirements
+- Enhanced test coverage for monitoring and alerting functionality without requiring AWS setup
+- Eliminates ImportError exceptions during test setup in environments without AWS SDK
+
+**Technical Implementation**:
+```python
+# Enhanced import handling with fallback for monitoring tests
+def setup_method(self):
+    """Set up test environment."""
+    # Create temporary log directory first
+    self.temp_dir = tempfile.mkdtemp()
+    self.log_file = Path(self.temp_dir) / "test_monitoring.log"
+    
+    # Only patch boto3 if it's available, otherwise skip AWS mocking
+    try:
+        import boto3
+        # Mock CloudWatch and SNS clients
+        self.cloudwatch_patcher = patch('boto3.client')
+        self.mock_boto3 = self.cloudwatch_patcher.start()
+        
+        # Create mock clients and configure responses
+        self.mock_cloudwatch = MagicMock()
+        self.mock_sns = MagicMock()
+        
+        def mock_client(service_name, **kwargs):
+            if service_name == 'cloudwatch':
+                return self.mock_cloudwatch
+            elif service_name == 'sns':
+                return self.mock_sns
+            else:
+                return MagicMock()
+        
+        self.mock_boto3.side_effect = mock_client
+        self.has_boto3 = True
+    except ImportError:
+        # boto3 not available, skip AWS mocking
+        self.cloudwatch_patcher = None
+        self.mock_boto3 = None
+        self.mock_cloudwatch = MagicMock()
+        self.mock_sns = MagicMock()
+        self.has_boto3 = False
+```
+
+**Standalone Test Implementation**:
+The new `test_property_12_monitoring_standalone.py` provides a completely self-contained testing approach:
+
+```python
+class StandaloneMonitoringService:
+    """Standalone monitoring service for testing."""
+    
+    def __init__(self, log_file_path: str, cloudwatch_namespace: str, 
+                 performance_thresholds: Optional[Dict[str, float]] = None):
+        # Complete implementation without external dependencies
+        self.log_file_path = log_file_path
+        self.cloudwatch_namespace = cloudwatch_namespace
+        self._log_entries = []
+        self._alert_history = []
+        # ... full standalone implementation
+```
+
+**Benefits of Standalone Approach**:
+- **Zero Dependencies**: No imports from app modules, completely self-contained
+- **CI/CD Reliability**: Guaranteed to work in any environment without setup
+- **Fast Execution**: No model loading or complex initialization
+- **Comprehensive Coverage**: Tests all monitoring properties without external dependencies
+
+**Affected Tests**:
+- `test_property_12_monitoring_and_alerting_reliability.py`: Enhanced with robust import handling and defensive test setup/teardown
+- `test_property_12_monitoring_standalone.py`: **NEW** - Completely standalone monitoring tests that don't depend on app imports
+- All monitoring and alerting property-based tests now work in CI environments
+- AWS-dependent functionality tests gracefully skip when dependencies unavailable
+
+**Key Implementation Details**:
+- **Defensive Setup**: Test setup checks for boto3 availability before attempting to patch AWS clients
+- **Safe Teardown**: Teardown methods handle cases where patchers were never created due to missing dependencies
+- **Conditional Mocking**: AWS client mocking only occurs when boto3 is actually available
+- **Graceful Degradation**: Tests continue to work with mock objects even when AWS SDK is unavailable
+
+### Test Infrastructure Improvements (December 2025)
+
+**Enhanced Test Environment Setup**: Improved robustness and reliability of test infrastructure
+
+**Key Improvements**:
+- **Enhanced Path Management**: Explicit project root path setup ensures proper module imports in all environments
+- **Comprehensive Directory Creation**: Automatically creates all required test directories (`test_uploads`, `static/saliency_maps`, `exports/models`)
+- **Robust Error Handling**: Uses `exist_ok=True` for directory creation and `ignore_errors=True` for cleanup
+- **Import Safety**: Ensures Python path is properly configured before any application module imports
+
+**Benefits**:
+- More reliable test execution across different environments (local, CI, Docker)
+- Eliminates directory-related test failures
+- Improved test isolation and cleanup
+- Better handling of missing directories during test setup
+
+**Technical Details**:
+```python
+# Enhanced directory creation
+required_dirs = ["test_uploads", "static/saliency_maps", "exports/models"]
+for dir_name in required_dirs:
+    os.makedirs(dir_name, exist_ok=True)
+
+# Robust cleanup with error handling
+for dir_name in ["test_uploads"]:
+    if os.path.exists(dir_name):
+        shutil.rmtree(dir_name, ignore_errors=True)
+```
 
 ### Model Export Compatibility Testing (December 2025)
 

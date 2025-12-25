@@ -1,14 +1,14 @@
 {
   "enabled": true,
   "name": "Auto-Poll CI Status",
-  "description": "Automatically checks the status of the remote CI pipeline after a push and opens remediation tasks for any detected failures via GitHub MCP integration",
+  "description": "Automatically checks the status of the remote CI pipeline Actions after a push and opens remediation tasks for any detected failures via GitHub MCP integration. if polling for status to steblize, wailt at least 1 minute between polls.",
   "version": "1",
   "when": {
     "type": "agentStop"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Check the status of the remote CI pipeline using the GitHub MCP, status should be tracked with respect to action done (e.g. lint fix check lint results, test fail check it passes etcw...). If any failures are detected, immediately create a task to fix the identified error without waiting for user intervention. Focus on: 1) Retrieving the latest workflow run status, 2) Analyzing any failure logs or error messages, 3) Creating a specific remediation task with error details and suggested fixes, 4) Prioritizing the task for immediate attention."
+    "prompt": "Check the status of the remote CI pipeline using the GitHub MCP, status should be tracked with respect to action done (e.g. lint fix check lint results, test fail check it passes etcw...). If any failures are detected, immediately create a task to fix the identified error without waiting for user intervention. Focus on: 1) Retrieving the latest workflow run status, 2) Analyzing any failure logs or error messages, 3) Creating a specific remediation task with error details and suggested fixes, 4) Prioritizing the task for immediate attention.\nconnect using MCP and find the exact issue before stating to fix it (if there is an issue):\n{\n  \"owner\": \"laniri\",\n  \"repo\": \"drawings\",\n  \"path\": \".github/workflows\"\n}"
   },
   "workspaceFolderName": "drawings",
   "shortName": "ci-status-monitor"

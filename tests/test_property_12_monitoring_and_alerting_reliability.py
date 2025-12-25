@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch, MagicMock
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 import logging
 import threading
@@ -81,7 +81,7 @@ class StandaloneMonitoringService:
             "total_log_entries": 0,
             "total_alerts_sent": 0,
             "total_metrics_sent": 0,
-            "service_start_time": datetime.utcnow(),
+            "service_start_time": datetime.now(timezone.utc),
         }
         
         # Create log file
@@ -92,7 +92,7 @@ class StandaloneMonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
         
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         
         # Write to log file
         log_data = {
@@ -129,7 +129,7 @@ class StandaloneMonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
         
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         
         # Write to log file
         log_data = {
@@ -170,7 +170,7 @@ class StandaloneMonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
         
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         alert_id = f"alert-{uuid.uuid4()}"
         
         result = AlertResult(
@@ -189,7 +189,7 @@ class StandaloneMonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
         
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         
         self._metrics_buffer.append({
             "correlation_id": correlation_id,
@@ -228,7 +228,7 @@ class StandaloneMonitoringService:
         return self.send_alert(level=level, message=message, correlation_id=correlation_id, details=details)
     
     def get_service_stats(self) -> Dict[str, Any]:
-        uptime = datetime.utcnow() - self._stats["service_start_time"]
+        uptime = datetime.now(timezone.utc) - self._stats["service_start_time"]
         return {
             **self._stats,
             "uptime_seconds": int(uptime.total_seconds()),
@@ -554,7 +554,7 @@ class TestMonitoringAndAlertingReliability:
                 details={
                     "entry_index": i,
                     "test_data": f"data_{i}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             )
             

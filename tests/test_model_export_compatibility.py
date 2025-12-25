@@ -10,7 +10,7 @@ import json
 import tempfile
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from hypothesis import given, strategies as st, settings, assume
 from typing import Dict, List, Any
 import numpy as np

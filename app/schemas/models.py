@@ -5,7 +5,7 @@ This module contains request and response models for age group models,
 threshold management, and system configuration.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 

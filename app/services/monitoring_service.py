@@ -17,7 +17,7 @@ import time
 import uuid
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -141,7 +141,7 @@ class MonitoringService:
             "total_log_entries": 0,
             "total_alerts_sent": 0,
             "total_metrics_sent": 0,
-            "service_start_time": datetime.utcnow(),
+            "service_start_time": datetime.now(timezone.utc),
         }
 
         # Initialize AWS services
@@ -245,7 +245,7 @@ class MonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
 
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
 
         try:
             # Create structured log entry
@@ -328,7 +328,7 @@ class MonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
 
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
 
         try:
             # Create structured log data
@@ -413,7 +413,7 @@ class MonitoringService:
         recent_alerts = [
             alert
             for alert in self._alert_history
-            if (datetime.utcnow() - alert.timestamp).total_seconds() < 300  # 5 minutes
+            if (datetime.now(timezone.utc) - alert.timestamp).total_seconds() < 300  # 5 minutes
         ]
 
         same_type_alerts = [
@@ -445,7 +445,7 @@ class MonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
 
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
 
         try:
             # Create alert data
@@ -537,7 +537,7 @@ class MonitoringService:
         if not correlation_id:
             correlation_id = str(uuid.uuid4())
 
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
 
         try:
             # Prepare CloudWatch metrics
@@ -794,7 +794,7 @@ class MonitoringService:
             except Exception:
                 pass
 
-            log_stream_name = f"monitoring-{datetime.utcnow().strftime('%Y-%m-%d')}"
+            log_stream_name = f"monitoring-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
 
             # Create log group if it doesn't exist
             try:
@@ -849,7 +849,7 @@ class MonitoringService:
             Service statistics dictionary
         """
         with self._lock:
-            uptime = datetime.utcnow() - self._stats["service_start_time"]
+            uptime = datetime.now(timezone.utc) - self._stats["service_start_time"]
 
             return {
                 **self._stats,
@@ -869,7 +869,7 @@ class MonitoringService:
         Args:
             days_to_keep: Number of days of data to keep
         """
-        cutoff_date = datetime.utcnow() - timedelta(days=days_to_keep)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
 
         with self._lock:
             # Clean log entries

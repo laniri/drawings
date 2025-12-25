@@ -13,7 +13,7 @@ import tempfile
 import sqlite3
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch, MagicMock, AsyncMock
@@ -193,43 +193,59 @@ class TestBackupAndRecoveryIntegrity:
                 (temp_path / "uploads" / "test_file.png").write_text("test content")
                 (temp_path / "static" / "model.pth").write_text("model data")
             
-            # Initialize backup service with test configuration
-            backup_service = BackupService(str(backup_dir))
-            backup_service.db_path = original_db
-            
-            # Get original database content
-            original_content = self._get_database_content(original_db)
-            
-            # Create backup (database only to avoid settings mock issues)
-            backup_info = asyncio.run(backup_service.create_database_backup())
-            
-            # Verify backup was created
-            backup_path = Path(backup_info['backup_path'])
-            assert backup_path.exists()
-            assert backup_info['status'] == 'completed'
-            assert backup_info['size_bytes'] > 0
-            
-            # Create a new database location for restore
-            restored_db = temp_path / "restored.db"
-            
-            # Update backup service to use restored database path
-            backup_service.db_path = restored_db
-            
-            # Restore from backup (skip safety backup by patching)
-            with patch.object(backup_service, 'create_database_backup', new_callable=AsyncMock) as mock_safety_backup:
-                mock_safety_backup.return_value = {"backup_name": "safety_backup.db"}
-                restore_info = asyncio.run(backup_service.restore_from_backup(backup_path))
-            
-            # Verify restore was successful
-            assert restore_info['status'] == 'completed'
-            assert restored_db.exists()
-            
-            # Get restored database content
-            restored_content = self._get_database_content(restored_db)
-            
-            # Verify functional equivalence
-            assert self._compare_database_content(original_content, restored_content), \
-                "Restored database content does not match original"
+            # Mock settings to ensure consistent database URL handling
+            with patch('app.services.backup_service.settings') as mock_settings:
+                mock_settings.DATABASE_URL = f"sqlite:///{original_db}"
+                
+                # Initialize backup service with test configuration
+                backup_service = BackupService(str(backup_dir))
+                # Explicitly set the database path to ensure it's correct
+                backup_service.db_path = original_db
+                
+                # Get original database content
+                original_content = self._get_database_content(original_db)
+                
+                # Verify original database has content
+                assert len(original_content) > 0, "Original database should have content"
+                
+                # Create backup (database only to avoid settings mock issues)
+                backup_info = asyncio.run(backup_service.create_database_backup())
+                
+                # Verify backup was created
+                backup_path = Path(backup_info['backup_path'])
+                assert backup_path.exists(), "Backup file should exist"
+                assert backup_info['status'] == 'completed', "Backup should be completed"
+                assert backup_info['size_bytes'] > 0, "Backup should not be empty"
+                
+                # Create a new database location for restore
+                restored_db = temp_path / "restored.db"
+                
+                # Create a new backup service instance for restore to avoid state issues
+                restore_service = BackupService(str(backup_dir))
+                restore_service.db_path = restored_db
+                
+                # Restore from backup (skip safety backup by patching)
+                with patch.object(restore_service, 'create_database_backup', new_callable=AsyncMock) as mock_safety_backup:
+                    mock_safety_backup.return_value = {"backup_name": "safety_backup.db"}
+                    restore_info = asyncio.run(restore_service.restore_from_backup(backup_path))
+                
+                # Verify restore was successful
+                assert restore_info['status'] == 'completed', "Restore should be completed"
+                assert restored_db.exists(), "Restored database file should exist"
+                
+                # Verify restored database is not empty
+                restored_size = restored_db.stat().st_size
+                assert restored_size > 0, "Restored database should not be empty"
+                
+                # Get restored database content
+                restored_content = self._get_database_content(restored_db)
+                
+                # Verify restored database has content
+                assert len(restored_content) > 0, "Restored database should have content"
+                
+                # Verify functional equivalence
+                assert self._compare_database_content(original_content, restored_content), \
+                    f"Restored database content does not match original. Original: {original_content}, Restored: {restored_content}"
     
     @given(
         corruption_type=st.sampled_from(['truncate', 'random_bytes', 'missing_header']),

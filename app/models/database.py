@@ -5,7 +5,7 @@ This module contains SQLAlchemy models for storing drawings, embeddings,
 age group models, anomaly analyses, and interpretability results.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -23,6 +23,11 @@ from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
 
 
+def utc_now():
+    """Get current UTC timestamp."""
+    return datetime.now(timezone.utc)
+
+
 class Drawing(Base):
     """Model for storing drawing metadata and file information."""
 
@@ -36,7 +41,7 @@ class Drawing(Base):
     expert_label = Column(String, nullable=True)  # "normal", "concern", "severe"
     drawing_tool = Column(String, nullable=True)
     prompt = Column(Text, nullable=True)
-    upload_timestamp = Column(DateTime, default=datetime.utcnow)
+    upload_timestamp = Column(DateTime, default=utc_now)
 
     # Relationships
     embeddings = relationship(
@@ -70,7 +75,7 @@ class DrawingEmbedding(Base):
     vector_dimension = Column(
         Integer, nullable=False, default=832
     )  # Always 832 for hybrid embeddings
-    created_timestamp = Column(DateTime, default=datetime.utcnow)
+    created_timestamp = Column(DateTime, default=utc_now)
 
     # Relationships
     drawing = relationship("Drawing", back_populates="embeddings")
@@ -98,7 +103,7 @@ class AgeGroupModel(Base):
     parameters = Column(Text, nullable=False)  # JSON serialized parameters
     sample_count = Column(Integer, nullable=False)
     threshold = Column(Float, nullable=False)
-    created_timestamp = Column(DateTime, default=datetime.utcnow)
+    created_timestamp = Column(DateTime, default=utc_now)
     is_active = Column(Boolean, default=True)
 
     # Relationships
@@ -131,7 +136,7 @@ class AnomalyAnalysis(Base):
     )  # Always "subject_aware"
     is_anomaly = Column(Boolean, nullable=False)
     confidence = Column(Float, nullable=False)
-    analysis_timestamp = Column(DateTime, default=datetime.utcnow)
+    analysis_timestamp = Column(DateTime, default=utc_now)
 
     # Relationships
     drawing = relationship("Drawing", back_populates="analyses")
@@ -154,7 +159,7 @@ class InterpretabilityResult(Base):
     overlay_image_path = Column(String, nullable=False)
     explanation_text = Column(Text, nullable=True)
     importance_regions = Column(Text, nullable=True)  # JSON serialized bounding boxes
-    created_timestamp = Column(DateTime, default=datetime.utcnow)
+    created_timestamp = Column(DateTime, default=utc_now)
 
     # Relationships
     analysis = relationship("AnomalyAnalysis", back_populates="interpretability")
@@ -197,7 +202,7 @@ class TrainingReport(Base):
     model_parameters_path = Column(String, nullable=False)
     metrics_summary = Column(Text, nullable=False)  # JSON serialized metrics
     report_file_path = Column(String, nullable=False)
-    created_timestamp = Column(DateTime, default=datetime.utcnow)
+    created_timestamp = Column(DateTime, default=utc_now)
 
     # Relationships
     training_job = relationship("TrainingJob", back_populates="training_reports")

@@ -10,7 +10,7 @@ import json
 import logging
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 # Optional AWS dependencies
@@ -192,8 +192,8 @@ class AuthenticationService:
         """
         session_token = secrets.token_urlsafe(32)
         session_data = {
-            "created_at": datetime.utcnow(),
-            "last_accessed": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
+            "last_accessed": datetime.now(timezone.utc),
             "client_ip": client_ip,
             "is_admin": True,
         }
@@ -252,7 +252,7 @@ class AuthenticationService:
             return False
 
         session_data = self._sessions[session_token]
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Check if session is expired
         last_accessed = session_data["last_accessed"]
@@ -304,7 +304,7 @@ class AuthenticationService:
 
     def cleanup_expired_sessions(self):
         """Clean up expired sessions."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired_tokens = []
 
         for token, session_data in self._sessions.items():

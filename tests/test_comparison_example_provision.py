@@ -13,7 +13,7 @@ import numpy as np
 from hypothesis import given, strategies as st, assume, settings
 from hypothesis.stateful import RuleBasedStateMachine, Bundle, rule, initialize
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 
 from app.models.database import Drawing, DrawingEmbedding, AnomalyAnalysis, AgeGroupModel

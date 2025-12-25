@@ -10,7 +10,7 @@ import logging
 import shutil
 import subprocess
 import tempfile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -143,7 +143,7 @@ class DatabaseMigrationService:
             backup_file = Path(backup_path)
 
             # Generate S3 key with timestamp and environment
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             s3_key = f"database-backups/{self.env_config.environment.value}/{timestamp}_{backup_file.name}"
 
             # Upload to S3
@@ -240,7 +240,7 @@ class DatabaseMigrationService:
                 "post_migration": post_migration_info,
                 "backup_info": backup_info,
                 "consistency_check": consistency_check,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
@@ -341,7 +341,7 @@ class DatabaseMigrationService:
                 "status": "completed",
                 "target_revision": target_revision,
                 "post_rollback": post_rollback_info,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(f"Migration rollback completed: {target_revision}")
@@ -387,7 +387,7 @@ class DatabaseMigrationService:
                 "current_schema": current_schema,
                 "other_schema": other_schema,
                 "differences": comparison_result["differences"],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
@@ -535,7 +535,7 @@ class DatabaseMigrationService:
             return
 
         try:
-            cutoff_date = datetime.utcnow() - timedelta(days=retention_days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
 
             # List objects in backup prefix
             prefix = f"database-backups/{self.env_config.environment.value}/"

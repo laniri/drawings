@@ -7,7 +7,7 @@ Property-based tests for database model consistency.
 
 import pytest
 from hypothesis import given, strategies as st, settings, HealthCheck
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models.database import Drawing
 

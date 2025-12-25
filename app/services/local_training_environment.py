@@ -11,7 +11,7 @@ import queue
 import threading
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -512,7 +512,7 @@ class LocalTrainingEnvironment:
                 config_parameters=json.dumps(asdict(config)),
                 dataset_path=config.dataset_folder,
                 status="pending",
-                start_timestamp=datetime.utcnow(),
+                start_timestamp=datetime.now(timezone.utc),
             )
 
             db.add(training_job)
@@ -575,7 +575,7 @@ class LocalTrainingEnvironment:
 
             # Update job status
             training_job.status = "completed"
-            training_job.end_timestamp = datetime.utcnow()
+            training_job.end_timestamp = datetime.now(timezone.utc)
             db.commit()
 
             logger.info(f"Training job {job_id} completed successfully")
@@ -590,7 +590,7 @@ class LocalTrainingEnvironment:
                 )
                 if training_job:
                     training_job.status = "failed"
-                    training_job.end_timestamp = datetime.utcnow()
+                    training_job.end_timestamp = datetime.now(timezone.utc)
                     db.commit()
             except Exception as db_error:
                 logger.error(f"Failed to update job status: {str(db_error)}")
@@ -816,7 +816,7 @@ class LocalTrainingEnvironment:
             )
             if training_job:
                 training_job.status = "cancelled"
-                training_job.end_timestamp = datetime.utcnow()
+                training_job.end_timestamp = datetime.now(timezone.utc)
                 db.commit()
 
             logger.info(f"Training job {job_id} cancelled")

@@ -8,7 +8,7 @@ import os
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.services.sagemaker_training_service import (
     SageMakerTrainingService,

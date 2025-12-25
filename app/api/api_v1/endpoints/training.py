@@ -773,7 +773,7 @@ async def validate_exported_model(model_id: str):
             )
 
         # Reconstruct metadata object
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         from app.services.model_deployment_service import ModelExportMetadata
 

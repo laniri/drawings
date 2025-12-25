@@ -30,7 +30,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 
 ### Backend
 - **Python 3.11+** with FastAPI web framework
-- **PyTorch** for deep learning models and autoencoder training
+- **PyTorch 2.2.2+** for deep learning models and autoencoder training
 - **Vision Transformer (ViT)** for visual feature extraction (768-dimensional)
 - **Subject Encoding System** for categorical features (64-dimensional one-hot encoding)
 - **Hybrid Embeddings** combining visual and subject features (832-dimensional total)
@@ -40,7 +40,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **ReportLab** for PDF generation and comprehensive export reports (optional)
 - **Pillow** for core image processing and saliency map generation
 - **OpenCV** for advanced image processing (optional, with PIL fallback)
-- **NumPy 1.26.4** (downgraded for PyTorch compatibility)
+- **NumPy 1.26.4** (compatible with PyTorch 2.2.2+, avoiding NumPy 2.x for stability)
 - **Boto3** for AWS services integration (optional for local development)
 
 ### Frontend
@@ -222,8 +222,9 @@ The testing infrastructure provides:
 - **Isolated Test Database**: In-memory SQLite database for each test function
 - **Robust Import Handling**: Delayed imports with graceful failure handling for missing dependencies
 - **Automatic Fixtures**: Database sessions, test clients, and sample data with dependency injection
-- **Environment Isolation**: Separate test environment with proper configuration
-- **Cleanup Management**: Automatic cleanup of test data and temporary files
+- **Environment Isolation**: Separate test environment with proper configuration and directory management
+- **Cleanup Management**: Automatic cleanup of test data and temporary files with error handling
+- **Path Management**: Ensures proper Python path setup before module imports
 
 ### Test Configuration
 
@@ -258,8 +259,9 @@ The `tests/conftest.py` provides comprehensive fixtures with robust error handli
 #### Environment Setup
 - `setup_test_environment`: Automatic test environment configuration
 - Sets `SKIP_MODEL_LOADING=true` for faster test execution
-- Creates and cleans up test upload directories
+- Creates required test directories: `test_uploads`, `static/saliency_maps`, `exports/models`
 - Configures test-specific environment variables
+- Ensures proper Python path setup with robust error handling
 
 ### Test Markers
 
@@ -355,6 +357,8 @@ When writing tests:
 7. **Import safety**: Don't import application modules at module level; use fixtures instead
 
 ### Recent Test Infrastructure Improvements
+
+**Enhanced Import Handling for CI/CD** (December 2025): Improved test reliability by adding robust import handling for AWS dependencies in monitoring tests. Tests now gracefully handle missing AWS dependencies (boto3, botocore) in CI environments by creating mock classes, ensuring reliable test execution across different deployment environments without requiring AWS setup. Added standalone monitoring tests (`test_property_12_monitoring_standalone.py`) that are completely self-contained and don't depend on app imports for maximum CI/CD reliability.
 
 **Model Export Compatibility Testing** (December 2025): Enhanced test reliability for model deployment services by fixing directory synchronization between `ModelExporter` and `ModelValidator` services. This improvement eliminates potential test failures due to directory mismatches and ensures consistent validation behavior across all export formats.
 
@@ -506,13 +510,31 @@ pip install reportlab>=4.0.0
 - PNG, JSON, CSV, and HTML exports remain available
 - Web-based report viewing through the interface
 
+## Security
+
+### Recent Security Updates
+
+**December 2024**: Updated `python-multipart` from `>=0.0.6` to `>=0.0.18` to address **CVE-2024-53981** - a Denial of Service vulnerability that could cause excessive logging and CPU load when processing malicious multipart form data. This security fix prevents potential DoS attacks on file upload endpoints.
+
+**December 2024**: Updated `uvicorn[standard]` from `>=0.24.0` to `>=0.40.0` - a significant version upgrade that includes multiple improvements, bug fixes, and security enhancements accumulated over 16 minor releases. This update ensures compatibility with the latest FastAPI features and provides improved performance and stability for the ASGI server.
+
+### Security Features
+
+- **Input Validation**: All file uploads and form data are validated and sanitized
+- **File Type Restrictions**: Only PNG, JPEG, and BMP image formats are accepted
+- **File Size Limits**: Maximum 10MB per uploaded drawing
+- **Session Management**: Secure session handling with configurable timeouts
+- **HTTPS Enforcement**: SSL/TLS encryption for all production deployments
+- **Rate Limiting**: Protection against abuse of API endpoints
+- **Authentication**: Password-protected admin features with secure credential storage
+
 ## Troubleshooting
 
 ### Common Issues
 
 1. **NumPy Compatibility Error**
    ```bash
-   # If you see NumPy 2.x compatibility issues:
+   # If you see NumPy 2.x compatibility issues with PyTorch 2.2.2+:
    pip install "numpy>=1.25.2,<2.0.0"
    ```
 
@@ -522,6 +544,20 @@ pip install reportlab>=4.0.0
    # The system will work without boto3/botocore
    # For production deployment with AWS features:
    pip install boto3 botocore
+   ```
+
+3. **Database Backup Issues**
+   ```bash
+   # The backup service supports multiple SQLite URL formats:
+   # - sqlite:///absolute/path/to/database.db
+   # - sqlite://relative/path/to/database.db
+   # - sqlite://:memory: (in-memory databases have limited backup support)
+   
+   # If backup operations fail, check your DATABASE_URL format in .env:
+   DATABASE_URL=sqlite:///./drawings.db  # Recommended format
+   
+   # For in-memory databases (testing), backup operations are limited:
+   DATABASE_URL=sqlite://:memory:  # Backup service will log warnings
    ```
 
 3. **OpenCV Import Errors**
@@ -567,6 +603,17 @@ pip install reportlab>=4.0.0
    - Ensure PyTorch and transformers are properly installed
    - Check that the embedding service initializes correctly
    - Verify image preprocessing pipeline
+   - For testing: Set `SKIP_MODEL_LOADING=true` to bypass model loading
+
+8. **Test Performance Issues**
+   ```bash
+   # For faster test execution, skip model loading
+   export SKIP_MODEL_LOADING=true
+   pytest
+   
+   # Or set in .env file for persistent configuration
+   echo "SKIP_MODEL_LOADING=true" >> .env
+   ```
 
 ### Development Tips
 

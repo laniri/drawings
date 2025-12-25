@@ -366,6 +366,17 @@ aws logs filter-log-events \
 aws s3api head-bucket \
   --bucket children-drawing-production-backups-account
 
+# Check database URL format in environment variables
+# The backup service supports multiple SQLite URL formats:
+# - sqlite:///absolute/path/to/database.db (recommended)
+# - sqlite://relative/path/to/database.db
+# - sqlite://:memory: (in-memory - limited backup support)
+
+# Verify DATABASE_URL environment variable
+aws ecs describe-task-definition \
+  --task-definition children-drawing-prod-task \
+  --query 'taskDefinition.containerDefinitions[0].environment[?name==`DATABASE_URL`]'
+
 # Manual backup test
 aws s3 cp /path/to/database.db s3://backup-bucket/test-backup.db
 ```
