@@ -151,22 +151,31 @@ def setup_test_environment():
     This fixture runs automatically for all tests and ensures
     proper test environment configuration.
     """
+    import os
+    import sys
+    
+    # Ensure project root is in Python path
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    
     # Set test environment variables
     os.environ["SKIP_MODEL_LOADING"] = "true"
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TESTING"] = "true"
     
-    # Ensure uploads directory exists for tests
-    test_uploads_dir = "test_uploads"
-    if not os.path.exists(test_uploads_dir):
-        os.makedirs(test_uploads_dir)
+    # Create required directories for tests
+    required_dirs = ["test_uploads", "static/saliency_maps", "exports/models"]
+    for dir_name in required_dirs:
+        os.makedirs(dir_name, exist_ok=True)
     
     yield
     
     # Cleanup test uploads directory
     import shutil
-    if os.path.exists(test_uploads_dir):
-        shutil.rmtree(test_uploads_dir)
+    for dir_name in ["test_uploads"]:
+        if os.path.exists(dir_name):
+            shutil.rmtree(dir_name, ignore_errors=True)
 
 
 @pytest.fixture
