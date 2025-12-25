@@ -1,7 +1,7 @@
 # Minimal requirements for CI/CD testing
 # Core framework
 fastapi==0.124.4
-uvicorn[standard]==0.40.0
+uvicorn[standard]==0.38.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
@@ -25,7 +25,7 @@ mypy==1.11.2
 
 # Basic ML (without CUDA dependencies)
 numpy==1.26.4
-scikit-learn==1.8.0
+scikit-learn==1.3.2
 pillow==10.3.0
 matplotlib==3.7.0
 seaborn==0.12.0
@@ -46,3 +46,6 @@ python-dotenv==1.0.0
 aiofiles==23.2.1
 psutil==5.9.6
 omegaconf==2.3.0
+
+# Protobuf version fix for TensorFlow compatibility
+protobuf==3.20.3
