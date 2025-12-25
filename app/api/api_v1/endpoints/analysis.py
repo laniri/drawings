@@ -1106,7 +1106,9 @@ async def process_batch_analysis(
 
     except Exception as e:
         batch_tracker.update_batch(
-            batch_id, status=f"failed: {str(e)}", completed_at=datetime.now(timezone.utc)
+            batch_id,
+            status=f"failed: {str(e)}",
+            completed_at=datetime.now(timezone.utc),
         )
         logger.error(f"Batch analysis {batch_id} failed: {str(e)}")
 

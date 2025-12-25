@@ -115,7 +115,9 @@ class HealthMonitor:
 
             conn.close()
 
-            response_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+            response_time = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
 
             status = "healthy"
             message = "Database is accessible"

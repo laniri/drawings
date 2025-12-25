@@ -58,7 +58,9 @@ class BackupService:
         if self.db_path:
             logger.info(f"Database path: {self.db_path}")
         else:
-            logger.warning("In-memory database detected - backup operations may be limited")
+            logger.warning(
+                "In-memory database detected - backup operations may be limited"
+            )
 
     async def create_full_backup(self, include_files: bool = True) -> Dict[str, Any]:
         """
@@ -201,14 +203,18 @@ class BackupService:
                     break
                 except (OSError, IOError) as e:
                     if attempt == max_retries - 1:
-                        raise StorageError(f"Failed to copy database after {max_retries} attempts: {str(e)}")
-                    logger.warning(f"Database copy attempt {attempt + 1} failed: {str(e)}, retrying...")
+                        raise StorageError(
+                            f"Failed to copy database after {max_retries} attempts: {str(e)}"
+                        )
+                    logger.warning(
+                        f"Database copy attempt {attempt + 1} failed: {str(e)}, retrying..."
+                    )
                     await asyncio.sleep(0.1)  # Brief delay before retry
 
             # Verify the backup was created and is not empty
             if not backup_path.exists():
                 raise StorageError("Backup file was not created")
-            
+
             backup_size = backup_path.stat().st_size
             if backup_size == 0:
                 raise StorageError("Backup file is empty")
@@ -477,10 +483,10 @@ class BackupService:
                     if "database.db" in backup_zip.namelist():
                         backup_zip.extract("database.db", self.backup_dir)
                         temp_db = self.backup_dir / "database.db"
-                        
+
                         # Ensure target directory exists
                         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-                        
+
                         # Move with retry logic
                         max_retries = 3
                         for attempt in range(max_retries):
@@ -489,10 +495,14 @@ class BackupService:
                                 break
                             except (OSError, IOError) as e:
                                 if attempt == max_retries - 1:
-                                    raise StorageError(f"Failed to restore database after {max_retries} attempts: {str(e)}")
-                                logger.warning(f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying...")
+                                    raise StorageError(
+                                        f"Failed to restore database after {max_retries} attempts: {str(e)}"
+                                    )
+                                logger.warning(
+                                    f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying..."
+                                )
                                 await asyncio.sleep(0.1)
-                        
+
                         restore_info["restored_components"].append("database")
                         logger.info("Database restored")
 
@@ -509,20 +519,24 @@ class BackupService:
                 # Database-only restore
                 # Ensure target directory exists
                 self.db_path.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 # Verify backup file is valid before restore
                 backup_size = backup_path.stat().st_size
                 if backup_size == 0:
                     raise StorageError("Backup file is empty")
-                
+
                 # Test if backup file is a valid SQLite database
                 try:
                     test_conn = sqlite3.connect(str(backup_path))
-                    test_conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    test_conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table'"
+                    )
                     test_conn.close()
                 except sqlite3.Error as e:
-                    raise StorageError(f"Backup file is not a valid SQLite database: {str(e)}")
-                
+                    raise StorageError(
+                        f"Backup file is not a valid SQLite database: {str(e)}"
+                    )
+
                 # Copy with retry logic
                 max_retries = 3
                 for attempt in range(max_retries):
@@ -531,18 +545,22 @@ class BackupService:
                         break
                     except (OSError, IOError) as e:
                         if attempt == max_retries - 1:
-                            raise StorageError(f"Failed to restore database after {max_retries} attempts: {str(e)}")
-                        logger.warning(f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying...")
+                            raise StorageError(
+                                f"Failed to restore database after {max_retries} attempts: {str(e)}"
+                            )
+                        logger.warning(
+                            f"Database restore attempt {attempt + 1} failed: {str(e)}, retrying..."
+                        )
                         await asyncio.sleep(0.1)
-                
+
                 # Verify the restored database
                 if not self.db_path.exists():
                     raise StorageError("Database was not restored successfully")
-                
+
                 restored_size = self.db_path.stat().st_size
                 if restored_size == 0:
                     raise StorageError("Restored database is empty")
-                
+
                 restore_info["restored_components"].append("database")
                 logger.info("Database restored")
 

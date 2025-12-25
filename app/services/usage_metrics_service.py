@@ -245,7 +245,9 @@ class UsageMetricsService:
         with self._lock:
             if session_id in self._session_metrics:
                 session = self._session_metrics[session_id]
-                duration = (datetime.now(timezone.utc) - session.start_time).total_seconds()
+                duration = (
+                    datetime.now(timezone.utc) - session.start_time
+                ).total_seconds()
 
                 # Send session metrics to CloudWatch
                 self._send_cloudwatch_metrics(
@@ -284,7 +286,9 @@ class UsageMetricsService:
             response_time: Average response time in seconds
         """
         with self._lock:
-            uptime_seconds = int((datetime.now(timezone.utc) - self._start_time).total_seconds())
+            uptime_seconds = int(
+                (datetime.now(timezone.utc) - self._start_time).total_seconds()
+            )
 
             metric = SystemHealthMetric(
                 timestamp=datetime.now(timezone.utc),

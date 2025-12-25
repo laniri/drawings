@@ -413,7 +413,8 @@ class MonitoringService:
         recent_alerts = [
             alert
             for alert in self._alert_history
-            if (datetime.now(timezone.utc) - alert.timestamp).total_seconds() < 300  # 5 minutes
+            if (datetime.now(timezone.utc) - alert.timestamp).total_seconds()
+            < 300  # 5 minutes
         ]
 
         same_type_alerts = [
@@ -794,7 +795,9 @@ class MonitoringService:
             except Exception:
                 pass
 
-            log_stream_name = f"monitoring-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
+            log_stream_name = (
+                f"monitoring-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
+            )
 
             # Create log group if it doesn't exist
             try:

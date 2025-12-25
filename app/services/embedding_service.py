@@ -343,9 +343,11 @@ class VisionTransformerWrapper:
         self._model_hash = None
         self._cache_dir = Path("static/models")
         self._cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Check if model loading should be skipped (for testing)
-        self._skip_model_loading = os.getenv("SKIP_MODEL_LOADING", "false").lower() == "true"
+        self._skip_model_loading = (
+            os.getenv("SKIP_MODEL_LOADING", "false").lower() == "true"
+        )
 
     def _get_model_hash(self) -> str:
         """Generate a hash for the model configuration."""
@@ -365,7 +367,7 @@ class VisionTransformerWrapper:
             self.model = None
             self.processor = None
             return
-            
+
         try:
             self._model_hash = self._get_model_hash()
             cache_path = self._get_cache_path()
