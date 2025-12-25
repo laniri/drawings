@@ -1,18 +1,18 @@
 # Core dependencies
-fastapi>=0.104.1
-uvicorn[standard]>=0.24.0
+fastapi>=0.124.4
+uvicorn[standard]>=0.38.0
 pydantic>=2.5.0
 pydantic-settings>=2.0.0
-sqlalchemy>=2.0.23
+sqlalchemy>=2.0.37
 alembic>=1.13.0
-python-multipart>=0.0.6
+python-multipart>=0.0.20
 pillow>=10.3.0
 # opencv-python>=4.8.0,<4.10.0  # Optional: Advanced image processing (fallback to PIL if not available)
-torch>=2.1.0
-transformers>=4.35.0
+torch>=2.2.2
+transformers>=4.57.3
 numpy>=1.25.2,<2.0.0
 pandas>=2.1.3
-scikit-learn>=1.3.2
+scikit-learn>=1.8.0
 captum>=0.6.0
 hypothesis>=6.88.1
 aiofiles>=23.2.1
