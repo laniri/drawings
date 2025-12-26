@@ -121,7 +121,9 @@ class EnvironmentDetector:
 
         # Check for testing environment to override implicit AWS_REGION detection
         if os.getenv("TESTING", "").lower() in ["true", "1", "yes"]:
-            logger.info("Environment detected: LOCAL (testing mode - overriding AWS_REGION)")
+            logger.info(
+                "Environment detected: LOCAL (testing mode - overriding AWS_REGION)"
+            )
             return EnvironmentType.LOCAL
 
         # Implicit detection based on AWS configuration
