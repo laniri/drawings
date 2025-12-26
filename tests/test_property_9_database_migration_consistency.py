@@ -66,8 +66,12 @@ class TestDatabaseMigrationConsistency:
             'indexes': {}
         }
         
-        # Get table information
+        # Get table information (exclude Alembic's internal metadata table)
         for table_name in inspector.get_table_names():
+            # Skip Alembic's internal version tracking table
+            if table_name == 'alembic_version':
+                continue
+                
             columns = {}
             for column in inspector.get_columns(table_name):
                 columns[column['name']] = {
@@ -89,8 +93,12 @@ class TestDatabaseMigrationConsistency:
                 ]
             }
         
-        # Get index information
+        # Get index information (exclude Alembic's internal metadata table)
         for table_name in inspector.get_table_names():
+            # Skip Alembic's internal version tracking table
+            if table_name == 'alembic_version':
+                continue
+                
             indexes = []
             for index in inspector.get_indexes(table_name):
                 indexes.append({
