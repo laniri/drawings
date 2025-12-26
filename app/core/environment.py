@@ -123,17 +123,21 @@ class EnvironmentDetector:
         # Only apply this override in CI environments when not explicitly testing environment detection
         testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
         ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
-        
+
         # Apply TESTING override only in CI when there's no explicit APP_ENVIRONMENT
         # and we're not in an environment detection test context
         if testing_env and ci_env and not env_var:
             # Check if we're in a specific environment detection test
             # by looking for test-specific environment setup
             test_context = (
-                os.getenv("PYTEST_CURRENT_TEST", "").find("test_environment_detection") != -1
-                or os.getenv("PYTEST_CURRENT_TEST", "").find("test_property_1_environment") != -1
+                os.getenv("PYTEST_CURRENT_TEST", "").find("test_environment_detection")
+                != -1
+                or os.getenv("PYTEST_CURRENT_TEST", "").find(
+                    "test_property_1_environment"
+                )
+                != -1
             )
-            
+
             if not test_context:
                 logger.info(
                     "Environment detected: LOCAL (testing mode - overriding AWS_REGION)"
