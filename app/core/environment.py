@@ -102,26 +102,26 @@ class EnvironmentDetector:
         Detect the current environment based on environment variables.
 
         Detection logic:
-        1. Check TESTING variable first (for test environments)
-        2. Check APP_ENVIRONMENT variable explicitly
+        1. Check APP_ENVIRONMENT variable explicitly (highest priority)
+        2. Check TESTING variable for implicit AWS_REGION override
         3. If AWS_REGION is set, assume production
         4. Otherwise, default to local
 
         Returns:
             EnvironmentType: Detected environment type
         """
-        # Check for testing environment first
-        if os.getenv("TESTING", "").lower() in ["true", "1", "yes"]:
-            logger.info("Environment detected: LOCAL (testing mode)")
-            return EnvironmentType.LOCAL
-
-        # Explicit environment variable
+        # Explicit environment variable (highest priority)
         env_var = os.getenv(cls.ENV_VAR_ENVIRONMENT, "").lower()
         if env_var in ["production", "prod"]:
             logger.info("Environment detected: PRODUCTION (explicit)")
             return EnvironmentType.PRODUCTION
         elif env_var in ["local", "development", "dev"]:
             logger.info("Environment detected: LOCAL (explicit)")
+            return EnvironmentType.LOCAL
+
+        # Check for testing environment to override implicit AWS_REGION detection
+        if os.getenv("TESTING", "").lower() in ["true", "1", "yes"]:
+            logger.info("Environment detected: LOCAL (testing mode - overriding AWS_REGION)")
             return EnvironmentType.LOCAL
 
         # Implicit detection based on AWS configuration
