@@ -654,7 +654,7 @@ Anomaly Threshold: {metrics.anomaly_detection_threshold:.6f}
         ax1.grid(True, alpha=0.3)
 
         # Box plot
-        ax2.boxplot(errors, orientation="vertical")
+        ax2.boxplot(errors)
         ax2.set_ylabel("Reconstruction Error")
         ax2.set_title("Error Distribution Box Plot")
         ax2.grid(True, alpha=0.3)
