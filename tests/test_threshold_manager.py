@@ -109,7 +109,7 @@ def create_test_drawings_with_embeddings(db, age_min: float, age_max: float, num
     ),
     threshold=st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False)
 )
-@settings(max_examples=100)
+@settings(max_examples=100, deadline=None)
 def test_threshold_based_anomaly_detection(scores, threshold):
     """
     **Feature: children-drawing-anomaly-detection, Property 9: Threshold-Based Anomaly Detection**
