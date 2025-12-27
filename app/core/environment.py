@@ -166,10 +166,10 @@ class EnvironmentDetector:
         # Always use LOCAL storage backend for testing environments
         testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
         ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
-        
+
         if testing_env and ci_env:
             return StorageBackend.LOCAL
-            
+
         if environment == EnvironmentType.PRODUCTION:
             return StorageBackend.S3
         return StorageBackend.LOCAL
