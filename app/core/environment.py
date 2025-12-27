@@ -189,6 +189,8 @@ class EnvironmentDetector:
                 "test_database_isolation_across_environments" in current_test
                 or "test_environment_switching_isolation" in current_test
                 or "test_configuration_reset_isolation" in current_test
+                or "test_environment_storage_service_isolation" in current_test
+                or "TestEnvironmentDataIsolation::test_environment_storage_service_isolation" in current_test
             )
 
             # Override for property-based tests but not for unit tests testing environment behavior
