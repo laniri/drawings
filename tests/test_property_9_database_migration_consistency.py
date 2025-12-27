@@ -17,7 +17,7 @@ from typing import Dict, List, Tuple, Any
 from unittest.mock import patch
 
 import pytest
-from hypothesis import given, strategies as st, assume
+from hypothesis import given, strategies as st, assume, settings
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -372,6 +372,7 @@ else:
             max_size=3
         )
     )
+    @settings(deadline=1000)  # Allow 1 second for database operations
     def test_migration_rollback_consistency(self, migration_operations: List[str]):
         """
         Test that migration rollbacks work consistently across environments.
