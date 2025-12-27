@@ -219,12 +219,17 @@ class EnvironmentDetector:
         # Get AWS configuration
         aws_region = os.getenv(cls.ENV_VAR_AWS_REGION)
         s3_bucket_name = os.getenv(cls.ENV_VAR_S3_BUCKET)
-        
+
         # Provide default S3 bucket name for testing when storage backend is S3
         # This prevents validation errors during test collection
         testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
         ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
-        if testing_env and ci_env and storage_backend == StorageBackend.S3 and not s3_bucket_name:
+        if (
+            testing_env
+            and ci_env
+            and storage_backend == StorageBackend.S3
+            and not s3_bucket_name
+        ):
             s3_bucket_name = "test-bucket-name"  # Default for testing
             logger.info("Using default S3 bucket name for testing environment")
 
