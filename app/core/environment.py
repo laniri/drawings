@@ -181,16 +181,16 @@ class EnvironmentDetector:
             # During test collection (PYTEST_CURRENT_TEST is empty), always use LOCAL
             if not current_test:
                 return StorageBackend.LOCAL
-            
+
             # During test execution, only override for property-based tests
             # Unit tests that explicitly test environment behavior should use their expected backends
             is_property_test = "test_property_" in current_test
             is_unit_environment_test = (
-                "test_database_isolation_across_environments" in current_test or
-                "test_environment_switching_isolation" in current_test or
-                "test_configuration_reset_isolation" in current_test
+                "test_database_isolation_across_environments" in current_test
+                or "test_environment_switching_isolation" in current_test
+                or "test_configuration_reset_isolation" in current_test
             )
-            
+
             # Override for property-based tests but not for unit tests testing environment behavior
             if is_property_test and not is_unit_environment_test:
                 return StorageBackend.LOCAL
