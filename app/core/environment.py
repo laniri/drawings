@@ -163,12 +163,18 @@ class EnvironmentDetector:
         Returns:
             StorageBackend: Appropriate storage backend
         """
-        # Always use LOCAL storage backend for testing environments
-        testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
-        ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
+        # Check if environment was explicitly set (not auto-detected)
+        explicit_env = os.getenv(cls.ENV_VAR_ENVIRONMENT, "").lower()
 
-        if testing_env and ci_env:
-            return StorageBackend.LOCAL
+        # Only apply testing override for auto-detected environments
+        # If environment is explicitly set to production, respect that choice
+        if explicit_env not in ["production", "prod"]:
+            # Always use LOCAL storage backend for testing environments when not explicitly set to production
+            testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
+            ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
+
+            if testing_env and ci_env:
+                return StorageBackend.LOCAL
 
         if environment == EnvironmentType.PRODUCTION:
             return StorageBackend.S3
