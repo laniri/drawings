@@ -149,9 +149,15 @@ class EnvironmentDetector:
             # Check if we're running specific environment detection tests
             current_test = os.getenv("PYTEST_CURRENT_TEST", "")
 
+            # During test collection (PYTEST_CURRENT_TEST is empty), always use LOCAL
+            if not current_test:
+                logger.info(
+                    "Environment detected: LOCAL (testing mode - test collection phase)"
+                )
+                return EnvironmentType.LOCAL
+
             # Skip TESTING override only for specific environment detection tests during execution
-            # During test collection (when PYTEST_CURRENT_TEST is empty), always apply override
-            is_env_detection_test = current_test != "" and (
+            is_env_detection_test = (
                 "test_configuration_creation_validation" in current_test
                 or "test_environment_isolation_property" in current_test
                 or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation"
