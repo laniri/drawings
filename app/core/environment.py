@@ -128,14 +128,12 @@ class EnvironmentDetector:
         if testing_env and ci_env and not env_var:
             # Check if we're running specific environment detection tests
             current_test = os.getenv("PYTEST_CURRENT_TEST", "")
-            
+
             # Skip TESTING override only for specific environment detection tests during execution
             # During test collection (when PYTEST_CURRENT_TEST is empty), always apply override
-            is_env_detection_test = (
-                current_test != "" and (
-                    "test_property_1_environment_configuration_detection" in current_test
-                    or "test_environment_detection" in current_test
-                )
+            is_env_detection_test = current_test != "" and (
+                "test_property_1_environment_configuration_detection" in current_test
+                or "test_environment_detection" in current_test
             )
 
             # Apply TESTING override for all cases except specific environment detection tests
