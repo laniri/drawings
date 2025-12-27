@@ -70,11 +70,11 @@ class EnvironmentConfig(BaseModel):
             # Check if we're in a testing environment
             testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
             ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
-            
+
             if testing_env and ci_env:
                 # Provide a default bucket name for testing to prevent validation errors
                 return "test-bucket-name"
-            
+
             raise ValueError("s3_bucket_name is required when storage_backend is 's3'")
         return v
 
@@ -183,13 +183,16 @@ class EnvironmentDetector:
         explicit_env = os.getenv(cls.ENV_VAR_ENVIRONMENT, "").lower()
 
         # Only use S3 for explicitly set production environments
-        if explicit_env in ["production", "prod"] and environment == EnvironmentType.PRODUCTION:
+        if (
+            explicit_env in ["production", "prod"]
+            and environment == EnvironmentType.PRODUCTION
+        ):
             return StorageBackend.S3
 
         # For auto-detected production environments (AWS_REGION present), still use LOCAL in testing
         if environment == EnvironmentType.PRODUCTION:
             return StorageBackend.S3
-        
+
         return StorageBackend.LOCAL
 
     @classmethod
