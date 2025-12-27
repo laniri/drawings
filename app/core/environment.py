@@ -140,8 +140,10 @@ class EnvironmentDetector:
             # Skip TESTING override only for specific environment detection tests during execution
             # During test collection (when PYTEST_CURRENT_TEST is empty), always apply override
             is_env_detection_test = current_test != "" and (
-                "test_property_1_environment_configuration_detection" in current_test
-                or "test_environment_detection" in current_test
+                "test_configuration_creation_validation" in current_test
+                or "test_environment_isolation_property" in current_test
+                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation" in current_test
+                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property" in current_test
             )
 
             # Apply TESTING override for all cases except specific environment detection tests
@@ -192,6 +194,10 @@ class EnvironmentDetector:
                 or "test_environment_storage_service_isolation" in current_test
                 or "TestEnvironmentDataIsolation::test_environment_storage_service_isolation"
                 in current_test
+                or "test_configuration_creation_validation" in current_test
+                or "test_environment_isolation_property" in current_test
+                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation" in current_test
+                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property" in current_test
             )
 
             # Override for property-based tests but not for unit tests testing environment behavior
