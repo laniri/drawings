@@ -157,6 +157,7 @@ def downgrade():
         table_name=st.text(min_size=3, max_size=20, alphabet=st.characters(whitelist_categories=('Ll', 'Lu'), whitelist_characters='_')),
         column_count=st.integers(min_value=1, max_value=5)
     )
+    @settings(deadline=1000)  # Allow 1 second for database operations and file I/O
     def test_migration_consistency_across_environments(self, table_name: str, column_count: int):
         """
         **Feature: aws-production-deployment, Property 9: Database Migration Consistency**
