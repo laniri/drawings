@@ -142,8 +142,10 @@ class EnvironmentDetector:
             is_env_detection_test = current_test != "" and (
                 "test_configuration_creation_validation" in current_test
                 or "test_environment_isolation_property" in current_test
-                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation" in current_test
-                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property" in current_test
+                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation"
+                in current_test
+                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property"
+                in current_test
             )
 
             # Apply TESTING override for all cases except specific environment detection tests
@@ -196,8 +198,10 @@ class EnvironmentDetector:
                 in current_test
                 or "test_configuration_creation_validation" in current_test
                 or "test_environment_isolation_property" in current_test
-                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation" in current_test
-                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property" in current_test
+                or "TestEnvironmentConfigurationDetection::test_configuration_creation_validation"
+                in current_test
+                or "TestEnvironmentConfigurationDetection::test_environment_isolation_property"
+                in current_test
             )
 
             # Override for property-based tests but not for unit tests testing environment behavior
