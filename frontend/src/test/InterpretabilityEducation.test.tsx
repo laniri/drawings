@@ -43,7 +43,7 @@ describe('Interpretability Education Components', () => {
     queryClient.clear()
     
     // Setup axios mock implementation
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url.includes('/api/interpretability/examples')) {
         return Promise.resolve({
           data: [
