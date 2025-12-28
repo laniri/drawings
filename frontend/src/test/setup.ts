@@ -12,12 +12,43 @@ vi.mock('axios', () => ({
   },
 }))
 
-// Mock URL.createObjectURL and URL.revokeObjectURL
-Object.defineProperty(window, 'URL', {
-  value: {
-    createObjectURL: vi.fn(() => 'mocked-url'),
-    revokeObjectURL: vi.fn()
+// Mock URL constructor and methods
+Object.defineProperty(global, 'URL', {
+  value: class URL {
+    constructor(url: string, base?: string) {
+      this.href = base ? `${base}/${url}` : url
+      this.origin = base || 'http://localhost:3000'
+      this.protocol = 'http:'
+      this.host = 'localhost:3000'
+      this.hostname = 'localhost'
+      this.port = '3000'
+      this.pathname = url.startsWith('/') ? url : `/${url}`
+      this.search = ''
+      this.hash = ''
+    }
+    
+    href: string
+    origin: string
+    protocol: string
+    host: string
+    hostname: string
+    port: string
+    pathname: string
+    search: string
+    hash: string
+    
+    static createObjectURL = vi.fn(() => 'mocked-url')
+    static revokeObjectURL = vi.fn()
+    
+    toString() {
+      return this.href
+    }
   }
+})
+
+// Also set it on window for browser compatibility
+Object.defineProperty(window, 'URL', {
+  value: global.URL
 })
 
 // Mock ResizeObserver
