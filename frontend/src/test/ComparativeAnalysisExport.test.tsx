@@ -161,13 +161,13 @@ describe('Comparative Analysis and Export Features', () => {
       
       await waitFor(() => {
         expect(screen.getByText('Current Analysis Summary')).toBeInTheDocument()
-        expect(screen.getByText((content, element) => {
+        expect(screen.getByText((_content, element) => {
           return element?.textContent?.includes('test_drawing.png') || false
         })).toBeInTheDocument()
-        expect(screen.getByText((content, element) => {
+        expect(screen.getByText((_content, element) => {
           return element?.textContent?.includes('Age: 5.5 years') || false
         })).toBeInTheDocument()
-        expect(screen.getByText((content, element) => {
+        expect(screen.getByText((_content, element) => {
           return element?.textContent?.includes('Score: 75.0/100') || false
         })).toBeInTheDocument()
       })
