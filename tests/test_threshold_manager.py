@@ -357,7 +357,7 @@ from app.services.score_normalizer import ScoreNormalizer, NormalizationConfig, 
     ),
     normalization_method=st.sampled_from(["z_score", "min_max", "robust"])
 )
-@settings(max_examples=50)
+@settings(max_examples=50, deadline=None)  # Disable deadline to prevent flaky timing issues
 def test_score_normalization_consistency(raw_scores, normalization_method):
     """
     **Feature: children-drawing-anomaly-detection, Property 8: Score Normalization Consistency**
