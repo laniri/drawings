@@ -12,7 +12,7 @@ import pytest
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Tuple
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from unittest.mock import Mock, patch
 import json
 
@@ -94,7 +94,7 @@ class TestUnifiedSubjectAwareArchitecture:
             max_size=8
         )
     )
-    @settings(max_examples=20)
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.data_too_large])
     def test_unified_architecture_validation(self, model_specs):
         """
         **Feature: children-drawing-anomaly-detection, Property 43: Unified Subject-Aware Architecture**
