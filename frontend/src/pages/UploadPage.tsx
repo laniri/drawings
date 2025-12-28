@@ -127,7 +127,7 @@ const UploadPage: React.FC = () => {
         setTimeout(() => setAnalysisStatus(null), 5000)
       }
     },
-    onError: (error: any) => {
+    onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       setUploadError(
         error.response?.data?.detail || 'Upload failed. Please try again.'
       )

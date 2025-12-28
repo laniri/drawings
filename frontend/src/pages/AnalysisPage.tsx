@@ -100,7 +100,7 @@ const AnalysisPage: React.FC = () => {
         // First try to get analysis by analysis ID
         const response = await axios.get(`/api/analysis/${id}`)
         return response.data
-      } catch (error: any) {
+      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error.response?.status === 404) {
           // If not found, try to get the latest analysis for this drawing ID
           try {

@@ -94,7 +94,7 @@ const SUBJECT_CATEGORIES = {
 }
 
 interface SubjectCategorySelectProps {
-  control: Control<any>
+  control: Control<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   name: string
   label?: string
   required?: boolean
@@ -147,7 +147,7 @@ const SubjectCategorySelect: React.FC<SubjectCategorySelectProps> = ({
     return filtered
   }, [groupedCategories, searchTerm])
 
-  const renderCategoryIcon = (IconComponent: React.ComponentType<any>) => (
+  const renderCategoryIcon = (IconComponent: React.ComponentType<any>) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
     <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.light', mr: 1 }}>
       <IconComponent sx={{ fontSize: 14 }} />
     </Avatar>

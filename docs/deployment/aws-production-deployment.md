@@ -178,6 +178,7 @@ The application uses the following environment variables in production:
 
 | Variable | Description | Source |
 |----------|-------------|---------|
+| `APP_ENVIRONMENT` | Explicit environment specification (production) | CloudFormation |
 | `ENVIRONMENT` | Deployment environment | CloudFormation |
 | `AWS_DEFAULT_REGION` | AWS region | CloudFormation |
 | `S3_BUCKET_DRAWINGS` | Drawings storage bucket | CloudFormation |
@@ -186,6 +187,8 @@ The application uses the following environment variables in production:
 | `ENABLE_METRICS` | Enable CloudWatch metrics | CloudFormation |
 | `ENABLE_SECRETS_MANAGER` | Use Secrets Manager | CloudFormation |
 | `ADMIN_PASSWORD_SECRET_ARN` | Admin password secret ARN | Secrets Manager |
+
+**Environment Detection**: The system uses `APP_ENVIRONMENT=production` to explicitly specify the production environment. This takes precedence over other environment detection methods and ensures proper S3 storage backend selection even in CI/testing contexts.
 
 ### Database Configuration
 - **Type**: SQLite with S3 backup

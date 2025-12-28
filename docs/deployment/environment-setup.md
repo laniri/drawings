@@ -62,6 +62,36 @@ cd children-drawing-anomaly-detection
 4. Set up file storage paths
 5. Configure ML model paths
 
+#### Environment Variables
+
+The system uses automatic environment detection with the following priority:
+
+1. **APP_ENVIRONMENT** variable (highest priority) - Explicit environment specification (`production`, `local`, etc.)
+2. **TESTING** variable - When set to `true`, `1`, or `yes` in CI environments, forces LOCAL storage backend for test isolation
+3. **AWS_REGION** presence - Implies production environment when set
+4. **Default** - Falls back to local environment
+
+For production deployment, set:
+```bash
+APP_ENVIRONMENT=production
+AWS_REGION=eu-west-1
+```
+
+For testing (automatically set by test infrastructure):
+```bash
+TESTING=true
+CI=true  # Forces LOCAL storage backend when combined with TESTING=true
+SKIP_MODEL_LOADING=true
+DATABASE_URL=sqlite:///:memory:
+```
+
+**Storage Backend Selection**: The system automatically selects the appropriate storage backend:
+- **Production**: Uses S3 storage when `APP_ENVIRONMENT=production` or `AWS_REGION` is set
+- **Testing**: Uses LOCAL storage when `TESTING=true` and `CI=true` are both set, **except when `APP_ENVIRONMENT=production` is explicitly set**
+- **Local Development**: Uses LOCAL storage by default
+
+**Production Environment Precedence**: When `APP_ENVIRONMENT=production` is explicitly set, it takes precedence over testing overrides. This ensures production deployments work correctly even in CI/testing contexts, which is essential for production deployment pipelines.
+
 #### Database Configuration
 The system supports flexible SQLite database URL formats:
 ```bash

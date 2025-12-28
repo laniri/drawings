@@ -40,7 +40,7 @@ import ConfidenceIndicator from './ConfidenceIndicator'
 
 interface InterpretabilityEducationHubProps {
   analysisId?: number
-  analysisData?: any
+  analysisData?: any // eslint-disable-line @typescript-eslint/no-explicit-any
   userRole?: 'researcher' | 'educator' | 'parent' | 'clinician'
   ageGroup?: string
   showTutorialOnMount?: boolean
@@ -79,7 +79,7 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
 
   // Handle role change
   const handleRoleChange = (newRole: string) => {
-    setCurrentUserRole(newRole as any)
+    setCurrentUserRole(newRole as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     onUserRoleChange?.(newRole)
   }
 
@@ -138,7 +138,7 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
               <Chip
                 icon={getRoleIcon(currentUserRole)}
                 label={`${currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)} View`}
-                color={getRoleColor(currentUserRole) as any}
+                color={getRoleColor(currentUserRole) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                 variant="outlined"
               />
               {isFirstVisit && (

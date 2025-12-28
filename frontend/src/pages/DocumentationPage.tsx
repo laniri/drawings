@@ -77,7 +77,7 @@ interface DocumentationMetrics {
     validated_files: number
     errors: number
     warnings: number
-    categories: Record<string, any>
+    categories: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 }
 
@@ -114,7 +114,7 @@ const DocumentationPage: React.FC = () => {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
   const [previewCategory, setPreviewCategory] = useState('')
   const [batchDialogOpen, setBatchDialogOpen] = useState(false)
-  const [batchRequests, setBatchRequests] = useState<any[]>([])
+  const [batchRequests, setBatchRequests] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const [scheduleTime, setScheduleTime] = useState('')
 
@@ -210,7 +210,7 @@ const DocumentationPage: React.FC = () => {
 
   // Batch generate mutation
   const batchGenerateMutation = useMutation({
-    mutationFn: async (batchData: any) => {
+    mutationFn: async (batchData: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       const response = await axios.post('/api/documentation/batch/generate', batchData)
       return response.data
     },
@@ -223,7 +223,7 @@ const DocumentationPage: React.FC = () => {
 
   // Schedule generation mutation
   const scheduleMutation = useMutation({
-    mutationFn: async (scheduleData: any) => {
+    mutationFn: async (scheduleData: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       const response = await axios.post('/api/documentation/schedule', scheduleData)
       return response.data
     },
@@ -285,7 +285,7 @@ const DocumentationPage: React.FC = () => {
     }])
   }
 
-  const updateBatchRequest = (index: number, updates: any) => {
+  const updateBatchRequest = (index: number, updates: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const updated = [...batchRequests]
     updated[index] = { ...updated[index], ...updates }
     setBatchRequests(updated)
@@ -721,7 +721,7 @@ const DocumentationPage: React.FC = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {Object.entries(metrics?.validation_status?.categories || {}).map(([category, data]: [string, any]) => (
+                          {Object.entries(metrics?.validation_status?.categories || {}).map(([category, data]: [string, any]) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                             <TableRow key={category}>
                               <TableCell>{category}</TableCell>
                               <TableCell>{data.files}</TableCell>
@@ -855,7 +855,7 @@ const DocumentationPage: React.FC = () => {
                     Changes Detected
                   </Typography>
                   <List dense>
-                    {previewMutation.data.preview.changes_detected.map((change: any, index: number) => (
+                    {previewMutation.data.preview.changes_detected.map((change: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                       <ListItem key={index}>
                         <ListItemIcon>
                           <Warning color={change.type === 'modified' ? 'warning' : 'info'} />

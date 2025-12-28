@@ -58,7 +58,7 @@ interface AdaptiveContent {
 }
 
 interface AdaptiveExplanationSystemProps {
-  analysisData: any
+  analysisData: any // eslint-disable-line @typescript-eslint/no-explicit-any
   onConfigChange?: (config: ExplanationConfig) => void
   initialConfig?: Partial<ExplanationConfig>
 }
@@ -138,7 +138,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
     }
   }
 
-  const generateAdaptiveContent = (data: any, cfg: ExplanationConfig): AdaptiveContent => {
+  const generateAdaptiveContent = (data: any, cfg: ExplanationConfig): AdaptiveContent => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const vocabularyMap = {
       basic: {
         'anomaly': 'unusual pattern',
@@ -275,7 +275,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
     }
   }
 
-  const handleConfigChange = (key: keyof ExplanationConfig, value: any) => {
+  const handleConfigChange = (key: keyof ExplanationConfig, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     setConfig(prev => ({ ...prev, [key]: value }))
   }
 

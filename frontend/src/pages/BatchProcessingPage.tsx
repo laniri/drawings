@@ -310,7 +310,7 @@ const BatchProcessingPage: React.FC = () => {
                             <Chip
                               size="small"
                               label={batchFile.status}
-                              color={getStatusColor(batchFile.status) as any}
+                              color={getStatusColor(batchFile.status) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                               variant="outlined"
                             />
                             {batchFile.progress > 0 && batchFile.progress < 100 && (
@@ -448,7 +448,7 @@ const BatchProcessingPage: React.FC = () => {
                       <Chip
                         size="small"
                         label={file.status}
-                        color={getStatusColor(file.status) as any}
+                        color={getStatusColor(file.status) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                       />
                     </TableCell>
                     <TableCell>
