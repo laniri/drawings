@@ -72,6 +72,31 @@ describe('Interpretability Education Components', () => {
   })
 
   it('renders ExampleGallery without crashing', async () => {
+    // Mock successful API response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([
+        {
+          pattern_id: 'test-1',
+          pattern_name: 'Test Pattern',
+          description: 'Test description',
+          age_group: '3-4',
+          example_type: 'normal',
+          confidence_level: 'high',
+          visual_features: ['test feature'],
+          interpretation_notes: ['test note'],
+          educational_context: 'test context',
+          image_url: '/test-image.jpg',
+          saliency_url: '/test-saliency.jpg',
+          metadata: {
+            drawing_count: 100,
+            prevalence: 0.5,
+            developmental_significance: 'test significance'
+          }
+        }
+      ])
+    })
+
     render(
       <TestWrapper>
         <ExampleGallery
@@ -145,6 +170,7 @@ describe('Interpretability Education Components', () => {
     )
     
     await waitFor(() => {
+      // The component shows "Parent View" in the chip label
       expect(screen.getByText('Parent View')).toBeInTheDocument()
     })
   })

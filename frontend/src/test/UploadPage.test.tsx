@@ -34,7 +34,8 @@ describe('UploadPage Integration Tests', () => {
     
     // Check for Drawing Subject field by text content instead of label association
     await waitFor(() => {
-      expect(screen.getByText(/Drawing Subject/)).toBeInTheDocument()
+      const drawingSubjectElements = screen.getAllByText(/Drawing Subject/)
+      expect(drawingSubjectElements.length).toBeGreaterThan(0)
     })
     
     expect(screen.getAllByText('Expert Label (optional)').length).toBeGreaterThan(0)
