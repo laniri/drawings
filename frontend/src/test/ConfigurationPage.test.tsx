@@ -42,11 +42,14 @@ describe('ConfigurationPage Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockedAxios.get.mockImplementation((url) => {
-      if (url === '/api/config') {
+      if (url === '/api/config/') {
         return Promise.resolve({ data: mockConfig })
       }
       if (url === '/api/models/age-groups') {
-        return Promise.resolve({ data: mockAgeGroupModels })
+        return Promise.resolve({ data: { models: mockAgeGroupModels } })
+      }
+      if (url === '/api/config/subject-statistics') {
+        return Promise.resolve({ data: { statistics: [] } })
       }
       return Promise.reject(new Error('Unknown URL'))
     })
