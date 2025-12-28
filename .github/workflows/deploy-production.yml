@@ -149,6 +149,15 @@ jobs:
         pytest tests/test_property_1_environment_configuration_detection.py -v --tb=short
     
     - name: Run property-based tests
+      env:
+        # Force local environment for CI testing
+        APP_ENVIRONMENT: "local"
+        # Skip heavy model loading in CI
+        SKIP_MODEL_LOADING: "true"
+        # Use in-memory database for faster tests
+        DATABASE_URL: "sqlite:///:memory:"
+        # Add current directory to Python path
+        PYTHONPATH: "."
       run: |
         pytest tests/test_property_*.py -v --tb=short
     
