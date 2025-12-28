@@ -32,8 +32,9 @@ describe('UploadPage Integration Tests', () => {
       expect(screen.getByLabelText(/Child's Age/)).toBeInTheDocument()
     })
     
+    // Check for Drawing Subject field by text content instead of label association
     await waitFor(() => {
-      expect(screen.getByLabelText(/Drawing Subject/)).toBeInTheDocument()
+      expect(screen.getByText(/Drawing Subject/)).toBeInTheDocument()
     })
     
     expect(screen.getAllByText('Expert Label (optional)').length).toBeGreaterThan(0)
