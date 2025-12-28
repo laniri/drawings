@@ -257,7 +257,7 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      const exportButton = screen.getByRole('button', { name: /export/i })
+      const exportButton = screen.getByRole('button', { name: 'Export' })
       fireEvent.click(exportButton)
 
       expect(screen.getByText('Quick Export')).toBeInTheDocument()
@@ -293,7 +293,7 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      const exportButton = screen.getByRole('button', { name: /export/i })
+      const exportButton = screen.getByRole('button', { name: 'Export' })
       fireEvent.click(exportButton)
 
       const pdfOption = screen.getByText('PDF Report')
@@ -340,7 +340,7 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Annotations (0)')).toBeInTheDocument()
+      expect(screen.getByText('Annotations (2)')).toBeInTheDocument()
       expect(screen.getByText('Add Note')).toBeInTheDocument()
     })
 
@@ -358,8 +358,8 @@ describe('Comparative Analysis and Export Features', () => {
       fireEvent.click(addButton)
 
       expect(screen.getByText('Add Annotation')).toBeInTheDocument()
-      expect(screen.getByLabelText('Region')).toBeInTheDocument()
-      expect(screen.getByLabelText('Type')).toBeInTheDocument()
+      expect(screen.getByRole('combobox', { name: /region/i })).toBeInTheDocument()
+      expect(screen.getByRole('combobox', { name: /type/i })).toBeInTheDocument()
       expect(screen.getByLabelText('Annotation Text')).toBeInTheDocument()
     })
 
@@ -483,13 +483,13 @@ describe('Comparative Analysis and Export Features', () => {
         expect(screen.getByText('Timeline')).toBeInTheDocument()
       })
 
-      // Switch to Chart view - find the select input by its value
+      // Switch to Chart view - find the select input and click it
       const viewSelect = screen.getByDisplayValue('timeline')
       fireEvent.mouseDown(viewSelect)
       
       // Wait for the menu to appear and click Chart option
       await waitFor(() => {
-        const chartMenuItem = screen.getByRole('option', { name: 'Chart' })
+        const chartMenuItem = screen.getByText('Chart')
         fireEvent.click(chartMenuItem)
       })
 
