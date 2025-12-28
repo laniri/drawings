@@ -151,5 +151,5 @@ describe('Comparative Analysis Integration', () => {
     await waitFor(() => {
       expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
     })
-  }))
+  })
 })
