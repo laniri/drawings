@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "description": "Frontend for Children's Drawing Anomaly Detection System",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
