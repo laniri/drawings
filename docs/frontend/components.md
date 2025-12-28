@@ -183,6 +183,45 @@ The interpretability system provides comprehensive visual explanations for all d
 - `helperText?: string` - Help text
 - `showSearch?: boolean` - Whether to show search functionality
 
+**Testing Considerations**:
+- Use `getByText` instead of `getByLabelText` for testing due to complex Material-UI Select label association
+- Test search functionality with user interactions
+- Verify category grouping and filtering behavior
+- Test form integration with React Hook Form
+
+## Testing Best Practices
+
+### Component Testing Guidelines
+
+**Accessibility Testing**:
+```typescript
+// Preferred: Test with proper accessibility queries
+expect(screen.getByLabelText(/Child's Age/)).toBeInTheDocument()
+
+// Fallback: For complex components with label association issues
+expect(screen.getByText(/Drawing Subject/)).toBeInTheDocument()
+
+// Best practice: Ensure proper label association in components
+<FormControl fullWidth margin="normal">
+  <InputLabel id="subject-label">Drawing Subject</InputLabel>
+  <Select labelId="subject-label" aria-label="Drawing Subject">
+    {/* options */}
+  </Select>
+</FormControl>
+```
+
+**Material-UI Component Testing**:
+- Use `waitFor` for components that load data asynchronously
+- Test user interactions with `userEvent` from Testing Library
+- Verify form validation and error states
+- Test responsive behavior and theme integration
+
+**Test Setup**:
+- All tests use Vitest with jsdom environment
+- React Testing Library for component rendering and queries
+- Mock implementations for external dependencies
+- Proper cleanup and isolation between tests
+
 ## Layout Components
 
 ### Layout Components

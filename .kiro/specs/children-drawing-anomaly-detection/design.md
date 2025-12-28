@@ -279,9 +279,10 @@ The system follows a modern layered architecture with the following technology s
 - `POST /api/models/export` - Export model parameters for deployment
 
 **Configuration:**
-- `GET /api/config` - Get current system configuration
+- `GET /api/config/` - Get current system configuration
 - `PUT /api/config/threshold` - Update global threshold settings
 - `PUT /api/config/age-grouping` - Modify age grouping strategy
+- `GET /api/config/subjects/statistics` - Get subject-specific statistics
 
 **Enhanced Interpretability:**
 - `GET /api/interpretability/{analysis_id}/interactive` - Get interactive saliency data with region mappings

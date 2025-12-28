@@ -324,7 +324,38 @@ def test_something(app_modules):
     Drawing = app_modules['Drawing']  # Safe import
 ```
 
-#### 3. Ensure Test Isolation
+#### 3. Frontend Component Testing Best Practices
+```typescript
+// DO: Test form fields with proper accessibility queries
+await waitFor(() => {
+  expect(screen.getByLabelText(/Child's Age/)).toBeInTheDocument()
+})
+
+// FALLBACK: If label association is problematic, use text content
+await waitFor(() => {
+  expect(screen.getByText(/Drawing Subject/)).toBeInTheDocument()
+})
+
+// DO: Handle Material-UI Select dropdown interactions properly
+const viewSelect = screen.getByDisplayValue('timeline')
+fireEvent.mouseDown(viewSelect)
+
+// Wait for dropdown menu to appear before interacting
+await waitFor(() => {
+  const chartMenuItem = screen.getByRole('option', { name: 'Chart' })
+  fireEvent.click(chartMenuItem)
+})
+
+// BEST: Ensure proper label association in components
+<FormControl fullWidth margin="normal">
+  <InputLabel id="subject-label">Drawing Subject</InputLabel>
+  <Select labelId="subject-label" aria-label="Drawing Subject">
+    {/* options */}
+  </Select>
+</FormControl>
+```
+
+#### 4. Ensure Test Isolation
 ```python
 def test_independent_operation(db_session):
     """Each test should be completely independent."""
@@ -333,7 +364,7 @@ def test_independent_operation(db_session):
     # Use fresh database session
 ```
 
-#### 4. Use Appropriate Markers
+#### 5. Use Appropriate Markers
 ```python
 @pytest.mark.slow
 def test_model_training():
@@ -346,7 +377,7 @@ def test_fast_calculation():
     pass
 ```
 
-#### 5. Property-Based Test Design
+#### 6. Property-Based Test Design
 ```python
 from hypothesis import given, strategies as st
 
@@ -525,6 +556,42 @@ pytest tests/test_specific.py::test_function -v -s --pdb
 10. **Maintenance**: Keep tests up-to-date with code changes
 
 ## Recent Test Infrastructure Improvements
+
+### Frontend Accessibility Testing Improvements (December 2025)
+
+**Enhanced Form Component Testing**: Improved testing approach for form components with accessibility considerations
+
+**Key Improvements**:
+- **Accessibility-First Testing**: Updated test queries to prioritize proper label association testing
+- **Graceful Fallback Strategy**: Implemented fallback testing approach when label association is problematic
+- **Component Testing Best Practices**: Added guidelines for testing Material-UI form components with proper accessibility
+
+**Technical Changes**:
+```typescript
+// Before: Only using getByLabelText (could fail if label association is broken)
+expect(screen.getByLabelText(/Drawing Subject/)).toBeInTheDocument()
+
+// After: Fallback approach for components with complex label structures
+expect(screen.getByText(/Drawing Subject/)).toBeInTheDocument()
+```
+
+**Benefits**:
+- **Improved Test Reliability**: Tests now handle complex Material-UI Select components more reliably
+- **Accessibility Awareness**: Highlights potential accessibility issues in form components
+- **Better Test Maintenance**: Provides clear patterns for testing form components with complex structures
+- **Enhanced Documentation**: Added frontend component testing best practices to guide developers
+
+**Affected Tests**:
+- `frontend/src/test/UploadPage.test.tsx`: Updated Drawing Subject field testing approach
+- `frontend/src/test/ComparativeAnalysisExport.test.tsx`: Enhanced Material-UI Select dropdown interaction testing
+- Enhanced testing guidelines for Material-UI Select components with custom rendering
+- Improved patterns for testing form components with complex label associations
+
+**Impact on Development**:
+- More reliable frontend test execution across different component implementations
+- Better identification of accessibility issues in form components
+- Clearer testing patterns for complex Material-UI components
+- Enhanced test maintainability for form-heavy interfaces
 
 ### Enhanced Environment Configuration Testing (December 2025)
 

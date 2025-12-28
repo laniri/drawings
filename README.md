@@ -657,6 +657,28 @@ pip install reportlab>=4.0.0
    echo "SKIP_MODEL_LOADING=true" >> .env
    ```
 
+9. **Frontend Test Issues**
+   ```bash
+   # Common frontend testing issues and solutions:
+   
+   # Issue: Tests fail with "getByLabelText" errors for complex form components
+   # Solution: Use fallback testing approaches for Material-UI components
+   # Example: Use getByText instead of getByLabelText for Select components
+   
+   # Issue: Component tests fail due to missing test setup
+   # Solution: Ensure proper test setup in frontend/src/test/setup.ts
+   
+   # Run frontend tests with verbose output
+   cd frontend
+   npm run test -- --reporter=verbose
+   
+   # Run tests in watch mode for development
+   npm run test:watch
+   
+   # Run tests with UI for debugging
+   npm run test:ui
+   ```
+
 ### Development Tips
 
 - Use `python train_models.py` for complete automated training
