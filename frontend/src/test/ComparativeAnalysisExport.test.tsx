@@ -358,10 +358,12 @@ describe('Comparative Analysis and Export Features', () => {
       fireEvent.click(addButton)
 
       expect(screen.getByText('Add Annotation')).toBeInTheDocument()
-      // Use more specific selectors for Material-UI Select components
-      expect(screen.getByText('Region')).toBeInTheDocument()
-      expect(screen.getByText('Type')).toBeInTheDocument()
+      // Check for the dialog content instead of specific form labels
+      expect(screen.getByText('Add Annotation')).toBeInTheDocument()
       expect(screen.getByLabelText('Annotation Text')).toBeInTheDocument()
+      // Check for the presence of select components by their role
+      const comboboxes = screen.getAllByRole('combobox')
+      expect(comboboxes).toHaveLength(2) // Region and Type selects
     })
 
     it('handles annotation creation', async () => {
@@ -389,19 +391,20 @@ describe('Comparative Analysis and Export Features', () => {
       const addButton = screen.getByText('Add Note')
       fireEvent.click(addButton)
 
-      // Fill out the form - need to select region first
-      const regionSelect = screen.getByRole('combobox')
-      fireEvent.mouseDown(regionSelect)
-      
-      // Wait for menu to appear and select first region
-      await waitFor(() => {
-        const regionOption = screen.getByText('top-left (80% importance)')
-        fireEvent.click(regionOption)
-      })
-
-      // Fill out the text field
+      // Fill out the text field first
       const textField = screen.getByLabelText('Annotation Text')
       fireEvent.change(textField, { target: { value: 'Test annotation text' } })
+
+      // Find the region select by getting all comboboxes and selecting the first one
+      const comboboxes = screen.getAllByRole('combobox')
+      const regionSelect = comboboxes[0] // First combobox should be Region
+      fireEvent.mouseDown(regionSelect)
+      
+      // Wait for menu to appear and select first region option
+      await waitFor(() => {
+        const regionOption = screen.getByRole('option', { name: /top-left.*80% importance/ })
+        fireEvent.click(regionOption)
+      })
 
       // Now the save button should be enabled
       const saveButton = screen.getByText('Save')
@@ -495,13 +498,13 @@ describe('Comparative Analysis and Export Features', () => {
         expect(screen.getByText('Timeline')).toBeInTheDocument()
       })
 
-      // Switch to Chart view - find the select input and click it
-      const viewSelect = screen.getByDisplayValue('timeline')
+      // Find the View select dropdown by its label
+      const viewSelect = screen.getByLabelText('View')
       fireEvent.mouseDown(viewSelect)
       
       // Wait for the menu to appear and click Chart option
       await waitFor(() => {
-        const chartMenuItem = screen.getByText('Chart')
+        const chartMenuItem = screen.getByRole('option', { name: 'Chart' })
         fireEvent.click(chartMenuItem)
       })
 
