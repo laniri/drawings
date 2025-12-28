@@ -13,7 +13,7 @@ vi.mock('axios', () => ({
 }))
 
 // Mock URL constructor and methods
-Object.defineProperty(global, 'URL', {
+Object.defineProperty(globalThis, 'URL', {
   value: class URL {
     constructor(url: string, base?: string) {
       this.href = base ? `${base}/${url}` : url
@@ -48,7 +48,7 @@ Object.defineProperty(global, 'URL', {
 
 // Also set it on window for browser compatibility
 Object.defineProperty(window, 'URL', {
-  value: global.URL
+  value: globalThis.URL
 })
 
 // Mock ResizeObserver

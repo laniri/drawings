@@ -2,6 +2,33 @@
 
 This document describes the React components in the application.
 
+## Technology Stack
+
+The frontend is built with:
+- **React 18** with TypeScript
+- **Material-UI (MUI) v5** with Emotion styling engine
+- **Vite** as build tool and development server
+- **Vitest** for testing with jsdom environment
+- **React Testing Library** for component testing
+- **ESLint + Prettier** for code quality
+- **React Hook Form + Zod** for form validation
+- **React Query (@tanstack/react-query)** for server state
+- **Zustand** for client state management
+
+## Development Scripts
+
+- `npm run dev` - Start development server with API proxy
+- `npm run build` - Production build with TypeScript compilation
+- `npm run preview` - Preview production build
+- `npm run lint` - ESLint with TypeScript support
+- `npm run lint:fix` - Auto-fix linting issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check formatting without changes
+- `npm run type-check` - TypeScript type checking
+- `npm run test` - Run tests once with Vitest
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:ui` - Run tests with Vitest UI
+
 ## Page Components
 
 ### AnalysisPage

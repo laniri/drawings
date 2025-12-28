@@ -46,12 +46,15 @@ A machine learning-powered application that analyzes children's drawings to iden
 
 ### Frontend
 - **React 18** with TypeScript
-- **Material-UI (MUI)** for component library
+- **Material-UI (MUI)** for component library with Emotion styling
 - **Vite** for build tool and dev server with API proxy
-- **React Query** for server state management
+- **React Query (@tanstack/react-query)** for server state management
 - **Zustand** for client state management
 - **React Hook Form + Zod** for form handling and validation
 - **Recharts** for data visualization
+- **React Router DOM** for client-side routing
+- **React Dropzone** for file upload interface
+- **Axios** for HTTP client
 
 ## Quick Start
 
@@ -422,16 +425,24 @@ mypy app/
 ### Frontend
 ```bash
 # Format code
-npm run format
+npm run format          # Format with Prettier
+npm run format:check    # Check formatting without changes
 
 # Lint code
-npm run lint
+npm run lint            # Lint with ESLint
+npm run lint:fix        # Fix linting issues automatically
 
 # Type checking
-npm run type-check
+npm run type-check      # TypeScript type checking
 
 # Build for production
-npm run build
+npm run build           # Production build
+npm run preview         # Preview production build
+
+# Testing
+npm run test            # Run tests once with Vitest
+npm run test:watch      # Run tests in watch mode
+npm run test:ui         # Run tests with Vitest UI
 ```
 
 ## Usage
