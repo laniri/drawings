@@ -10,7 +10,7 @@ SHALL compute reconstruction loss using the appropriate age-subject aware autoen
 
 import pytest
 import numpy as np
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.orm import Session
 
@@ -27,7 +27,7 @@ class TestSubjectAwareModelSelection:
         subject=st.sampled_from([category.value for category in SubjectCategory]),
         embedding_dim=st.just(832)  # Always 832 for hybrid embeddings
     )
-    @settings(max_examples=50, deadline=10000)
+    @settings(max_examples=50, deadline=10000, suppress_health_check=[HealthCheck.data_too_large])
     def test_subject_aware_model_selection_property(self, age, subject, embedding_dim):
         """
         **Feature: children-drawing-anomaly-detection, Property 37: Subject-Aware Model Selection**
@@ -124,7 +124,7 @@ class TestSubjectAwareModelSelection:
         age=st.floats(min_value=2.0, max_value=18.0),
         invalid_embedding_dim=st.integers(min_value=1, max_value=1000).filter(lambda x: x != 832)
     )
-    @settings(max_examples=20, deadline=5000)
+    @settings(max_examples=20, deadline=5000, suppress_health_check=[HealthCheck.data_too_large])
     def test_subject_aware_model_selection_rejects_invalid_embeddings(self, age, invalid_embedding_dim):
         """
         **Feature: children-drawing-anomaly-detection, Property 37: Subject-Aware Model Selection**
