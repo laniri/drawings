@@ -39,15 +39,49 @@ describe('Comparative Analysis and Export Features', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Setup default mock responses
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({
-        normal_examples: [],
-        anomalous_examples: [],
-        explanation_context: 'Test context',
-        age_group: '5-6',
-        total_available: 0,
-        analyses: []
+    mockFetch.mockImplementation((url) => {
+      if (url.includes('/api/interpretability/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            normal_examples: [],
+            anomalous_examples: [],
+            explanation_context: 'Test context',
+            age_group: '5-6',
+            total_available: 0
+          })
+        })
+      }
+      if (url.includes('/api/analysis/drawing/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            analyses: [
+              {
+                id: 1,
+                anomaly_score: 0.75,
+                normalized_score: 75.0,
+                is_anomaly: true,
+                confidence: 0.85,
+                age_group: '5-6',
+                analysis_timestamp: '2024-01-15T10:30:00Z'
+              },
+              {
+                id: 2,
+                anomaly_score: 0.65,
+                normalized_score: 65.0,
+                is_anomaly: true,
+                confidence: 0.8,
+                age_group: '5-6',
+                analysis_timestamp: '2024-01-10T09:00:00Z'
+              }
+            ]
+          })
+        })
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({})
       })
     })
   })
@@ -421,7 +455,9 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+      })
       
       await waitFor(() => {
         expect(screen.getByText('Longitudinal Pattern Analysis')).toBeInTheDocument()
@@ -429,12 +465,10 @@ describe('Comparative Analysis and Export Features', () => {
     })
 
     it('switches between different view modes', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockHistoricalData)
       })
-
-      window.fetch = mockFetch
 
       render(
         <TestWrapper>
@@ -456,7 +490,9 @@ describe('Comparative Analysis and Export Features', () => {
       const chartMenuItem = screen.getByText('Chart')
       fireEvent.click(chartMenuItem)
 
-      expect(screen.getByText('Score Progression Over Time')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText('Score Progression Over Time')).toBeInTheDocument()
+      })
     })
   })
 })
