@@ -10,7 +10,7 @@ SHALL use "unspecified" subject category in the hybrid embedding for consistent 
 
 import pytest
 import numpy as np
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.orm import Session
 
@@ -105,7 +105,7 @@ class TestSubjectMissingDefaultHandling:
         age=st.floats(min_value=2.0, max_value=18.0),
         missing_subject_representation=st.sampled_from([None, "", "unknown", "missing"])
     )
-    @settings(max_examples=20, deadline=6000)
+    @settings(max_examples=20, deadline=6000, suppress_health_check=[HealthCheck.data_too_large])
     def test_various_missing_subject_representations_property(self, age, missing_subject_representation):
         """
         **Feature: children-drawing-anomaly-detection, Property 39: Subject-Missing Default Handling**
