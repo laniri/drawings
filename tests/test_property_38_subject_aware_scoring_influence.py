@@ -123,7 +123,7 @@ class TestSubjectAwareScoringInfluence:
         subject=st.sampled_from([category.value for category in SubjectCategory]),
         visual_noise_level=st.floats(min_value=0.0, max_value=1.0)
     )
-    @settings(max_examples=20, deadline=8000)
+    @settings(max_examples=20, deadline=8000, suppress_health_check=[HealthCheck.data_too_large])
     def test_subject_component_isolation_property(self, age, subject, visual_noise_level):
         """
         **Feature: children-drawing-anomaly-detection, Property 38: Subject-Aware Scoring Influence**
