@@ -270,7 +270,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                         icon={getTypeIcon(example.example_type)}
                         label={example.example_type}
                         size="small"
-                        color={getTypeColor(example.example_type) as any}
+                        color={getTypeColor(example.example_type) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                         sx={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
                       />
                     </Box>
@@ -308,7 +308,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                       <Chip
                         label={`${example.confidence_level} confidence`}
                         size="small"
-                        color={getConfidenceColor(example.confidence_level) as any}
+                        color={getConfidenceColor(example.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                         variant="outlined"
                       />
                       <Tooltip title="Click to view details">
@@ -361,7 +361,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     <Chip
                       icon={getTypeIcon(selectedExample.example_type)}
                       label={selectedExample.example_type}
-                      color={getTypeColor(selectedExample.example_type) as any}
+                      color={getTypeColor(selectedExample.example_type) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                     />
                     <Chip
                       label={`Age ${selectedExample.age_group}`}
@@ -369,7 +369,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     />
                     <Chip
                       label={`${selectedExample.confidence_level} confidence`}
-                      color={getConfidenceColor(selectedExample.confidence_level) as any}
+                      color={getConfidenceColor(selectedExample.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                       variant="outlined"
                     />
                   </Box>

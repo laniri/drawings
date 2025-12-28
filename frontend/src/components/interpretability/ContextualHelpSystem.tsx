@@ -298,7 +298,7 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
               icon={getRoleIcon(userRole)}
               label={`${userRole.charAt(0).toUpperCase() + userRole.slice(1)} View`}
               size="small"
-              color={getRoleColor(userRole) as any}
+              color={getRoleColor(userRole) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
               variant="outlined"
             />
           </Box>

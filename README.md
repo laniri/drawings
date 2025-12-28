@@ -20,7 +20,8 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **Hybrid Embeddings**: 832-dimensional vectors combining visual features (768-dim ViT) and subject encoding (64-dim)
 - **Age-Based Modeling**: Separate subject-aware autoencoder models trained for different age groups
 - **Anomaly Detection**: Reconstruction loss-based scoring with subject-contextualized thresholds
-- **Interactive Interpretability**: Subject-aware saliency maps with hoverable regions, zoom/pan, and subject-specific comparisons
+- **Interactive Interpretability**: Subject-aware saliency maps with hoverable regions, zoom/pan, subject-specific comparisons, and comprehensive confidence assessment system
+- **Enhanced Explanations**: Adaptive explanation system with role-based content, configurable complexity levels, and contextual help for all interpretability features
 - **Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with subject-aware comprehensive reports
 - **Web Interface**: Modern React frontend with Material-UI components and subject category selection
 - **REST API**: FastAPI backend with automatic OpenAPI documentation and subject-aware endpoints
@@ -451,10 +452,13 @@ npm run build
    - View subject-aware anomaly scores and confidence levels with 6 interactive tabs:
      - **Interactive Analysis**: Hoverable saliency regions with click-to-zoom and subject-specific insights
      - **Saliency Map**: Original + saliency overlays with adjustable opacity and subject context
-     - **Confidence**: Detailed confidence metrics with subject-aware reliability warnings
-     - **Comparison**: Similar examples from same age group and subject category
+     - **Confidence**: Detailed confidence metrics with subject-aware reliability warnings and technical breakdown
+     - **Comparison**: Similar examples from same age group and subject category with pattern statistics
      - **History**: Historical analysis tracking and subject-aware trends
      - **Annotations**: User annotation tools for regions with subject context
+   - **Enhanced Confidence Assessment**: Multi-dimensional confidence scoring including model certainty, explanation reliability, and data sufficiency
+   - **Adaptive Explanations**: Role-based explanation system with configurable complexity levels and vocabulary adaptation
+   - **Contextual Help**: Comprehensive help system with topic-specific guidance for interpretability features
    - Export results in multiple formats with subject-aware comprehensive reports (PNG, PDF, JSON, CSV, HTML)
    - Browse analysis history with subject-contextualized interpretability
 

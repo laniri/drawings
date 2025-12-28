@@ -115,7 +115,7 @@ export default function HistoricalInterpretationTracker({
       const data = await response.json()
       
       // Transform the data to include additional metadata
-      const enrichedData: HistoricalAnalysis[] = data.analyses.map((analysis: any, index: number) => ({
+      const enrichedData: HistoricalAnalysis[] = data.analyses.map((analysis: any, index: number) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
         ...analysis,
         drawing_filename: `drawing_${drawingId}`,
         child_age_at_time: 5 + (index * 0.5), // Mock progressive age
@@ -377,7 +377,7 @@ export default function HistoricalInterpretationTracker({
             <InputLabel>Time Range</InputLabel>
             <Select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as any)}
+              onChange={(e) => setTimeRange(e.target.value as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
               label="Time Range"
             >
               <MenuItem value="all">All Time</MenuItem>
@@ -391,7 +391,7 @@ export default function HistoricalInterpretationTracker({
             <InputLabel>View</InputLabel>
             <Select
               value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as any)}
+              onChange={(e) => setViewMode(e.target.value as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
               label="View"
             >
               <MenuItem value="timeline">Timeline</MenuItem>
@@ -548,7 +548,7 @@ export default function HistoricalInterpretationTracker({
                     <XAxis dataKey="date" />
                     <YAxis domain={[0, 100]} />
                     <RechartsTooltip
-                      formatter={(value: any, name: string) => [
+                      formatter={(value: any, name: string) => [ // eslint-disable-line @typescript-eslint/no-explicit-any
                         name === 'score' ? `${value.toFixed(1)}/100` : value,
                         name === 'score' ? 'Anomaly Score' : name
                       ]}

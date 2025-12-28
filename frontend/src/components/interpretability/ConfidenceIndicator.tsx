@@ -254,7 +254,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
                   icon={getDataSufficiencyIcon(confidenceData.data_sufficiency)}
                   label={confidenceData.data_sufficiency}
                   size="small"
-                  color={getDataSufficiencyColor(confidenceData.data_sufficiency) as any}
+                  color={getDataSufficiencyColor(confidenceData.data_sufficiency) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                   variant="outlined"
                 />
               </Box>
