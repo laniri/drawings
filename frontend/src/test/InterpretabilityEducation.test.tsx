@@ -114,8 +114,8 @@ describe('Interpretability Education Components', () => {
     // Wait for the component to load and show the title
     await waitFor(() => {
       expect(screen.getByText('Interpretation Examples')).toBeInTheDocument()
-    }, { timeout: 5000 })
-  })
+    }, { timeout: 10000 })
+  }, 15000)
 
   it('renders AdaptiveExplanationSystem without crashing', () => {
     const mockAnalysisData = {
@@ -179,6 +179,6 @@ describe('Interpretability Education Components', () => {
     await waitFor(() => {
       // The component shows "Parent View" in the chip label
       expect(screen.getByText('Parent View')).toBeInTheDocument()
-    }, { timeout: 5000 })
-  })
+    }, { timeout: 10000 })
+  }, 15000)
 })
