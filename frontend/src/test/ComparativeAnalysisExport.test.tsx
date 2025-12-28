@@ -244,7 +244,7 @@ describe('Comparative Analysis and Export Features', () => {
       )
 
       expect(screen.getByText('Export')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
     })
 
     it('opens export menu when clicked', () => {
@@ -358,8 +358,9 @@ describe('Comparative Analysis and Export Features', () => {
       fireEvent.click(addButton)
 
       expect(screen.getByText('Add Annotation')).toBeInTheDocument()
-      expect(screen.getByRole('combobox', { name: /region/i })).toBeInTheDocument()
-      expect(screen.getByRole('combobox', { name: /type/i })).toBeInTheDocument()
+      // Use more specific selectors for Material-UI Select components
+      expect(screen.getByText('Region')).toBeInTheDocument()
+      expect(screen.getByText('Type')).toBeInTheDocument()
       expect(screen.getByLabelText('Annotation Text')).toBeInTheDocument()
     })
 
@@ -388,10 +389,21 @@ describe('Comparative Analysis and Export Features', () => {
       const addButton = screen.getByText('Add Note')
       fireEvent.click(addButton)
 
-      // Fill out the form
+      // Fill out the form - need to select region first
+      const regionSelect = screen.getByRole('combobox')
+      fireEvent.mouseDown(regionSelect)
+      
+      // Wait for menu to appear and select first region
+      await waitFor(() => {
+        const regionOption = screen.getByText('top-left (80% importance)')
+        fireEvent.click(regionOption)
+      })
+
+      // Fill out the text field
       const textField = screen.getByLabelText('Annotation Text')
       fireEvent.change(textField, { target: { value: 'Test annotation text' } })
 
+      // Now the save button should be enabled
       const saveButton = screen.getByText('Save')
       fireEvent.click(saveButton)
 
