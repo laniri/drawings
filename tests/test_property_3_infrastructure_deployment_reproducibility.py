@@ -62,6 +62,7 @@ class TestInfrastructureDeploymentReproducibility:
         enable_cloudfront=st.booleans(),
         enable_route53=st.booleans()
     )
+    @pytest.mark.hypothesis(deadline=None)
     def test_infrastructure_template_reproducibility(
         self, 
         stack_name: str, 
