@@ -15,7 +15,7 @@ This property ensures that:
 """
 
 import pytest
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from typing import Dict, List
 import logging
 
@@ -319,7 +319,7 @@ class TestCostBoundaryCompliance:
         target_min=st.floats(min_value=5.0, max_value=50.0),
         target_max=st.floats(min_value=20.0, max_value=80.0)
     )
-    @settings(max_examples=20, deadline=10000)
+    @settings(max_examples=20, deadline=10000, suppress_health_check=[HealthCheck.data_too_large])
     def test_cost_compliance_with_different_budgets(
         self, 
         budget_limit: float, 

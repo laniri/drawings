@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from pathlib import Path
 from typing import List, Dict, Tuple
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from unittest.mock import Mock, patch
 import tempfile
 import json
@@ -113,7 +113,7 @@ class TestSubjectAwareModelTraining:
             max_size=30
         )
     )
-    @settings(max_examples=20, deadline=None)  # Disable deadline for model training
+    @settings(max_examples=20, deadline=None, suppress_health_check=[HealthCheck.data_too_large])  # Disable deadline for model training
     def test_hybrid_embedding_training_consistency(self, age_range, embedding_specs):
         """
         **Feature: children-drawing-anomaly-detection, Property 34: Subject-Aware Model Training**

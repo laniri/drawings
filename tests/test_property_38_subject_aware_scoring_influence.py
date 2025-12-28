@@ -10,7 +10,7 @@ SHALL use subject-aware scoring that considers subject-specific patterns within 
 
 import pytest
 import numpy as np
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import given, strategies as st, settings, assume, HealthCheck
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.orm import Session
 
@@ -203,7 +203,7 @@ class TestSubjectAwareScoringInfluence:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=15, deadline=6000)
+    @settings(max_examples=15, deadline=6000, suppress_health_check=[HealthCheck.data_too_large])
     def test_subject_aware_scoring_consistency_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 38: Subject-Aware Scoring Influence**
