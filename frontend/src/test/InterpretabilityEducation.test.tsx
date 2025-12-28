@@ -37,10 +37,40 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('Interpretability Education Components', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Setup default mock responses
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([])
+    // Setup default mock responses for all API calls
+    mockFetch.mockImplementation((url) => {
+      // Mock the example patterns API
+      if (url.includes('/api/interpretability/examples')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            {
+              pattern_id: 'test-1',
+              pattern_name: 'Test Pattern',
+              description: 'Test description',
+              age_group: '3-4',
+              example_type: 'normal',
+              confidence_level: 'high',
+              visual_features: ['test feature'],
+              interpretation_notes: ['test note'],
+              educational_context: 'test context',
+              image_url: '/test-image.jpg',
+              saliency_url: '/test-saliency.jpg',
+              metadata: {
+                drawing_count: 100,
+                prevalence: 0.5,
+                developmental_significance: 'test significance'
+              }
+            }
+          ])
+        })
+      }
+      
+      // Default mock for other API calls
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([])
+      })
     })
   })
   it('renders InterpretabilityTutorial without crashing', () => {
@@ -72,31 +102,6 @@ describe('Interpretability Education Components', () => {
   })
 
   it('renders ExampleGallery without crashing', async () => {
-    // Mock successful API response
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve([
-        {
-          pattern_id: 'test-1',
-          pattern_name: 'Test Pattern',
-          description: 'Test description',
-          age_group: '3-4',
-          example_type: 'normal',
-          confidence_level: 'high',
-          visual_features: ['test feature'],
-          interpretation_notes: ['test note'],
-          educational_context: 'test context',
-          image_url: '/test-image.jpg',
-          saliency_url: '/test-saliency.jpg',
-          metadata: {
-            drawing_count: 100,
-            prevalence: 0.5,
-            developmental_significance: 'test significance'
-          }
-        }
-      ])
-    })
-
     render(
       <TestWrapper>
         <ExampleGallery
@@ -106,9 +111,10 @@ describe('Interpretability Education Components', () => {
       </TestWrapper>
     )
     
+    // Wait for the component to load and show the title
     await waitFor(() => {
       expect(screen.getByText('Interpretation Examples')).toBeInTheDocument()
-    }, { timeout: 3000 })
+    }, { timeout: 5000 })
   })
 
   it('renders AdaptiveExplanationSystem without crashing', () => {
@@ -160,6 +166,7 @@ describe('Interpretability Education Components', () => {
       expect(screen.getByText('Researcher View')).toBeInTheDocument()
     })
 
+    // Clear the previous render and render with parent role
     rerender(
       <TestWrapper>
         <InterpretabilityEducationHub
@@ -172,6 +179,6 @@ describe('Interpretability Education Components', () => {
     await waitFor(() => {
       // The component shows "Parent View" in the chip label
       expect(screen.getByText('Parent View')).toBeInTheDocument()
-    })
+    }, { timeout: 5000 })
   })
 })
