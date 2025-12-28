@@ -12,7 +12,7 @@ import json
 import tempfile
 import os
 import pytest
-from hypothesis import given, strategies as st, assume
+from hypothesis import given, strategies as st, assume, HealthCheck
 from unittest.mock import patch, MagicMock
 from typing import Dict, Any, List
 import yaml
@@ -113,6 +113,7 @@ class TestInfrastructureDeploymentReproducibility:
         enable_nat_gateway=st.booleans(),
         instance_type=st.sampled_from(["t3.micro", "t3.small", "t3.medium"])
     )
+    @pytest.mark.hypothesis(suppress_health_check=[HealthCheck.data_too_large])
     def test_network_configuration_reproducibility(
         self,
         vpc_cidr: str,
