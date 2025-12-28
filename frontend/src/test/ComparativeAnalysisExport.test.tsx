@@ -10,8 +10,10 @@ import {
 } from '../components/interpretability'
 
 // Mock fetch globally
-Object.defineProperty(window, 'fetch', {
-  value: vi.fn()
+const mockFetch = vi.fn()
+Object.defineProperty(globalThis, 'fetch', {
+  value: mockFetch,
+  writable: true
 })
 
 const createTestQueryClient = () => {
@@ -36,6 +38,18 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 describe('Comparative Analysis and Export Features', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Setup default mock responses
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        normal_examples: [],
+        anomalous_examples: [],
+        explanation_context: 'Test context',
+        age_group: '5-6',
+        total_available: 0,
+        analyses: []
+      })
+    })
   })
 
   describe('ComparativeAnalysisPanel', () => {
@@ -88,7 +102,7 @@ describe('Comparative Analysis and Export Features', () => {
     }
 
     it('renders comparative analysis panel with current analysis summary', async () => {
-      const mockFetch = vi.fn()
+      mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockComparisonData)
@@ -97,8 +111,6 @@ describe('Comparative Analysis and Export Features', () => {
           ok: true,
           json: () => Promise.resolve({ analyses: [] })
         })
-
-      window.fetch = mockFetch
 
       render(
         <TestWrapper>
@@ -109,15 +121,20 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
-      expect(screen.getByText('Current Analysis Summary')).toBeInTheDocument()
-      expect(screen.getByText('test_drawing.png')).toBeInTheDocument()
-      expect(screen.getByText('Age: 5.5 years')).toBeInTheDocument()
-      expect(screen.getByText('Score: 75.0/100')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+      }, { timeout: 3000 })
+      
+      await waitFor(() => {
+        expect(screen.getByText('Current Analysis Summary')).toBeInTheDocument()
+        expect(screen.getByText('test_drawing.png')).toBeInTheDocument()
+        expect(screen.getByText('Age: 5.5 years')).toBeInTheDocument()
+        expect(screen.getByText('Score: 75.0/100')).toBeInTheDocument()
+      })
     })
 
     it('loads and displays comparison examples', async () => {
-      const mockFetch = vi.fn()
+      mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockComparisonData)
@@ -126,8 +143,6 @@ describe('Comparative Analysis and Export Features', () => {
           ok: true,
           json: () => Promise.resolve({ analyses: [] })
         })
-
-      window.fetch = mockFetch
 
       render(
         <TestWrapper>
@@ -148,7 +163,7 @@ describe('Comparative Analysis and Export Features', () => {
     })
 
     it('switches between different tab views', async () => {
-      const mockFetch = vi.fn()
+      mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: () => Promise.resolve(mockComparisonData)
@@ -157,8 +172,6 @@ describe('Comparative Analysis and Export Features', () => {
           ok: true,
           json: () => Promise.resolve({ analyses: [] })
         })
-
-      window.fetch = mockFetch
 
       render(
         <TestWrapper>
@@ -229,12 +242,10 @@ describe('Comparative Analysis and Export Features', () => {
         created_at: '2024-01-15T10:30:00Z'
       }
 
-      const mockFetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockExportResult)
       })
-
-      window.fetch = mockFetch
 
       const onExportComplete = vi.fn()
 
@@ -319,7 +330,7 @@ describe('Comparative Analysis and Export Features', () => {
     })
 
     it('handles annotation creation', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({
           annotation_id: 'test-annotation-123',
@@ -327,8 +338,6 @@ describe('Comparative Analysis and Export Features', () => {
           region_id: 'region_1'
         })
       })
-
-      window.fetch = mockFetch
 
       const onAnnotationAdd = vi.fn()
 
@@ -398,12 +407,10 @@ describe('Comparative Analysis and Export Features', () => {
     }
 
     it('renders historical interpretation tracker', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockHistoricalData)
       })
-
-      window.fetch = mockFetch
 
       render(
         <TestWrapper>

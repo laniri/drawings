@@ -1,14 +1,21 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import InterpretabilityTutorial from '../components/interpretability/InterpretabilityTutorial'
 import ContextualHelpSystem from '../components/interpretability/ContextualHelpSystem'
 import ExampleGallery from '../components/interpretability/ExampleGallery'
 import AdaptiveExplanationSystem from '../components/interpretability/AdaptiveExplanationSystem'
 import InterpretabilityEducationHub from '../components/interpretability/InterpretabilityEducationHub'
+
+// Mock fetch globally
+const mockFetch = vi.fn()
+Object.defineProperty(globalThis, 'fetch', {
+  value: mockFetch,
+  writable: true
+})
 
 const theme = createTheme()
 const queryClient = new QueryClient({
@@ -28,6 +35,14 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 )
 
 describe('Interpretability Education Components', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    // Setup default mock responses
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve([])
+    })
+  })
   it('renders InterpretabilityTutorial without crashing', () => {
     render(
       <TestWrapper>
@@ -56,7 +71,7 @@ describe('Interpretability Education Components', () => {
     expect(screen.getByRole('button')).toBeInTheDocument()
   })
 
-  it('renders ExampleGallery without crashing', () => {
+  it('renders ExampleGallery without crashing', async () => {
     render(
       <TestWrapper>
         <ExampleGallery
@@ -66,7 +81,9 @@ describe('Interpretability Education Components', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Interpretation Examples')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Interpretation Examples')).toBeInTheDocument()
+    }, { timeout: 3000 })
   })
 
   it('renders AdaptiveExplanationSystem without crashing', () => {
@@ -104,7 +121,7 @@ describe('Interpretability Education Components', () => {
     expect(screen.getByText('Educator View')).toBeInTheDocument()
   })
 
-  it('shows different content for different user roles', () => {
+  it('shows different content for different user roles', async () => {
     const { rerender } = render(
       <TestWrapper>
         <InterpretabilityEducationHub
@@ -114,7 +131,9 @@ describe('Interpretability Education Components', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Researcher View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Researcher View')).toBeInTheDocument()
+    })
 
     rerender(
       <TestWrapper>
@@ -125,6 +144,8 @@ describe('Interpretability Education Components', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Parent View')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Parent View')).toBeInTheDocument()
+    })
   })
 })

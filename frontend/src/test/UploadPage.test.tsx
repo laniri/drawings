@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { render } from './utils'
 import UploadPage from '../pages/UploadPage'
 
@@ -25,11 +25,17 @@ describe('UploadPage Integration Tests', () => {
     expect(uploadButton).toBeDisabled() // Should be disabled without file
   })
 
-  it('displays form fields correctly', () => {
+  it('displays form fields correctly', async () => {
     render(<UploadPage />)
     
-    expect(screen.getByLabelText(/Child's Age/)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Drawing Subject/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Child's Age/)).toBeInTheDocument()
+    })
+    
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Drawing Subject/)).toBeInTheDocument()
+    })
+    
     expect(screen.getAllByText('Expert Label (optional)').length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/Drawing Tool/)).toBeInTheDocument()
     expect(screen.getByLabelText(/Drawing Prompt/)).toBeInTheDocument()

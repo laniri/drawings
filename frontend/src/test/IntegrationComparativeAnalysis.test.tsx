@@ -1,7 +1,7 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { vi, describe, it, expect } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import {
   ComparativeAnalysisPanel,
   ExportToolbar,
@@ -11,7 +11,7 @@ import {
 
 // Mock fetch globally
 const mockFetch = vi.fn()
-Object.defineProperty(window, 'fetch', {
+Object.defineProperty(globalThis, 'fetch', {
   value: mockFetch,
   writable: true
 })
@@ -36,7 +36,23 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 }
 
 describe('Comparative Analysis Integration', () => {
-  it('renders all new components without crashing', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    // Setup default mock responses
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        normal_examples: [],
+        anomalous_examples: [],
+        explanation_context: 'Test context',
+        age_group: '5-6',
+        total_available: 0,
+        analyses: []
+      })
+    })
+  })
+
+  it('renders all new components without crashing', async () => {
     const mockCurrentAnalysis = {
       id: 1,
       drawing_id: 1,
@@ -72,7 +88,8 @@ describe('Comparative Analysis Integration', () => {
         anomalous_examples: [],
         explanation_context: 'Test context',
         age_group: '5-6',
-        total_available: 0
+        total_available: 0,
+        analyses: []
       })
     })
 
@@ -86,7 +103,9 @@ describe('Comparative Analysis Integration', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+    }, { timeout: 3000 })
     unmount1()
 
     // Test ExportToolbar
@@ -99,7 +118,9 @@ describe('Comparative Analysis Integration', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Export')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Export')).toBeInTheDocument()
+    })
     unmount2()
 
     // Test AnnotationTools
@@ -112,7 +133,9 @@ describe('Comparative Analysis Integration', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText(/Annotations/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/Annotations/)).toBeInTheDocument()
+    })
     unmount3()
 
     // Test HistoricalInterpretationTracker
@@ -125,6 +148,8 @@ describe('Comparative Analysis Integration', () => {
       </TestWrapper>
     )
     
-    expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
-  })
+    await waitFor(() => {
+      expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+    })
+  }))
 })
