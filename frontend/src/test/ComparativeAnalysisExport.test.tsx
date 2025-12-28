@@ -483,12 +483,15 @@ describe('Comparative Analysis and Export Features', () => {
         expect(screen.getByText('Timeline')).toBeInTheDocument()
       })
 
-      // Switch to Chart view
-      const chartOption = screen.getByDisplayValue('timeline')
-      fireEvent.mouseDown(chartOption)
+      // Switch to Chart view - find the select input by its value
+      const viewSelect = screen.getByDisplayValue('timeline')
+      fireEvent.mouseDown(viewSelect)
       
-      const chartMenuItem = screen.getByText('Chart')
-      fireEvent.click(chartMenuItem)
+      // Wait for the menu to appear and click Chart option
+      await waitFor(() => {
+        const chartMenuItem = screen.getByRole('option', { name: 'Chart' })
+        fireEvent.click(chartMenuItem)
+      })
 
       await waitFor(() => {
         expect(screen.getByText('Score Progression Over Time')).toBeInTheDocument()
