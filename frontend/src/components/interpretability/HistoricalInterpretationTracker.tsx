@@ -98,7 +98,7 @@ export default function HistoricalInterpretationTracker({
 
   useEffect(() => {
     loadHistoricalData()
-  }, [drawingId, timeRange])
+  }, [drawingId, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadHistoricalData = async () => {
     try {

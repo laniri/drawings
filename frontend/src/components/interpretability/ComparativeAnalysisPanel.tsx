@@ -123,7 +123,7 @@ export default function ComparativeAnalysisPanel({
   useEffect(() => {
     loadComparisonExamples()
     loadAnalysisHistory()
-  }, [currentAnalysis.age_group, currentDrawing.id])
+  }, [currentAnalysis.age_group, currentDrawing.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadComparisonExamples = async () => {
     try {

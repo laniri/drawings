@@ -26,6 +26,12 @@
 - [Score Normalization](./algorithms/07-score-normalization.md)
 - [Algorithm Implementations](./algorithms/implementations/)
 
+### 🔍 Interpretability
+- [Interpretability System](./interpretability.md) - **NEW**: Comprehensive interpretability documentation
+- [Confidence Assessment](./interpretability.md#multi-dimensional-confidence-assessment)
+- [Adaptive Explanations](./interpretability.md#adaptive-explanation-system)
+- [Export Formats](./interpretability.md#export-formats)
+
 ### 🔄 Workflows
 - [Subject-Aware Analysis](./workflows/business/02-subject-aware-analysis.md) - **NEW**: Enhanced workflow with subject support
 - [Upload and Analysis](./workflows/business/01-drawing-upload-analysis.md)
