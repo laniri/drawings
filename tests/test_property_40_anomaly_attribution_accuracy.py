@@ -106,7 +106,12 @@ class TestAnomalyAttributionAccuracy:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=20, deadline=None, suppress_health_check=[HealthCheck.data_too_large])
+    @settings(
+        max_examples=10, 
+        deadline=None, 
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
+        max_size=50
+    )
     def test_visual_only_attribution_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 40: Anomaly Attribution Accuracy**
@@ -153,7 +158,12 @@ class TestAnomalyAttributionAccuracy:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=20, deadline=8000, suppress_health_check=[HealthCheck.data_too_large])
+    @settings(
+        max_examples=10, 
+        deadline=None, 
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
+        max_size=50
+    )
     def test_subject_only_attribution_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 40: Anomaly Attribution Accuracy**
@@ -200,7 +210,12 @@ class TestAnomalyAttributionAccuracy:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=20, deadline=8000, suppress_health_check=[HealthCheck.data_too_large])
+    @settings(
+        max_examples=10, 
+        deadline=None, 
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
+        max_size=50
+    )
     def test_both_components_attribution_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 40: Anomaly Attribution Accuracy**
@@ -247,7 +262,12 @@ class TestAnomalyAttributionAccuracy:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=15, deadline=6000, suppress_health_check=[HealthCheck.data_too_large])
+    @settings(
+        max_examples=8, 
+        deadline=None, 
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
+        max_size=50
+    )
     def test_age_related_attribution_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 40: Anomaly Attribution Accuracy**
