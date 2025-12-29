@@ -638,6 +638,12 @@ jobs:
     needs: [deploy-application, health-check, monitor-deployment]
     if: always() && github.ref == 'refs/heads/main'
     
+    # Required permissions for GitHub deployment API
+    permissions:
+      contents: read
+      deployments: write
+      issues: write
+    
     steps:
     - name: Determine deployment outcome
       id: outcome
@@ -695,68 +701,89 @@ jobs:
     - name: Create GitHub deployment
       id: create-deployment
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
-          const deployment = await github.rest.repos.createDeployment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: context.sha,
-            environment: 'production',
-            description: 'Production deployment via CI/CD',
-            auto_merge: false,
-            required_contexts: []
-          });
-          return deployment.data.id;
+          try {
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              description: 'Production deployment via CI/CD',
+              auto_merge: false,
+              required_contexts: []
+            });
+            console.log('Deployment created successfully:', deployment.data.id);
+            return deployment.data.id;
+          } catch (error) {
+            console.error('Failed to create deployment:', error.message);
+            // Return a placeholder ID to prevent downstream failures
+            return 0;
+          }
 
     - name: Update GitHub deployment status
+      if: steps.create-deployment.outputs.result != '0'
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
-          const deploymentId = ${{ steps.create-deployment.outputs.result }};
-          const status = '${{ steps.outcome.outputs.status }}' === 'success' ? 'success' : 'failure';
-          const description = '${{ steps.outcome.outputs.message }}';
-          
-          await github.rest.repos.createDeploymentStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            deployment_id: deploymentId,
-            state: status,
-            description: description,
-            environment: 'production'
-          });
+          try {
+            const deploymentId = ${{ steps.create-deployment.outputs.result }};
+            const status = '${{ steps.outcome.outputs.status }}' === 'success' ? 'success' : 'failure';
+            const description = '${{ steps.outcome.outputs.message }}';
+            
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deploymentId,
+              state: status,
+              description: description,
+              environment: 'production'
+            });
+            console.log('Deployment status updated successfully');
+          } catch (error) {
+            console.error('Failed to update deployment status:', error.message);
+          }
     
     - name: Create GitHub issue on failure
       if: steps.outcome.outputs.status == 'failure'
       uses: actions/github-script@v7
+      continue-on-error: true
       with:
         script: |
-          const title = `Deployment Failed: ${context.sha.substring(0, 7)}`;
-          const body = `
-          ## Deployment Failure Report
-          
-          **Commit**: ${context.sha}
-          **Branch**: ${context.ref}
-          **Author**: ${context.actor}
-          **Workflow Run**: [${context.runId}](${context.payload.repository.html_url}/actions/runs/${context.runId})
-          **Timestamp**: ${new Date().toISOString()}
-          
-          ### Details
-          ${{ steps.outcome.outputs.message }}
-          
-          ### Next Steps
-          - [ ] Investigate the failure cause
-          - [ ] Fix the issue
-          - [ ] Re-run the deployment
-          - [ ] Verify the fix
-          
-          ### Logs
-          Check the [workflow logs](${context.payload.repository.html_url}/actions/runs/${context.runId}) for detailed information.
-          `;
-          
-          await github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: title,
-            body: body,
-            labels: ['deployment-failure', 'bug', 'high-priority']
-          });
+          try {
+            const title = `Deployment Failed: ${context.sha.substring(0, 7)}`;
+            const body = `
+            ## Deployment Failure Report
+            
+            **Commit**: ${context.sha}
+            **Branch**: ${context.ref}
+            **Author**: ${context.actor}
+            **Workflow Run**: [${context.runId}](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            **Timestamp**: ${new Date().toISOString()}
+            
+            ### Details
+            ${{ steps.outcome.outputs.message }}
+            
+            ### Next Steps
+            - [ ] Investigate the failure cause
+            - [ ] Fix the issue
+            - [ ] Re-run the deployment
+            - [ ] Verify the fix
+            
+            ### Logs
+            Check the [workflow logs](${context.payload.repository.html_url}/actions/runs/${context.runId}) for detailed information.
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['deployment-failure', 'bug', 'high-priority']
+            });
+            console.log('GitHub issue created successfully');
+          } catch (error) {
+            console.error('Failed to create GitHub issue:', error.message);
+          }
