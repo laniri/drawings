@@ -173,6 +173,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                         burst_limit=100,
                     )
                 ),
+                "demo": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=2000,
+                        requests_per_hour=20000,
+                        burst_limit=200,
+                    )
+                ),
                 "upload": RateLimiter(
                     RateLimitRule(
                         requests_per_minute=100, requests_per_hour=1000, burst_limit=50
@@ -195,6 +202,11 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 "default": RateLimiter(
                     RateLimitRule(
                         requests_per_minute=60, requests_per_hour=1000, burst_limit=10
+                    )
+                ),
+                "demo": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=300, requests_per_hour=5000, burst_limit=50
                     )
                 ),
                 "upload": RateLimiter(
@@ -279,7 +291,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """
         path = request.url.path
 
-        if path.startswith("/api/v1/drawings/upload"):
+        if path.startswith("/demo/") or path == "/demo":
+            return self.rate_limiters["demo"]
+        elif path.startswith("/api/v1/drawings/upload"):
             return self.rate_limiters["upload"]
         elif path.startswith("/api/v1/analysis"):
             return self.rate_limiters["analysis"]
