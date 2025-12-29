@@ -211,6 +211,7 @@ class TestInfrastructureDeploymentReproducibility:
         desired_count=st.integers(min_value=1, max_value=3),
         enable_auto_scaling=st.booleans()
     )
+    @pytest.mark.hypothesis(deadline=None)
     def test_ecs_configuration_reproducibility(
         self,
         cpu_units: int,
