@@ -4,7 +4,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 
 ## ✅ System Status
 
-**Current Status**: Fully functional and trained (v2.0.0 - Subject-Aware)
+**Current Status**: Fully functional and trained (v2.0.0 - Subject-Aware) - Updated December 2024
 - **37,778+ drawings** uploaded and processed
 - **8 trained subject-aware autoencoder models** for age groups (2-3, 3-4, 4-5, 5-6, 6-7, 7-8, 8-9, 9-12 years)
 - **Hybrid embeddings** (832-dimensional: 768 visual + 64 subject) generated for all drawings
