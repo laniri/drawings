@@ -6,14 +6,14 @@ import {
   ComparativeAnalysisPanel,
   ExportToolbar,
   AnnotationTools,
-  HistoricalInterpretationTracker
+  HistoricalInterpretationTracker,
 } from '../components/interpretability'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
 Object.defineProperty(globalThis, 'fetch', {
   value: mockFetch,
-  writable: true
+  writable: true,
 })
 
 const createTestQueryClient = () => {
@@ -29,9 +29,7 @@ const createTestQueryClient = () => {
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = createTestQueryClient()
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 }
 
@@ -43,45 +41,47 @@ describe('Comparative Analysis and Export Features', () => {
       if (url.includes('/api/interpretability/')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            normal_examples: [],
-            anomalous_examples: [],
-            explanation_context: 'Test context',
-            age_group: '5-6',
-            total_available: 0
-          })
+          json: () =>
+            Promise.resolve({
+              normal_examples: [],
+              anomalous_examples: [],
+              explanation_context: 'Test context',
+              age_group: '5-6',
+              total_available: 0,
+            }),
         })
       }
       if (url.includes('/api/analysis/drawing/')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            analyses: [
-              {
-                id: 1,
-                anomaly_score: 0.75,
-                normalized_score: 75.0,
-                is_anomaly: true,
-                confidence: 0.85,
-                age_group: '5-6',
-                analysis_timestamp: '2024-01-15T10:30:00Z'
-              },
-              {
-                id: 2,
-                anomaly_score: 0.65,
-                normalized_score: 65.0,
-                is_anomaly: true,
-                confidence: 0.8,
-                age_group: '5-6',
-                analysis_timestamp: '2024-01-10T09:00:00Z'
-              }
-            ]
-          })
+          json: () =>
+            Promise.resolve({
+              analyses: [
+                {
+                  id: 1,
+                  anomaly_score: 0.75,
+                  normalized_score: 75.0,
+                  is_anomaly: true,
+                  confidence: 0.85,
+                  age_group: '5-6',
+                  analysis_timestamp: '2024-01-15T10:30:00Z',
+                },
+                {
+                  id: 2,
+                  anomaly_score: 0.65,
+                  normalized_score: 65.0,
+                  is_anomaly: true,
+                  confidence: 0.8,
+                  age_group: '5-6',
+                  analysis_timestamp: '2024-01-10T09:00:00Z',
+                },
+              ],
+            }),
         })
       }
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({})
+        json: () => Promise.resolve({}),
       })
     })
   })
@@ -95,14 +95,14 @@ describe('Comparative Analysis and Export Features', () => {
       is_anomaly: true,
       confidence: 0.85,
       age_group: '5-6',
-      analysis_timestamp: '2024-01-15T10:30:00Z'
+      analysis_timestamp: '2024-01-15T10:30:00Z',
     }
 
     const mockCurrentDrawing = {
       id: 1,
       filename: 'test_drawing.png',
       age_years: 5.5,
-      subject: 'house'
+      subject: 'house',
     }
 
     const mockComparisonData = {
@@ -115,8 +115,8 @@ describe('Comparative Analysis and Export Features', () => {
           anomaly_score: 0.15,
           normalized_score: 15.0,
           confidence: 0.9,
-          analysis_timestamp: '2024-01-10T09:00:00Z'
-        }
+          analysis_timestamp: '2024-01-10T09:00:00Z',
+        },
       ],
       anomalous_examples: [
         {
@@ -127,23 +127,24 @@ describe('Comparative Analysis and Export Features', () => {
           anomaly_score: 0.85,
           normalized_score: 85.0,
           confidence: 0.8,
-          analysis_timestamp: '2024-01-12T14:20:00Z'
-        }
+          analysis_timestamp: '2024-01-12T14:20:00Z',
+        },
       ],
-      explanation_context: 'These examples show typical patterns for age group 5-6',
+      explanation_context:
+        'These examples show typical patterns for age group 5-6',
       age_group: '5-6',
-      total_available: 150
+      total_available: 150,
     }
 
     it('renders comparative analysis panel with current analysis summary', async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockComparisonData)
+          json: () => Promise.resolve(mockComparisonData),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ analyses: [] })
+          json: () => Promise.resolve({ analyses: [] }),
         })
 
       render(
@@ -155,21 +156,30 @@ describe('Comparative Analysis and Export Features', () => {
         </TestWrapper>
       )
 
-      await waitFor(() => {
-        expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
-      }, { timeout: 3000 })
-      
+      await waitFor(
+        () => {
+          expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+        },
+        { timeout: 3000 }
+      )
+
       await waitFor(() => {
         expect(screen.getByText('Current Analysis Summary')).toBeInTheDocument()
-        expect(screen.getAllByText((_content, element) => {
-          return element?.textContent?.includes('test_drawing.png') || false
-        })[0]).toBeInTheDocument()
-        expect(screen.getAllByText((_content, element) => {
-          return element?.textContent?.includes('Age: 5.5 years') || false
-        })[0]).toBeInTheDocument()
-        expect(screen.getAllByText((_content, element) => {
-          return element?.textContent?.includes('Score: 75.0/100') || false
-        })[0]).toBeInTheDocument()
+        expect(
+          screen.getAllByText((_content, element) => {
+            return element?.textContent?.includes('test_drawing.png') || false
+          })[0]
+        ).toBeInTheDocument()
+        expect(
+          screen.getAllByText((_content, element) => {
+            return element?.textContent?.includes('Age: 5.5 years') || false
+          })[0]
+        ).toBeInTheDocument()
+        expect(
+          screen.getAllByText((_content, element) => {
+            return element?.textContent?.includes('Score: 75.0/100') || false
+          })[0]
+        ).toBeInTheDocument()
       })
     })
 
@@ -177,11 +187,11 @@ describe('Comparative Analysis and Export Features', () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockComparisonData)
+          json: () => Promise.resolve(mockComparisonData),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ analyses: [] })
+          json: () => Promise.resolve({ analyses: [] }),
         })
 
       render(
@@ -194,9 +204,12 @@ describe('Comparative Analysis and Export Features', () => {
       )
 
       // Wait for the component to load and display comparison data
-      await waitFor(() => {
-        expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
-      }, { timeout: 3000 })
+      await waitFor(
+        () => {
+          expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+        },
+        { timeout: 3000 }
+      )
 
       // Check for the presence of comparison sections - use more flexible text matching
       await waitFor(() => {
@@ -212,11 +225,11 @@ describe('Comparative Analysis and Export Features', () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockComparisonData)
+          json: () => Promise.resolve(mockComparisonData),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ analyses: [] })
+          json: () => Promise.resolve({ analyses: [] }),
         })
 
       render(
@@ -229,9 +242,12 @@ describe('Comparative Analysis and Export Features', () => {
       )
 
       // Wait for the component to load
-      await waitFor(() => {
-        expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
-      }, { timeout: 3000 })
+      await waitFor(
+        () => {
+          expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+        },
+        { timeout: 3000 }
+      )
 
       // Look for tab buttons instead of specific text that might not be visible
       await waitFor(() => {
@@ -243,7 +259,7 @@ describe('Comparative Analysis and Export Features', () => {
       const tabs = screen.getAllByRole('tab')
       if (tabs.length > 1) {
         fireEvent.click(tabs[1]) // Click second tab
-        
+
         // Check that some content changed
         await waitFor(() => {
           expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
@@ -256,10 +272,7 @@ describe('Comparative Analysis and Export Features', () => {
     it('renders export toolbar with download button', () => {
       render(
         <TestWrapper>
-          <ExportToolbar
-            analysisId={1}
-            drawingFilename="test_drawing.png"
-          />
+          <ExportToolbar analysisId={1} drawingFilename="test_drawing.png" />
         </TestWrapper>
       )
 
@@ -270,10 +283,7 @@ describe('Comparative Analysis and Export Features', () => {
     it('opens export menu when clicked', () => {
       render(
         <TestWrapper>
-          <ExportToolbar
-            analysisId={1}
-            drawingFilename="test_drawing.png"
-          />
+          <ExportToolbar analysisId={1} drawingFilename="test_drawing.png" />
         </TestWrapper>
       )
 
@@ -293,12 +303,12 @@ describe('Comparative Analysis and Export Features', () => {
         file_url: '/static/exports/test_export.pdf',
         format: 'pdf',
         file_size: 1024000,
-        created_at: '2024-01-15T10:30:00Z'
+        created_at: '2024-01-15T10:30:00Z',
       }
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockExportResult)
+        json: () => Promise.resolve(mockExportResult),
       })
 
       const onExportComplete = vi.fn()
@@ -325,9 +335,9 @@ describe('Comparative Analysis and Export Features', () => {
           expect.objectContaining({
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            body: expect.stringContaining('"format":"pdf"')
+            body: expect.stringContaining('"format":"pdf"'),
           })
         )
       })
@@ -340,23 +350,20 @@ describe('Comparative Analysis and Export Features', () => {
         region_id: 'region_1',
         bounding_box: [10, 20, 50, 60],
         spatial_location: 'top-left',
-        importance_score: 0.8
+        importance_score: 0.8,
       },
       {
         region_id: 'region_2',
         bounding_box: [100, 120, 150, 180],
         spatial_location: 'center',
-        importance_score: 0.6
-      }
+        importance_score: 0.6,
+      },
     ]
 
     it('renders annotation tools with regions', () => {
       render(
         <TestWrapper>
-          <AnnotationTools
-            analysisId={1}
-            regions={mockRegions}
-          />
+          <AnnotationTools analysisId={1} regions={mockRegions} />
         </TestWrapper>
       )
 
@@ -367,10 +374,7 @@ describe('Comparative Analysis and Export Features', () => {
     it('opens annotation dialog when add button is clicked', () => {
       render(
         <TestWrapper>
-          <AnnotationTools
-            analysisId={1}
-            regions={mockRegions}
-          />
+          <AnnotationTools analysisId={1} regions={mockRegions} />
         </TestWrapper>
       )
 
@@ -389,11 +393,12 @@ describe('Comparative Analysis and Export Features', () => {
     it('handles annotation creation', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          annotation_id: 'test-annotation-123',
-          analysis_id: 1,
-          region_id: 'region_1'
-        })
+        json: () =>
+          Promise.resolve({
+            annotation_id: 'test-annotation-123',
+            analysis_id: 1,
+            region_id: 'region_1',
+          }),
       })
 
       const onAnnotationAdd = vi.fn()
@@ -419,10 +424,12 @@ describe('Comparative Analysis and Export Features', () => {
       const comboboxes = screen.getAllByRole('combobox')
       const regionSelect = comboboxes[0] // First combobox should be Region
       fireEvent.mouseDown(regionSelect)
-      
+
       // Wait for menu to appear and select first region option
       await waitFor(() => {
-        const regionOption = screen.getByRole('option', { name: /top-left.*80% importance/ })
+        const regionOption = screen.getByRole('option', {
+          name: /top-left.*80% importance/,
+        })
         fireEvent.click(regionOption)
       })
 
@@ -436,8 +443,8 @@ describe('Comparative Analysis and Export Features', () => {
           expect.objectContaining({
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
-            }
+              'Content-Type': 'application/json',
+            },
           })
         )
       })
@@ -449,7 +456,7 @@ describe('Comparative Analysis and Export Features', () => {
       id: 1,
       normalized_score: 75.0,
       is_anomaly: true,
-      analysis_timestamp: '2024-01-15T10:30:00Z'
+      analysis_timestamp: '2024-01-15T10:30:00Z',
     }
 
     const mockHistoricalData = {
@@ -461,7 +468,7 @@ describe('Comparative Analysis and Export Features', () => {
           is_anomaly: true,
           confidence: 0.85,
           age_group: '5-6',
-          analysis_timestamp: '2024-01-15T10:30:00Z'
+          analysis_timestamp: '2024-01-15T10:30:00Z',
         },
         {
           id: 2,
@@ -470,15 +477,15 @@ describe('Comparative Analysis and Export Features', () => {
           is_anomaly: true,
           confidence: 0.8,
           age_group: '5-6',
-          analysis_timestamp: '2024-01-10T09:00:00Z'
-        }
-      ]
+          analysis_timestamp: '2024-01-10T09:00:00Z',
+        },
+      ],
     }
 
     it('renders historical interpretation tracker', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockHistoricalData)
+        json: () => Promise.resolve(mockHistoricalData),
       })
 
       render(
@@ -491,18 +498,22 @@ describe('Comparative Analysis and Export Features', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+        expect(
+          screen.getByText('Historical Analysis Tracking')
+        ).toBeInTheDocument()
       })
-      
+
       await waitFor(() => {
-        expect(screen.getByText('Longitudinal Pattern Analysis')).toBeInTheDocument()
+        expect(
+          screen.getByText('Longitudinal Pattern Analysis')
+        ).toBeInTheDocument()
       })
     })
 
     it('switches between different view modes', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockHistoricalData)
+        json: () => Promise.resolve(mockHistoricalData),
       })
 
       render(
@@ -515,16 +526,18 @@ describe('Comparative Analysis and Export Features', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+        expect(
+          screen.getByText('Historical Analysis Tracking')
+        ).toBeInTheDocument()
       })
 
       // Find the View select dropdown by looking for the second select (first is Time Range)
       const selects = screen.getAllByRole('combobox')
       expect(selects.length).toBeGreaterThanOrEqual(2)
-      
+
       const viewSelect = selects[1] // Second select should be View
       fireEvent.mouseDown(viewSelect)
-      
+
       // Wait for the menu to appear and click Chart option
       await waitFor(() => {
         const chartMenuItem = screen.getByRole('option', { name: 'Chart' })
@@ -532,7 +545,9 @@ describe('Comparative Analysis and Export Features', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getByText('Score Progression Over Time')).toBeInTheDocument()
+        expect(
+          screen.getByText('Score Progression Over Time')
+        ).toBeInTheDocument()
       })
     })
   })

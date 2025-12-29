@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      
+
       <Drawer
         variant="permanent"
         sx={{
@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </List>
         </Box>
       </Drawer>
-      
+
       <Box
         component="main"
         sx={{

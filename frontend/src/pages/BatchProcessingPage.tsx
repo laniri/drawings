@@ -44,7 +44,13 @@ interface BatchFile {
   id: string
   file: File
   preview: string
-  status: 'pending' | 'uploading' | 'uploaded' | 'analyzing' | 'completed' | 'error'
+  status:
+    | 'pending'
+    | 'uploading'
+    | 'uploaded'
+    | 'analyzing'
+    | 'completed'
+    | 'error'
   progress: number
   drawingId?: number
   analysisResult?: {
@@ -109,26 +115,30 @@ const BatchProcessingPage: React.FC = () => {
         formData.append('files', batchFile.file)
       })
 
-      const response = await axios.post('/api/analysis/batch/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const progress = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            )
-            // Update progress for all files
-            setBatchFiles((prev) =>
-              prev.map((file) => ({
-                ...file,
-                status: 'uploading',
-                progress,
-              }))
-            )
-          }
-        },
-      })
+      const response = await axios.post(
+        '/api/analysis/batch/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              )
+              // Update progress for all files
+              setBatchFiles((prev) =>
+                prev.map((file) => ({
+                  ...file,
+                  status: 'uploading',
+                  progress,
+                }))
+              )
+            }
+          },
+        }
+      )
       return response.data
     },
     onSuccess: (data) => {
@@ -159,7 +169,7 @@ const BatchProcessingPage: React.FC = () => {
     },
     onSuccess: () => {
       // Start polling for results
-      setCurrentJob((prev) => prev ? { ...prev, status: 'running' } : null)
+      setCurrentJob((prev) => (prev ? { ...prev, status: 'running' } : null))
     },
   })
 
@@ -220,7 +230,9 @@ const BatchProcessingPage: React.FC = () => {
   }
 
   const completedFiles = batchFiles.filter((f) => f.status === 'completed')
-  const anomalousFiles = completedFiles.filter((f) => f.analysisResult?.is_anomaly)
+  const anomalousFiles = completedFiles.filter(
+    (f) => f.analysisResult?.is_anomaly
+  )
 
   return (
     <Box>
@@ -267,7 +279,12 @@ const BatchProcessingPage: React.FC = () => {
 
             {batchFiles.length > 0 && (
               <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
                   <Typography variant="h6">
                     Files ({batchFiles.length})
                   </Typography>
@@ -282,11 +299,15 @@ const BatchProcessingPage: React.FC = () => {
                     <Button
                       variant="contained"
                       onClick={startBatchProcessing}
-                      disabled={batchUploadMutation.isPending || batchFiles.length === 0}
+                      disabled={
+                        batchUploadMutation.isPending || batchFiles.length === 0
+                      }
                       startIcon={<PlayArrow />}
                       sx={{ ml: 1 }}
                     >
-                      {batchUploadMutation.isPending ? 'Uploading...' : 'Start Processing'}
+                      {batchUploadMutation.isPending
+                        ? 'Uploading...'
+                        : 'Start Processing'}
                     </Button>
                   </Box>
                 </Box>
@@ -295,9 +316,7 @@ const BatchProcessingPage: React.FC = () => {
                   {batchFiles.map((batchFile) => (
                     <ListItem key={batchFile.id}>
                       <ListItemAvatar>
-                        <Avatar>
-                          {getStatusIcon(batchFile.status)}
-                        </Avatar>
+                        <Avatar>{getStatusIcon(batchFile.status)}</Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={batchFile.file.name}
@@ -313,13 +332,14 @@ const BatchProcessingPage: React.FC = () => {
                               color={getStatusColor(batchFile.status) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
                               variant="outlined"
                             />
-                            {batchFile.progress > 0 && batchFile.progress < 100 && (
-                              <LinearProgress
-                                variant="determinate"
-                                value={batchFile.progress}
-                                sx={{ mt: 1 }}
-                              />
-                            )}
+                            {batchFile.progress > 0 &&
+                              batchFile.progress < 100 && (
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={batchFile.progress}
+                                  sx={{ mt: 1 }}
+                                />
+                              )}
                           </Box>
                         }
                       />
@@ -347,24 +367,34 @@ const BatchProcessingPage: React.FC = () => {
 
             {currentJob && (
               <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
                   <Typography variant="body2">
                     Job: {currentJob.id.slice(0, 8)}...
                   </Typography>
                   <Chip
                     size="small"
                     label={currentJob.status}
-                    color={currentJob.status === 'completed' ? 'success' : 'primary'}
+                    color={
+                      currentJob.status === 'completed' ? 'success' : 'primary'
+                    }
                   />
                 </Box>
 
                 <Typography variant="body2" gutterBottom>
-                  Progress: {currentJob.completed_files} / {currentJob.total_files}
+                  Progress: {currentJob.completed_files} /{' '}
+                  {currentJob.total_files}
                 </Typography>
 
                 <LinearProgress
                   variant="determinate"
-                  value={(currentJob.completed_files / currentJob.total_files) * 100}
+                  value={
+                    (currentJob.completed_files / currentJob.total_files) * 100
+                  }
                   sx={{ mb: 2 }}
                 />
 
@@ -413,7 +443,14 @@ const BatchProcessingPage: React.FC = () => {
                 Anomalies Detected: {anomalousFiles.length}
               </Typography>
               <Typography variant="body2">
-                Anomaly Rate: {completedFiles.length > 0 ? ((anomalousFiles.length / completedFiles.length) * 100).toFixed(1) : 0}%
+                Anomaly Rate:{' '}
+                {completedFiles.length > 0
+                  ? (
+                      (anomalousFiles.length / completedFiles.length) *
+                      100
+                    ).toFixed(1)
+                  : 0}
+                %
               </Typography>
             </Paper>
           )}
@@ -457,15 +494,23 @@ const BatchProcessingPage: React.FC = () => {
                     <TableCell>
                       <Chip
                         size="small"
-                        label={file.analysisResult?.is_anomaly ? 'Anomaly' : 'Normal'}
-                        color={file.analysisResult?.is_anomaly ? 'warning' : 'success'}
+                        label={
+                          file.analysisResult?.is_anomaly ? 'Anomaly' : 'Normal'
+                        }
+                        color={
+                          file.analysisResult?.is_anomaly
+                            ? 'warning'
+                            : 'success'
+                        }
                       />
                     </TableCell>
                     <TableCell>
                       {file.drawingId && (
                         <Button
                           size="small"
-                          onClick={() => navigate(`/analysis/${file.drawingId}`)}
+                          onClick={() =>
+                            navigate(`/analysis/${file.drawingId}`)
+                          }
                         >
                           View Details
                         </Button>

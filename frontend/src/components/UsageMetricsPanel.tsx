@@ -100,20 +100,21 @@ const UsageMetricsPanel: React.FC = () => {
     refetchInterval: 30000, // Refresh every 30 seconds
   })
 
-  const { data: performance, isLoading: performanceLoading } = useQuery<PerformanceMetrics>({
-    queryKey: ['performance-metrics'],
-    queryFn: async () => {
-      const response = await axios.get('/api/v1/metrics/performance')
-      return response.data
-    },
-    refetchInterval: 15000, // Refresh every 15 seconds
-  })
+  const { data: performance, isLoading: performanceLoading } =
+    useQuery<PerformanceMetrics>({
+      queryKey: ['performance-metrics'],
+      queryFn: async () => {
+        const response = await axios.get('/api/v1/metrics/performance')
+        return response.data
+      },
+      refetchInterval: 15000, // Refresh every 15 seconds
+    })
 
   const formatUptime = (seconds: number): string => {
     const days = Math.floor(seconds / 86400)
     const hours = Math.floor((seconds % 86400) / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    
+
     if (days > 0) {
       return `${days}d ${hours}h ${minutes}m`
     } else if (hours > 0) {
@@ -129,16 +130,18 @@ const UsageMetricsPanel: React.FC = () => {
   }
 
   // Prepare chart data for processing times
-  const processingTimeData = performance?.analysis.recent_processing_times.map((time, index) => ({
-    index: index + 1,
-    time: time * 1000, // Convert to milliseconds
-  })) || []
+  const processingTimeData =
+    performance?.analysis.recent_processing_times.map((time, index) => ({
+      index: index + 1,
+      time: time * 1000, // Convert to milliseconds
+    })) || []
 
   // Prepare chart data for response times
-  const responseTimeData = performance?.system.recent_response_times.map((time, index) => ({
-    index: index + 1,
-    time: time * 1000, // Convert to milliseconds
-  })) || []
+  const responseTimeData =
+    performance?.system.recent_response_times.map((time, index) => ({
+      index: index + 1,
+      time: time * 1000, // Convert to milliseconds
+    })) || []
 
   if (metricsLoading || performanceLoading) {
     return (
@@ -162,7 +165,11 @@ const UsageMetricsPanel: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Active Sessions
@@ -182,7 +189,11 @@ const UsageMetricsPanel: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     System Uptime
@@ -205,13 +216,19 @@ const UsageMetricsPanel: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Memory Usage
                   </Typography>
                   <Typography variant="h6">
-                    {metrics ? formatBytes(metrics.system_health.memory_usage_mb) : '0 MB'}
+                    {metrics
+                      ? formatBytes(metrics.system_health.memory_usage_mb)
+                      : '0 MB'}
                   </Typography>
                   <Typography variant="body2" color="info.main">
                     CPU: {metrics?.system_health.cpu_usage_percent.toFixed(1)}%
@@ -228,16 +245,37 @@ const UsageMetricsPanel: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Error Rate
                   </Typography>
-                  <Typography variant="h4" color={(metrics?.system_health.error_rate || 0) > 0.05 ? 'error.main' : 'success.main'}>
-                    {((metrics?.system_health.error_rate || 0) * 100).toFixed(1)}%
+                  <Typography
+                    variant="h4"
+                    color={
+                      (metrics?.system_health.error_rate || 0) > 0.05
+                        ? 'error.main'
+                        : 'success.main'
+                    }
+                  >
+                    {((metrics?.system_health.error_rate || 0) * 100).toFixed(
+                      1
+                    )}
+                    %
                   </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: (metrics?.system_health.error_rate || 0) > 0.05 ? 'error.main' : 'success.main' }}>
+                <Avatar
+                  sx={{
+                    bgcolor:
+                      (metrics?.system_health.error_rate || 0) > 0.05
+                        ? 'error.main'
+                        : 'success.main',
+                  }}
+                >
                   <TrendingUp />
                 </Avatar>
               </Box>
@@ -285,10 +323,14 @@ const UsageMetricsPanel: React.FC = () => {
                 </Box>
               </Grid>
             </Grid>
-            
+
             <Divider sx={{ my: 2 }} />
-            
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Typography variant="body2" color="textSecondary">
                 Avg Processing Time
               </Typography>
@@ -308,29 +350,35 @@ const UsageMetricsPanel: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Geographic Distribution
             </Typography>
-            {metrics?.geographic && Object.keys(metrics.geographic).length > 0 ? (
+            {metrics?.geographic &&
+            Object.keys(metrics.geographic).length > 0 ? (
               <Box>
                 {Object.entries(metrics.geographic)
                   .sort(([, a], [, b]) => b - a)
                   .slice(0, 5)
                   .map(([location, count]) => (
-                    <Box key={location} display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Box
+                      key={location}
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={1}
+                    >
                       <Box display="flex" alignItems="center" gap={1}>
                         <Public fontSize="small" color="action" />
-                        <Typography variant="body2">
-                          {location}
-                        </Typography>
+                        <Typography variant="body2">{location}</Typography>
                       </Box>
-                      <Chip
-                        label={count}
-                        size="small"
-                        variant="outlined"
-                      />
+                      <Chip label={count} size="small" variant="outlined" />
                     </Box>
                   ))}
               </Box>
             ) : (
-              <Typography variant="body2" color="textSecondary" textAlign="center" py={2}>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                textAlign="center"
+                py={2}
+              >
                 No active sessions
               </Typography>
             )}
@@ -350,8 +398,18 @@ const UsageMetricsPanel: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="index" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${(value as number).toFixed(0)}ms`, 'Processing Time']} />
-                <Line type="monotone" dataKey="time" stroke="#1976d2" strokeWidth={2} />
+                <Tooltip
+                  formatter={(value) => [
+                    `${(value as number).toFixed(0)}ms`,
+                    'Processing Time',
+                  ]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="time"
+                  stroke="#1976d2"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </Paper>
@@ -367,8 +425,19 @@ const UsageMetricsPanel: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="index" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${(value as number).toFixed(0)}ms`, 'Response Time']} />
-                <Area type="monotone" dataKey="time" stroke="#ff9800" fill="#ff9800" fillOpacity={0.3} />
+                <Tooltip
+                  formatter={(value) => [
+                    `${(value as number).toFixed(0)}ms`,
+                    'Response Time',
+                  ]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="time"
+                  stroke="#ff9800"
+                  fill="#ff9800"
+                  fillOpacity={0.3}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </Paper>
@@ -397,7 +466,14 @@ const UsageMetricsPanel: React.FC = () => {
                 Success Rate
               </Typography>
               <Typography variant="h5" color="success.main">
-                {metrics ? (((metrics.system_health.successful_requests / metrics.system_health.total_requests) * 100) || 0).toFixed(1) : 0}%
+                {metrics
+                  ? (
+                      (metrics.system_health.successful_requests /
+                        metrics.system_health.total_requests) *
+                        100 || 0
+                    ).toFixed(1)
+                  : 0}
+                %
               </Typography>
             </Box>
           </Grid>
@@ -407,7 +483,10 @@ const UsageMetricsPanel: React.FC = () => {
                 Avg Response Time
               </Typography>
               <Typography variant="h5">
-                {((metrics?.system_health.average_response_time || 0) * 1000).toFixed(0)}ms
+                {(
+                  (metrics?.system_health.average_response_time || 0) * 1000
+                ).toFixed(0)}
+                ms
               </Typography>
             </Box>
           </Grid>

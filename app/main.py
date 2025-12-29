@@ -80,6 +80,7 @@ app.include_router(demo_router, prefix="/demo", tags=["demo"])
 
 # Mount static files for serving uploaded images and results
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 @app.get("/")

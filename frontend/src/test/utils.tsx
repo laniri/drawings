@@ -8,7 +8,9 @@ import { theme } from '../theme/theme'
 
 // Create a custom render function that includes providers
 // eslint-disable-next-line react-refresh/only-export-components
-const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -22,9 +24,7 @@ const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) 
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
+        <BrowserRouter>{children}</BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   )

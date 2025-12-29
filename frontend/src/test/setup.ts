@@ -26,7 +26,7 @@ Object.defineProperty(globalThis, 'URL', {
       this.search = ''
       this.hash = ''
     }
-    
+
     href: string
     origin: string
     protocol: string
@@ -36,19 +36,19 @@ Object.defineProperty(globalThis, 'URL', {
     pathname: string
     search: string
     hash: string
-    
+
     static createObjectURL = vi.fn(() => 'mocked-url')
     static revokeObjectURL = vi.fn()
-    
+
     toString() {
       return this.href
     }
-  }
+  },
 })
 
 // Also set it on window for browser compatibility
 Object.defineProperty(window, 'URL', {
-  value: globalThis.URL
+  value: globalThis.URL,
 })
 
 // Mock ResizeObserver
@@ -57,7 +57,7 @@ Object.defineProperty(window, 'ResizeObserver', {
     observe = vi.fn()
     unobserve = vi.fn()
     disconnect = vi.fn()
-  }
+  },
 })
 
 // Mock IntersectionObserver
@@ -66,5 +66,5 @@ Object.defineProperty(window, 'IntersectionObserver', {
     observe = vi.fn()
     unobserve = vi.fn()
     disconnect = vi.fn()
-  }
+  },
 })

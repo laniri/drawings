@@ -14,8 +14,8 @@ import InterpretabilityEducationHub from '../components/interpretability/Interpr
 // Mock axios
 vi.mock('axios', () => ({
   default: {
-    get: vi.fn()
-  }
+    get: vi.fn(),
+  },
 }))
 
 const mockedAxios = axios as any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -31,9 +31,7 @@ const queryClient = new QueryClient({
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider theme={theme}>
-      {children}
-    </ThemeProvider>
+    <ThemeProvider theme={theme}>{children}</ThemeProvider>
   </QueryClientProvider>
 )
 
@@ -41,7 +39,7 @@ describe('Interpretability Education Components', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     queryClient.clear()
-    
+
     // Setup axios mock implementation
     mockedAxios.get.mockImplementation((url: string) => {
       if (url.includes('/api/interpretability/examples')) {
@@ -62,10 +60,10 @@ describe('Interpretability Education Components', () => {
               metadata: {
                 drawing_count: 100,
                 prevalence: 0.5,
-                developmental_significance: 'test significance'
-              }
-            }
-          ]
+                developmental_significance: 'test significance',
+              },
+            },
+          ],
         })
       }
       return Promise.resolve({ data: [] })
@@ -81,20 +79,17 @@ describe('Interpretability Education Components', () => {
         />
       </TestWrapper>
     )
-    
+
     expect(screen.getByText('Interpretability Tutorial')).toBeInTheDocument()
   })
 
   it('renders ContextualHelpSystem without crashing', () => {
     render(
       <TestWrapper>
-        <ContextualHelpSystem
-          topic="saliency-maps"
-          userRole="educator"
-        />
+        <ContextualHelpSystem topic="saliency-maps" userRole="educator" />
       </TestWrapper>
     )
-    
+
     // Should render a help button
     expect(screen.getByRole('button')).toBeInTheDocument()
   })
@@ -102,19 +97,21 @@ describe('Interpretability Education Components', () => {
   it('renders ExampleGallery without crashing', async () => {
     render(
       <TestWrapper>
-        <ExampleGallery
-          ageGroup="3-4"
-          userRole="educator"
-        />
+        <ExampleGallery ageGroup="3-4" userRole="educator" />
       </TestWrapper>
     )
-    
+
     // Wait for the component to load - check for either success or error state
-    await waitFor(() => {
-      const successElement = screen.queryByText('Interpretation Examples')
-      const errorElement = screen.queryByText('Failed to load example patterns. Please try again later.')
-      expect(successElement || errorElement).toBeInTheDocument()
-    }, { timeout: 10000 })
+    await waitFor(
+      () => {
+        const successElement = screen.queryByText('Interpretation Examples')
+        const errorElement = screen.queryByText(
+          'Failed to load example patterns. Please try again later.'
+        )
+        expect(successElement || errorElement).toBeInTheDocument()
+      },
+      { timeout: 10000 }
+    )
   }, 15000)
 
   it('renders AdaptiveExplanationSystem without crashing', () => {
@@ -124,30 +121,25 @@ describe('Interpretability Education Components', () => {
       is_anomaly: true,
       confidence: 0.85,
       threshold: 0.65,
-      age_group: '5-6'
+      age_group: '5-6',
     }
 
     render(
       <TestWrapper>
-        <AdaptiveExplanationSystem
-          analysisData={mockAnalysisData}
-        />
+        <AdaptiveExplanationSystem analysisData={mockAnalysisData} />
       </TestWrapper>
     )
-    
+
     expect(screen.getByText('Explanation Settings')).toBeInTheDocument()
   })
 
   it('renders InterpretabilityEducationHub without crashing', () => {
     render(
       <TestWrapper>
-        <InterpretabilityEducationHub
-          userRole="educator"
-          ageGroup="5-6"
-        />
+        <InterpretabilityEducationHub userRole="educator" ageGroup="5-6" />
       </TestWrapper>
     )
-    
+
     expect(screen.getByText('Interpretability Guide')).toBeInTheDocument()
     expect(screen.getByText('Educator View')).toBeInTheDocument()
   })
@@ -155,13 +147,10 @@ describe('Interpretability Education Components', () => {
   it('shows different content for different user roles', async () => {
     const { rerender } = render(
       <TestWrapper>
-        <InterpretabilityEducationHub
-          userRole="researcher"
-          ageGroup="5-6"
-        />
+        <InterpretabilityEducationHub userRole="researcher" ageGroup="5-6" />
       </TestWrapper>
     )
-    
+
     // Wait for initial render with researcher role
     await waitFor(() => {
       expect(screen.getByText('Researcher View')).toBeInTheDocument()
@@ -177,10 +166,13 @@ describe('Interpretability Education Components', () => {
         />
       </TestWrapper>
     )
-    
+
     // Wait for the parent view to appear
-    await waitFor(() => {
-      expect(screen.getByText('Parent View')).toBeInTheDocument()
-    }, { timeout: 10000 })
+    await waitFor(
+      () => {
+        expect(screen.getByText('Parent View')).toBeInTheDocument()
+      },
+      { timeout: 10000 }
+    )
   }, 15000)
 })

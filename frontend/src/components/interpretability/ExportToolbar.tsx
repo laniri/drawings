@@ -25,7 +25,7 @@ import {
   Paper,
   Grid,
   IconButton,
-  Tooltip
+  Tooltip,
 } from '@mui/material'
 import {
   FileDownload as DownloadIcon,
@@ -36,7 +36,7 @@ import {
   Web as HtmlIcon,
   Settings as SettingsIcon,
   History as HistoryIcon,
-  CheckCircle as CheckIcon
+  CheckCircle as CheckIcon,
 } from '@mui/icons-material'
 
 interface ExportOptions {
@@ -83,7 +83,7 @@ const formatIcons = {
   png: ImageIcon,
   csv: CsvIcon,
   json: JsonIcon,
-  html: HtmlIcon
+  html: HtmlIcon,
 }
 
 const formatLabels = {
@@ -91,7 +91,7 @@ const formatLabels = {
   png: 'PNG Image',
   csv: 'CSV Data',
   json: 'JSON Data',
-  html: 'HTML Report'
+  html: 'HTML Report',
 }
 
 const formatDescriptions = {
@@ -99,19 +99,20 @@ const formatDescriptions = {
   png: 'High-quality image with saliency overlays',
   csv: 'Structured data for spreadsheet analysis',
   json: 'Raw data for programmatic access',
-  html: 'Interactive web report'
+  html: 'Interactive web report',
 }
 
 export default function ExportToolbar({
   analysisId,
   drawingFilename,
   onExportComplete,
-  disabled = false
+  disabled = false,
 }: ExportToolbarProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
-  const [selectedFormat, setSelectedFormat] = useState<ExportOptions['format']>('pdf')
+  const [selectedFormat, setSelectedFormat] =
+    useState<ExportOptions['format']>('pdf')
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: 'pdf',
     include_annotations: true,
@@ -122,8 +123,8 @@ export default function ExportToolbar({
       page_size: 'A4',
       include_metadata: true,
       include_saliency: true,
-      include_confidence: true
-    }
+      include_confidence: true,
+    },
   })
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
@@ -138,17 +139,15 @@ export default function ExportToolbar({
     setAnchorEl(null)
   }
 
-
-
   const handleQuickExport = async (format: ExportOptions['format']) => {
     const quickOptions: ExportOptions = {
       format,
       include_annotations: true,
       include_comparisons: true,
       simplified_version: false,
-      export_options: {}
+      export_options: {},
     }
-    
+
     await performExport(quickOptions)
     handleMenuClose()
   }
@@ -164,13 +163,16 @@ export default function ExportToolbar({
       setExportError(null)
       setExportSuccess(null)
 
-      const response = await fetch(`/api/interpretability/${analysisId}/export`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(options)
-      })
+      const response = await fetch(
+        `/api/interpretability/${analysisId}/export`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(options),
+        }
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -179,19 +181,22 @@ export default function ExportToolbar({
 
       const result: ExportResult = await response.json()
       setExportSuccess(result)
-      
+
       if (onExportComplete) {
         onExportComplete(result)
       }
 
       // Add to history
-      setExportHistory(prev => [{
-        export_id: result.export_id,
-        format: result.format,
-        file_size: result.file_size,
-        created_at: result.created_at,
-        status: 'completed'
-      }, ...prev])
+      setExportHistory((prev) => [
+        {
+          export_id: result.export_id,
+          format: result.format,
+          file_size: result.file_size,
+          created_at: result.created_at,
+          status: 'completed',
+        },
+        ...prev,
+      ])
 
       // Auto-download the file
       const link = document.createElement('a')
@@ -200,7 +205,6 @@ export default function ExportToolbar({
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-
     } catch (err) {
       console.error('Export failed:', err)
       setExportError(err instanceof Error ? err.message : 'Export failed')
@@ -209,20 +213,22 @@ export default function ExportToolbar({
     }
   }
 
-  const handleOptionChange = (key: keyof ExportOptions, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    setExportOptions(prev => ({
+  const handleOptionChange = (key: keyof ExportOptions, value: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    setExportOptions((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }))
   }
 
-  const handleExportOptionChange = (key: string, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    setExportOptions(prev => ({
+  const handleExportOptionChange = (key: string, value: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    setExportOptions((prev) => ({
       ...prev,
       export_options: {
         ...prev.export_options,
-        [key]: value
-      }
+        [key]: value,
+      },
     }))
   }
 
@@ -268,7 +274,7 @@ export default function ExportToolbar({
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         PaperProps={{
-          sx: { minWidth: 280 }
+          sx: { minWidth: 280 },
         }}
       >
         <MenuItem disabled>
@@ -276,20 +282,24 @@ export default function ExportToolbar({
             Quick Export
           </Typography>
         </MenuItem>
-        
+
         {Object.entries(formatLabels).map(([format, label]) => {
           const IconComponent = formatIcons[format as keyof typeof formatIcons]
           return (
             <MenuItem
               key={format}
-              onClick={() => handleQuickExport(format as ExportOptions['format'])}
+              onClick={() =>
+                handleQuickExport(format as ExportOptions['format'])
+              }
             >
               <ListItemIcon>
                 <IconComponent fontSize="small" />
               </ListItemIcon>
               <ListItemText
                 primary={label}
-                secondary={formatDescriptions[format as keyof typeof formatDescriptions]}
+                secondary={
+                  formatDescriptions[format as keyof typeof formatDescriptions]
+                }
               />
             </MenuItem>
           )
@@ -315,9 +325,7 @@ export default function ExportToolbar({
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          Export Configuration
-        </DialogTitle>
+        <DialogTitle>Export Configuration</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             {/* Format Selection */}
@@ -333,7 +341,8 @@ export default function ExportToolbar({
                 row
               >
                 {Object.entries(formatLabels).map(([format, label]) => {
-                  const IconComponent = formatIcons[format as keyof typeof formatIcons]
+                  const IconComponent =
+                    formatIcons[format as keyof typeof formatIcons]
                   return (
                     <FormControlLabel
                       key={format}
@@ -359,7 +368,12 @@ export default function ExportToolbar({
                   control={
                     <Checkbox
                       checked={exportOptions.include_annotations}
-                      onChange={(e) => handleOptionChange('include_annotations', e.target.checked)}
+                      onChange={(e) =>
+                        handleOptionChange(
+                          'include_annotations',
+                          e.target.checked
+                        )
+                      }
                     />
                   }
                   label="Include user annotations and notes"
@@ -368,7 +382,12 @@ export default function ExportToolbar({
                   control={
                     <Checkbox
                       checked={exportOptions.include_comparisons}
-                      onChange={(e) => handleOptionChange('include_comparisons', e.target.checked)}
+                      onChange={(e) =>
+                        handleOptionChange(
+                          'include_comparisons',
+                          e.target.checked
+                        )
+                      }
                     />
                   }
                   label="Include comparison examples"
@@ -377,7 +396,12 @@ export default function ExportToolbar({
                   control={
                     <Checkbox
                       checked={exportOptions.simplified_version}
-                      onChange={(e) => handleOptionChange('simplified_version', e.target.checked)}
+                      onChange={(e) =>
+                        handleOptionChange(
+                          'simplified_version',
+                          e.target.checked
+                        )
+                      }
                     />
                   }
                   label="Use simplified explanations"
@@ -394,7 +418,12 @@ export default function ExportToolbar({
                     control={
                       <Checkbox
                         checked={exportOptions.export_options.include_metadata}
-                        onChange={(e) => handleExportOptionChange('include_metadata', e.target.checked)}
+                        onChange={(e) =>
+                          handleExportOptionChange(
+                            'include_metadata',
+                            e.target.checked
+                          )
+                        }
                       />
                     }
                     label="Include technical metadata"
@@ -403,7 +432,12 @@ export default function ExportToolbar({
                     control={
                       <Checkbox
                         checked={exportOptions.export_options.include_saliency}
-                        onChange={(e) => handleExportOptionChange('include_saliency', e.target.checked)}
+                        onChange={(e) =>
+                          handleExportOptionChange(
+                            'include_saliency',
+                            e.target.checked
+                          )
+                        }
                       />
                     }
                     label="Include saliency maps"
@@ -411,8 +445,15 @@ export default function ExportToolbar({
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={exportOptions.export_options.include_confidence}
-                        onChange={(e) => handleExportOptionChange('include_confidence', e.target.checked)}
+                        checked={
+                          exportOptions.export_options.include_confidence
+                        }
+                        onChange={(e) =>
+                          handleExportOptionChange(
+                            'include_confidence',
+                            e.target.checked
+                          )
+                        }
                       />
                     }
                     label="Include confidence metrics"
@@ -426,11 +467,25 @@ export default function ExportToolbar({
                 <FormLabel>Image Resolution</FormLabel>
                 <RadioGroup
                   value={exportOptions.export_options.resolution || 'high'}
-                  onChange={(e) => handleExportOptionChange('resolution', e.target.value)}
+                  onChange={(e) =>
+                    handleExportOptionChange('resolution', e.target.value)
+                  }
                 >
-                  <FormControlLabel value="standard" control={<Radio />} label="Standard (72 DPI)" />
-                  <FormControlLabel value="high" control={<Radio />} label="High (150 DPI)" />
-                  <FormControlLabel value="print" control={<Radio />} label="Print Quality (300 DPI)" />
+                  <FormControlLabel
+                    value="standard"
+                    control={<Radio />}
+                    label="Standard (72 DPI)"
+                  />
+                  <FormControlLabel
+                    value="high"
+                    control={<Radio />}
+                    label="High (150 DPI)"
+                  />
+                  <FormControlLabel
+                    value="print"
+                    control={<Radio />}
+                    label="Print Quality (300 DPI)"
+                  />
                 </RadioGroup>
               </FormControl>
             )}
@@ -440,11 +495,21 @@ export default function ExportToolbar({
                 <FormLabel>Page Size</FormLabel>
                 <RadioGroup
                   value={exportOptions.export_options.page_size || 'A4'}
-                  onChange={(e) => handleExportOptionChange('page_size', e.target.value)}
+                  onChange={(e) =>
+                    handleExportOptionChange('page_size', e.target.value)
+                  }
                 >
                   <FormControlLabel value="A4" control={<Radio />} label="A4" />
-                  <FormControlLabel value="Letter" control={<Radio />} label="Letter" />
-                  <FormControlLabel value="Legal" control={<Radio />} label="Legal" />
+                  <FormControlLabel
+                    value="Letter"
+                    control={<Radio />}
+                    label="Letter"
+                  />
+                  <FormControlLabel
+                    value="Legal"
+                    control={<Radio />}
+                    label="Legal"
+                  />
                 </RadioGroup>
               </FormControl>
             )}
@@ -460,21 +525,22 @@ export default function ExportToolbar({
             {exportSuccess && (
               <Alert severity="success" sx={{ mb: 2 }} icon={<CheckIcon />}>
                 <Typography variant="body2">
-                  Export completed successfully! File size: {formatFileSize(exportSuccess.file_size)}
+                  Export completed successfully! File size:{' '}
+                  {formatFileSize(exportSuccess.file_size)}
                 </Typography>
               </Alert>
             )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setExportDialogOpen(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setExportDialogOpen(false)}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleCustomExport}
             disabled={exporting}
-            startIcon={exporting ? <CircularProgress size={16} /> : <DownloadIcon />}
+            startIcon={
+              exporting ? <CircularProgress size={16} /> : <DownloadIcon />
+            }
           >
             {exporting ? 'Exporting...' : 'Export'}
           </Button>
@@ -488,14 +554,13 @@ export default function ExportToolbar({
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          Export History
-        </DialogTitle>
+        <DialogTitle>Export History</DialogTitle>
         <DialogContent>
           {exportHistory.length > 0 ? (
             <Box sx={{ mt: 2 }}>
               {exportHistory.map((item) => {
-                const IconComponent = formatIcons[item.format as keyof typeof formatIcons]
+                const IconComponent =
+                  formatIcons[item.format as keyof typeof formatIcons]
                 return (
                   <Paper key={item.export_id} sx={{ p: 2, mb: 2 }}>
                     <Grid container spacing={2} alignItems="center">
@@ -504,16 +569,23 @@ export default function ExportToolbar({
                       </Grid>
                       <Grid item xs>
                         <Typography variant="subtitle2">
-                          {formatLabels[item.format as keyof typeof formatLabels]}
+                          {
+                            formatLabels[
+                              item.format as keyof typeof formatLabels
+                            ]
+                          }
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {formatDate(item.created_at)} • {formatFileSize(item.file_size)}
+                          {formatDate(item.created_at)} •{' '}
+                          {formatFileSize(item.file_size)}
                         </Typography>
                       </Grid>
                       <Grid item>
                         <Chip
                           label={item.status}
-                          color={item.status === 'completed' ? 'success' : 'error'}
+                          color={
+                            item.status === 'completed' ? 'success' : 'error'
+                          }
                           size="small"
                         />
                       </Grid>
@@ -523,15 +595,11 @@ export default function ExportToolbar({
               })}
             </Box>
           ) : (
-            <Alert severity="info">
-              No export history available
-            </Alert>
+            <Alert severity="info">No export history available</Alert>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setHistoryDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setHistoryDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

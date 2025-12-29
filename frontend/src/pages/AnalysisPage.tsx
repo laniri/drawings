@@ -89,28 +89,40 @@ const AnalysisPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [showSaliency, setShowSaliency] = useState(true)
   const [saliencyOpacity, setSaliencyOpacity] = useState(0.6)
-  const [selectedRegionExplanation, setSelectedRegionExplanation] = useState<string>('')
-  const [, setCurrentExplanationLevel] = useState<'technical' | 'simplified'>('simplified')
+  const [selectedRegionExplanation, setSelectedRegionExplanation] =
+    useState<string>('')
+  const [, setCurrentExplanationLevel] = useState<'technical' | 'simplified'>(
+    'simplified'
+  )
 
   // Fetch analysis results
-  const { data: analysisData, isLoading, error } = useQuery<AnalysisData>({
+  const {
+    data: analysisData,
+    isLoading,
+    error,
+  } = useQuery<AnalysisData>({
     queryKey: ['analysis', id],
     queryFn: async () => {
       try {
         // First try to get analysis by analysis ID
         const response = await axios.get(`/api/analysis/${id}`)
         return response.data
-      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         if (error.response?.status === 404) {
           // If not found, try to get the latest analysis for this drawing ID
           try {
-            const drawingAnalysesResponse = await axios.get(`/api/analysis/drawing/${id}`)
+            const drawingAnalysesResponse = await axios.get(
+              `/api/analysis/drawing/${id}`
+            )
             const analyses = drawingAnalysesResponse.data.analyses
             if (analyses && analyses.length > 0) {
               // Get the latest analysis (first in the list since they're ordered by timestamp desc)
               const latestAnalysisId = analyses[0].id
               // Now fetch the complete analysis result
-              const analysisResponse = await axios.get(`/api/analysis/${latestAnalysisId}`)
+              const analysisResponse = await axios.get(
+                `/api/analysis/${latestAnalysisId}`
+              )
               return analysisResponse.data
             }
           } catch (drawingError) {
@@ -130,7 +142,9 @@ const AnalysisPage: React.FC = () => {
       if (!analysisData?.drawing?.id) {
         return Promise.reject(new Error('Drawing ID not available'))
       }
-      const response = await axios.post(`/api/analysis/analyze/${analysisData.drawing.id}`)
+      const response = await axios.post(
+        `/api/analysis/analyze/${analysisData.drawing.id}`
+      )
       return response.data
     },
     onSuccess: () => {
@@ -159,7 +173,12 @@ const AnalysisPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
     )
@@ -240,11 +259,12 @@ const AnalysisPage: React.FC = () => {
                   Subject: {drawing.subject}
                 </Typography>
               )}
-              {analysis.subject_category && analysis.subject_category !== drawing.subject && (
-                <Typography variant="body2" color="text.secondary">
-                  Analysis Subject: {analysis.subject_category}
-                </Typography>
-              )}
+              {analysis.subject_category &&
+                analysis.subject_category !== drawing.subject && (
+                  <Typography variant="body2" color="text.secondary">
+                    Analysis Subject: {analysis.subject_category}
+                  </Typography>
+                )}
               {drawing.expert_label && (
                 <Chip
                   label={`Expert: ${drawing.expert_label}`}
@@ -262,9 +282,18 @@ const AnalysisPage: React.FC = () => {
             <Box display="flex" alignItems="center" gap={2} mb={3}>
               <Typography variant="h5">Analysis Results</Typography>
               <Chip
-                icon={getAnomalyStatusIcon(analysis.is_anomaly, analysis.confidence)}
-                label={getAnomalyStatusText(analysis.is_anomaly, analysis.confidence)}
-                color={getAnomalyStatusColor(analysis.is_anomaly, analysis.confidence)}
+                icon={getAnomalyStatusIcon(
+                  analysis.is_anomaly,
+                  analysis.confidence
+                )}
+                label={getAnomalyStatusText(
+                  analysis.is_anomaly,
+                  analysis.confidence
+                )}
+                color={getAnomalyStatusColor(
+                  analysis.is_anomaly,
+                  analysis.confidence
+                )}
                 variant="outlined"
               />
             </Box>
@@ -347,16 +376,28 @@ const AnalysisPage: React.FC = () => {
                     <Grid item xs={6} sm={3}>
                       <Box textAlign="center">
                         <Chip
-                          label={analysis.anomaly_attribution.charAt(0).toUpperCase() + analysis.anomaly_attribution.slice(1)}
+                          label={
+                            analysis.anomaly_attribution
+                              .charAt(0)
+                              .toUpperCase() +
+                            analysis.anomaly_attribution.slice(1)
+                          }
                           color={
-                            analysis.anomaly_attribution === 'visual' ? 'info' :
-                            analysis.anomaly_attribution === 'subject' ? 'warning' :
-                            analysis.anomaly_attribution === 'both' ? 'error' :
-                            'default'
+                            analysis.anomaly_attribution === 'visual'
+                              ? 'info'
+                              : analysis.anomaly_attribution === 'subject'
+                                ? 'warning'
+                                : analysis.anomaly_attribution === 'both'
+                                  ? 'error'
+                                  : 'default'
                           }
                           variant="filled"
                         />
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.5 }}
+                        >
                           Primary Attribution
                         </Typography>
                       </Box>
@@ -375,19 +416,19 @@ const AnalysisPage: React.FC = () => {
                     </Grid>
                   )}
                 </Grid>
-                
+
                 {/* Attribution Explanation - Only show for anomalies */}
                 {analysis.anomaly_attribution && analysis.is_anomaly && (
                   <Alert severity="info" sx={{ mt: 2 }}>
                     <Typography variant="body2">
                       <strong>Attribution Explanation:</strong>{' '}
-                      {analysis.anomaly_attribution === 'visual' && 
+                      {analysis.anomaly_attribution === 'visual' &&
                         'The anomaly is primarily in the visual features of the drawing (shapes, lines, spatial relationships).'}
-                      {analysis.anomaly_attribution === 'subject' && 
+                      {analysis.anomaly_attribution === 'subject' &&
                         'The anomaly is primarily related to the subject category representation.'}
-                      {analysis.anomaly_attribution === 'both' && 
+                      {analysis.anomaly_attribution === 'both' &&
                         'The anomaly involves both visual features and subject representation.'}
-                      {analysis.anomaly_attribution === 'age' && 
+                      {analysis.anomaly_attribution === 'age' &&
                         'The drawing appears more typical for a different age group.'}
                     </Typography>
                   </Alert>
@@ -398,7 +439,8 @@ const AnalysisPage: React.FC = () => {
             <Divider sx={{ my: 2 }} />
 
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Method: {analysis.method_used} | Type: {analysis.analysis_type} | Analyzed: {new Date(analysis.analysis_timestamp).toLocaleString()}
+              Method: {analysis.method_used} | Type: {analysis.analysis_type} |
+              Analyzed: {new Date(analysis.analysis_timestamp).toLocaleString()}
             </Typography>
 
             <Button
@@ -421,8 +463,18 @@ const AnalysisPage: React.FC = () => {
                 Interpretability Analysis
               </Typography>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Tabs
+                  value={activeTab}
+                  onChange={(_, newValue) => setActiveTab(newValue)}
+                >
                   <Tab label="Interactive Analysis" icon={<Analytics />} />
                   <Tab label="Saliency Map" icon={<Visibility />} />
                   <Tab label="Comparison" icon={<Compare />} />
@@ -430,7 +482,7 @@ const AnalysisPage: React.FC = () => {
                   <Tab label="History" icon={<TrendingUp />} />
                   <Tab label="Annotations" icon={<Analytics />} />
                 </Tabs>
-                
+
                 <ExportToolbar
                   analysisId={analysis.id}
                   drawingFilename={drawing.filename}
@@ -472,7 +524,14 @@ const AnalysisPage: React.FC = () => {
                         }}
                       />
                       {selectedRegionExplanation && (
-                        <Paper sx={{ p: 2, mt: 2, backgroundColor: 'primary.light', color: 'primary.contrastText' }}>
+                        <Paper
+                          sx={{
+                            p: 2,
+                            mt: 2,
+                            backgroundColor: 'primary.light',
+                            color: 'primary.contrastText',
+                          }}
+                        >
                           <Typography variant="subtitle2" gutterBottom>
                             Selected Region Analysis:
                           </Typography>
@@ -505,7 +564,9 @@ const AnalysisPage: React.FC = () => {
                         </Typography>
                         <Slider
                           value={saliencyOpacity}
-                          onChange={(_, value) => setSaliencyOpacity(value as number)}
+                          onChange={(_, value) =>
+                            setSaliencyOpacity(value as number)
+                          }
                           min={0.1}
                           max={1}
                           step={0.1}
@@ -596,7 +657,7 @@ const AnalysisPage: React.FC = () => {
                   <ComparativeAnalysisPanel
                     currentAnalysis={{
                       ...analysis,
-                      drawing_id: drawing.id
+                      drawing_id: drawing.id,
                     }}
                     currentDrawing={drawing}
                     onExampleSelect={(exampleId) => {
@@ -633,12 +694,21 @@ const AnalysisPage: React.FC = () => {
                 <Box sx={{ mt: 3 }}>
                   <AnnotationTools
                     analysisId={analysis.id}
-                    regions={interpretability?.importance_regions?.map((region, index) => ({
-                      region_id: `region_${index + 1}`,
-                      bounding_box: [region.x, region.y, region.x + region.width, region.y + region.height],
-                      spatial_location: `Region ${index + 1}`,
-                      importance_score: region.importance
-                    })) || []}
+                    regions={
+                      interpretability?.importance_regions?.map(
+                        (region, index) => ({
+                          region_id: `region_${index + 1}`,
+                          bounding_box: [
+                            region.x,
+                            region.y,
+                            region.x + region.width,
+                            region.y + region.height,
+                          ],
+                          spatial_location: `Region ${index + 1}`,
+                          importance_score: region.importance,
+                        })
+                      ) || []
+                    }
                     onAnnotationAdd={(annotation) => {
                       console.log('Annotation added:', annotation)
                     }}

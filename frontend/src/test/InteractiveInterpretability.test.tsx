@@ -28,9 +28,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </QueryClientProvider>
   )
 }
@@ -48,7 +46,9 @@ describe('Interactive Interpretability Components', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Loading interactive interpretability data...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading interactive interpretability data...')
+      ).toBeInTheDocument()
     })
 
     it('renders with required props', () => {
@@ -63,12 +63,14 @@ describe('Interactive Interpretability Components', () => {
       )
 
       // Component should render without crashing
-      expect(screen.getByText('Loading interactive interpretability data...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading interactive interpretability data...')
+      ).toBeInTheDocument()
     })
 
     it('accepts optional onRegionClick callback', () => {
       const mockCallback = vi.fn()
-      
+
       render(
         <TestWrapper>
           <InteractiveInterpretabilityViewer
@@ -80,7 +82,9 @@ describe('Interactive Interpretability Components', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Loading interactive interpretability data...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading interactive interpretability data...')
+      ).toBeInTheDocument()
     })
 
     it('handles zoom and pan interactions', () => {
@@ -95,7 +99,9 @@ describe('Interactive Interpretability Components', () => {
       )
 
       // Test that component renders with interactive features
-      expect(screen.getByText('Loading interactive interpretability data...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading interactive interpretability data...')
+      ).toBeInTheDocument()
     })
   })
 
@@ -119,7 +125,9 @@ describe('Interactive Interpretability Components', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Educational explanations for classroom use')).toBeInTheDocument()
+      expect(
+        screen.getByText('Educational explanations for classroom use')
+      ).toBeInTheDocument()
     })
   })
 
@@ -131,7 +139,9 @@ describe('Interactive Interpretability Components', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Loading confidence metrics...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading confidence metrics...')
+      ).toBeInTheDocument()
     })
 
     it('renders in compact mode', () => {
@@ -142,7 +152,9 @@ describe('Interactive Interpretability Components', () => {
       )
 
       // Should render without crashing
-      expect(screen.getByText('Loading confidence metrics...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading confidence metrics...')
+      ).toBeInTheDocument()
     })
 
     it('shows technical details when enabled', () => {
@@ -152,7 +164,9 @@ describe('Interactive Interpretability Components', () => {
         </TestWrapper>
       )
 
-      expect(screen.getByText('Loading confidence metrics...')).toBeInTheDocument()
+      expect(
+        screen.getByText('Loading confidence metrics...')
+      ).toBeInTheDocument()
     })
   })
 })

@@ -162,29 +162,57 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Check if we're in testing mode (when using TestClient)
         self.testing_mode = False
 
-        # Rate limiting configuration
-        self.rate_limiters = {
-            "default": RateLimiter(
-                RateLimitRule(
-                    requests_per_minute=60, requests_per_hour=1000, burst_limit=10
-                )
-            ),
-            "upload": RateLimiter(
-                RateLimitRule(
-                    requests_per_minute=10, requests_per_hour=100, burst_limit=3
-                )
-            ),
-            "analysis": RateLimiter(
-                RateLimitRule(
-                    requests_per_minute=30, requests_per_hour=500, burst_limit=5
-                )
-            ),
-            "auth": RateLimiter(
-                RateLimitRule(
-                    requests_per_minute=5, requests_per_hour=50, burst_limit=2
-                )
-            ),
-        }
+        # Rate limiting configuration - more lenient for local development
+        if settings.is_local:
+            # Local development - very lenient rate limits
+            self.rate_limiters = {
+                "default": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=1000,
+                        requests_per_hour=10000,
+                        burst_limit=100,
+                    )
+                ),
+                "upload": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=100, requests_per_hour=1000, burst_limit=50
+                    )
+                ),
+                "analysis": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=500, requests_per_hour=5000, burst_limit=100
+                    )
+                ),
+                "auth": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=100, requests_per_hour=1000, burst_limit=50
+                    )
+                ),
+            }
+        else:
+            # Production - strict rate limits
+            self.rate_limiters = {
+                "default": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=60, requests_per_hour=1000, burst_limit=10
+                    )
+                ),
+                "upload": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=10, requests_per_hour=100, burst_limit=3
+                    )
+                ),
+                "analysis": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=30, requests_per_hour=500, burst_limit=5
+                    )
+                ),
+                "auth": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=5, requests_per_hour=50, burst_limit=2
+                    )
+                ),
+            }
 
         # Security headers
         self.security_headers = SecurityHeaders()
@@ -476,7 +504,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             or os.environ.get("PYTEST_CURRENT_TEST") is not None
         )
 
-        if not is_testing:
+        # Skip rate limiting for localhost in local development
+        client_ip = request.client.host if request.client else "unknown"
+        is_localhost = (
+            client_ip in ["127.0.0.1", "::1", "localhost"] and settings.is_local
+        )
+
+        if not is_testing and not is_localhost:
             # Validate request size
             size_error = self._validate_request_size(request)
             if size_error:
@@ -509,8 +543,12 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
 
-            # Add rate limit headers to successful responses (only if not testing)
-            if not is_testing:
+            # Add rate limit headers to successful responses (only if not testing and not localhost)
+            if not is_testing and not is_localhost:
+                client_id = self._get_client_identifier(request)
+                rate_limiter = self._get_rate_limiter(request)
+                _, rate_limit_info = rate_limiter.is_allowed(client_id)
+
                 response.headers["X-RateLimit-Limit-Minute"] = str(
                     rate_limit_info["limit_per_minute"]
                 )

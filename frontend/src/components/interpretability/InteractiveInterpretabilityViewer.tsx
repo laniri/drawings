@@ -64,15 +64,12 @@ interface InteractiveInterpretabilityViewerProps {
   onRegionClick?: (regionId: string, explanation: string) => void
 }
 
-const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityViewerProps> = ({
-  analysisId,
-  drawingImageUrl,
-  saliencyMapUrl,
-  onRegionClick,
-}) => {
-
+const InteractiveInterpretabilityViewer: React.FC<
+  InteractiveInterpretabilityViewerProps
+> = ({ analysisId, drawingImageUrl, saliencyMapUrl, onRegionClick }) => {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
-  const [selectedRegion, setSelectedRegion] = useState<InteractiveRegion | null>(null)
+  const [selectedRegion, setSelectedRegion] =
+    useState<InteractiveRegion | null>(null)
   const [showAttentionPatches, setShowAttentionPatches] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(1)
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 })
@@ -82,10 +79,16 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
   const imageRef = useRef<HTMLImageElement>(null)
 
   // Fetch interactive interpretability data
-  const { data: interactiveData, isLoading, error } = useQuery<InteractiveInterpretabilityData>({
+  const {
+    data: interactiveData,
+    isLoading,
+    error,
+  } = useQuery<InteractiveInterpretabilityData>({
     queryKey: ['interactive-interpretability', analysisId],
     queryFn: async () => {
-      const response = await axios.get(`/api/interpretability/${analysisId}/interactive`)
+      const response = await axios.get(
+        `/api/interpretability/${analysisId}/interactive`
+      )
       return response.data
     },
     enabled: !!analysisId,
@@ -95,34 +98,46 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
     setHoveredRegion(regionId)
   }, [])
 
-  const handleRegionClick = useCallback((region: InteractiveRegion) => {
-    setSelectedRegion(region)
-    onRegionClick?.(region.region_id, region.click_explanation)
-  }, [onRegionClick])
+  const handleRegionClick = useCallback(
+    (region: InteractiveRegion) => {
+      setSelectedRegion(region)
+      onRegionClick?.(region.region_id, region.click_explanation)
+    },
+    [onRegionClick]
+  )
 
   const handleZoomIn = useCallback(() => {
-    setZoomLevel(prev => Math.min(prev * 1.5, 5))
+    setZoomLevel((prev) => Math.min(prev * 1.5, 5))
   }, [])
 
   const handleZoomOut = useCallback(() => {
-    setZoomLevel(prev => Math.max(prev / 1.5, 0.5))
+    setZoomLevel((prev) => Math.max(prev / 1.5, 0.5))
   }, [])
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (zoomLevel > 1) {
-      setIsDragging(true)
-      setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y })
-    }
-  }, [zoomLevel, imagePosition])
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (zoomLevel > 1) {
+        setIsDragging(true)
+        setDragStart({
+          x: e.clientX - imagePosition.x,
+          y: e.clientY - imagePosition.y,
+        })
+      }
+    },
+    [zoomLevel, imagePosition]
+  )
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isDragging && zoomLevel > 1) {
-      setImagePosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      })
-    }
-  }, [isDragging, dragStart, zoomLevel])
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (isDragging && zoomLevel > 1) {
+        setImagePosition({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y,
+        })
+      }
+    },
+    [isDragging, dragStart, zoomLevel]
+  )
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false)
@@ -133,7 +148,7 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
     const isHovered = hoveredRegion === region.region_id
     const opacity = isHovered ? 0.8 : 0.4
     const borderWidth = isHovered ? 3 : 2
-    
+
     // Color based on importance score
     const hue = (1 - region.importance_score) * 120 // Red (0) to Green (120)
     const color = `hsl(${hue}, 70%, 50%)`
@@ -145,7 +160,9 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
       width: `${x2 - x1}px`,
       height: `${y2 - y1}px`,
       border: `${borderWidth}px solid ${color}`,
-      backgroundColor: `${color}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`,
+      backgroundColor: `${color}${Math.round(opacity * 255)
+        .toString(16)
+        .padStart(2, '0')}`,
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
       borderRadius: '4px',
@@ -156,7 +173,7 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
   const getPatchStyle = (patch: AttentionPatch) => {
     const [x, y, width, height] = patch.coordinates
     const opacity = patch.attention_weight * 0.6
-    
+
     return {
       position: 'absolute' as const,
       left: `${x}px`,
@@ -196,10 +213,17 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
     <Box>
       <Card>
         <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
             <Typography variant="h6">Interactive Saliency Analysis</Typography>
             <Box display="flex" gap={1}>
-              <IconButton onClick={() => setShowAttentionPatches(!showAttentionPatches)}>
+              <IconButton
+                onClick={() => setShowAttentionPatches(!showAttentionPatches)}
+              >
                 {showAttentionPatches ? <VisibilityOff /> : <Visibility />}
               </IconButton>
               <IconButton onClick={handleZoomOut} disabled={zoomLevel <= 0.5}>
@@ -220,7 +244,8 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
               border: '1px solid',
               borderColor: 'divider',
               borderRadius: 1,
-              cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+              cursor:
+                zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
               height: 400,
               display: 'flex',
               justifyContent: 'center',
@@ -277,7 +302,8 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
                         {region.spatial_location}
                       </Typography>
                       <Typography variant="body2">
-                        Importance: {(region.importance_score * 100).toFixed(1)}%
+                        Importance: {(region.importance_score * 100).toFixed(1)}
+                        %
                       </Typography>
                       <Typography variant="body2" sx={{ mt: 1 }}>
                         {region.hover_explanation}
@@ -308,7 +334,8 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
                     title={
                       <Box>
                         <Typography variant="body2">
-                          Attention: {(patch.attention_weight * 100).toFixed(1)}%
+                          Attention: {(patch.attention_weight * 100).toFixed(1)}
+                          %
                         </Typography>
                         <Typography variant="body2">
                           Layer {patch.layer_index}, Head {patch.head_index}
@@ -327,7 +354,8 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
           {hoveredRegion && (
             <Paper sx={{ mt: 2, p: 2, backgroundColor: 'action.hover' }}>
               <Typography variant="body2" color="text.secondary">
-                Hover over regions to see explanations • Click for detailed analysis
+                Hover over regions to see explanations • Click for detailed
+                analysis
               </Typography>
             </Paper>
           )}
@@ -352,7 +380,8 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Typography variant="body2" color="text.secondary">
-                  Patch Size: {interactiveData.interaction_metadata.patch_size}px
+                  Patch Size: {interactiveData.interaction_metadata.patch_size}
+                  px
                 </Typography>
               </Grid>
             </Grid>
@@ -370,7 +399,11 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
         {selectedRegion && (
           <>
             <DialogTitle>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Typography variant="h6">
                   Region Analysis: {selectedRegion.spatial_location}
                 </Typography>
@@ -383,7 +416,13 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
               <Box mb={2}>
                 <Chip
                   label={`Importance: ${(selectedRegion.importance_score * 100).toFixed(1)}%`}
-                  color={selectedRegion.importance_score > 0.7 ? 'error' : selectedRegion.importance_score > 0.4 ? 'warning' : 'success'}
+                  color={
+                    selectedRegion.importance_score > 0.7
+                      ? 'error'
+                      : selectedRegion.importance_score > 0.4
+                        ? 'warning'
+                        : 'success'
+                  }
                   variant="outlined"
                 />
                 <Chip
@@ -395,13 +434,23 @@ const InteractiveInterpretabilityViewer: React.FC<InteractiveInterpretabilityVie
               <Typography variant="body1" paragraph>
                 {selectedRegion.click_explanation}
               </Typography>
-              {interactiveData.region_explanations[selectedRegion.region_id] && (
+              {interactiveData.region_explanations[
+                selectedRegion.region_id
+              ] && (
                 <Paper sx={{ p: 2, backgroundColor: 'action.hover' }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     Technical Details:
                   </Typography>
                   <Typography variant="body2">
-                    {interactiveData.region_explanations[selectedRegion.region_id]}
+                    {
+                      interactiveData.region_explanations[
+                        selectedRegion.region_id
+                      ]
+                    }
                   </Typography>
                 </Paper>
               )}

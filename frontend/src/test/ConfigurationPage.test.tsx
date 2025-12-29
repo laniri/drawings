@@ -57,7 +57,7 @@ describe('ConfigurationPage Integration Tests', () => {
 
   it('renders configuration interface correctly', async () => {
     render(<ConfigurationPage />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('System Configuration')).toBeInTheDocument()
       expect(screen.getByText('General Settings')).toBeInTheDocument()
@@ -67,18 +67,22 @@ describe('ConfigurationPage Integration Tests', () => {
 
   it('displays age group models correctly', async () => {
     render(<ConfigurationPage />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('Ages 3-4')).toBeInTheDocument()
       expect(screen.getByText('Ages 5-6')).toBeInTheDocument()
-      expect(screen.getByText('Samples: 150 • Threshold: 0.123')).toBeInTheDocument()
-      expect(screen.getByText('Samples: 200 • Threshold: 0.156')).toBeInTheDocument()
+      expect(
+        screen.getByText('Samples: 150 • Threshold: 0.123')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('Samples: 200 • Threshold: 0.156')
+      ).toBeInTheDocument()
     })
   })
 
   it('shows train new button', async () => {
     render(<ConfigurationPage />)
-    
+
     await waitFor(() => {
       expect(screen.getByText('Train New')).toBeInTheDocument()
     })
@@ -86,9 +90,11 @@ describe('ConfigurationPage Integration Tests', () => {
 
   it('shows save configuration button', async () => {
     render(<ConfigurationPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Save Configuration/ })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Save Configuration/ })
+      ).toBeInTheDocument()
     })
   })
 })

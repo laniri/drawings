@@ -23,7 +23,7 @@ import {
   Select,
   MenuItem,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material'
 import {
   Timeline as TimelineIcon,
@@ -35,9 +35,18 @@ import {
   School as SchoolIcon,
   Info as InfoIcon,
   Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material'
-import { XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart, Line } from 'recharts'
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+  Line,
+} from 'recharts'
 
 interface HistoricalAnalysis {
   id: number
@@ -83,18 +92,26 @@ interface HistoricalInterpretationTrackerProps {
 export default function HistoricalInterpretationTracker({
   drawingId,
   currentAnalysis,
-  onAnalysisSelect
+  onAnalysisSelect,
 }: HistoricalInterpretationTrackerProps) {
   const [historicalData, setHistoricalData] = useState<HistoricalAnalysis[]>([])
-  const [longitudinalPattern, setLongitudinalPattern] = useState<LongitudinalPattern | null>(null)
-  const [developmentalMilestones, setDevelopmentalMilestones] = useState<DevelopmentalMilestone[]>([])
+  const [longitudinalPattern, setLongitudinalPattern] =
+    useState<LongitudinalPattern | null>(null)
+  const [developmentalMilestones, setDevelopmentalMilestones] = useState<
+    DevelopmentalMilestone[]
+  >([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedAnalysis, setSelectedAnalysis] = useState<HistoricalAnalysis | null>(null)
+  const [selectedAnalysis, setSelectedAnalysis] =
+    useState<HistoricalAnalysis | null>(null)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
-  const [timeRange, setTimeRange] = useState<'all' | '6months' | '1year' | '2years'>('all')
+  const [timeRange, setTimeRange] = useState<
+    'all' | '6months' | '1year' | '2years'
+  >('all')
   const [showTrendLine, setShowTrendLine] = useState(true)
-  const [viewMode, setViewMode] = useState<'timeline' | 'chart' | 'milestones'>('timeline')
+  const [viewMode, setViewMode] = useState<'timeline' | 'chart' | 'milestones'>(
+    'timeline'
+  )
 
   useEffect(() => {
     loadHistoricalData()
@@ -107,20 +124,23 @@ export default function HistoricalInterpretationTracker({
 
       // Load historical analyses for this drawing
       const response = await fetch(`/api/analysis/drawing/${drawingId}`)
-      
+
       if (!response.ok) {
         throw new Error('Failed to load historical data')
       }
 
       const data = await response.json()
-      
+
       // Transform the data to include additional metadata
-      const enrichedData: HistoricalAnalysis[] = data.analyses.map((analysis: any, index: number) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
-        ...analysis,
-        drawing_filename: `drawing_${drawingId}`,
-        child_age_at_time: 5 + (index * 0.5), // Mock progressive age
-        interpretability_available: true
-      }))
+      const enrichedData: HistoricalAnalysis[] = data.analyses.map(
+        (analysis: any, index: number) => ({
+          // eslint-disable-line @typescript-eslint/no-explicit-any
+          ...analysis,
+          drawing_filename: `drawing_${drawingId}`,
+          child_age_at_time: 5 + index * 0.5, // Mock progressive age
+          interpretability_available: true,
+        })
+      )
 
       // Filter by time range
       const filteredData = filterByTimeRange(enrichedData)
@@ -135,10 +155,11 @@ export default function HistoricalInterpretationTracker({
       // Generate developmental milestones
       const milestones = generateDevelopmentalMilestones(filteredData)
       setDevelopmentalMilestones(milestones)
-
     } catch (err) {
       console.error('Error loading historical data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load historical data')
+      setError(
+        err instanceof Error ? err.message : 'Failed to load historical data'
+      )
     } finally {
       setLoading(false)
     }
@@ -149,7 +170,7 @@ export default function HistoricalInterpretationTracker({
 
     const now = new Date()
     const cutoffDate = new Date()
-    
+
     switch (timeRange) {
       case '6months':
         cutoffDate.setMonth(now.getMonth() - 6)
@@ -162,11 +183,15 @@ export default function HistoricalInterpretationTracker({
         break
     }
 
-    return data.filter(item => new Date(item.analysis_timestamp) >= cutoffDate)
+    return data.filter(
+      (item) => new Date(item.analysis_timestamp) >= cutoffDate
+    )
   }
 
-  const analyzeLongitudinalPattern = (data: HistoricalAnalysis[]): LongitudinalPattern => {
-    const scores = data.map(d => d.normalized_score)
+  const analyzeLongitudinalPattern = (
+    data: HistoricalAnalysis[]
+  ): LongitudinalPattern => {
+    const scores = data.map((d) => d.normalized_score)
     const firstScore = scores[0]
     const lastScore = scores[scores.length - 1]
     const scoreDiff = lastScore - firstScore
@@ -180,77 +205,84 @@ export default function HistoricalInterpretationTracker({
 
     if (Math.abs(scoreDiff) < 5) {
       pattern_type = 'stable'
-      description = 'Anomaly scores have remained relatively stable over time, indicating consistent developmental patterns.'
+      description =
+        'Anomaly scores have remained relatively stable over time, indicating consistent developmental patterns.'
       recommendations = [
         'Continue regular monitoring',
         'Maintain current intervention strategies if any',
-        'Document any environmental or developmental changes'
+        'Document any environmental or developmental changes',
       ]
       key_observations = [
         `Score variation within ${Math.abs(scoreDiff).toFixed(1)} points`,
         'Consistent pattern maintenance',
-        'No significant developmental shifts detected'
+        'No significant developmental shifts detected',
       ]
     } else if (scoreDiff < -10) {
       pattern_type = 'improvement'
-      description = 'Anomaly scores show a positive trend with decreasing anomaly indicators over time.'
+      description =
+        'Anomaly scores show a positive trend with decreasing anomaly indicators over time.'
       recommendations = [
         'Continue current interventions as they appear effective',
         'Document successful strategies for future reference',
-        'Consider gradual reduction in intervention intensity if appropriate'
+        'Consider gradual reduction in intervention intensity if appropriate',
       ]
       key_observations = [
         `${Math.abs(scoreDiff).toFixed(1)} point improvement in scores`,
         'Positive developmental trajectory',
-        'Intervention effectiveness indicated'
+        'Intervention effectiveness indicated',
       ]
     } else if (scoreDiff > 10) {
       pattern_type = 'decline'
-      description = 'Anomaly scores show an increasing trend, suggesting emerging or worsening developmental concerns.'
+      description =
+        'Anomaly scores show an increasing trend, suggesting emerging or worsening developmental concerns.'
       recommendations = [
         'Increase monitoring frequency',
         'Consider additional assessment or intervention',
         'Consult with developmental specialists',
-        'Review environmental factors that may be contributing'
+        'Review environmental factors that may be contributing',
       ]
       key_observations = [
         `${scoreDiff.toFixed(1)} point increase in anomaly scores`,
         'Concerning developmental trajectory',
-        'May require intervention adjustment'
+        'May require intervention adjustment',
       ]
     } else {
       pattern_type = 'fluctuating'
-      description = 'Anomaly scores show variable patterns with both increases and decreases over time.'
+      description =
+        'Anomaly scores show variable patterns with both increases and decreases over time.'
       recommendations = [
         'Investigate factors contributing to variability',
         'Consider more frequent assessment periods',
-        'Document contextual factors during each assessment'
+        'Document contextual factors during each assessment',
       ]
       key_observations = [
         'Variable score patterns observed',
         'Multiple factors may be influencing development',
-        'Requires careful contextual analysis'
+        'Requires careful contextual analysis',
       ]
     }
 
     // Adjust confidence based on data quality
     if (data.length >= 5) confidence = Math.min(0.9, confidence + 0.1)
-    if (data.every(d => d.confidence > 0.7)) confidence = Math.min(0.95, confidence + 0.1)
+    if (data.every((d) => d.confidence > 0.7))
+      confidence = Math.min(0.95, confidence + 0.1)
 
     return {
       pattern_type,
       confidence,
       description,
       recommendations,
-      key_observations
+      key_observations,
     }
   }
 
-  const generateDevelopmentalMilestones = (data: HistoricalAnalysis[]): DevelopmentalMilestone[] => {
+  const generateDevelopmentalMilestones = (
+    data: HistoricalAnalysis[]
+  ): DevelopmentalMilestone[] => {
     // Group data by age ranges
     const ageGroups = new Map<string, HistoricalAnalysis[]>()
-    
-    data.forEach(item => {
+
+    data.forEach((item) => {
       const ageRange = `${Math.floor(item.child_age_at_time)}-${Math.floor(item.child_age_at_time) + 1}`
       if (!ageGroups.has(ageRange)) {
         ageGroups.set(ageRange, [])
@@ -259,8 +291,10 @@ export default function HistoricalInterpretationTracker({
     })
 
     return Array.from(ageGroups.entries()).map(([ageRange, analyses]) => {
-      const avgScore = analyses.reduce((sum, a) => sum + a.normalized_score, 0) / analyses.length
-      const hasAnomalies = analyses.some(a => a.is_anomaly)
+      const avgScore =
+        analyses.reduce((sum, a) => sum + a.normalized_score, 0) /
+        analyses.length
+      const hasAnomalies = analyses.some((a) => a.is_anomaly)
 
       // Define expected patterns based on age
       const age = parseInt(ageRange.split('-')[0])
@@ -273,34 +307,49 @@ export default function HistoricalInterpretationTracker({
         expected_patterns = [
           'Simple geometric shapes',
           'Basic spatial relationships',
-          'Emerging symbolic representation'
+          'Emerging symbolic representation',
         ]
       } else if (age <= 6) {
         expected_patterns = [
           'More complex drawings with details',
           'Human figures with body parts',
-          'Improved spatial organization'
+          'Improved spatial organization',
         ]
       } else {
         expected_patterns = [
           'Detailed and proportional drawings',
           'Advanced spatial relationships',
-          'Creative and expressive elements'
+          'Creative and expressive elements',
         ]
       }
 
       // Analyze observed patterns
       if (avgScore < 30) {
-        observed_patterns = ['Typical developmental patterns', 'Age-appropriate complexity', 'Normal variation range']
+        observed_patterns = [
+          'Typical developmental patterns',
+          'Age-appropriate complexity',
+          'Normal variation range',
+        ]
         alignment_score = 0.9
       } else if (avgScore < 60) {
-        observed_patterns = ['Some atypical elements', 'Mixed developmental indicators', 'Requires monitoring']
+        observed_patterns = [
+          'Some atypical elements',
+          'Mixed developmental indicators',
+          'Requires monitoring',
+        ]
         alignment_score = 0.6
         concerns = ['Mild developmental variations noted']
       } else {
-        observed_patterns = ['Significant atypical patterns', 'Developmental concerns present', 'Intervention may be needed']
+        observed_patterns = [
+          'Significant atypical patterns',
+          'Developmental concerns present',
+          'Intervention may be needed',
+        ]
         alignment_score = 0.3
-        concerns = ['Significant developmental concerns', 'Professional assessment recommended']
+        concerns = [
+          'Significant developmental concerns',
+          'Professional assessment recommended',
+        ]
       }
 
       if (hasAnomalies) {
@@ -313,7 +362,7 @@ export default function HistoricalInterpretationTracker({
         expected_patterns,
         observed_patterns,
         alignment_score,
-        concerns
+        concerns,
       }
     })
   }
@@ -322,13 +371,13 @@ export default function HistoricalInterpretationTracker({
     return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
   const getTrendIcon = (current: number, previous?: number) => {
     if (!previous) return <TimelineIcon />
-    
+
     const diff = current - previous
     if (diff > 5) return <TrendingUpIcon color="error" />
     if (diff < -5) return <TrendingDownIcon color="success" />
@@ -337,11 +386,16 @@ export default function HistoricalInterpretationTracker({
 
   const getPatternColor = (pattern: LongitudinalPattern['pattern_type']) => {
     switch (pattern) {
-      case 'improvement': return '#4caf50'
-      case 'decline': return '#f44336'
-      case 'stable': return '#2196f3'
-      case 'fluctuating': return '#ff9800'
-      default: return '#757575'
+      case 'improvement':
+        return '#4caf50'
+      case 'decline':
+        return '#f44336'
+      case 'stable':
+        return '#2196f3'
+      case 'fluctuating':
+        return '#ff9800'
+      default:
+        return '#757575'
     }
   }
 
@@ -350,12 +404,19 @@ export default function HistoricalInterpretationTracker({
     score: item.normalized_score,
     age: item.child_age_at_time,
     isAnomaly: item.is_anomaly,
-    confidence: item.confidence * 100
+    confidence: item.confidence * 100,
   }))
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 200,
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -364,14 +425,19 @@ export default function HistoricalInterpretationTracker({
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <TimelineIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6">
-            Historical Analysis Tracking
-          </Typography>
+          <Typography variant="h6">Historical Analysis Tracking</Typography>
         </Box>
-        
+
         <Box sx={{ display: 'flex', gap: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Time Range</InputLabel>
@@ -386,7 +452,7 @@ export default function HistoricalInterpretationTracker({
               <MenuItem value="2years">2 Years</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>View</InputLabel>
             <Select
@@ -417,16 +483,27 @@ export default function HistoricalInterpretationTracker({
           {/* Longitudinal Pattern Summary */}
           {longitudinalPattern && (
             <Paper sx={{ p: 2, mb: 3, backgroundColor: '#f8f9fa' }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                <AssessmentIcon sx={{ mr: 1, color: getPatternColor(longitudinalPattern.pattern_type) }} />
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ display: 'flex', alignItems: 'center' }}
+              >
+                <AssessmentIcon
+                  sx={{
+                    mr: 1,
+                    color: getPatternColor(longitudinalPattern.pattern_type),
+                  }}
+                />
                 Longitudinal Pattern Analysis
                 <Chip
                   label={longitudinalPattern.pattern_type.toUpperCase()}
                   size="small"
                   sx={{
                     ml: 2,
-                    backgroundColor: getPatternColor(longitudinalPattern.pattern_type),
-                    color: 'white'
+                    backgroundColor: getPatternColor(
+                      longitudinalPattern.pattern_type
+                    ),
+                    color: 'white',
                   }}
                 />
               </Typography>
@@ -445,8 +522,11 @@ export default function HistoricalInterpretationTracker({
               <Box>
                 {historicalData.map((item, index) => {
                   const isLatest = item.id === currentAnalysis.id
-                  const previousScore = index > 0 ? historicalData[index - 1].normalized_score : undefined
-                  
+                  const previousScore =
+                    index > 0
+                      ? historicalData[index - 1].normalized_score
+                      : undefined
+
                   return (
                     <Box key={item.id} sx={{ display: 'flex', mb: 2 }}>
                       <Box sx={{ minWidth: 150, pr: 2 }}>
@@ -457,7 +537,9 @@ export default function HistoricalInterpretationTracker({
                           Age: {item.child_age_at_time} years
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', mr: 2 }}
+                      >
                         <Box
                           sx={{
                             width: 40,
@@ -466,9 +548,11 @@ export default function HistoricalInterpretationTracker({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: item.is_anomaly ? 'error.main' : 'success.main',
+                            backgroundColor: item.is_anomaly
+                              ? 'error.main'
+                              : 'success.main',
                             color: 'white',
-                            border: isLatest ? '3px solid #1976d2' : 'none'
+                            border: isLatest ? '3px solid #1976d2' : 'none',
                           }}
                         >
                           {getTrendIcon(item.normalized_score, previousScore)}
@@ -480,7 +564,7 @@ export default function HistoricalInterpretationTracker({
                               height: 60,
                               backgroundColor: 'divider',
                               ml: 2,
-                              mt: 4
+                              mt: 4,
                             }}
                           />
                         )}
@@ -489,8 +573,10 @@ export default function HistoricalInterpretationTracker({
                         <Card
                           sx={{
                             cursor: 'pointer',
-                            border: isLatest ? '2px solid #1976d2' : '1px solid #e0e0e0',
-                            '&:hover': { boxShadow: 2 }
+                            border: isLatest
+                              ? '2px solid #1976d2'
+                              : '1px solid #e0e0e0',
+                            '&:hover': { boxShadow: 2 },
                           }}
                           onClick={() => {
                             setSelectedAnalysis(item)
@@ -498,10 +584,23 @@ export default function HistoricalInterpretationTracker({
                           }}
                         >
                           <CardContent sx={{ pb: '16px !important' }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 1,
+                              }}
+                            >
                               <Typography variant="subtitle2">
                                 Analysis #{item.id}
-                                {isLatest && <Chip label="Current" size="small" sx={{ ml: 1 }} />}
+                                {isLatest && (
+                                  <Chip
+                                    label="Current"
+                                    size="small"
+                                    sx={{ ml: 1 }}
+                                  />
+                                )}
                               </Typography>
                               <Chip
                                 label={item.is_anomaly ? 'Anomaly' : 'Normal'}
@@ -528,8 +627,17 @@ export default function HistoricalInterpretationTracker({
           {/* Chart View */}
           {viewMode === 'chart' && (
             <Paper sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="subtitle1">Score Progression Over Time</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="subtitle1">
+                  Score Progression Over Time
+                </Typography>
                 <FormControlLabel
                   control={
                     <Switch
@@ -540,7 +648,7 @@ export default function HistoricalInterpretationTracker({
                   label="Show Trend"
                 />
               </Box>
-              
+
               <Box sx={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>
@@ -548,9 +656,10 @@ export default function HistoricalInterpretationTracker({
                     <XAxis dataKey="date" />
                     <YAxis domain={[0, 100]} />
                     <RechartsTooltip
-                      formatter={(value: any, name: string) => [ // eslint-disable-line @typescript-eslint/no-explicit-any
+                      formatter={(value: any, name: string) => [
+                        // eslint-disable-line @typescript-eslint/no-explicit-any
                         name === 'score' ? `${value.toFixed(1)}/100` : value,
-                        name === 'score' ? 'Anomaly Score' : name
+                        name === 'score' ? 'Anomaly Score' : name,
                       ]}
                     />
                     <Area
@@ -580,17 +689,27 @@ export default function HistoricalInterpretationTracker({
             <Box>
               {developmentalMilestones.map((milestone, index) => (
                 <Paper key={index} sx={{ p: 2, mb: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                  >
                     <SchoolIcon sx={{ mr: 1, color: 'primary.main' }} />
                     Age {milestone.age_range} Years
                     <Chip
                       label={`${(milestone.alignment_score * 100).toFixed(0)}% Alignment`}
-                      color={milestone.alignment_score > 0.7 ? 'success' : milestone.alignment_score > 0.4 ? 'warning' : 'error'}
+                      color={
+                        milestone.alignment_score > 0.7
+                          ? 'success'
+                          : milestone.alignment_score > 0.4
+                            ? 'warning'
+                            : 'error'
+                      }
                       size="small"
                       sx={{ ml: 2 }}
                     />
                   </Typography>
-                  
+
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <Typography variant="subtitle2" gutterBottom>
@@ -600,14 +719,17 @@ export default function HistoricalInterpretationTracker({
                         {milestone.expected_patterns.map((pattern, i) => (
                           <ListItem key={i}>
                             <ListItemIcon>
-                              <CheckCircleIcon color="success" fontSize="small" />
+                              <CheckCircleIcon
+                                color="success"
+                                fontSize="small"
+                              />
                             </ListItemIcon>
                             <ListItemText primary={pattern} />
                           </ListItem>
                         ))}
                       </List>
                     </Grid>
-                    
+
                     <Grid item xs={12} md={6}>
                       <Typography variant="subtitle2" gutterBottom>
                         Observed Patterns
@@ -624,10 +746,14 @@ export default function HistoricalInterpretationTracker({
                       </List>
                     </Grid>
                   </Grid>
-                  
+
                   {milestone.concerns.length > 0 && (
                     <Box sx={{ mt: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom color="error">
+                      <Typography
+                        variant="subtitle2"
+                        gutterBottom
+                        color="error"
+                      >
                         Areas of Concern
                       </Typography>
                       <List dense>
@@ -657,7 +783,9 @@ export default function HistoricalInterpretationTracker({
         fullWidth
       >
         <DialogTitle>
-          Analysis Details: {selectedAnalysis?.analysis_timestamp && formatTimestamp(selectedAnalysis.analysis_timestamp)}
+          Analysis Details:{' '}
+          {selectedAnalysis?.analysis_timestamp &&
+            formatTimestamp(selectedAnalysis.analysis_timestamp)}
         </DialogTitle>
         <DialogContent>
           {selectedAnalysis && (
@@ -677,7 +805,7 @@ export default function HistoricalInterpretationTracker({
                     Age Group Model: {selectedAnalysis.age_group}
                   </Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" gutterBottom>
                     Results
@@ -686,13 +814,18 @@ export default function HistoricalInterpretationTracker({
                     Anomaly Score: {selectedAnalysis.anomaly_score.toFixed(3)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Normalized Score: {selectedAnalysis.normalized_score.toFixed(1)}/100
+                    Normalized Score:{' '}
+                    {selectedAnalysis.normalized_score.toFixed(1)}/100
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Status: {selectedAnalysis.is_anomaly ? 'Anomaly Detected' : 'Normal'}
+                    Status:{' '}
+                    {selectedAnalysis.is_anomaly
+                      ? 'Anomaly Detected'
+                      : 'Normal'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Confidence: {(selectedAnalysis.confidence * 100).toFixed(0)}%
+                    Confidence: {(selectedAnalysis.confidence * 100).toFixed(0)}
+                    %
                   </Typography>
                 </Grid>
               </Grid>
@@ -700,9 +833,7 @@ export default function HistoricalInterpretationTracker({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setDetailDialogOpen(false)}>Close</Button>
           {selectedAnalysis && onAnalysisSelect && (
             <Button
               variant="contained"

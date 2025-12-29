@@ -52,11 +52,13 @@ describe('AnalysisPage Integration Tests', () => {
 
   it('displays analysis results correctly', async () => {
     mockedAxios.get.mockResolvedValueOnce({ data: mockAnalysisData })
-    
+
     render(<AnalysisPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 4, name: 'Analysis Results' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { level: 4, name: 'Analysis Results' })
+      ).toBeInTheDocument()
       expect(screen.getByText('test-drawing.png')).toBeInTheDocument()
       expect(screen.getByText('Age: 5.5 years')).toBeInTheDocument()
       expect(screen.getByText('Subject: house')).toBeInTheDocument()
@@ -65,20 +67,24 @@ describe('AnalysisPage Integration Tests', () => {
 
   it('handles loading state', () => {
     mockedAxios.get.mockImplementationOnce(() => new Promise(() => {})) // Never resolves
-    
+
     render(<AnalysisPage />)
-    
+
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('handles error state', async () => {
     mockedAxios.get.mockRejectedValueOnce(new Error('Network error'))
-    
+
     render(<AnalysisPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Failed to load analysis results. Please try again.')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Run Analysis/ })).toBeInTheDocument()
+      expect(
+        screen.getByText('Failed to load analysis results. Please try again.')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Run Analysis/ })
+      ).toBeInTheDocument()
     })
   })
 })

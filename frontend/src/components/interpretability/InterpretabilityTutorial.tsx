@@ -26,13 +26,11 @@ import {
 } from '@mui/material'
 import {
   Close,
-
   Psychology,
   School,
   Lightbulb,
   TouchApp,
   ZoomIn,
-
   CheckCircle,
   ArrowForward,
   ArrowBack,
@@ -66,7 +64,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
     const baseSteps: TutorialStep[] = [
       {
         title: 'Welcome to Interpretability Analysis',
-        content: 'This tutorial will guide you through understanding how our AI analyzes children\'s drawings and explains its decisions.',
+        content:
+          "This tutorial will guide you through understanding how our AI analyzes children's drawings and explains its decisions.",
         visual: (
           <Box display="flex" justifyContent="center" p={2}>
             <Psychology sx={{ fontSize: 60, color: 'primary.main' }} />
@@ -80,7 +79,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       },
       {
         title: 'Understanding Saliency Maps',
-        content: 'Saliency maps show which parts of a drawing the AI focused on when making its decision. Brighter areas indicate higher importance.',
+        content:
+          'Saliency maps show which parts of a drawing the AI focused on when making its decision. Brighter areas indicate higher importance.',
         visual: (
           <Card sx={{ maxWidth: 300, mx: 'auto' }}>
             <CardContent>
@@ -88,7 +88,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
                 sx={{
                   width: '100%',
                   height: 150,
-                  background: 'linear-gradient(45deg, rgba(255,0,0,0.3) 0%, rgba(255,255,0,0.5) 50%, rgba(0,255,0,0.3) 100%)',
+                  background:
+                    'linear-gradient(45deg, rgba(255,0,0,0.3) 0%, rgba(255,255,0,0.5) 50%, rgba(0,255,0,0.3) 100%)',
                   border: '2px solid',
                   borderColor: 'primary.main',
                   borderRadius: 1,
@@ -102,8 +103,16 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
                 </Typography>
               </Box>
               <Box mt={1} display="flex" justifyContent="space-between">
-                <Chip label="Low Importance" size="small" sx={{ backgroundColor: 'rgba(0,255,0,0.3)' }} />
-                <Chip label="High Importance" size="small" sx={{ backgroundColor: 'rgba(255,0,0,0.3)' }} />
+                <Chip
+                  label="Low Importance"
+                  size="small"
+                  sx={{ backgroundColor: 'rgba(0,255,0,0.3)' }}
+                />
+                <Chip
+                  label="High Importance"
+                  size="small"
+                  sx={{ backgroundColor: 'rgba(255,0,0,0.3)' }}
+                />
               </Box>
             </CardContent>
           </Card>
@@ -116,7 +125,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       },
       {
         title: 'Interactive Regions',
-        content: 'You can hover over and click on different regions to get detailed explanations about what the AI detected.',
+        content:
+          'You can hover over and click on different regions to get detailed explanations about what the AI detected.',
         visual: (
           <Box display="flex" justifyContent="center" gap={2} p={2}>
             <Box display="flex" flexDirection="column" alignItems="center">
@@ -137,7 +147,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       },
       {
         title: 'Confidence Levels',
-        content: 'The system provides confidence scores to help you understand how reliable the analysis is.',
+        content:
+          'The system provides confidence scores to help you understand how reliable the analysis is.',
         visual: (
           <Box display="flex" flexDirection="column" gap={1} p={2}>
             <Box display="flex" alignItems="center" gap={1}>
@@ -146,7 +157,9 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <CheckCircle sx={{ color: 'warning.main' }} />
-              <Typography variant="body2">Medium Confidence (60-79%)</Typography>
+              <Typography variant="body2">
+                Medium Confidence (60-79%)
+              </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <CheckCircle sx={{ color: 'error.main' }} />
@@ -166,7 +179,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
     if (userRole === 'educator') {
       baseSteps.push({
         title: 'Educational Applications',
-        content: 'As an educator, you can use these insights to understand developmental patterns and identify students who might benefit from additional support.',
+        content:
+          'As an educator, you can use these insights to understand developmental patterns and identify students who might benefit from additional support.',
         visual: (
           <Box display="flex" justifyContent="center" p={2}>
             <School sx={{ fontSize: 60, color: 'primary.main' }} />
@@ -182,7 +196,8 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
     } else if (userRole === 'researcher') {
       baseSteps.push({
         title: 'Research Applications',
-        content: 'Use technical explanations and export features to document findings and share results with colleagues.',
+        content:
+          'Use technical explanations and export features to document findings and share results with colleagues.',
         visual: (
           <Box display="flex" justifyContent="center" p={2}>
             <Psychology sx={{ fontSize: 60, color: 'primary.main' }} />
@@ -197,8 +212,9 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       })
     } else if (userRole === 'parent') {
       baseSteps.push({
-        title: 'Understanding Your Child\'s Drawing',
-        content: 'The system helps identify if your child\'s drawing shows typical developmental patterns for their age.',
+        title: "Understanding Your Child's Drawing",
+        content:
+          "The system helps identify if your child's drawing shows typical developmental patterns for their age.",
         visual: (
           <Box display="flex" justifyContent="center" p={2}>
             <Lightbulb sx={{ fontSize: 60, color: 'primary.main' }} />
@@ -215,17 +231,19 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
 
     baseSteps.push({
       title: 'Best Practices',
-      content: 'Remember that AI analysis is a tool to support human judgment, not replace it. Always consider the full context.',
+      content:
+        'Remember that AI analysis is a tool to support human judgment, not replace it. Always consider the full context.',
       visual: (
         <Alert severity="info" sx={{ maxWidth: 400, mx: 'auto' }}>
           <Typography variant="body2">
-            Use AI insights as one piece of information alongside professional expertise and contextual knowledge.
+            Use AI insights as one piece of information alongside professional
+            expertise and contextual knowledge.
           </Typography>
         </Alert>
       ),
       tips: [
         'Combine AI insights with professional judgment',
-        'Consider the child\'s context and background',
+        "Consider the child's context and background",
         'Seek professional consultation when needed',
       ],
     })
@@ -236,7 +254,7 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
   const steps = getTutorialSteps()
 
   const handleNext = () => {
-    setCompletedSteps(prev => new Set([...prev, activeStep]))
+    setCompletedSteps((prev) => new Set([...prev, activeStep]))
     if (activeStep < steps.length - 1) {
       setActiveStep(activeStep + 1)
     }
@@ -249,7 +267,7 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
   }
 
   const handleComplete = () => {
-    setCompletedSteps(prev => new Set([...prev, activeStep]))
+    setCompletedSteps((prev) => new Set([...prev, activeStep]))
     onComplete?.()
     onClose()
   }
@@ -287,7 +305,7 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: { minHeight: '70vh' }
+        sx: { minHeight: '70vh' },
       }}
     >
       <DialogTitle>
@@ -326,13 +344,13 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
 
                       {step.visual && (
                         <Zoom in={activeStep === index} timeout={500}>
-                          <Box mb={2}>
-                            {step.visual}
-                          </Box>
+                          <Box mb={2}>{step.visual}</Box>
                         </Zoom>
                       )}
 
-                      <Paper sx={{ p: 2, backgroundColor: 'action.hover', mb: 2 }}>
+                      <Paper
+                        sx={{ p: 2, backgroundColor: 'action.hover', mb: 2 }}
+                      >
                         <Typography variant="subtitle2" gutterBottom>
                           💡 Key Tips:
                         </Typography>
@@ -354,11 +372,23 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
                       <Box sx={{ mb: 1 }}>
                         <Button
                           variant="contained"
-                          onClick={index === steps.length - 1 ? handleComplete : handleNext}
+                          onClick={
+                            index === steps.length - 1
+                              ? handleComplete
+                              : handleNext
+                          }
                           sx={{ mt: 1, mr: 1 }}
-                          endIcon={index === steps.length - 1 ? <CheckCircle /> : <ArrowForward />}
+                          endIcon={
+                            index === steps.length - 1 ? (
+                              <CheckCircle />
+                            ) : (
+                              <ArrowForward />
+                            )
+                          }
                         >
-                          {index === steps.length - 1 ? 'Complete Tutorial' : 'Next'}
+                          {index === steps.length - 1
+                            ? 'Complete Tutorial'
+                            : 'Next'}
                         </Button>
                         <Button
                           disabled={index === 0}
@@ -379,7 +409,12 @@ const InterpretabilityTutorial: React.FC<InterpretabilityTutorialProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          width="100%"
+          alignItems="center"
+        >
           <Typography variant="body2" color="text.secondary">
             Step {activeStep + 1} of {steps.length}
           </Typography>

@@ -22,7 +22,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
 } from '@mui/material'
 import {
   Compare as CompareIcon,
@@ -31,7 +31,7 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   Timeline as TimelineIcon,
-  Assessment as AssessmentIcon
+  Assessment as AssessmentIcon,
 } from '@mui/icons-material'
 
 interface ComparisonExample {
@@ -109,13 +109,16 @@ function TabPanel(props: TabPanelProps) {
 export default function ComparativeAnalysisPanel({
   currentAnalysis,
   currentDrawing,
-  onExampleSelect
+  onExampleSelect,
 }: ComparativeAnalysisPanelProps) {
-  const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null)
+  const [comparisonData, setComparisonData] = useState<ComparisonData | null>(
+    null
+  )
   const [analysisHistory, setAnalysisHistory] = useState<AnalysisHistory[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedExample, setSelectedExample] = useState<ComparisonExample | null>(null)
+  const [selectedExample, setSelectedExample] =
+    useState<ComparisonExample | null>(null)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [tabValue, setTabValue] = useState(0)
 
@@ -146,7 +149,11 @@ export default function ComparativeAnalysisPanel({
       setComparisonData(data)
     } catch (err) {
       console.error('Error loading comparison examples:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load comparison examples')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to load comparison examples'
+      )
     } finally {
       setLoading(false)
     }
@@ -155,7 +162,7 @@ export default function ComparativeAnalysisPanel({
   const loadAnalysisHistory = async () => {
     try {
       const response = await fetch(`/api/analysis/drawing/${currentDrawing.id}`)
-      
+
       if (!response.ok) {
         throw new Error('Failed to load analysis history')
       }
@@ -202,7 +209,7 @@ export default function ComparativeAnalysisPanel({
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -214,15 +221,22 @@ export default function ComparativeAnalysisPanel({
         transition: 'all 0.2s ease-in-out',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: 3
+          boxShadow: 3,
         },
         border: `2px solid ${getScoreColor(example.normalized_score, !isNormal)}`,
-        borderRadius: 2
+        borderRadius: 2,
       }}
       onClick={() => handleExampleClick(example)}
     >
       <CardContent sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 1,
+          }}
+        >
           <Typography variant="subtitle2" noWrap sx={{ flex: 1, mr: 1 }}>
             {example.filename}
           </Typography>
@@ -230,19 +244,28 @@ export default function ComparativeAnalysisPanel({
             size="small"
             label={getScoreLabel(example.normalized_score, !isNormal)}
             sx={{
-              backgroundColor: getScoreColor(example.normalized_score, !isNormal),
+              backgroundColor: getScoreColor(
+                example.normalized_score,
+                !isNormal
+              ),
               color: 'white',
-              fontSize: '0.7rem'
+              fontSize: '0.7rem',
             }}
           />
         </Box>
-        
+
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Age: {example.age_years} years
           {example.subject && ` • Subject: ${example.subject}`}
         </Typography>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="body2" color="text.secondary">
             Score: {example.normalized_score.toFixed(1)}
           </Typography>
@@ -256,9 +279,16 @@ export default function ComparativeAnalysisPanel({
 
   const renderHistoryItem = (analysis: AnalysisHistory, index: number) => {
     const isLatest = index === 0
-    const trend = index > 0 ? 
-      (analysis.normalized_score > analysisHistory[index - 1].normalized_score ? 'up' : 
-       analysis.normalized_score < analysisHistory[index - 1].normalized_score ? 'down' : 'stable') : 'none'
+    const trend =
+      index > 0
+        ? analysis.normalized_score >
+          analysisHistory[index - 1].normalized_score
+          ? 'up'
+          : analysis.normalized_score <
+              analysisHistory[index - 1].normalized_score
+            ? 'down'
+            : 'stable'
+        : 'none'
 
     return (
       <ListItem
@@ -267,20 +297,30 @@ export default function ComparativeAnalysisPanel({
           border: isLatest ? '2px solid #1976d2' : '1px solid #e0e0e0',
           borderRadius: 1,
           mb: 1,
-          backgroundColor: isLatest ? '#f3f7ff' : 'white'
+          backgroundColor: isLatest ? '#f3f7ff' : 'white',
         }}
       >
         <ListItemIcon>
           {trend === 'up' && <TrendingUpIcon color="error" />}
           {trend === 'down' && <TrendingDownIcon color="success" />}
-          {(trend === 'stable' || trend === 'none') && <TimelineIcon color="action" />}
+          {(trend === 'stable' || trend === 'none') && (
+            <TimelineIcon color="action" />
+          )}
         </ListItemIcon>
         <ListItemText
           primary={
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Typography variant="body2">
                 Score: {analysis.normalized_score.toFixed(1)}
-                {isLatest && <Chip size="small" label="Current" sx={{ ml: 1 }} />}
+                {isLatest && (
+                  <Chip size="small" label="Current" sx={{ ml: 1 }} />
+                )}
               </Typography>
               <Chip
                 size="small"
@@ -292,7 +332,8 @@ export default function ComparativeAnalysisPanel({
           }
           secondary={
             <Typography variant="caption" color="text.secondary">
-              {formatTimestamp(analysis.analysis_timestamp)} • Confidence: {(analysis.confidence * 100).toFixed(0)}%
+              {formatTimestamp(analysis.analysis_timestamp)} • Confidence:{' '}
+              {(analysis.confidence * 100).toFixed(0)}%
             </Typography>
           }
         />
@@ -302,7 +343,14 @@ export default function ComparativeAnalysisPanel({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 200,
+        }}
+      >
         <CircularProgress />
       </Box>
     )
@@ -313,9 +361,7 @@ export default function ComparativeAnalysisPanel({
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <CompareIcon sx={{ mr: 1, color: 'primary.main' }} />
-        <Typography variant="h6">
-          Comparative Analysis
-        </Typography>
+        <Typography variant="h6">Comparative Analysis</Typography>
         <Tooltip title="Compare with similar drawings and view analysis history">
           <IconButton size="small" sx={{ ml: 1 }}>
             <InfoIcon fontSize="small" />
@@ -348,7 +394,8 @@ export default function ComparativeAnalysisPanel({
               Score: {currentAnalysis.normalized_score.toFixed(1)}/100
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Status: {currentAnalysis.is_anomaly ? 'Anomaly Detected' : 'Normal'}
+              Status:{' '}
+              {currentAnalysis.is_anomaly ? 'Anomaly Detected' : 'Normal'}
             </Typography>
           </Grid>
         </Grid>
@@ -356,7 +403,10 @@ export default function ComparativeAnalysisPanel({
 
       {/* Tabs for different comparison views */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+        >
           <Tab label="Similar Examples" />
           <Tab label="Analysis History" />
           <Tab label="Age Group Context" />
@@ -368,16 +418,21 @@ export default function ComparativeAnalysisPanel({
         {comparisonData && (
           <Box>
             {/* Normal Examples */}
-            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
               <TrendingDownIcon sx={{ mr: 1, color: 'success.main' }} />
               Normal Examples (Age {comparisonData.age_group}
-              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`})
+              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`}
+              )
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               These drawings show typical patterns for this age group
               {currentDrawing.subject && ' and subject category'}
             </Typography>
-            
+
             <Grid container spacing={2} sx={{ mb: 4 }}>
               {comparisonData.normal_examples.map((example) => (
                 <Grid item xs={12} sm={6} md={4} key={example.drawing_id}>
@@ -389,16 +444,21 @@ export default function ComparativeAnalysisPanel({
             <Divider sx={{ my: 3 }} />
 
             {/* Anomalous Examples */}
-            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
               <TrendingUpIcon sx={{ mr: 1, color: 'error.main' }} />
               Anomalous Examples (Age {comparisonData.age_group}
-              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`})
+              {currentDrawing.subject && `, Subject: ${currentDrawing.subject}`}
+              )
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               These drawings show patterns that deviate from typical development
               {currentDrawing.subject && ' for this subject category'}
             </Typography>
-            
+
             <Grid container spacing={2}>
               {comparisonData.anomalous_examples.map((example) => (
                 <Grid item xs={12} sm={6} md={4} key={example.drawing_id}>
@@ -407,18 +467,24 @@ export default function ComparativeAnalysisPanel({
               ))}
             </Grid>
 
-            {comparisonData.normal_examples.length === 0 && comparisonData.anomalous_examples.length === 0 && (
-              <Alert severity="info">
-                No comparison examples available for age group {comparisonData.age_group}
-              </Alert>
-            )}
+            {comparisonData.normal_examples.length === 0 &&
+              comparisonData.anomalous_examples.length === 0 && (
+                <Alert severity="info">
+                  No comparison examples available for age group{' '}
+                  {comparisonData.age_group}
+                </Alert>
+              )}
           </Box>
         )}
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
         <Box>
-          <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            sx={{ display: 'flex', alignItems: 'center' }}
+          >
             <TimelineIcon sx={{ mr: 1, color: 'primary.main' }} />
             Analysis History for {currentDrawing.filename}
           </Typography>
@@ -428,7 +494,9 @@ export default function ComparativeAnalysisPanel({
 
           {analysisHistory.length > 0 ? (
             <List sx={{ width: '100%' }}>
-              {analysisHistory.map((analysis, index) => renderHistoryItem(analysis, index))}
+              {analysisHistory.map((analysis, index) =>
+                renderHistoryItem(analysis, index)
+              )}
             </List>
           ) : (
             <Alert severity="info">
@@ -441,11 +509,15 @@ export default function ComparativeAnalysisPanel({
       <TabPanel value={tabValue} index={2}>
         {comparisonData && (
           <Box>
-            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
               <AssessmentIcon sx={{ mr: 1, color: 'info.main' }} />
               Age Group Context
             </Typography>
-            
+
             <Alert severity="info" sx={{ mb: 2 }}>
               {comparisonData.explanation_context}
             </Alert>
@@ -457,33 +529,49 @@ export default function ComparativeAnalysisPanel({
                     Dataset Statistics
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Total drawings in age group {comparisonData.age_group}: {comparisonData.total_available}
+                    Total drawings in age group {comparisonData.age_group}:{' '}
+                    {comparisonData.total_available}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Normal examples shown: {comparisonData.normal_examples.length}
+                    Normal examples shown:{' '}
+                    {comparisonData.normal_examples.length}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Anomalous examples shown: {comparisonData.anomalous_examples.length}
+                    Anomalous examples shown:{' '}
+                    {comparisonData.anomalous_examples.length}
                   </Typography>
                 </Paper>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" gutterBottom>
                     Developmental Context
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Age {comparisonData.age_group} years represents a critical period for:
+                    Age {comparisonData.age_group} years represents a critical
+                    period for:
                   </Typography>
                   <Box component="ul" sx={{ mt: 1, pl: 2 }}>
-                    <Typography component="li" variant="body2" color="text.secondary">
+                    <Typography
+                      component="li"
+                      variant="body2"
+                      color="text.secondary"
+                    >
                       Spatial relationship development
                     </Typography>
-                    <Typography component="li" variant="body2" color="text.secondary">
+                    <Typography
+                      component="li"
+                      variant="body2"
+                      color="text.secondary"
+                    >
                       Fine motor skill refinement
                     </Typography>
-                    <Typography component="li" variant="body2" color="text.secondary">
+                    <Typography
+                      component="li"
+                      variant="body2"
+                      color="text.secondary"
+                    >
                       Symbolic representation growth
                     </Typography>
                   </Box>
@@ -501,9 +589,7 @@ export default function ComparativeAnalysisPanel({
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          Example Details: {selectedExample?.filename}
-        </DialogTitle>
+        <DialogTitle>Example Details: {selectedExample?.filename}</DialogTitle>
         <DialogContent>
           {selectedExample && (
             <Box>
@@ -521,10 +607,11 @@ export default function ComparativeAnalysisPanel({
                     </Typography>
                   )}
                   <Typography variant="body2" color="text.secondary">
-                    Analysis Date: {formatTimestamp(selectedExample.analysis_timestamp)}
+                    Analysis Date:{' '}
+                    {formatTimestamp(selectedExample.analysis_timestamp)}
                   </Typography>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" gutterBottom>
                     Analysis Results
@@ -533,7 +620,8 @@ export default function ComparativeAnalysisPanel({
                     Anomaly Score: {selectedExample.anomaly_score.toFixed(3)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Normalized Score: {selectedExample.normalized_score.toFixed(1)}/100
+                    Normalized Score:{' '}
+                    {selectedExample.normalized_score.toFixed(1)}/100
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Confidence: {(selectedExample.confidence * 100).toFixed(0)}%
@@ -544,9 +632,7 @@ export default function ComparativeAnalysisPanel({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setDetailDialogOpen(false)}>Close</Button>
           {selectedExample && (
             <Button
               variant="contained"

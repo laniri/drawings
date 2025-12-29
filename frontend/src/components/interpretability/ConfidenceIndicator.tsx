@@ -59,10 +59,16 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   const theme = useTheme()
 
   // Fetch confidence metrics
-  const { data: confidenceData, isLoading, error } = useQuery<ConfidenceMetrics>({
+  const {
+    data: confidenceData,
+    isLoading,
+    error,
+  } = useQuery<ConfidenceMetrics>({
     queryKey: ['confidence-metrics', analysisId],
     queryFn: async () => {
-      const response = await axios.get(`/api/interpretability/${analysisId}/confidence`)
+      const response = await axios.get(
+        `/api/interpretability/${analysisId}/confidence`
+      )
       return response.data
     },
     enabled: !!analysisId,
@@ -112,7 +118,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
     }
   }
 
-  const ConfidenceMeter: React.FC<{ 
+  const ConfidenceMeter: React.FC<{
     label: string
     value: number
     icon: React.ReactNode
@@ -172,9 +178,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
     return (
       <Card>
         <CardContent>
-          <Alert severity="error">
-            Failed to load confidence metrics
-          </Alert>
+          <Alert severity="error">Failed to load confidence metrics</Alert>
         </CardContent>
       </Card>
     )
@@ -183,12 +187,16 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   if (compact) {
     return (
       <Box display="flex" alignItems="center" gap={2}>
-        <Tooltip title={`Overall confidence: ${(confidenceData.overall_confidence * 100).toFixed(1)}%`}>
+        <Tooltip
+          title={`Overall confidence: ${(confidenceData.overall_confidence * 100).toFixed(1)}%`}
+        >
           <Chip
             icon={getConfidenceIcon(confidenceData.overall_confidence)}
             label={`${getConfidenceLabel(confidenceData.overall_confidence)} Confidence`}
             sx={{
-              backgroundColor: getConfidenceColor(confidenceData.overall_confidence),
+              backgroundColor: getConfidenceColor(
+                confidenceData.overall_confidence
+              ),
               color: 'white',
             }}
           />
@@ -254,7 +262,11 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
                   icon={getDataSufficiencyIcon(confidenceData.data_sufficiency)}
                   label={confidenceData.data_sufficiency}
                   size="small"
-                  color={getDataSufficiencyColor(confidenceData.data_sufficiency) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  color={
+                    getDataSufficiencyColor(
+                      confidenceData.data_sufficiency
+                    ) as any
+                  } // eslint-disable-line @typescript-eslint/no-explicit-any
                   variant="outlined"
                 />
               </Box>
@@ -296,32 +308,47 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Base Model Confidence:</strong> {(confidenceData.technical_details.base_model_confidence * 100).toFixed(1)}%
+                  <strong>Base Model Confidence:</strong>{' '}
+                  {(
+                    confidenceData.technical_details.base_model_confidence * 100
+                  ).toFixed(1)}
+                  %
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Training Data Quality:</strong> {(confidenceData.technical_details.training_data_quality * 100).toFixed(1)}%
+                  <strong>Training Data Quality:</strong>{' '}
+                  {(
+                    confidenceData.technical_details.training_data_quality * 100
+                  ).toFixed(1)}
+                  %
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Score Extremity:</strong> {(confidenceData.technical_details.score_extremity * 100).toFixed(1)}%
+                  <strong>Score Extremity:</strong>{' '}
+                  {(
+                    confidenceData.technical_details.score_extremity * 100
+                  ).toFixed(1)}
+                  %
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Age Group Samples:</strong> {confidenceData.technical_details.age_group_sample_count}
+                  <strong>Age Group Samples:</strong>{' '}
+                  {confidenceData.technical_details.age_group_sample_count}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Analysis Method:</strong> {confidenceData.technical_details.analysis_method}
+                  <strong>Analysis Method:</strong>{' '}
+                  {confidenceData.technical_details.analysis_method}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2">
-                  <strong>Vision Model:</strong> {confidenceData.technical_details.vision_model}
+                  <strong>Vision Model:</strong>{' '}
+                  {confidenceData.technical_details.vision_model}
                 </Typography>
               </Grid>
             </Grid>

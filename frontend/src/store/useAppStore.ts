@@ -35,20 +35,20 @@ interface AppState {
   drawings: Drawing[]
   selectedDrawing: Drawing | null
   uploadProgress: number
-  
+
   // Analysis state
   currentAnalysis: AnalysisResult | null
   analysisHistory: AnalysisResult[]
   isAnalyzing: boolean
-  
+
   // Configuration
   systemConfig: SystemConfig
   modelStatus: ModelStatus
-  
+
   // UI state
   sidebarOpen: boolean
   currentView: 'upload' | 'analysis' | 'dashboard' | 'config'
-  
+
   // Actions
   setDrawings: (drawings: Drawing[]) => void
   setSelectedDrawing: (drawing: Drawing | null) => void
@@ -80,7 +80,7 @@ export const useAppStore = create<AppState>((set) => ({
   },
   sidebarOpen: true,
   currentView: 'dashboard',
-  
+
   // Actions
   setDrawings: (drawings) => set({ drawings }),
   setSelectedDrawing: (drawing) => set({ selectedDrawing: drawing }),

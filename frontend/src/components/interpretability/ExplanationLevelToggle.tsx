@@ -47,7 +47,10 @@ interface ExplanationLevelToggleProps {
   analysisId: number
   technicalExplanation?: string
   userRole?: 'researcher' | 'educator' | 'parent' | 'clinician'
-  onExplanationChange?: (level: 'technical' | 'simplified', explanation: string) => void
+  onExplanationChange?: (
+    level: 'technical' | 'simplified',
+    explanation: string
+  ) => void
 }
 
 const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
@@ -56,15 +59,24 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
   userRole = 'educator',
   onExplanationChange,
 }) => {
-  const [explanationLevel, setExplanationLevel] = useState<'technical' | 'simplified'>('simplified')
+  const [explanationLevel, setExplanationLevel] = useState<
+    'technical' | 'simplified'
+  >('simplified')
 
   // Fetch simplified explanation
-  const { data: simplifiedData, isLoading, error } = useQuery<SimplifiedExplanation>({
+  const {
+    data: simplifiedData,
+    isLoading,
+    error,
+  } = useQuery<SimplifiedExplanation>({
     queryKey: ['simplified-explanation', analysisId, userRole],
     queryFn: async () => {
-      const response = await axios.get(`/api/interpretability/${analysisId}/simplified`, {
-        params: { user_role: userRole }
-      })
+      const response = await axios.get(
+        `/api/interpretability/${analysisId}/simplified`,
+        {
+          params: { user_role: userRole },
+        }
+      )
       return response.data
     },
     enabled: !!analysisId,
@@ -72,13 +84,14 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
 
   const handleLevelChange = (
     _: React.MouseEvent<HTMLElement>,
-    newLevel: 'technical' | 'simplified' | null,
+    newLevel: 'technical' | 'simplified' | null
   ) => {
     if (newLevel !== null) {
       setExplanationLevel(newLevel)
-      const explanation = newLevel === 'technical' 
-        ? technicalExplanation || 'Technical explanation not available'
-        : simplifiedData?.summary || 'Simplified explanation loading...'
+      const explanation =
+        newLevel === 'technical'
+          ? technicalExplanation || 'Technical explanation not available'
+          : simplifiedData?.summary || 'Simplified explanation loading...'
       onExplanationChange?.(newLevel, explanation)
     }
   }
@@ -127,11 +140,16 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
   return (
     <Card>
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
           <Typography variant="h6">Explanation Level</Typography>
-          <Chip 
-            label={getRoleDescription(userRole)} 
-            size="small" 
+          <Chip
+            label={getRoleDescription(userRole)}
+            size="small"
             variant="outlined"
             color="primary"
           />
@@ -176,7 +194,9 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
                   <Chip
                     icon={getConfidenceIcon(simplifiedData.confidence_level)}
                     label={`${simplifiedData.confidence_level} Confidence`}
-                    color={getConfidenceColor(simplifiedData.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+                    color={
+                      getConfidenceColor(simplifiedData.confidence_level) as any
+                    } // eslint-disable-line @typescript-eslint/no-explicit-any
                     variant="outlined"
                   />
                   <Typography variant="body2" color="text.secondary">
@@ -221,14 +241,16 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
                   </AccordionSummary>
                   <AccordionDetails>
                     <List dense>
-                      {simplifiedData.visual_indicators.map((indicator, index) => (
-                        <ListItem key={index}>
-                          <ListItemText
-                            primary={indicator.indicator}
-                            secondary={indicator.meaning}
-                          />
-                        </ListItem>
-                      ))}
+                      {simplifiedData.visual_indicators.map(
+                        (indicator, index) => (
+                          <ListItem key={index}>
+                            <ListItemText
+                              primary={indicator.indicator}
+                              secondary={indicator.meaning}
+                            />
+                          </ListItem>
+                        )
+                      )}
                     </List>
                   </AccordionDetails>
                 </Accordion>
@@ -243,31 +265,37 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
-                        {simplifiedData.recommendations.map((recommendation, index) => (
-                          <ListItem key={index}>
-                            <ListItemIcon>
-                              <CheckCircle color="success" />
-                            </ListItemIcon>
-                            <ListItemText primary={recommendation} />
-                          </ListItem>
-                        ))}
+                        {simplifiedData.recommendations.map(
+                          (recommendation, index) => (
+                            <ListItem key={index}>
+                              <ListItemIcon>
+                                <CheckCircle color="success" />
+                              </ListItemIcon>
+                              <ListItemText primary={recommendation} />
+                            </ListItem>
+                          )
+                        )}
                       </List>
                     </AccordionDetails>
                   </Accordion>
                 )}
 
                 {/* Confidence level explanation */}
-                <Alert 
-                  severity={getConfidenceColor(simplifiedData.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any 
+                <Alert
+                  severity={
+                    getConfidenceColor(simplifiedData.confidence_level) as any
+                  } // eslint-disable-line @typescript-eslint/no-explicit-any
                   sx={{ mt: 2 }}
                 >
                   <Typography variant="body2">
-                    <strong>{simplifiedData.confidence_level} Confidence:</strong>{' '}
-                    {simplifiedData.confidence_level === 'High' && 
+                    <strong>
+                      {simplifiedData.confidence_level} Confidence:
+                    </strong>{' '}
+                    {simplifiedData.confidence_level === 'High' &&
                       'The analysis is based on strong patterns and reliable data. The findings are likely accurate.'}
-                    {simplifiedData.confidence_level === 'Medium' && 
+                    {simplifiedData.confidence_level === 'Medium' &&
                       'The analysis shows clear patterns but may benefit from additional context or data.'}
-                    {simplifiedData.confidence_level === 'Low' && 
+                    {simplifiedData.confidence_level === 'Low' &&
                       'The analysis has limited confidence. Consider additional assessment or consultation.'}
                   </Typography>
                 </Alert>
@@ -280,13 +308,20 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
           <Box>
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
-                Technical explanation includes detailed model outputs, statistical measures, and algorithmic details.
+                Technical explanation includes detailed model outputs,
+                statistical measures, and algorithmic details.
               </Typography>
             </Alert>
 
             <Paper sx={{ p: 2, backgroundColor: 'grey.50' }}>
-              <Typography variant="body2" fontFamily="monospace" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
-                {technicalExplanation || 'Technical explanation not available for this analysis.'}
+              <Typography
+                variant="body2"
+                fontFamily="monospace"
+                component="pre"
+                sx={{ whiteSpace: 'pre-wrap' }}
+              >
+                {technicalExplanation ||
+                  'Technical explanation not available for this analysis.'}
               </Typography>
             </Paper>
 

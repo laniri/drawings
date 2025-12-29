@@ -72,26 +72,37 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
   filterByType = 'all',
   onExampleSelect,
 }) => {
-  const [selectedExample, setSelectedExample] = useState<ExamplePattern | null>(null)
+  const [selectedExample, setSelectedExample] = useState<ExamplePattern | null>(
+    null
+  )
   const [activeTab, setActiveTab] = useState(0)
-  const [typeFilter, setTypeFilter] = useState<'all' | 'normal' | 'anomalous' | 'borderline'>(filterByType)
+  const [typeFilter, setTypeFilter] = useState<
+    'all' | 'normal' | 'anomalous' | 'borderline'
+  >(filterByType)
 
   // Fetch example patterns
-  const { data: examples, isLoading, error } = useQuery<ExamplePattern[]>({
+  const {
+    data: examples,
+    isLoading,
+    error,
+  } = useQuery<ExamplePattern[]>({
     queryKey: ['example-patterns', ageGroup, userRole],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (ageGroup) params.append('age_group', ageGroup)
       params.append('user_role', userRole)
-      
-      const response = await axios.get(`/api/interpretability/examples?${params}`)
+
+      const response = await axios.get(
+        `/api/interpretability/examples?${params}`
+      )
       return response.data
     },
   })
 
-  const filteredExamples = examples?.filter(example => 
-    typeFilter === 'all' || example.example_type === typeFilter
-  ) || []
+  const filteredExamples =
+    examples?.filter(
+      (example) => typeFilter === 'all' || example.example_type === typeFilter
+    ) || []
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -197,7 +208,12 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
     <>
       <Card>
         <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
             <Typography variant="h6">
               Interpretation Examples
               {ageGroup && (
@@ -219,7 +235,8 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                 color="success"
                 onClick={() => setTypeFilter('normal')}
               >
-                Normal ({examples.filter(e => e.example_type === 'normal').length})
+                Normal (
+                {examples.filter((e) => e.example_type === 'normal').length})
               </Button>
               <Button
                 size="small"
@@ -227,14 +244,17 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                 color="error"
                 onClick={() => setTypeFilter('anomalous')}
               >
-                Anomalous ({examples.filter(e => e.example_type === 'anomalous').length})
+                Anomalous (
+                {examples.filter((e) => e.example_type === 'anomalous').length})
               </Button>
             </Box>
           </Box>
 
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2">
-              These examples show common patterns and their interpretations. Click on any example to learn more about what the AI detected and why.
+              These examples show common patterns and their interpretations.
+              Click on any example to learn more about what the AI detected and
+              why.
             </Typography>
           </Alert>
 
@@ -274,11 +294,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                         sx={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
                       />
                     </Box>
-                    <Box
-                      position="absolute"
-                      bottom={8}
-                      left={8}
-                    >
+                    <Box position="absolute" bottom={8} left={8}>
                       <Badge
                         badgeContent={example.metadata.drawing_count}
                         color="primary"
@@ -296,19 +312,30 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     <Typography variant="subtitle2" gutterBottom noWrap>
                       {example.pattern_name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
                       {example.description}
                     </Typography>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mt={1}
+                    >
                       <Chip
                         label={`${example.confidence_level} confidence`}
                         size="small"
-                        color={getConfidenceColor(example.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+                        color={
+                          getConfidenceColor(example.confidence_level) as any
+                        } // eslint-disable-line @typescript-eslint/no-explicit-any
                         variant="outlined"
                       />
                       <Tooltip title="Click to view details">
@@ -328,10 +355,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
               <Typography variant="body1" color="text.secondary">
                 No examples found for the selected filter.
               </Typography>
-              <Button
-                onClick={() => setTypeFilter('all')}
-                sx={{ mt: 1 }}
-              >
+              <Button onClick={() => setTypeFilter('all')} sx={{ mt: 1 }}>
                 Show All Examples
               </Button>
             </Box>
@@ -346,13 +370,17 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
         maxWidth="lg"
         fullWidth
         PaperProps={{
-          sx: { minHeight: '70vh' }
+          sx: { minHeight: '70vh' },
         }}
       >
         {selectedExample && (
           <>
             <DialogTitle>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Box>
                   <Typography variant="h5" component="div">
                     {selectedExample.pattern_name}
@@ -369,7 +397,11 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     />
                     <Chip
                       label={`${selectedExample.confidence_level} confidence`}
-                      color={getConfidenceColor(selectedExample.confidence_level) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+                      color={
+                        getConfidenceColor(
+                          selectedExample.confidence_level
+                        ) as any
+                      } // eslint-disable-line @typescript-eslint/no-explicit-any
                       variant="outlined"
                     />
                   </Box>
@@ -390,10 +422,15 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     <img
                       src={selectedExample.image_url}
                       alt={selectedExample.pattern_name}
-                      style={{ width: '100%', height: 'auto', maxHeight: 300, objectFit: 'contain' }}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        maxHeight: 300,
+                        objectFit: 'contain',
+                      }}
                     />
                   </Paper>
-                  
+
                   <Typography variant="h6" gutterBottom>
                     Saliency Analysis
                   </Typography>
@@ -401,13 +438,21 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     <img
                       src={selectedExample.saliency_url}
                       alt="Saliency map"
-                      style={{ width: '100%', height: 'auto', maxHeight: 300, objectFit: 'contain' }}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        maxHeight: 300,
+                        objectFit: 'contain',
+                      }}
                     />
                   </Paper>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+                  <Tabs
+                    value={activeTab}
+                    onChange={(_, newValue) => setActiveTab(newValue)}
+                  >
                     <Tab label="Overview" />
                     <Tab label="Features" />
                     <Tab label="Guidance" />
@@ -446,7 +491,10 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                             <ListItem>
                               <ListItemText
                                 primary="Developmental Significance"
-                                secondary={selectedExample.metadata.developmental_significance}
+                                secondary={
+                                  selectedExample.metadata
+                                    .developmental_significance
+                                }
                               />
                             </ListItem>
                           </List>
@@ -460,28 +508,32 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                           Visual Features Detected
                         </Typography>
                         <List>
-                          {selectedExample.visual_features.map((feature, index) => (
-                            <ListItem key={index}>
-                              <ListItemIcon>
-                                <Visibility color="primary" />
-                              </ListItemIcon>
-                              <ListItemText primary={feature} />
-                            </ListItem>
-                          ))}
+                          {selectedExample.visual_features.map(
+                            (feature, index) => (
+                              <ListItem key={index}>
+                                <ListItemIcon>
+                                  <Visibility color="primary" />
+                                </ListItemIcon>
+                                <ListItemText primary={feature} />
+                              </ListItem>
+                            )
+                          )}
                         </List>
 
                         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
                           Interpretation Notes
                         </Typography>
                         <List>
-                          {selectedExample.interpretation_notes.map((note, index) => (
-                            <ListItem key={index}>
-                              <ListItemIcon>
-                                <Psychology color="secondary" />
-                              </ListItemIcon>
-                              <ListItemText primary={note} />
-                            </ListItem>
-                          ))}
+                          {selectedExample.interpretation_notes.map(
+                            (note, index) => (
+                              <ListItem key={index}>
+                                <ListItemIcon>
+                                  <Psychology color="secondary" />
+                                </ListItemIcon>
+                                <ListItemText primary={note} />
+                              </ListItem>
+                            )
+                          )}
                         </List>
                       </Box>
                     )}
@@ -489,15 +541,23 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                     {activeTab === 2 && (
                       <Box>
                         <Typography variant="h6" gutterBottom>
-                          {userRole === 'educator' ? 'Educational Guidance' :
-                           userRole === 'researcher' ? 'Research Applications' :
-                           userRole === 'parent' ? 'What This Means' :
-                           'Clinical Considerations'}
+                          {userRole === 'educator'
+                            ? 'Educational Guidance'
+                            : userRole === 'researcher'
+                              ? 'Research Applications'
+                              : userRole === 'parent'
+                                ? 'What This Means'
+                                : 'Clinical Considerations'}
                         </Typography>
 
-                        <Alert 
-                          severity={selectedExample.example_type === 'normal' ? 'success' : 
-                                   selectedExample.example_type === 'anomalous' ? 'warning' : 'info'}
+                        <Alert
+                          severity={
+                            selectedExample.example_type === 'normal'
+                              ? 'success'
+                              : selectedExample.example_type === 'anomalous'
+                                ? 'warning'
+                                : 'info'
+                          }
                           sx={{ mb: 2 }}
                         >
                           <Typography variant="body2">
@@ -547,9 +607,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
             </DialogContent>
 
             <DialogActions>
-              <Button onClick={handleCloseDialog}>
-                Close
-              </Button>
+              <Button onClick={handleCloseDialog}>Close</Button>
               <Button
                 variant="contained"
                 onClick={() => {

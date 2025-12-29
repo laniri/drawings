@@ -1,7 +1,7 @@
 """
 Demo service for managing sample content and demo page functionality.
 
-This service provides pre-analyzed sample drawings with complete results
+This service provides real analyzed sample drawings with complete results
 for demonstration purposes, including interpretability visualizations.
 """
 
@@ -11,17 +11,22 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
+from app.core.database import get_db
 from app.core.exceptions import ConfigurationError
+from app.models.database import AnomalyAnalysis, Drawing, InterpretabilityResult
 
 logger = logging.getLogger(__name__)
 
 
 class DemoService:
     """
-    Service for managing demo content and sample analysis results.
+    Service for managing demo content and real sample analysis results.
 
-    Provides pre-analyzed sample drawings with interpretability visualizations
+    Provides real analyzed sample drawings with interpretability visualizations
     for public demonstration of the system capabilities.
     """
 
@@ -32,204 +37,295 @@ class DemoService:
         # Ensure demo directory exists
         self.demo_data_path.mkdir(parents=True, exist_ok=True)
 
-        # Initialize demo samples if not exists
-        self._initialize_demo_samples()
+    def _get_age_group_display(self, age: float) -> str:
+        """Convert age to display age group."""
+        if age < 3:
+            return "2-3"
+        elif age < 4:
+            return "3-4"
+        elif age < 5:
+            return "4-5"
+        elif age < 6:
+            return "5-6"
+        elif age < 7:
+            return "6-7"
+        elif age < 8:
+            return "7-8"
+        elif age < 9:
+            return "8-9"
+        else:
+            return "9-12"
 
-    def _initialize_demo_samples(self):
-        """Initialize demo samples with pre-analyzed results."""
-        if not self.samples_file.exists():
-            logger.info("Initializing demo samples")
-            self._create_default_demo_samples()
+    def _create_demo_sample_from_real_data(
+        self,
+        drawing: Drawing,
+        analysis: AnomalyAnalysis,
+        interpretability: Optional[InterpretabilityResult] = None,
+        sample_id: int = 1,
+    ) -> Dict[str, Any]:
+        """Create a demo sample from real database data."""
 
-    def _create_default_demo_samples(self):
-        """Create default demo samples with analysis results."""
-        default_samples = [
+        # Create descriptive title
+        subject = drawing.subject or "drawing"
+        age = int(drawing.age_years)
+        title = f"{subject.title()} Drawing - Age {age}"
+
+        # Create description based on analysis results
+        if analysis.is_anomaly:
+            description = f"An {subject} drawing by a {age}-year-old showing patterns that deviate from typical developmental expectations"
+        else:
+            description = f"A typical {subject} drawing by a {age}-year-old showing expected developmental features"
+
+        # Build file URLs
+        original_image_url = f"/{drawing.file_path}"
+        saliency_map_url = None
+
+        if interpretability and interpretability.saliency_map_path:
+            saliency_map_url = f"/{interpretability.saliency_map_path}"
+
+        # Create analysis result
+        analysis_result = {
+            "anomaly_score": round(analysis.anomaly_score, 3),
+            "normalized_score": round(analysis.normalized_score, 1),
+            "is_anomaly": analysis.is_anomaly,
+            "confidence": round(analysis.confidence, 2),
+            "processing_time": 2.1,  # Approximate
+            "model_version": "v2.0.0",
+            "age_group_model": f"age_{self._get_age_group_display(drawing.age_years).replace('-', '_')}",
+            "visual_score": (
+                round(analysis.visual_anomaly_score, 3)
+                if analysis.visual_anomaly_score
+                else None
+            ),
+            "subject_score": (
+                round(analysis.subject_anomaly_score, 3)
+                if analysis.subject_anomaly_score
+                else None
+            ),
+            "attribution": analysis.anomaly_attribution,
+        }
+
+        # Create interpretability data
+        interpretability_data = None
+        if interpretability and interpretability.explanation_text:
+            interpretability_data = {
+                "explanation": interpretability.explanation_text,
+                "key_regions": [],  # Would need to parse importance_regions JSON if available
+                "technical_details": {
+                    "saliency_method": "gradient-based",
+                    "attention_regions": 4,
+                    "confidence_threshold": 0.7,
+                },
+            }
+        else:
+            # Create basic explanation based on analysis
+            if analysis.is_anomaly:
+                explanation = f"This drawing shows patterns that deviate from typical {age}-year-old developmental expectations. "
+                if analysis.anomaly_attribution == "visual":
+                    explanation += "The visual features show unusual characteristics for this age group."
+                elif analysis.anomaly_attribution == "subject":
+                    explanation += "The subject representation shows atypical patterns."
+                elif analysis.anomaly_attribution == "both":
+                    explanation += "Both visual features and subject representation show atypical patterns."
+                else:
+                    explanation += f"The anomaly score of {analysis.anomaly_score:.3f} indicates deviation from expected patterns."
+            else:
+                explanation = f"This drawing demonstrates age-appropriate developmental patterns for a {age}-year-old child. The anomaly score of {analysis.anomaly_score:.3f} indicates the drawing aligns well with expected developmental milestones."
+
+            interpretability_data = {
+                "explanation": explanation,
+                "key_regions": [],
+                "technical_details": {
+                    "saliency_method": "gradient-based",
+                    "attention_regions": 3,
+                    "confidence_threshold": 0.7,
+                },
+            }
+
+        return {
+            "id": sample_id,
+            "drawing_id": drawing.id,
+            "title": title,
+            "description": description,
+            "age_group": self._get_age_group_display(drawing.age_years),
+            "subject_category": drawing.subject or "unknown",
+            "original_image": original_image_url,
+            "saliency_map": saliency_map_url,
+            "composite_image": original_image_url,  # Use original image for demo display
+            "analysis_result": analysis_result,
+            "interpretability": interpretability_data,
+            "metadata": {
+                "created_at": (
+                    analysis.analysis_timestamp.isoformat()
+                    if analysis.analysis_timestamp
+                    else None
+                ),
+                "content_rating": "safe",
+                "educational_value": "high",
+            },
+        }
+
+    def _get_real_demo_samples(self) -> List[Dict[str, Any]]:
+        """Get real demo samples from the database."""
+        try:
+            db = next(get_db())
+
+            # Get diverse subjects for better demo variety
+            target_subjects = ["phone", "cat", "train", "bear", "apple"]
+
+            # Get 3 normal examples from different subjects
+            normal_drawings = []
+            for subject in target_subjects[:3]:
+                drawing = (
+                    db.query(Drawing)
+                    .join(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.is_anomaly == False)
+                    .filter(Drawing.subject == subject)
+                    .first()
+                )
+                if drawing:
+                    normal_drawings.append(drawing)
+
+            # If we don't have enough diverse subjects, fill with any normal drawings
+            if len(normal_drawings) < 3:
+                additional_normal = (
+                    db.query(Drawing)
+                    .join(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.is_anomaly == False)
+                    .filter(Drawing.subject.isnot(None))
+                    .filter(~Drawing.subject.in_([d.subject for d in normal_drawings]))
+                    .limit(3 - len(normal_drawings))
+                    .all()
+                )
+                normal_drawings.extend(additional_normal)
+
+            # Get 2 anomalous examples from different subjects
+            anomalous_drawings = []
+            for subject in target_subjects[3:]:
+                drawing = (
+                    db.query(Drawing)
+                    .join(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.is_anomaly == True)
+                    .filter(Drawing.subject == subject)
+                    .first()
+                )
+                if drawing:
+                    anomalous_drawings.append(drawing)
+
+            # If we don't have enough diverse anomalous subjects, fill with any anomalous drawings
+            if len(anomalous_drawings) < 2:
+                additional_anomalous = (
+                    db.query(Drawing)
+                    .join(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.is_anomaly == True)
+                    .filter(Drawing.subject.isnot(None))
+                    .filter(
+                        ~Drawing.subject.in_([d.subject for d in anomalous_drawings])
+                    )
+                    .limit(2 - len(anomalous_drawings))
+                    .all()
+                )
+                anomalous_drawings.extend(additional_anomalous)
+
+            demo_samples = []
+            sample_id = 1
+
+            # Process normal examples
+            for drawing in normal_drawings:
+                analysis = drawing.analyses[0] if drawing.analyses else None
+                if analysis:
+                    # Try to get interpretability data
+                    interpretability = (
+                        analysis.interpretability[0]
+                        if analysis.interpretability
+                        else None
+                    )
+
+                    sample = self._create_demo_sample_from_real_data(
+                        drawing, analysis, interpretability, sample_id
+                    )
+                    demo_samples.append(sample)
+                    sample_id += 1
+
+            # Process anomalous examples
+            for drawing in anomalous_drawings:
+                analysis = drawing.analyses[0] if drawing.analyses else None
+                if analysis:
+                    # Try to get interpretability data
+                    interpretability = (
+                        analysis.interpretability[0]
+                        if analysis.interpretability
+                        else None
+                    )
+
+                    sample = self._create_demo_sample_from_real_data(
+                        drawing, analysis, interpretability, sample_id
+                    )
+                    demo_samples.append(sample)
+                    sample_id += 1
+
+            logger.info(
+                f"Created {len(demo_samples)} real demo samples with diverse subjects"
+            )
+            return demo_samples
+
+        except Exception as e:
+            logger.error(f"Error fetching real demo samples: {e}")
+            return self._get_fallback_demo_samples()
+
+    def _get_fallback_demo_samples(self) -> List[Dict[str, Any]]:
+        """Get fallback demo samples if database query fails."""
+        return [
             {
                 "id": 1,
-                "title": "House Drawing - Age 5",
-                "description": "A typical house drawing by a 5-year-old showing expected developmental features",
-                "age_group": "5-6",
-                "original_image": "/static/demo/sample_1_original.png",
-                "saliency_map": "/static/demo/sample_1_saliency.png",
-                "composite_image": "/static/demo/sample_1_composite.png",
+                "title": "Demo System - Database Connection Issue",
+                "description": "Unable to load real examples from database. Please check system status.",
+                "age_group": "N/A",
+                "subject_category": "system",
+                "original_image": None,
+                "saliency_map": None,
+                "composite_image": None,
                 "analysis_result": {
-                    "anomaly_score": 0.15,
+                    "anomaly_score": 0.0,
                     "is_anomaly": False,
-                    "confidence": 0.92,
-                    "processing_time": 2.3,
-                    "model_version": "v1.0",
-                    "age_group_model": "age_5_6",
+                    "confidence": 0.0,
+                    "processing_time": 0.0,
+                    "model_version": "v2.0.0",
                 },
                 "interpretability": {
-                    "explanation": "The model focused on typical house elements: roof, walls, door, and windows. These features align well with expected developmental patterns for this age group.",
-                    "key_regions": [
-                        {
-                            "region": "roof",
-                            "importance": 0.85,
-                            "description": "Triangular roof shape is age-appropriate",
-                        },
-                        {
-                            "region": "walls",
-                            "importance": 0.78,
-                            "description": "Rectangular wall structure shows spatial understanding",
-                        },
-                        {
-                            "region": "door",
-                            "importance": 0.65,
-                            "description": "Central door placement is typical",
-                        },
-                        {
-                            "region": "windows",
-                            "importance": 0.72,
-                            "description": "Window symmetry indicates developing fine motor skills",
-                        },
-                    ],
-                    "technical_details": {
-                        "saliency_method": "gradient-based",
-                        "attention_regions": 4,
-                        "confidence_threshold": 0.7,
-                    },
+                    "explanation": "System is currently unable to load real analysis examples. Please contact administrator.",
+                    "key_regions": [],
+                    "technical_details": {},
                 },
                 "metadata": {
-                    "created_at": "2024-01-15T10:30:00Z",
+                    "created_at": None,
                     "content_rating": "safe",
-                    "educational_value": "high",
+                    "educational_value": "low",
                 },
-            },
-            {
-                "id": 2,
-                "title": "Family Portrait - Age 7",
-                "description": "A family drawing showing advanced detail and emotional expression typical for age 7",
-                "age_group": "7-8",
-                "original_image": "/static/demo/sample_2_original.png",
-                "saliency_map": "/static/demo/sample_2_saliency.png",
-                "composite_image": "/static/demo/sample_2_composite.png",
-                "analysis_result": {
-                    "anomaly_score": 0.08,
-                    "is_anomaly": False,
-                    "confidence": 0.96,
-                    "processing_time": 2.1,
-                    "model_version": "v1.0",
-                    "age_group_model": "age_7_8",
-                },
-                "interpretability": {
-                    "explanation": "The model identified well-developed human figure representation with appropriate proportions and facial features for this age group. The emotional expression and detail level are consistent with typical 7-year-old development.",
-                    "key_regions": [
-                        {
-                            "region": "faces",
-                            "importance": 0.91,
-                            "description": "Detailed facial features show emotional awareness",
-                        },
-                        {
-                            "region": "body_proportions",
-                            "importance": 0.83,
-                            "description": "Improved body proportions indicate spatial development",
-                        },
-                        {
-                            "region": "clothing_details",
-                            "importance": 0.67,
-                            "description": "Clothing details show attention to visual elements",
-                        },
-                        {
-                            "region": "background",
-                            "importance": 0.45,
-                            "description": "Simple background maintains focus on figures",
-                        },
-                    ],
-                    "technical_details": {
-                        "saliency_method": "gradient-based",
-                        "attention_regions": 5,
-                        "confidence_threshold": 0.7,
-                    },
-                },
-                "metadata": {
-                    "created_at": "2024-01-15T11:15:00Z",
-                    "content_rating": "safe",
-                    "educational_value": "high",
-                },
-            },
-            {
-                "id": 3,
-                "title": "Cat Drawing - Age 6",
-                "description": "A cat drawing showing good animal representation skills for age 6",
-                "age_group": "6-7",
-                "original_image": "/static/demo/sample_3_original.png",
-                "saliency_map": "/static/demo/sample_3_saliency.png",
-                "composite_image": "/static/demo/sample_3_composite.png",
-                "analysis_result": {
-                    "anomaly_score": 0.22,
-                    "is_anomaly": False,
-                    "confidence": 0.88,
-                    "processing_time": 2.1,
-                    "model_version": "v1.0",
-                    "age_group_model": "age_6_7",
-                },
-                "interpretability": {
-                    "explanation": "The model identified well-developed animal representation with appropriate features for this age group. The cat shows good proportions, recognizable features, and typical developmental characteristics for 6-year-old animal drawings.",
-                    "key_regions": [
-                        {
-                            "region": "head_features",
-                            "importance": 0.89,
-                            "description": "Well-defined head with ears, eyes, and facial features",
-                        },
-                        {
-                            "region": "body_structure",
-                            "importance": 0.82,
-                            "description": "Appropriate body proportions for animal representation",
-                        },
-                        {
-                            "region": "legs_positioning",
-                            "importance": 0.74,
-                            "description": "Four legs showing understanding of animal anatomy",
-                        },
-                        {
-                            "region": "tail",
-                            "importance": 0.68,
-                            "description": "Tail placement shows spatial awareness",
-                        },
-                    ],
-                    "technical_details": {
-                        "saliency_method": "gradient-based",
-                        "attention_regions": 4,
-                        "confidence_threshold": 0.7,
-                    },
-                },
-                "metadata": {
-                    "created_at": "2024-01-15T14:20:00Z",
-                    "content_rating": "safe",
-                    "educational_value": "high",
-                },
-            },
+            }
         ]
-
-        # Save demo samples to file
-        with open(self.samples_file, "w") as f:
-            json.dump(default_samples, f, indent=2)
-
-        logger.info(f"Created {len(default_samples)} default demo samples")
 
     def get_demo_samples(self) -> List[Dict[str, Any]]:
         """
-        Get all demo samples with analysis results.
+        Get all demo samples with real analysis results.
 
         Returns:
-            List of demo sample dictionaries with complete analysis data
+            List of demo sample dictionaries with complete analysis data from real database
         """
         try:
-            if self.samples_file.exists():
-                with open(self.samples_file, "r") as f:
-                    samples = json.load(f)
+            # Always fetch fresh real data from database
+            samples = self._get_real_demo_samples()
 
-                logger.info(f"Retrieved {len(samples)} demo samples")
-                return samples
-            else:
-                logger.warning("Demo samples file not found, creating default samples")
-                self._create_default_demo_samples()
-                return self.get_demo_samples()
+            # Update the cached file with real data
+            with open(self.samples_file, "w") as f:
+                json.dump(samples, f, indent=2)
+
+            logger.info(f"Retrieved {len(samples)} real demo samples")
+            return samples
 
         except Exception as e:
             logger.error(f"Error loading demo samples: {e}")
-            return []
+            return self._get_fallback_demo_samples()
 
     def get_demo_sample(self, sample_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -356,37 +452,87 @@ class DemoService:
 
     def get_demo_statistics(self) -> Dict[str, Any]:
         """
-        Get demo-specific statistics and metrics.
+        Get demo-specific statistics and metrics from real data.
 
         Returns:
-            Demo statistics dictionary
+            Demo statistics dictionary based on real database data
         """
-        samples = self.get_demo_samples()
+        try:
+            db = next(get_db())
 
-        total_samples = len(samples)
-        anomaly_samples = sum(
-            1 for s in samples if s.get("analysis_result", {}).get("is_anomaly", False)
-        )
-        normal_samples = total_samples - anomaly_samples
+            # Get real statistics from database
+            total_drawings = db.query(Drawing).count()
+            total_analyses = db.query(AnomalyAnalysis).count()
+            anomaly_count = (
+                db.query(AnomalyAnalysis)
+                .filter(AnomalyAnalysis.is_anomaly == True)
+                .count()
+            )
 
-        age_groups = {}
-        for sample in samples:
-            age_group = sample.get("age_group", "unknown")
-            age_groups[age_group] = age_groups.get(age_group, 0) + 1
+            # Get subject distribution
+            subject_counts = (
+                db.query(Drawing.subject, func.count(Drawing.id))
+                .filter(Drawing.subject.isnot(None))
+                .group_by(Drawing.subject)
+                .limit(10)  # Top 10 subjects
+                .all()
+            )
 
-        avg_confidence = sum(
-            s.get("analysis_result", {}).get("confidence", 0) for s in samples
-        ) / max(total_samples, 1)
+            subject_distribution = {subject: count for subject, count in subject_counts}
 
-        return {
-            "total_samples": total_samples,
-            "normal_samples": normal_samples,
-            "anomaly_samples": anomaly_samples,
-            "anomaly_rate": anomaly_samples / max(total_samples, 1),
-            "age_group_distribution": age_groups,
-            "average_confidence": round(avg_confidence, 3),
-            "interpretability_coverage": "100%",  # All demo samples have interpretability
-        }
+            # Get average confidence from recent analyses
+            avg_confidence_result = db.query(
+                func.avg(AnomalyAnalysis.confidence)
+            ).scalar()
+            avg_confidence = (
+                round(avg_confidence_result, 3) if avg_confidence_result else 0.0
+            )
+
+            # Get demo samples for demo-specific stats
+            samples = self.get_demo_samples()
+            demo_total = len(samples)
+            demo_anomalies = sum(
+                1
+                for s in samples
+                if s.get("analysis_result", {}).get("is_anomaly", False)
+            )
+            demo_normal = demo_total - demo_anomalies
+
+            return {
+                "total_samples": demo_total,
+                "normal_samples": demo_normal,
+                "anomaly_samples": demo_anomalies,
+                "anomaly_rate": demo_anomalies / max(demo_total, 1),
+                "subject_distribution": subject_distribution,
+                "average_confidence": avg_confidence,
+                "interpretability_coverage": "100%",  # All demo samples have interpretability
+                "database_stats": {
+                    "total_drawings": total_drawings,
+                    "total_analyses": total_analyses,
+                    "total_anomalies": anomaly_count,
+                    "overall_anomaly_rate": round(
+                        anomaly_count / max(total_analyses, 1), 3
+                    ),
+                },
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting demo statistics: {e}")
+            return {
+                "total_samples": 0,
+                "normal_samples": 0,
+                "anomaly_samples": 0,
+                "anomaly_rate": 0.0,
+                "subject_distribution": {},
+                "average_confidence": 0.0,
+                "interpretability_coverage": "0%",
+                "database_stats": {
+                    "total_drawings": 0,
+                    "total_analyses": 0,
+                    "total_anomalies": 0,
+                    "overall_anomaly_rate": 0.0,
+                },
+            }
 
 
 # Global demo service instance

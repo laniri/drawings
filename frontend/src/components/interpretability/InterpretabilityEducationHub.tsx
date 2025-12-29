@@ -47,7 +47,9 @@ interface InterpretabilityEducationHubProps {
   onUserRoleChange?: (role: string) => void
 }
 
-const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> = ({
+const InterpretabilityEducationHub: React.FC<
+  InterpretabilityEducationHubProps
+> = ({
   analysisId,
   analysisData,
   userRole = 'educator',
@@ -59,11 +61,15 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
   const [showTutorial, setShowTutorial] = useState(showTutorialOnMount)
   const [currentUserRole, setCurrentUserRole] = useState(userRole)
   const [isFirstVisit, setIsFirstVisit] = useState(false)
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['overview']))
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(['overview'])
+  )
 
   // Check if this is the user's first visit
   useEffect(() => {
-    const hasVisited = localStorage.getItem('interpretability_tutorial_completed')
+    const hasVisited = localStorage.getItem(
+      'interpretability_tutorial_completed'
+    )
     if (!hasVisited) {
       setIsFirstVisit(true)
       setShowTutorial(true)
@@ -83,11 +89,9 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
     onUserRoleChange?.(newRole)
   }
 
-
-
   // Toggle section expansion
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(section)) {
         newSet.delete(section)
@@ -100,21 +104,31 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'researcher': return <Science />
-      case 'educator': return <School />
-      case 'parent': return <Lightbulb />
-      case 'clinician': return <Psychology />
-      default: return <School />
+      case 'researcher':
+        return <Science />
+      case 'educator':
+        return <School />
+      case 'parent':
+        return <Lightbulb />
+      case 'clinician':
+        return <Psychology />
+      default:
+        return <School />
     }
   }
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'researcher': return 'primary'
-      case 'educator': return 'secondary'
-      case 'parent': return 'success'
-      case 'clinician': return 'warning'
-      default: return 'default'
+      case 'researcher':
+        return 'primary'
+      case 'educator':
+        return 'secondary'
+      case 'parent':
+        return 'success'
+      case 'clinician':
+        return 'warning'
+      default:
+        return 'default'
     }
   }
 
@@ -130,11 +144,13 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
       {/* Header with role indicator and help */}
       <Card sx={{ mb: 2 }}>
         <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="h5">
-                Interpretability Guide
-              </Typography>
+              <Typography variant="h5">Interpretability Guide</Typography>
               <Chip
                 icon={getRoleIcon(currentUserRole)}
                 label={`${currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)} View`}
@@ -147,7 +163,7 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                 </Badge>
               )}
             </Box>
-            
+
             <Box display="flex" gap={1}>
               <ContextualHelpSystem
                 topic="interpretability-overview"
@@ -160,7 +176,7 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                   </IconButton>
                 </Tooltip>
               </ContextualHelpSystem>
-              
+
               <Button
                 variant="outlined"
                 startIcon={<School />}
@@ -176,8 +192,9 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
           {isFirstVisit && (
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                Welcome! This guide will help you understand AI interpretability results. 
-                We recommend starting with the tutorial to learn the basics.
+                Welcome! This guide will help you understand AI interpretability
+                results. We recommend starting with the tutorial to learn the
+                basics.
               </Typography>
             </Alert>
           )}
@@ -210,29 +227,44 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                 {/* Quick Start Section */}
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, mb: 2 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="h6">
-                        Quick Start Guide
-                      </Typography>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6">Quick Start Guide</Typography>
                       <IconButton onClick={() => toggleSection('quickstart')}>
-                        {expandedSections.has('quickstart') ? <ExpandLess /> : <ExpandMore />}
+                        {expandedSections.has('quickstart') ? (
+                          <ExpandLess />
+                        ) : (
+                          <ExpandMore />
+                        )}
                       </IconButton>
                     </Box>
-                    
+
                     <Collapse in={expandedSections.has('quickstart')}>
                       <Box mt={2}>
                         <Grid container spacing={2}>
                           <Grid item xs={12} md={4}>
                             <Card variant="outlined">
                               <CardContent>
-                                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  gap={1}
+                                  mb={1}
+                                >
                                   <Visibility color="primary" />
                                   <Typography variant="subtitle2">
                                     1. View Saliency Maps
                                   </Typography>
                                 </Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  Colored overlays show which parts of the drawing the AI focused on.
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Colored overlays show which parts of the
+                                  drawing the AI focused on.
                                 </Typography>
                                 <ContextualHelpSystem
                                   topic="saliency-maps"
@@ -242,18 +274,27 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                               </CardContent>
                             </Card>
                           </Grid>
-                          
+
                           <Grid item xs={12} md={4}>
                             <Card variant="outlined">
                               <CardContent>
-                                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  gap={1}
+                                  mb={1}
+                                >
                                   <Psychology color="primary" />
                                   <Typography variant="subtitle2">
                                     2. Check Confidence
                                   </Typography>
                                 </Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  Confidence scores tell you how reliable the analysis is.
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Confidence scores tell you how reliable the
+                                  analysis is.
                                 </Typography>
                                 <ContextualHelpSystem
                                   topic="confidence-scores"
@@ -263,18 +304,27 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                               </CardContent>
                             </Card>
                           </Grid>
-                          
+
                           <Grid item xs={12} md={4}>
                             <Card variant="outlined">
                               <CardContent>
-                                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                                <Box
+                                  display="flex"
+                                  alignItems="center"
+                                  gap={1}
+                                  mb={1}
+                                >
                                   <AutoStories color="primary" />
                                   <Typography variant="subtitle2">
                                     3. Explore Examples
                                   </Typography>
                                 </Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  See examples of typical and unusual patterns for comparison.
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  See examples of typical and unusual patterns
+                                  for comparison.
                                 </Typography>
                                 <Button
                                   size="small"
@@ -296,15 +346,22 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                 {analysisId && analysisData && (
                   <Grid item xs={12}>
                     <Paper sx={{ p: 2 }}>
-                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                        <Typography variant="h6">
-                          Current Analysis
-                        </Typography>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mb={2}
+                      >
+                        <Typography variant="h6">Current Analysis</Typography>
                         <IconButton onClick={() => toggleSection('analysis')}>
-                          {expandedSections.has('analysis') ? <ExpandLess /> : <ExpandMore />}
+                          {expandedSections.has('analysis') ? (
+                            <ExpandLess />
+                          ) : (
+                            <ExpandMore />
+                          )}
                         </IconButton>
                       </Box>
-                      
+
                       <Collapse in={expandedSections.has('analysis')}>
                         <Grid container spacing={2}>
                           <Grid item xs={12} md={6}>
@@ -339,22 +396,45 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                 {/* Key Concepts Section */}
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                      <Typography variant="h6">
-                        Key Concepts
-                      </Typography>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={2}
+                    >
+                      <Typography variant="h6">Key Concepts</Typography>
                       <IconButton onClick={() => toggleSection('concepts')}>
-                        {expandedSections.has('concepts') ? <ExpandLess /> : <ExpandMore />}
+                        {expandedSections.has('concepts') ? (
+                          <ExpandLess />
+                        ) : (
+                          <ExpandMore />
+                        )}
                       </IconButton>
                     </Box>
-                    
+
                     <Collapse in={expandedSections.has('concepts')}>
                       <Grid container spacing={2}>
                         {[
-                          { topic: 'saliency-maps', title: 'Saliency Maps', description: 'Visual importance indicators' },
-                          { topic: 'confidence-scores', title: 'Confidence Scores', description: 'Reliability measures' },
-                          { topic: 'anomaly-detection', title: 'Anomaly Detection', description: 'Pattern deviation analysis' },
-                          { topic: 'age-groups', title: 'Age Group Models', description: 'Developmental expectations' },
+                          {
+                            topic: 'saliency-maps',
+                            title: 'Saliency Maps',
+                            description: 'Visual importance indicators',
+                          },
+                          {
+                            topic: 'confidence-scores',
+                            title: 'Confidence Scores',
+                            description: 'Reliability measures',
+                          },
+                          {
+                            topic: 'anomaly-detection',
+                            title: 'Anomaly Detection',
+                            description: 'Pattern deviation analysis',
+                          },
+                          {
+                            topic: 'age-groups',
+                            title: 'Age Group Models',
+                            description: 'Developmental expectations',
+                          },
                         ].map((concept) => (
                           <Grid item xs={12} sm={6} md={3} key={concept.topic}>
                             <Card variant="outlined" sx={{ height: '100%' }}>
@@ -362,7 +442,11 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                                 <Typography variant="subtitle2" gutterBottom>
                                   {concept.title}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary" paragraph>
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  paragraph
+                                >
                                   {concept.description}
                                 </Typography>
                                 <ContextualHelpSystem
@@ -406,7 +490,8 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                   Interactive Tutorial
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
-                  Learn how to interpret AI analysis results with our step-by-step guide.
+                  Learn how to interpret AI analysis results with our
+                  step-by-step guide.
                 </Typography>
                 <Button
                   variant="contained"
@@ -429,24 +514,53 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                     <Typography variant="h6" gutterBottom>
                       User Role Settings
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      Choose your role to get explanations tailored to your needs.
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      paragraph
+                    >
+                      Choose your role to get explanations tailored to your
+                      needs.
                     </Typography>
-                    
+
                     <Grid container spacing={1}>
                       {[
-                        { role: 'educator', label: 'Educator', description: 'For teachers and educational professionals' },
-                        { role: 'researcher', label: 'Researcher', description: 'For academic and research purposes' },
-                        { role: 'parent', label: 'Parent', description: 'For parents and caregivers' },
-                        { role: 'clinician', label: 'Clinician', description: 'For healthcare professionals' },
+                        {
+                          role: 'educator',
+                          label: 'Educator',
+                          description:
+                            'For teachers and educational professionals',
+                        },
+                        {
+                          role: 'researcher',
+                          label: 'Researcher',
+                          description: 'For academic and research purposes',
+                        },
+                        {
+                          role: 'parent',
+                          label: 'Parent',
+                          description: 'For parents and caregivers',
+                        },
+                        {
+                          role: 'clinician',
+                          label: 'Clinician',
+                          description: 'For healthcare professionals',
+                        },
                       ].map((option) => (
                         <Grid item xs={12} key={option.role}>
                           <Card
-                            variant={currentUserRole === option.role ? 'elevation' : 'outlined'}
+                            variant={
+                              currentUserRole === option.role
+                                ? 'elevation'
+                                : 'outlined'
+                            }
                             sx={{
                               cursor: 'pointer',
                               border: currentUserRole === option.role ? 2 : 1,
-                              borderColor: currentUserRole === option.role ? 'primary.main' : 'divider',
+                              borderColor:
+                                currentUserRole === option.role
+                                  ? 'primary.main'
+                                  : 'divider',
                             }}
                             onClick={() => handleRoleChange(option.role)}
                           >
@@ -457,7 +571,10 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                                   <Typography variant="subtitle2">
                                     {option.label}
                                   </Typography>
-                                  <Typography variant="body2" color="text.secondary">
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
                                     {option.description}
                                   </Typography>
                                 </Box>
@@ -469,16 +586,20 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                     </Grid>
                   </Paper>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Paper sx={{ p: 2 }}>
                     <Typography variant="h6" gutterBottom>
                       Tutorial & Help
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      paragraph
+                    >
                       Access learning resources and reset tutorial progress.
                     </Typography>
-                    
+
                     <Box display="flex" flexDirection="column" gap={2}>
                       <Button
                         variant="outlined"
@@ -488,19 +609,21 @@ const InterpretabilityEducationHub: React.FC<InterpretabilityEducationHubProps> 
                       >
                         Restart Tutorial
                       </Button>
-                      
+
                       <Button
                         variant="outlined"
                         startIcon={<QuestionMark />}
                         onClick={() => {
-                          localStorage.removeItem('interpretability_tutorial_completed')
+                          localStorage.removeItem(
+                            'interpretability_tutorial_completed'
+                          )
                           setIsFirstVisit(true)
                         }}
                         fullWidth
                       >
                         Reset Tutorial Progress
                       </Button>
-                      
+
                       <Button
                         variant="outlined"
                         startIcon={<AutoStories />}

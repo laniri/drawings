@@ -104,7 +104,9 @@ const ConfigurationPage: React.FC = () => {
   })
 
   // Fetch age group models
-  const { data: ageGroupModels, isLoading: modelsLoading } = useQuery<AgeGroupModel[]>({
+  const { data: ageGroupModels, isLoading: modelsLoading } = useQuery<
+    AgeGroupModel[]
+  >({
     queryKey: ['age-group-models'],
     queryFn: async () => {
       const response = await axios.get('/api/models/age-groups')
@@ -113,7 +115,9 @@ const ConfigurationPage: React.FC = () => {
   })
 
   // Fetch subject statistics
-  const { data: subjectStats, isLoading: subjectStatsLoading } = useQuery<SubjectStatistics[]>({
+  const { data: subjectStats, isLoading: subjectStatsLoading } = useQuery<
+    SubjectStatistics[]
+  >({
     queryKey: ['subject-statistics'],
     queryFn: async () => {
       const response = await axios.get('/api/config/subject-statistics')
@@ -142,7 +146,7 @@ const ConfigurationPage: React.FC = () => {
   const updateThresholdMutation = useMutation({
     mutationFn: async (percentile: number) => {
       const response = await axios.put('/api/config/threshold', {
-        percentile: percentile
+        percentile: percentile,
       })
       return response.data
     },
@@ -155,27 +159,39 @@ const ConfigurationPage: React.FC = () => {
 
   // Update age grouping configuration
   const updateAgeGroupingMutation = useMutation({
-    mutationFn: async (data: { threshold_percentile?: number; age_grouping_strategy?: string; min_samples_per_group?: number; max_age_group_span?: number }) => {
+    mutationFn: async (data: {
+      threshold_percentile?: number
+      age_grouping_strategy?: string
+      min_samples_per_group?: number
+      max_age_group_span?: number
+    }) => {
       const response = await axios.put('/api/config/age-grouping', data)
       return response.data
     },
     onSuccess: (_, variables) => {
       // Update the query cache with the new values to prevent form reset
-      queryClient.setQueryData(['system-config'], (oldData: SystemConfig | undefined) => {
-        if (!oldData) return oldData
-        return {
-          ...oldData,
-          threshold_percentile: variables.threshold_percentile ?? oldData.threshold_percentile,
-          age_grouping_strategy: variables.age_grouping_strategy ?? oldData.age_grouping_strategy,
-          min_samples_per_group: variables.min_samples_per_group ?? oldData.min_samples_per_group,
-          max_age_group_span: variables.max_age_group_span ?? oldData.max_age_group_span,
+      queryClient.setQueryData(
+        ['system-config'],
+        (oldData: SystemConfig | undefined) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            threshold_percentile:
+              variables.threshold_percentile ?? oldData.threshold_percentile,
+            age_grouping_strategy:
+              variables.age_grouping_strategy ?? oldData.age_grouping_strategy,
+            min_samples_per_group:
+              variables.min_samples_per_group ?? oldData.min_samples_per_group,
+            max_age_group_span:
+              variables.max_age_group_span ?? oldData.max_age_group_span,
+          }
         }
-      })
-      
+      )
+
       // Don't invalidate system-config to prevent form reset, but invalidate dashboard stats
       // since threshold changes affect anomaly classifications
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
-      
+
       // Reset the flag after a short delay
       setTimeout(() => setJustSubmitted(false), 2000)
     },
@@ -222,8 +238,11 @@ const ConfigurationPage: React.FC = () => {
 
   const onSubmit = (data: ConfigFormData) => {
     // Use the age-grouping endpoint for all updates (workaround)
-    const mappedStrategy = data.age_grouping_strategy === '1-year' ? 'yearly' : data.age_grouping_strategy
-    
+    const mappedStrategy =
+      data.age_grouping_strategy === '1-year'
+        ? 'yearly'
+        : data.age_grouping_strategy
+
     setJustSubmitted(true)
     updateAgeGroupingMutation.mutate({
       threshold_percentile: data.threshold_percentile,
@@ -243,12 +262,18 @@ const ConfigurationPage: React.FC = () => {
   React.useEffect(() => {
     if (config && !justSubmitted) {
       // Map API values to frontend values
-      const mapAgeGroupingStrategy = (apiValue: string): '1-year' | '2-year' | '3-year' => {
+      const mapAgeGroupingStrategy = (
+        apiValue: string
+      ): '1-year' | '2-year' | '3-year' => {
         switch (apiValue) {
-          case 'yearly': return '1-year'
-          case '2-year': return '2-year'
-          case '3-year': return '3-year'
-          default: return '1-year'
+          case 'yearly':
+            return '1-year'
+          case '2-year':
+            return '2-year'
+          case '3-year':
+            return '3-year'
+          default:
+            return '1-year'
         }
       }
 
@@ -256,9 +281,12 @@ const ConfigurationPage: React.FC = () => {
         threshold_percentile: config.threshold_percentile,
         min_samples_per_group: config.min_samples_per_group,
         max_age_group_span: config.max_age_group_span,
-        age_grouping_strategy: mapAgeGroupingStrategy(config.age_grouping_strategy),
+        age_grouping_strategy: mapAgeGroupingStrategy(
+          config.age_grouping_strategy
+        ),
         vision_model: (config.vision_model || 'vit') as 'vit',
-        anomaly_detection_method: (config.anomaly_detection_method || 'autoencoder') as 'autoencoder',
+        anomaly_detection_method: (config.anomaly_detection_method ||
+          'autoencoder') as 'autoencoder',
       })
     }
   }, [config, reset, justSubmitted])
@@ -284,10 +312,7 @@ const ConfigurationPage: React.FC = () => {
         {/* General Settings */}
         <Grid item xs={12} lg={4}>
           <Card>
-            <CardHeader
-              title="General Settings"
-              avatar={<Settings />}
-            />
+            <CardHeader title="General Settings" avatar={<Settings />} />
             <CardContent>
               <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                 <Controller
@@ -297,7 +322,9 @@ const ConfigurationPage: React.FC = () => {
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Vision Model</InputLabel>
                       <Select {...field} label="Vision Model" disabled>
-                        <MenuItem value="vit">Vision Transformer (ViT)</MenuItem>
+                        <MenuItem value="vit">
+                          Vision Transformer (ViT)
+                        </MenuItem>
                       </Select>
                     </FormControl>
                   )}
@@ -309,7 +336,11 @@ const ConfigurationPage: React.FC = () => {
                   render={({ field }) => (
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Anomaly Detection Method</InputLabel>
-                      <Select {...field} label="Anomaly Detection Method" disabled>
+                      <Select
+                        {...field}
+                        label="Anomaly Detection Method"
+                        disabled
+                      >
                         <MenuItem value="autoencoder">Autoencoder</MenuItem>
                       </Select>
                     </FormControl>
@@ -333,7 +364,8 @@ const ConfigurationPage: React.FC = () => {
 
                 <Box sx={{ mt: 3, mb: 2 }}>
                   <Typography gutterBottom>
-                    Threshold Percentile: {control._formValues.threshold_percentile || 95}%
+                    Threshold Percentile:{' '}
+                    {control._formValues.threshold_percentile || 95}%
                   </Typography>
                   <Controller
                     name="threshold_percentile"
@@ -356,13 +388,17 @@ const ConfigurationPage: React.FC = () => {
                   />
                 </Box>
 
-                {(updateThresholdMutation.error || updateAgeGroupingMutation.error || updateConfigMutation.error) && (
+                {(updateThresholdMutation.error ||
+                  updateAgeGroupingMutation.error ||
+                  updateConfigMutation.error) && (
                   <Alert severity="error" sx={{ mt: 2 }}>
                     Failed to update configuration. Please try again.
                   </Alert>
                 )}
 
-                {(updateThresholdMutation.isSuccess || updateAgeGroupingMutation.isSuccess || updateConfigMutation.isSuccess) && (
+                {(updateThresholdMutation.isSuccess ||
+                  updateAgeGroupingMutation.isSuccess ||
+                  updateConfigMutation.isSuccess) && (
                   <Alert severity="success" sx={{ mt: 2 }}>
                     Configuration updated successfully!
                   </Alert>
@@ -372,11 +408,20 @@ const ConfigurationPage: React.FC = () => {
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={!isDirty || updateThresholdMutation.isPending || updateAgeGroupingMutation.isPending || updateConfigMutation.isPending}
+                  disabled={
+                    !isDirty ||
+                    updateThresholdMutation.isPending ||
+                    updateAgeGroupingMutation.isPending ||
+                    updateConfigMutation.isPending
+                  }
                   startIcon={<Save />}
                   sx={{ mt: 3 }}
                 >
-                  {(updateThresholdMutation.isPending || updateAgeGroupingMutation.isPending || updateConfigMutation.isPending) ? 'Saving...' : 'Save Configuration'}
+                  {updateThresholdMutation.isPending ||
+                  updateAgeGroupingMutation.isPending ||
+                  updateConfigMutation.isPending
+                    ? 'Saving...'
+                    : 'Save Configuration'}
                 </Button>
               </Box>
             </CardContent>
@@ -409,13 +454,27 @@ const ConfigurationPage: React.FC = () => {
                         secondary={
                           <Box>
                             <Typography variant="body2" component="span">
-                              Samples: {model.sample_count} • Threshold: {model.threshold.toFixed(3)}
+                              Samples: {model.sample_count} • Threshold:{' '}
+                              {model.threshold.toFixed(3)}
                             </Typography>
                             <br />
-                            <Typography variant="caption" color="text.secondary">
-                              Created: {new Date(model.created_timestamp).toLocaleDateString()}
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              Created:{' '}
+                              {new Date(
+                                model.created_timestamp
+                              ).toLocaleDateString()}
                             </Typography>
-                            <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Box
+                              sx={{
+                                mt: 1,
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                              }}
+                            >
                               <Chip
                                 size="small"
                                 label={model.is_active ? 'Active' : 'Inactive'}
@@ -424,18 +483,27 @@ const ConfigurationPage: React.FC = () => {
                               />
                               <Chip
                                 size="small"
-                                label={model.supports_subjects ? 'Subject-Aware' : 'Age-Only'}
-                                color={model.supports_subjects ? 'primary' : 'default'}
+                                label={
+                                  model.supports_subjects
+                                    ? 'Subject-Aware'
+                                    : 'Age-Only'
+                                }
+                                color={
+                                  model.supports_subjects
+                                    ? 'primary'
+                                    : 'default'
+                                }
                                 variant="outlined"
                               />
-                              {model.supports_subjects && model.subject_categories && (
-                                <Chip
-                                  size="small"
-                                  label={`${model.subject_categories.length} subjects`}
-                                  color="info"
-                                  variant="outlined"
-                                />
-                              )}
+                              {model.supports_subjects &&
+                                model.subject_categories && (
+                                  <Chip
+                                    size="small"
+                                    label={`${model.subject_categories.length} subjects`}
+                                    color="info"
+                                    variant="outlined"
+                                  />
+                                )}
                             </Box>
                           </Box>
                         }
@@ -468,15 +536,13 @@ const ConfigurationPage: React.FC = () => {
         {/* Subject Management */}
         <Grid item xs={12} lg={4}>
           <Card>
-            <CardHeader
-              title="Subject Management"
-              avatar={<Category />}
-            />
+            <CardHeader title="Subject Management" avatar={<Category />} />
             <CardContent>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Subject-aware analysis is always enabled in this system. All models use hybrid embeddings 
-                  that combine visual features with subject category information.
+                  Subject-aware analysis is always enabled in this system. All
+                  models use hybrid embeddings that combine visual features with
+                  subject category information.
                 </Typography>
                 <Chip
                   label="Subject-Aware Analysis: Enabled"
@@ -491,7 +557,7 @@ const ConfigurationPage: React.FC = () => {
               <Typography variant="subtitle2" gutterBottom>
                 Subject Statistics
               </Typography>
-              
+
               {subjectStats && subjectStats.length > 0 ? (
                 <List dense>
                   {subjectStats.slice(0, 10).map((stat) => (
@@ -500,17 +566,33 @@ const ConfigurationPage: React.FC = () => {
                         primary={stat.subject}
                         secondary={
                           <Box>
-                            <Typography variant="caption" color="text.secondary">
-                              {stat.total_drawings} drawings • {(stat.anomaly_rate * 100).toFixed(1)}% anomaly rate
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {stat.total_drawings} drawings •{' '}
+                              {(stat.anomaly_rate * 100).toFixed(1)}% anomaly
+                              rate
                             </Typography>
                             <br />
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                                mt: 0.5,
+                              }}
+                            >
                               {stat.age_groups.map((ageGroup) => (
                                 <Chip
                                   key={ageGroup.age_group}
                                   size="small"
                                   label={`${ageGroup.age_group}: ${ageGroup.count}`}
-                                  color={ageGroup.sufficient_data ? 'success' : 'warning'}
+                                  color={
+                                    ageGroup.sufficient_data
+                                      ? 'success'
+                                      : 'warning'
+                                  }
                                   variant="outlined"
                                   sx={{ fontSize: '0.6rem', height: 20 }}
                                 />
@@ -535,7 +617,8 @@ const ConfigurationPage: React.FC = () => {
                 </List>
               ) : (
                 <Alert severity="info">
-                  No subject statistics available yet. Upload drawings with subject information to see statistics.
+                  No subject statistics available yet. Upload drawings with
+                  subject information to see statistics.
                 </Alert>
               )}
 
@@ -544,21 +627,28 @@ const ConfigurationPage: React.FC = () => {
               <Typography variant="subtitle2" gutterBottom>
                 Data Sufficiency Warnings
               </Typography>
-              
-              {subjectStats && subjectStats.some(stat => 
-                stat.age_groups.some(ag => !ag.sufficient_data)
+
+              {subjectStats &&
+              subjectStats.some((stat) =>
+                stat.age_groups.some((ag) => !ag.sufficient_data)
               ) ? (
                 <Alert severity="warning" sx={{ mb: 2 }}>
                   <Typography variant="body2">
-                    Some age-subject combinations have insufficient data for reliable analysis:
+                    Some age-subject combinations have insufficient data for
+                    reliable analysis:
                   </Typography>
                   <Box component="ul" sx={{ mt: 1, pl: 2, mb: 0 }}>
-                    {subjectStats.map(stat => 
+                    {subjectStats.map((stat) =>
                       stat.age_groups
-                        .filter(ag => !ag.sufficient_data)
-                        .map(ag => (
-                          <Typography key={`${stat.subject}-${ag.age_group}`} component="li" variant="caption">
-                            {stat.subject} (Age {ag.age_group}): {ag.count} drawings
+                        .filter((ag) => !ag.sufficient_data)
+                        .map((ag) => (
+                          <Typography
+                            key={`${stat.subject}-${ag.age_group}`}
+                            component="li"
+                            variant="caption"
+                          >
+                            {stat.subject} (Age {ag.age_group}): {ag.count}{' '}
+                            drawings
                           </Typography>
                         ))
                     )}
@@ -566,7 +656,8 @@ const ConfigurationPage: React.FC = () => {
                 </Alert>
               ) : (
                 <Alert severity="success">
-                  All age-subject combinations have sufficient data for analysis.
+                  All age-subject combinations have sufficient data for
+                  analysis.
                 </Alert>
               )}
 
@@ -607,8 +698,9 @@ const ConfigurationPage: React.FC = () => {
             </Select>
           </FormControl>
           <Alert severity="info" sx={{ mt: 2 }}>
-            Training a new model requires sufficient normal examples from the selected age group.
-            The process may take several minutes to complete.
+            Training a new model requires sufficient normal examples from the
+            selected age group. The process may take several minutes to
+            complete.
           </Alert>
         </DialogContent>
         <DialogActions>

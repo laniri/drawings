@@ -71,7 +71,7 @@ const UploadPage: React.FC = () => {
       const formData = new FormData()
       formData.append('file', data.file)
       formData.append('age_years', data.metadata.age_years.toString())
-      
+
       if (data.metadata.subject) {
         formData.append('subject', data.metadata.subject)
       }
@@ -105,17 +105,21 @@ const UploadPage: React.FC = () => {
       setUploadedFile(null)
       reset()
       setUploadProgress(0)
-      
+
       // Automatically trigger analysis for the uploaded drawing
       setAnalysisStatus('Analyzing drawing...')
       setAnalysisId(null)
       try {
-        const analysisResponse = await axios.post(`/api/analysis/analyze/${uploadResult.id}`)
+        const analysisResponse = await axios.post(
+          `/api/analysis/analyze/${uploadResult.id}`
+        )
         const newAnalysisId = analysisResponse.data.analysis.id
         setAnalysisId(newAnalysisId)
         setAnalysisStatus('Analysis complete! Click to view results.')
-        console.log(`Analysis completed for drawing ${uploadResult.id}, analysis ID: ${newAnalysisId}`)
-        
+        console.log(
+          `Analysis completed for drawing ${uploadResult.id}, analysis ID: ${newAnalysisId}`
+        )
+
         // Clear analysis status after a longer time to let user see the link
         setTimeout(() => {
           setAnalysisStatus(null)
@@ -127,7 +131,8 @@ const UploadPage: React.FC = () => {
         setTimeout(() => setAnalysisStatus(null), 5000)
       }
     },
-    onError: (error: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
       setUploadError(
         error.response?.data?.detail || 'Upload failed. Please try again.'
       )
@@ -160,7 +165,9 @@ const UploadPage: React.FC = () => {
       if (rejection.errors[0]?.code === 'file-too-large') {
         setUploadError('File is too large. Maximum size is 10MB.')
       } else if (rejection.errors[0]?.code === 'file-invalid-type') {
-        setUploadError('Invalid file type. Please upload PNG, JPEG, or BMP images.')
+        setUploadError(
+          'Invalid file type. Please upload PNG, JPEG, or BMP images.'
+        )
       } else {
         setUploadError('File upload failed. Please try again.')
       }
@@ -195,7 +202,7 @@ const UploadPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Select Drawing
             </Typography>
-            
+
             <Box
               {...getRootProps()}
               sx={{
@@ -240,7 +247,8 @@ const UploadPage: React.FC = () => {
                 />
                 <CardContent>
                   <Typography variant="body2">
-                    {uploadedFile.name} ({Math.round(uploadedFile.size / 1024)} KB)
+                    {uploadedFile.name} ({Math.round(uploadedFile.size / 1024)}{' '}
+                    KB)
                   </Typography>
                   <Button
                     size="small"
@@ -263,7 +271,11 @@ const UploadPage: React.FC = () => {
               Drawing Information
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{ mt: 2 }}
+            >
               <Controller
                 name="age_years"
                 control={control}
@@ -349,14 +361,20 @@ const UploadPage: React.FC = () => {
               )}
 
               {analysisStatus && (
-                <Alert 
-                  severity={analysisStatus.includes('complete') ? 'success' : analysisStatus.includes('failed') ? 'warning' : 'info'} 
+                <Alert
+                  severity={
+                    analysisStatus.includes('complete')
+                      ? 'success'
+                      : analysisStatus.includes('failed')
+                        ? 'warning'
+                        : 'info'
+                  }
                   sx={{ mt: 2 }}
                   action={
                     analysisId && analysisStatus.includes('complete') ? (
-                      <Button 
-                        color="inherit" 
-                        size="small" 
+                      <Button
+                        color="inherit"
+                        size="small"
                         onClick={() => navigate(`/analysis/${analysisId}`)}
                       >
                         View Results
@@ -373,7 +391,10 @@ const UploadPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     Uploading... {uploadProgress}%
                   </Typography>
-                  <LinearProgress variant="determinate" value={uploadProgress} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={uploadProgress}
+                  />
                 </Box>
               )}
 

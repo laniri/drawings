@@ -28,13 +28,13 @@ import { Control, Controller } from 'react-hook-form'
 // Subject categories with icons and groupings
 const SUBJECT_CATEGORIES = {
   unspecified: { label: 'Unspecified', icon: Help, group: 'Default' },
-  
+
   // People and body parts
   person: { label: 'Person', icon: Person, group: 'People & Body' },
   face: { label: 'Face', icon: Person, group: 'People & Body' },
   hand: { label: 'Hand', icon: Person, group: 'People & Body' },
   family: { label: 'Family', icon: Person, group: 'People & Body' },
-  
+
   // Animals
   bear: { label: 'Bear', icon: Pets, group: 'Animals' },
   bee: { label: 'Bee', icon: Pets, group: 'Animals' },
@@ -54,7 +54,7 @@ const SUBJECT_CATEGORIES = {
   spider: { label: 'Spider', icon: Pets, group: 'Animals' },
   tiger: { label: 'Tiger', icon: Pets, group: 'Animals' },
   whale: { label: 'Whale', icon: Pets, group: 'Animals' },
-  
+
   // Objects & Household Items
   TV: { label: 'TV', icon: School, group: 'Objects & Household' },
   bed: { label: 'Bed', icon: Home, group: 'Objects & Household' },
@@ -73,21 +73,21 @@ const SUBJECT_CATEGORIES = {
   piano: { label: 'Piano', icon: School, group: 'Objects & Household' },
   scissors: { label: 'Scissors', icon: Category, group: 'Objects & Household' },
   watch: { label: 'Watch', icon: Category, group: 'Objects & Household' },
-  
+
   // Transportation
   airplane: { label: 'Airplane', icon: DirectionsCar, group: 'Transportation' },
   bike: { label: 'Bike', icon: DirectionsCar, group: 'Transportation' },
   boat: { label: 'Boat', icon: DirectionsCar, group: 'Transportation' },
   car: { label: 'Car', icon: DirectionsCar, group: 'Transportation' },
   train: { label: 'Train', icon: DirectionsCar, group: 'Transportation' },
-  
+
   // Nature & Food
   apple: { label: 'Apple', icon: Nature, group: 'Nature & Food' },
   cactus: { label: 'Cactus', icon: Nature, group: 'Nature & Food' },
   'ice cream': { label: 'Ice Cream', icon: Nature, group: 'Nature & Food' },
   mushroom: { label: 'Mushroom', icon: Nature, group: 'Nature & Food' },
   tree: { label: 'Tree', icon: Nature, group: 'Nature & Food' },
-  
+
   // Abstract & Other
   abstract: { label: 'Abstract', icon: Category, group: 'Abstract & Other' },
   other: { label: 'Other', icon: Category, group: 'Abstract & Other' },
@@ -116,38 +116,52 @@ const SubjectCategorySelect: React.FC<SubjectCategorySelectProps> = ({
 
   // Group categories by their group
   const groupedCategories = useMemo(() => {
-    const groups: Record<string, Array<{ key: string; category: typeof SUBJECT_CATEGORIES[keyof typeof SUBJECT_CATEGORIES] }>> = {}
-    
+    const groups: Record<
+      string,
+      Array<{
+        key: string
+        category: (typeof SUBJECT_CATEGORIES)[keyof typeof SUBJECT_CATEGORIES]
+      }>
+    > = {}
+
     Object.entries(SUBJECT_CATEGORIES).forEach(([key, category]) => {
       if (!groups[category.group]) {
         groups[category.group] = []
       }
       groups[category.group].push({ key, category })
     })
-    
+
     return groups
   }, [])
 
   // Filter categories based on search term
   const filteredCategories = useMemo(() => {
     if (!searchTerm) return groupedCategories
-    
-    const filtered: Record<string, Array<{ key: string; category: typeof SUBJECT_CATEGORIES[keyof typeof SUBJECT_CATEGORIES] }>> = {}
-    
+
+    const filtered: Record<
+      string,
+      Array<{
+        key: string
+        category: (typeof SUBJECT_CATEGORIES)[keyof typeof SUBJECT_CATEGORIES]
+      }>
+    > = {}
+
     Object.entries(groupedCategories).forEach(([groupName, categories]) => {
       const matchingCategories = categories.filter(({ category }) =>
         category.label.toLowerCase().includes(searchTerm.toLowerCase())
       )
-      
+
       if (matchingCategories.length > 0) {
         filtered[groupName] = matchingCategories
       }
     })
-    
+
     return filtered
   }, [groupedCategories, searchTerm])
 
-  const renderCategoryIcon = (IconComponent: React.ComponentType<any>) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+  const renderCategoryIcon = (
+    IconComponent: React.ComponentType<any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  ) => (
     <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.light', mr: 1 }}>
       <IconComponent sx={{ fontSize: 14 }} />
     </Avatar>
@@ -172,7 +186,7 @@ const SubjectCategorySelect: React.FC<SubjectCategorySelectProps> = ({
           sx={{ mb: 2 }}
         />
       )}
-      
+
       <Controller
         name={name}
         control={control}
@@ -185,12 +199,19 @@ const SubjectCategorySelect: React.FC<SubjectCategorySelectProps> = ({
               value={field.value || ''}
               renderValue={(selected) => {
                 if (!selected) {
-                  return <Typography color="text.secondary">Optional - leave blank if unsure</Typography>
+                  return (
+                    <Typography color="text.secondary">
+                      Optional - leave blank if unsure
+                    </Typography>
+                  )
                 }
-                
-                const category = SUBJECT_CATEGORIES[selected as keyof typeof SUBJECT_CATEGORIES]
+
+                const category =
+                  SUBJECT_CATEGORIES[
+                    selected as keyof typeof SUBJECT_CATEGORIES
+                  ]
                 if (!category) return selected
-                
+
                 return (
                   <Box display="flex" alignItems="center">
                     {renderCategoryIcon(category.icon)}
@@ -210,65 +231,90 @@ const SubjectCategorySelect: React.FC<SubjectCategorySelectProps> = ({
                   </Box>
                 </Box>
               </MenuItem>
-              
-              {Object.entries(filteredCategories).map(([groupName, categories]) => [
-                <ListSubheader key={groupName} sx={{ bgcolor: 'background.paper' }}>
-                  {groupName}
-                </ListSubheader>,
-                ...categories.map(({ key, category }) => (
-                  <MenuItem key={key} value={key}>
-                    <Box display="flex" alignItems="center">
-                      {renderCategoryIcon(category.icon)}
-                      {category.label}
-                    </Box>
-                  </MenuItem>
-                ))
-              ]).flat()}
+
+              {Object.entries(filteredCategories)
+                .map(([groupName, categories]) => [
+                  <ListSubheader
+                    key={groupName}
+                    sx={{ bgcolor: 'background.paper' }}
+                  >
+                    {groupName}
+                  </ListSubheader>,
+                  ...categories.map(({ key, category }) => (
+                    <MenuItem key={key} value={key}>
+                      <Box display="flex" alignItems="center">
+                        {renderCategoryIcon(category.icon)}
+                        {category.label}
+                      </Box>
+                    </MenuItem>
+                  )),
+                ])
+                .flat()}
             </Select>
-            
+
             {helperText && (
-              <Typography variant="caption" color={error ? 'error' : 'text.secondary'} sx={{ mt: 0.5, ml: 1.5 }}>
+              <Typography
+                variant="caption"
+                color={error ? 'error' : 'text.secondary'}
+                sx={{ mt: 0.5, ml: 1.5 }}
+              >
                 {helperText}
               </Typography>
             )}
-            
+
             {!helperText && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.5 }}>
-                Optional: Select the main subject of the drawing to improve analysis accuracy
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, ml: 1.5 }}
+              >
+                Optional: Select the main subject of the drawing to improve
+                analysis accuracy
               </Typography>
             )}
           </FormControl>
         )}
       />
-      
+
       {/* Popular subjects as chips for quick selection */}
       <Box sx={{ mt: 1 }}>
         <Typography variant="caption" color="text.secondary" gutterBottom>
           Popular subjects:
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-          {['person', 'house', 'tree', 'car', 'family', 'cat', 'dog'].map((subjectKey) => {
-            const category = SUBJECT_CATEGORIES[subjectKey as keyof typeof SUBJECT_CATEGORIES]
-            if (!category) return null
-            
-            return (
-              <Controller
-                key={subjectKey}
-                name={name}
-                control={control}
-                render={({ field }) => (
-                  <Chip
-                    size="small"
-                    label={category.label}
-                    variant={field.value === subjectKey ? 'filled' : 'outlined'}
-                    color={field.value === subjectKey ? 'primary' : 'default'}
-                    onClick={() => field.onChange(field.value === subjectKey ? '' : subjectKey)}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                )}
-              />
-            )
-          })}
+          {['person', 'house', 'tree', 'car', 'family', 'cat', 'dog'].map(
+            (subjectKey) => {
+              const category =
+                SUBJECT_CATEGORIES[
+                  subjectKey as keyof typeof SUBJECT_CATEGORIES
+                ]
+              if (!category) return null
+
+              return (
+                <Controller
+                  key={subjectKey}
+                  name={name}
+                  control={control}
+                  render={({ field }) => (
+                    <Chip
+                      size="small"
+                      label={category.label}
+                      variant={
+                        field.value === subjectKey ? 'filled' : 'outlined'
+                      }
+                      color={field.value === subjectKey ? 'primary' : 'default'}
+                      onClick={() =>
+                        field.onChange(
+                          field.value === subjectKey ? '' : subjectKey
+                        )
+                      }
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  )}
+                />
+              )
+            }
+          )}
         </Box>
       </Box>
     </Box>

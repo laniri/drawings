@@ -6,14 +6,14 @@ import {
   ComparativeAnalysisPanel,
   ExportToolbar,
   AnnotationTools,
-  HistoricalInterpretationTracker
+  HistoricalInterpretationTracker,
 } from '../components/interpretability'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
 Object.defineProperty(globalThis, 'fetch', {
   value: mockFetch,
-  writable: true
+  writable: true,
 })
 
 const createTestQueryClient = () => {
@@ -29,9 +29,7 @@ const createTestQueryClient = () => {
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = createTestQueryClient()
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 }
 
@@ -41,14 +39,15 @@ describe('Comparative Analysis Integration', () => {
     // Setup default mock responses
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        normal_examples: [],
-        anomalous_examples: [],
-        explanation_context: 'Test context',
-        age_group: '5-6',
-        total_available: 0,
-        analyses: []
-      })
+      json: () =>
+        Promise.resolve({
+          normal_examples: [],
+          anomalous_examples: [],
+          explanation_context: 'Test context',
+          age_group: '5-6',
+          total_available: 0,
+          analyses: [],
+        }),
     })
   })
 
@@ -61,14 +60,14 @@ describe('Comparative Analysis Integration', () => {
       is_anomaly: true,
       confidence: 0.85,
       age_group: '5-6',
-      analysis_timestamp: '2024-01-15T10:30:00Z'
+      analysis_timestamp: '2024-01-15T10:30:00Z',
     }
 
     const mockCurrentDrawing = {
       id: 1,
       filename: 'test_drawing.png',
       age_years: 5.5,
-      subject: 'house'
+      subject: 'house',
     }
 
     const mockRegions = [
@@ -76,21 +75,22 @@ describe('Comparative Analysis Integration', () => {
         region_id: 'region_1',
         bounding_box: [10, 20, 50, 60],
         spatial_location: 'top-left',
-        importance_score: 0.8
-      }
+        importance_score: 0.8,
+      },
     ]
 
     // Mock successful API responses
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        normal_examples: [],
-        anomalous_examples: [],
-        explanation_context: 'Test context',
-        age_group: '5-6',
-        total_available: 0,
-        analyses: []
-      })
+      json: () =>
+        Promise.resolve({
+          normal_examples: [],
+          anomalous_examples: [],
+          explanation_context: 'Test context',
+          age_group: '5-6',
+          total_available: 0,
+          analyses: [],
+        }),
     })
 
     // Test ComparativeAnalysisPanel
@@ -102,22 +102,22 @@ describe('Comparative Analysis Integration', () => {
         />
       </TestWrapper>
     )
-    
-    await waitFor(() => {
-      expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
-    }, { timeout: 3000 })
+
+    await waitFor(
+      () => {
+        expect(screen.getByText('Comparative Analysis')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
     unmount1()
 
     // Test ExportToolbar
     const { unmount: unmount2 } = render(
       <TestWrapper>
-        <ExportToolbar
-          analysisId={1}
-          drawingFilename="test_drawing.png"
-        />
+        <ExportToolbar analysisId={1} drawingFilename="test_drawing.png" />
       </TestWrapper>
     )
-    
+
     await waitFor(() => {
       expect(screen.getByText('Export')).toBeInTheDocument()
     })
@@ -126,13 +126,10 @@ describe('Comparative Analysis Integration', () => {
     // Test AnnotationTools
     const { unmount: unmount3 } = render(
       <TestWrapper>
-        <AnnotationTools
-          analysisId={1}
-          regions={mockRegions}
-        />
+        <AnnotationTools analysisId={1} regions={mockRegions} />
       </TestWrapper>
     )
-    
+
     await waitFor(() => {
       expect(screen.getByText(/Annotations/)).toBeInTheDocument()
     })
@@ -147,9 +144,11 @@ describe('Comparative Analysis Integration', () => {
         />
       </TestWrapper>
     )
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Historical Analysis Tracking')).toBeInTheDocument()
+      expect(
+        screen.getByText('Historical Analysis Tracking')
+      ).toBeInTheDocument()
     })
   })
 })

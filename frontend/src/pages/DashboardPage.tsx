@@ -80,8 +80,6 @@ interface DashboardStats {
   }
 }
 
-
-
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
   const [subjectFilter, setSubjectFilter] = useState<string>('')
@@ -105,7 +103,7 @@ const DashboardPage: React.FC = () => {
   const availableSubjects = React.useMemo(() => {
     if (!stats?.recent_analyses) return []
     const subjects = new Set<string>()
-    stats.recent_analyses.forEach(analysis => {
+    stats.recent_analyses.forEach((analysis) => {
       if (analysis.subject) {
         subjects.add(analysis.subject)
       }
@@ -114,7 +112,10 @@ const DashboardPage: React.FC = () => {
   }, [stats?.recent_analyses])
 
   const anomalyRate = stats
-    ? ((stats.anomaly_count / (stats.anomaly_count + stats.normal_count)) * 100).toFixed(1)
+    ? (
+        (stats.anomaly_count / (stats.anomaly_count + stats.normal_count)) *
+        100
+      ).toFixed(1)
     : '0'
 
   const pieData = stats
@@ -137,14 +138,20 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">
-          System Dashboard
-        </Typography>
-        
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h4">System Dashboard</Typography>
+
         {/* View Tabs */}
         <Box display="flex" alignItems="center" gap={2}>
-          <Tabs value={viewTab} onChange={(_, newValue) => setViewTab(newValue)}>
+          <Tabs
+            value={viewTab}
+            onChange={(_, newValue) => setViewTab(newValue)}
+          >
             <Tab icon={<Analytics />} label="Overview" />
             <Tab icon={<Assessment />} label="Usage Metrics" />
           </Tabs>
@@ -154,7 +161,12 @@ const DashboardPage: React.FC = () => {
       {viewTab === 0 && (
         <>
           {/* Subject Filter for Overview */}
-          <Box display="flex" justifyContent="flex-end" alignItems="center" mb={3}>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            mb={3}
+          >
             <Box display="flex" alignItems="center" gap={2}>
               <FilterList color="action" />
               <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -180,7 +192,11 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box>
                       <Typography color="textSecondary" gutterBottom>
                         Total Drawings
@@ -200,7 +216,11 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box>
                       <Typography color="textSecondary" gutterBottom>
                         Analyses Run
@@ -220,7 +240,11 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box>
                       <Typography color="textSecondary" gutterBottom>
                         Anomalies Detected
@@ -240,7 +264,11 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
                     <Box>
                       <Typography color="textSecondary" gutterBottom>
                         Anomaly Rate
@@ -263,16 +291,20 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12} md={8}>
               <Paper sx={{ p: 3 }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                  <Tabs value={chartTab} onChange={(_, newValue) => setChartTab(newValue)}>
+                  <Tabs
+                    value={chartTab}
+                    onChange={(_, newValue) => setChartTab(newValue)}
+                  >
                     <Tab label="Age Distribution" />
                     <Tab label="Subject Distribution" />
                   </Tabs>
                 </Box>
-                
+
                 {chartTab === 0 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Age Distribution {subjectFilter && `(Subject: ${subjectFilter})`}
+                      Age Distribution{' '}
+                      {subjectFilter && `(Subject: ${subjectFilter})`}
                     </Typography>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={stats?.age_distribution || []}>
@@ -285,31 +317,45 @@ const DashboardPage: React.FC = () => {
                     </ResponsiveContainer>
                   </Box>
                 )}
-                
+
                 {chartTab === 1 && (
                   <Box>
                     <Typography variant="h6" gutterBottom>
                       Subject Distribution
                     </Typography>
-                    {stats?.subject_distribution && stats.subject_distribution.length > 0 ? (
+                    {stats?.subject_distribution &&
+                    stats.subject_distribution.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={stats.subject_distribution}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="subject" angle={-45} textAnchor="end" height={80} />
+                          <XAxis
+                            dataKey="subject"
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                          />
                           <YAxis />
-                          <Tooltip 
+                          <Tooltip
                             formatter={(value, name) => [
-                              name === 'count' ? `${value} drawings` : `${((value as number) * 100).toFixed(1)}% anomaly rate`,
-                              name === 'count' ? 'Count' : 'Anomaly Rate'
+                              name === 'count'
+                                ? `${value} drawings`
+                                : `${((value as number) * 100).toFixed(1)}% anomaly rate`,
+                              name === 'count' ? 'Count' : 'Anomaly Rate',
                             ]}
                           />
                           <Bar dataKey="count" fill="#1976d2" name="count" />
-                          <Bar dataKey="anomaly_rate" fill="#ff9800" name="anomaly_rate" />
+                          <Bar
+                            dataKey="anomaly_rate"
+                            fill="#ff9800"
+                            name="anomaly_rate"
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
                       <Box sx={{ textAlign: 'center', py: 4 }}>
-                        <Category sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                        <Category
+                          sx={{ fontSize: 48, color: 'grey.400', mb: 2 }}
+                        />
                         <Typography variant="body1" color="text.secondary">
                           No subject distribution data available
                         </Typography>
@@ -333,7 +379,9 @@ const DashboardPage: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -358,20 +406,37 @@ const DashboardPage: React.FC = () => {
                   <Box>
                     <Box display="flex" alignItems="center" gap={1} mb={2}>
                       <Chip
-                        icon={stats.model_status.is_loaded ? <CheckCircle /> : <Warning />}
-                        label={stats.model_status.is_loaded ? 'Loaded' : 'Not Loaded'}
-                        color={stats.model_status.is_loaded ? 'success' : 'warning'}
+                        icon={
+                          stats.model_status.is_loaded ? (
+                            <CheckCircle />
+                          ) : (
+                            <Warning />
+                          )
+                        }
+                        label={
+                          stats.model_status.is_loaded ? 'Loaded' : 'Not Loaded'
+                        }
+                        color={
+                          stats.model_status.is_loaded ? 'success' : 'warning'
+                        }
                         variant="outlined"
                       />
                       <Typography variant="body2">
                         {stats.model_status.vision_model.toUpperCase()} Model
                       </Typography>
                     </Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
                       Active Age Groups: {stats.model_status.active_age_groups}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Last Updated: {new Date(stats.model_status.last_updated).toLocaleString()}
+                      Last Updated:{' '}
+                      {new Date(
+                        stats.model_status.last_updated
+                      ).toLocaleString()}
                     </Typography>
                   </Box>
                 )}
@@ -381,14 +446,14 @@ const DashboardPage: React.FC = () => {
             {/* Recent Analyses */}
             <Grid item xs={12} md={6}>
               <Paper sx={{ p: 3 }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h6">
-                    Recent Analyses
-                  </Typography>
-                  <Button
-                    size="small"
-                    onClick={() => navigate('/upload')}
-                  >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
+                  <Typography variant="h6">Recent Analyses</Typography>
+                  <Button size="small" onClick={() => navigate('/upload')}>
                     Upload New
                   </Button>
                 </Box>
@@ -400,7 +465,13 @@ const DashboardPage: React.FC = () => {
                       onClick={() => navigate(`/analysis/${analysis.id}`)}
                     >
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: analysis.is_anomaly ? 'warning.main' : 'success.main' }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: analysis.is_anomaly
+                              ? 'warning.main'
+                              : 'success.main',
+                          }}
+                        >
                           {analysis.is_anomaly ? <Warning /> : <CheckCircle />}
                         </Avatar>
                       </ListItemAvatar>
@@ -409,12 +480,19 @@ const DashboardPage: React.FC = () => {
                         secondary={
                           <Box>
                             <Typography variant="body2" component="span">
-                              Age: {analysis.age_years} years • Score: {analysis.anomaly_score.toFixed(3)}
-                              {analysis.subject && ` • Subject: ${analysis.subject}`}
+                              Age: {analysis.age_years} years • Score:{' '}
+                              {analysis.anomaly_score.toFixed(3)}
+                              {analysis.subject &&
+                                ` • Subject: ${analysis.subject}`}
                             </Typography>
                             <br />
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(analysis.analysis_timestamp).toLocaleString()}
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {new Date(
+                                analysis.analysis_timestamp
+                              ).toLocaleString()}
                             </Typography>
                           </Box>
                         }
@@ -441,9 +519,7 @@ const DashboardPage: React.FC = () => {
         </>
       )}
 
-      {viewTab === 1 && (
-        <UsageMetricsPanel />
-      )}
+      {viewTab === 1 && <UsageMetricsPanel />}
     </Box>
   )
 }

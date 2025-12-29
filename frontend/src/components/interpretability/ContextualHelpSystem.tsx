@@ -65,7 +65,8 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
   const helpContent: Record<string, HelpContent> = {
     'saliency-maps': {
       title: 'Saliency Maps',
-      description: 'Visual representations showing which parts of the drawing the AI model focused on when making its decision.',
+      description:
+        'Visual representations showing which parts of the drawing the AI model focused on when making its decision.',
       examples: [
         'Red/warm areas indicate high importance',
         'Blue/cool areas indicate low importance',
@@ -76,17 +77,23 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Compare with your own visual assessment',
         'Consider the overall distribution of attention',
       ],
-      technicalDetails: 'Generated using gradient-based attribution methods on Vision Transformer attention weights, normalized across spatial dimensions.',
+      technicalDetails:
+        'Generated using gradient-based attribution methods on Vision Transformer attention weights, normalized across spatial dimensions.',
       roleSpecific: {
-        educator: 'Use saliency maps to understand what visual features might indicate developmental patterns in student drawings.',
-        researcher: 'Saliency maps provide quantitative evidence for feature importance in developmental assessment models.',
-        parent: 'These colorful overlays show what the computer "noticed" most in your child\'s drawing.',
-        clinician: 'Saliency analysis supports clinical observation by highlighting potentially significant visual elements.',
+        educator:
+          'Use saliency maps to understand what visual features might indicate developmental patterns in student drawings.',
+        researcher:
+          'Saliency maps provide quantitative evidence for feature importance in developmental assessment models.',
+        parent:
+          'These colorful overlays show what the computer "noticed" most in your child\'s drawing.',
+        clinician:
+          'Saliency analysis supports clinical observation by highlighting potentially significant visual elements.',
       },
     },
     'confidence-scores': {
       title: 'Confidence Scores',
-      description: 'Numerical indicators of how certain the AI model is about its analysis and predictions.',
+      description:
+        'Numerical indicators of how certain the AI model is about its analysis and predictions.',
       examples: [
         'High (80%+): Strong evidence supports the analysis',
         'Medium (60-79%): Moderate evidence, consider additional context',
@@ -97,17 +104,23 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Low confidence may indicate edge cases or insufficient training data',
         'Always consider confidence when interpreting results',
       ],
-      technicalDetails: 'Calculated from model uncertainty, training data quality, and prediction entropy across ensemble models.',
+      technicalDetails:
+        'Calculated from model uncertainty, training data quality, and prediction entropy across ensemble models.',
       roleSpecific: {
-        educator: 'Use confidence levels to decide when to seek additional professional input for student assessments.',
-        researcher: 'Confidence metrics help evaluate model reliability and identify areas needing more training data.',
-        parent: 'Confidence tells you how sure the computer is - like a teacher being more or less certain about an answer.',
-        clinician: 'Confidence scores inform clinical decision-making and the need for additional assessment tools.',
+        educator:
+          'Use confidence levels to decide when to seek additional professional input for student assessments.',
+        researcher:
+          'Confidence metrics help evaluate model reliability and identify areas needing more training data.',
+        parent:
+          'Confidence tells you how sure the computer is - like a teacher being more or less certain about an answer.',
+        clinician:
+          'Confidence scores inform clinical decision-making and the need for additional assessment tools.',
       },
     },
     'anomaly-detection': {
       title: 'Anomaly Detection',
-      description: 'The process of identifying drawings that deviate significantly from typical patterns for a child\'s age group.',
+      description:
+        "The process of identifying drawings that deviate significantly from typical patterns for a child's age group.",
       examples: [
         'Unusual proportions or spatial relationships',
         'Unexpected complexity or simplicity for age',
@@ -118,17 +131,23 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Consider cultural and individual factors',
         'Use as one piece of information, not a diagnosis',
       ],
-      technicalDetails: 'Uses autoencoder reconstruction loss to measure deviation from learned age-appropriate patterns in embedding space.',
+      technicalDetails:
+        'Uses autoencoder reconstruction loss to measure deviation from learned age-appropriate patterns in embedding space.',
       roleSpecific: {
-        educator: 'Anomaly detection helps identify students who might benefit from additional developmental support or enrichment.',
-        researcher: 'Provides quantitative measures of developmental variation for research studies and population analysis.',
-        parent: 'Shows if your child\'s drawing is typical for their age - differences aren\'t necessarily problems.',
-        clinician: 'Supports screening for developmental concerns but should be combined with comprehensive clinical assessment.',
+        educator:
+          'Anomaly detection helps identify students who might benefit from additional developmental support or enrichment.',
+        researcher:
+          'Provides quantitative measures of developmental variation for research studies and population analysis.',
+        parent:
+          "Shows if your child's drawing is typical for their age - differences aren't necessarily problems.",
+        clinician:
+          'Supports screening for developmental concerns but should be combined with comprehensive clinical assessment.',
       },
     },
     'age-groups': {
       title: 'Age Group Models',
-      description: 'Separate AI models trained on drawings from children in specific age ranges to account for developmental differences.',
+      description:
+        'Separate AI models trained on drawings from children in specific age ranges to account for developmental differences.',
       examples: [
         'Ages 2-3: Basic shapes and scribbles',
         'Ages 4-5: Recognizable objects emerge',
@@ -139,17 +158,23 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Models account for natural developmental progression',
         'Cross-age comparisons should be interpreted carefully',
       ],
-      technicalDetails: 'Age-stratified autoencoders trained on developmental datasets with minimum sample thresholds for statistical validity.',
+      technicalDetails:
+        'Age-stratified autoencoders trained on developmental datasets with minimum sample thresholds for statistical validity.',
       roleSpecific: {
-        educator: 'Age-appropriate models help set realistic expectations for student developmental milestones.',
-        researcher: 'Enables developmental trajectory analysis and cross-sectional age comparisons in studies.',
-        parent: 'The computer knows what\'s typical for your child\'s age and compares accordingly.',
-        clinician: 'Age-stratified analysis supports developmental assessment and milestone tracking.',
+        educator:
+          'Age-appropriate models help set realistic expectations for student developmental milestones.',
+        researcher:
+          'Enables developmental trajectory analysis and cross-sectional age comparisons in studies.',
+        parent:
+          "The computer knows what's typical for your child's age and compares accordingly.",
+        clinician:
+          'Age-stratified analysis supports developmental assessment and milestone tracking.',
       },
     },
     'interactive-regions': {
       title: 'Interactive Regions',
-      description: 'Clickable areas on the drawing that provide detailed explanations about what the AI detected.',
+      description:
+        'Clickable areas on the drawing that provide detailed explanations about what the AI detected.',
       examples: [
         'Hover for quick explanations',
         'Click for detailed analysis',
@@ -160,17 +185,23 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Pay attention to both highlighted and non-highlighted areas',
         'Use zoom controls for better visibility of small regions',
       ],
-      technicalDetails: 'Regions defined by clustering attention weights and gradient magnitudes, with explanations generated from feature attribution analysis.',
+      technicalDetails:
+        'Regions defined by clustering attention weights and gradient magnitudes, with explanations generated from feature attribution analysis.',
       roleSpecific: {
-        educator: 'Interactive exploration helps you understand and explain AI findings to students and parents.',
-        researcher: 'Provides detailed feature-level analysis for research documentation and publication.',
-        parent: 'Click around the drawing to learn what the computer noticed in different parts.',
-        clinician: 'Detailed region analysis supports clinical observation and documentation.',
+        educator:
+          'Interactive exploration helps you understand and explain AI findings to students and parents.',
+        researcher:
+          'Provides detailed feature-level analysis for research documentation and publication.',
+        parent:
+          'Click around the drawing to learn what the computer noticed in different parts.',
+        clinician:
+          'Detailed region analysis supports clinical observation and documentation.',
       },
     },
     'vision-transformer': {
       title: 'Vision Transformer (ViT)',
-      description: 'The AI model that analyzes drawings by breaking them into patches and understanding relationships between different parts.',
+      description:
+        'The AI model that analyzes drawings by breaking them into patches and understanding relationships between different parts.',
       examples: [
         'Processes images as sequences of patches',
         'Learns spatial relationships and patterns',
@@ -181,12 +212,17 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         'Can understand complex spatial relationships',
         'Attention patterns provide interpretable insights',
       ],
-      technicalDetails: 'Transformer architecture adapted for computer vision, using patch embeddings and multi-head self-attention for spatial feature learning.',
+      technicalDetails:
+        'Transformer architecture adapted for computer vision, using patch embeddings and multi-head self-attention for spatial feature learning.',
       roleSpecific: {
-        educator: 'A sophisticated AI that can understand complex patterns in drawings, similar to how humans analyze visual information.',
-        researcher: 'State-of-the-art computer vision model providing both high accuracy and interpretable attention mechanisms.',
-        parent: 'An advanced computer program that looks at drawings the way a trained expert might.',
-        clinician: 'Advanced AI model that provides both quantitative analysis and qualitative insights for clinical assessment.',
+        educator:
+          'A sophisticated AI that can understand complex patterns in drawings, similar to how humans analyze visual information.',
+        researcher:
+          'State-of-the-art computer vision model providing both high accuracy and interpretable attention mechanisms.',
+        parent:
+          'An advanced computer program that looks at drawings the way a trained expert might.',
+        clinician:
+          'Advanced AI model that provides both quantitative analysis and qualitative insights for clinical assessment.',
       },
     },
   }
@@ -249,7 +285,11 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         <Box
           ref={helpRef}
           onClick={handleClick}
-          sx={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          sx={{
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
         >
           {children}
         </Box>
@@ -271,19 +311,44 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: placement === 'top' ? 'top' : placement === 'bottom' ? 'bottom' : 'center',
-          horizontal: placement === 'left' ? 'left' : placement === 'right' ? 'right' : 'center',
+          vertical:
+            placement === 'top'
+              ? 'top'
+              : placement === 'bottom'
+                ? 'bottom'
+                : 'center',
+          horizontal:
+            placement === 'left'
+              ? 'left'
+              : placement === 'right'
+                ? 'right'
+                : 'center',
         }}
         transformOrigin={{
-          vertical: placement === 'top' ? 'bottom' : placement === 'bottom' ? 'top' : 'center',
-          horizontal: placement === 'left' ? 'right' : placement === 'right' ? 'left' : 'center',
+          vertical:
+            placement === 'top'
+              ? 'bottom'
+              : placement === 'bottom'
+                ? 'top'
+                : 'center',
+          horizontal:
+            placement === 'left'
+              ? 'right'
+              : placement === 'right'
+                ? 'left'
+                : 'center',
         }}
         PaperProps={{
-          sx: { maxWidth: 400, p: 0 }
+          sx: { maxWidth: 400, p: 0 },
         }}
       >
         <Paper sx={{ p: 2 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            mb={1}
+          >
             <Box display="flex" alignItems="center" gap={1}>
               <Info color="primary" />
               <Typography variant="h6">{content.title}</Typography>
@@ -311,7 +376,8 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
           {content.roleSpecific?.[userRole] && (
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
-                <strong>For {userRole}s:</strong> {content.roleSpecific[userRole]}
+                <strong>For {userRole}s:</strong>{' '}
+                {content.roleSpecific[userRole]}
               </Typography>
             </Alert>
           )}
@@ -378,7 +444,12 @@ const ContextualHelpSystem: React.FC<ContextualHelpProps> = ({
           )}
 
           {/* Actions */}
-          <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={2}
+          >
             {content.technicalDetails && (
               <Button
                 size="small"
