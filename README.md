@@ -16,7 +16,7 @@ A machine learning-powered application that analyzes children's drawings to iden
 ## Features
 
 - **Drawing Upload & Analysis**: Support for PNG, JPEG, and BMP formats with metadata and subject categorization
-- **Subject-Aware Modeling**: 64 predefined subject categories (objects, living beings, nature, abstract concepts)
+- **Subject-Aware Modeling**: 64 predefined subject categories (objects, living beings, nature, abstract concepts) with automatic "unspecified" default for missing subject information
 - **Hybrid Embeddings**: 832-dimensional vectors combining visual features (768-dim ViT) and subject encoding (64-dim)
 - **Age-Based Modeling**: Separate subject-aware autoencoder models trained for different age groups
 - **Anomaly Detection**: Reconstruction loss-based scoring with subject-contextualized thresholds
@@ -120,7 +120,8 @@ A machine learning-powered application that analyzes children's drawings to iden
    ```
 
 5. **Access the application**
-   - Frontend: http://localhost:5173
+   - Frontend: http://localhost:5173 (Demo page with interactive samples)
+   - Dashboard: http://localhost:5173/dashboard
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
 
@@ -363,16 +364,32 @@ The test infrastructure includes robust import handling:
 
 ### Property-Based Testing
 
-The system includes extensive property-based tests using Hypothesis:
-- Input validation consistency tests
-- Data sufficiency warning generation tests
-- Subject encoding and embedding tests
-- Authentication and access control tests
-- Infrastructure deployment reproducibility tests
+The system includes extensive property-based tests using Hypothesis with enhanced reliability features:
+- **Input validation consistency tests** with robust data generation strategies
+- **Data sufficiency warning generation tests** with optimized test execution
+- **Subject encoding and embedding tests** with health check suppression for large data
+- **Authentication and access control tests** with deadline management
+- **Infrastructure deployment reproducibility tests** with enhanced configuration testing
+- **Database migration consistency tests** with proper timing allowances
+- **Backup and recovery integrity tests** with simplified corruption detection
+
+**Enhanced Reliability Features**:
+- **Health Check Management**: Uses `HealthCheck.data_too_large` suppression for complex test scenarios
+- **Deadline Configuration**: Configurable test deadlines for database operations and model training
+- **Function-Scoped Fixture Support**: Proper handling of database fixtures in property-based tests
+- **Optimized Test Execution**: Reduced example counts for expensive operations while maintaining coverage
 
 Run property-based tests specifically:
 ```bash
 pytest tests/test_property_*.py -v
+
+# Run with increased verbosity for debugging
+pytest tests/test_property_*.py -v --tb=short
+
+# Run specific property-based test categories
+pytest tests/test_property_*infrastructure*.py -v  # Infrastructure tests
+pytest tests/test_property_*subject*.py -v         # Subject-aware tests
+pytest tests/test_property_*backup*.py -v          # Backup and recovery tests
 ```
 
 ### Test Development Guidelines
@@ -449,17 +466,24 @@ npm run test:ui         # Run tests with Vitest UI
 
 ### Web Interface
 
-1. **Dashboard** (http://localhost:5173)
+1. **Demo Page** (http://localhost:5173)
+   - Interactive demo samples showcasing system capabilities
+   - Pre-analyzed drawings with AI analysis results and interpretability visualizations
+   - System statistics and technical information
+   - Direct access to full application features
+
+2. **Dashboard** (http://localhost:5173/dashboard)
    - View system statistics and model status
    - See age distribution of drawings
    - Monitor recent analyses and anomaly detection results
 
-2. **Upload Drawings** 
+3. **Upload Drawings** 
    - Upload individual drawings with age, subject, and metadata
    - Supported formats: PNG, JPEG, BMP (max 10MB)
    - Subject categories: 64 predefined categories including objects, living beings, nature, abstract concepts
+   - **Automatic handling**: When subject is unknown, system automatically uses "unspecified" category for consistent analysis
 
-3. **Analysis Results**
+4. **Analysis Results**
    - View subject-aware anomaly scores and confidence levels with 6 interactive tabs:
      - **Interactive Analysis**: Hoverable saliency regions with click-to-zoom and subject-specific insights
      - **Saliency Map**: Original + saliency overlays with adjustable opacity and subject context
@@ -473,7 +497,7 @@ npm run test:ui         # Run tests with Vitest UI
    - Export results in multiple formats with subject-aware comprehensive reports (PNG, PDF, JSON, CSV, HTML)
    - Browse analysis history with subject-contextualized interpretability
 
-4. **Configuration**
+5. **Configuration**
    - View trained subject-aware models and their statistics
    - Adjust system thresholds and subject-specific parameters
    - Monitor model performance across different subject categories
@@ -646,6 +670,12 @@ pip install reportlab>=4.0.0
    - Check that the embedding service initializes correctly
    - Verify image preprocessing pipeline
    - For testing: Set `SKIP_MODEL_LOADING=true` to bypass model loading
+
+8. **Subject Category Issues**
+   - **Missing Subject Information**: System automatically defaults to "unspecified" category
+   - **Unknown Subject Categories**: Invalid subjects are mapped to "unspecified" for consistent analysis
+   - **Subject Encoding**: All subjects are converted to 64-dimensional one-hot encodings
+   - **Hybrid Embeddings**: Visual (768-dim) + Subject (64-dim) = 832-dimensional total
 
 8. **Test Performance Issues**
    ```bash

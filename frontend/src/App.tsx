@@ -8,13 +8,15 @@ import DashboardPage from './pages/DashboardPage'
 import ConfigurationPage from './pages/ConfigurationPage'
 import BatchProcessingPage from './pages/BatchProcessingPage'
 import DocumentationPage from './pages/DocumentationPage'
+import DemoPage from './pages/DemoPage'
 
 function App() {
   return (
     <Layout>
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<DemoPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/batch" element={<BatchProcessingPage />} />

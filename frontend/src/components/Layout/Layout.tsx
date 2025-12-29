@@ -17,6 +17,7 @@ import {
   BatchPrediction,
   Settings,
   Description,
+  PlayArrow,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -27,7 +28,8 @@ interface LayoutProps {
 }
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/' },
+  { text: 'Demo', icon: <PlayArrow />, path: '/' },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
   { text: 'Upload', icon: <Upload />, path: '/upload' },
   { text: 'Batch Processing', icon: <BatchPrediction />, path: '/batch' },
   { text: 'Configuration', icon: <Settings />, path: '/config' },

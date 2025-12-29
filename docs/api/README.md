@@ -8,7 +8,7 @@ Machine learning system for detecting anomalies in children's drawings
 
 ## Base Information
 - **OpenAPI Version**: 3.1.0
-- **Total Endpoints**: 105
+- **Total Endpoints**: 112
 - **Documentation Format**: Enhanced with examples and specifications
 
 ## Quick Navigation
@@ -153,6 +153,15 @@ Common error responses across 1 status codes:
 - [GET /health](./endpoints/GET__health.md)
 - [GET /health/detailed](./endpoints/GET__health_detailed.md)
 - [GET /metrics](./endpoints/GET__metrics.md)
+
+### Demo
+- [GET /api/v1/demo/](./endpoints/GET__api_v1_demo_.md)
+- [GET /api/v1/demo/samples](./endpoints/GET__api_v1_demo_samples.md)
+- [GET /api/v1/demo/samples/{sample_id}](./endpoints/GET__api_v1_demo_samples_sample_id.md)
+- [GET /api/v1/demo/project-info](./endpoints/GET__api_v1_demo_project-info.md)
+- [GET /api/v1/demo/disclaimer](./endpoints/GET__api_v1_demo_disclaimer.md)
+- [GET /api/v1/demo/technical-links](./endpoints/GET__api_v1_demo_technical-links.md)
+- [GET /api/v1/demo/statistics](./endpoints/GET__api_v1_demo_statistics.md)
 
 
 ## Interactive Documentation

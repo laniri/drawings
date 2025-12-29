@@ -31,6 +31,34 @@ The frontend is built with:
 
 ## Page Components
 
+### DemoPage
+
+**File**: `src/pages/DemoPage.tsx`
+
+**Purpose**: Interactive demo page serving as the application landing page, showcasing system capabilities with pre-analyzed sample drawings.
+
+**Key Features**:
+- Interactive demo samples with pre-analyzed drawings
+- System capability statistics (demo samples, age group models, subject categories, feature dimensions)
+- Technical information about AI vision analysis, age-aware models, and interpretable results
+- Medical disclaimer and educational context
+- Direct navigation to full application features
+- Technical links to documentation, GitHub, research papers, and API docs
+- Responsive design with Material-UI components
+
+**API Dependencies**:
+- `/api/demo/samples` - Fetch demo sample drawings with analysis results
+- `/api/demo/project-info` - Get project information and technical stack
+- `/api/demo/disclaimer` - Fetch medical disclaimer text
+- `/api/demo/technical-links` - Get links to documentation and resources
+- `/api/demo/statistics` - System capability statistics
+
+**Props**: None (uses React Query for data fetching)
+
+**Navigation**:
+- Serves as the root route (`/`) of the application
+- Provides navigation to dashboard (`/dashboard`) and upload page (`/upload`)
+
 ### AnalysisPage
 
 **File**: `src/pages/AnalysisPage.tsx`

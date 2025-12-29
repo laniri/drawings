@@ -275,7 +275,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
     }
   }
 
-  const handleConfigChange = (key: keyof ExplanationConfig, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleConfigChange = (key: keyof ExplanationConfig, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any // eslint-disable-line @typescript-eslint/no-explicit-any
     setConfig(prev => ({ ...prev, [key]: value }))
   }
 
