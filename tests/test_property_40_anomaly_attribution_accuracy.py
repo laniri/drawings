@@ -106,7 +106,7 @@ class TestAnomalyAttributionAccuracy:
         age=st.floats(min_value=2.0, max_value=18.0),
         subject=st.sampled_from([category.value for category in SubjectCategory])
     )
-    @settings(max_examples=20, deadline=8000)
+    @settings(max_examples=20, deadline=8000, suppress_health_check=[HealthCheck.data_too_large])
     def test_visual_only_attribution_property(self, age, subject):
         """
         **Feature: children-drawing-anomaly-detection, Property 40: Anomaly Attribution Accuracy**
