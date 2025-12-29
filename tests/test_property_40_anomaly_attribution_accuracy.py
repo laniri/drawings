@@ -109,8 +109,7 @@ class TestAnomalyAttributionAccuracy:
     @settings(
         max_examples=10, 
         deadline=None, 
-        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
-        max_size=50
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow]
     )
     def test_visual_only_attribution_property(self, age, subject):
         """
@@ -161,8 +160,7 @@ class TestAnomalyAttributionAccuracy:
     @settings(
         max_examples=10, 
         deadline=None, 
-        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
-        max_size=50
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow]
     )
     def test_subject_only_attribution_property(self, age, subject):
         """
@@ -213,8 +211,7 @@ class TestAnomalyAttributionAccuracy:
     @settings(
         max_examples=10, 
         deadline=None, 
-        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
-        max_size=50
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow]
     )
     def test_both_components_attribution_property(self, age, subject):
         """
@@ -265,8 +262,7 @@ class TestAnomalyAttributionAccuracy:
     @settings(
         max_examples=8, 
         deadline=None, 
-        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow],
-        max_size=50
+        suppress_health_check=[HealthCheck.data_too_large, HealthCheck.too_slow]
     )
     def test_age_related_attribution_property(self, age, subject):
         """
