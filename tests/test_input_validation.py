@@ -271,8 +271,8 @@ def test_image_validation_consistency(max_file_size, allowed_formats, min_width,
 @settings(max_examples=20, deadline=None)
 def test_empty_string_normalization(whitespace_string):
     """
-    Property: For any empty or whitespace-only strings in optional fields,
-    the system should normalize them to None.
+    Property: For empty or whitespace-only strings in optional fields,
+    the system should normalize prompt to None but preserve drawing_tool as-is.
     """
     # Test empty string (only for string fields, not enum fields like subject)
     request1 = DrawingUploadRequest(
@@ -283,7 +283,7 @@ def test_empty_string_normalization(whitespace_string):
     )
     
     assert request1.subject is None, "None should remain None"
-    assert request1.drawing_tool is None, "Empty string should be converted to None"
+    assert request1.drawing_tool == "", "Empty string should be preserved for drawing_tool"
     assert request1.prompt is None, "Empty string should be converted to None"
     
     # Test whitespace-only string
@@ -295,5 +295,5 @@ def test_empty_string_normalization(whitespace_string):
     )
     
     assert request2.subject is None, "None should remain None"
-    assert request2.drawing_tool is None, "Whitespace-only string should be converted to None"
+    assert request2.drawing_tool == whitespace_string, "Whitespace-only string should be preserved for drawing_tool"
     assert request2.prompt is None, "Whitespace-only string should be converted to None"
