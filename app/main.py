@@ -84,6 +84,7 @@ app.include_router(demo_router, prefix="/demo", tags=["demo"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+
 # Temporary fix: Add root route handler to serve React app
 @app.get("/")
 async def serve_react_app():
