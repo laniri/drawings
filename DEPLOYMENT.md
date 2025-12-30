@@ -153,6 +153,8 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 ```
 
+**Note**: The production container uses supervisord to manage both nginx (frontend) and gunicorn (backend) processes within a single container. This provides better process management, automatic restarts, and centralized logging compared to separate containers.
+
 ### 5. Verify Deployment
 
 ```bash
@@ -184,23 +186,25 @@ Key environment variables in `.env`:
 ### Service Configuration
 
 #### Backend (FastAPI)
-- Runs on port 8000
-- Uses Gunicorn with 4 workers
+- Runs on port 8000 (internal)
+- Uses Gunicorn with 1 worker and uvicorn worker class
+- Managed by supervisord for automatic restart
 - Includes health checks and monitoring
-
-#### Database (PostgreSQL)
-- Runs on port 5432
-- Includes automatic backups
-- Optimized for performance
+- Runs as non-root user for security
 
 #### Frontend (React)
-- Served through nginx
-- Includes SSL termination
-- Rate limiting enabled
+- Served through nginx on port 80
+- Built with Vite for optimized production bundle
+- Includes SSL termination and security headers
+- Rate limiting and gzip compression enabled
+- Managed by supervisord alongside backend
 
-#### Redis (Caching)
-- Runs on port 6379
-- Used for session storage and caching
+#### Process Management (Supervisord)
+- Manages both nginx and gunicorn processes
+- Automatic restart on process failure
+- Centralized logging to `/var/log/supervisor/`
+- Process monitoring and control via supervisorctl
+- Configuration in `/etc/supervisor/conf.d/supervisord.conf`
 
 ### Nginx Configuration
 
@@ -230,10 +234,25 @@ curl -f https://your-domain.com/metrics
 
 ### Logging
 
-Logs are stored in the `logs/` directory:
-- `app.log`: Application logs
-- `monitor.log`: Monitoring logs
+Logs are stored in the following locations:
+- Application logs: `docker-compose logs backend`
+- Supervisord logs: `/var/log/supervisor/supervisord.log`
+- Nginx logs: `/var/log/supervisor/nginx.err.log` and `/var/log/supervisor/nginx.out.log`
+- Gunicorn logs: `/var/log/supervisor/gunicorn.err.log` and `/var/log/supervisor/gunicorn.out.log`
 - Docker logs: `docker-compose logs`
+
+Access process logs:
+```bash
+# View all supervisord managed processes
+docker exec <container> supervisorctl status
+
+# View specific process logs
+docker exec <container> supervisorctl tail -f nginx
+docker exec <container> supervisorctl tail -f gunicorn
+
+# View supervisord main log
+docker exec <container> cat /var/log/supervisor/supervisord.log
+```
 
 ### Backup
 
@@ -329,6 +348,27 @@ backend:
 
 ## Troubleshooting
 
+### Docker Supervisord Issues
+
+The production container uses supervisord to manage nginx and gunicorn processes. For detailed troubleshooting of supervisord-related issues, see the [Docker Supervisord Troubleshooting Guide](tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md).
+
+**Quick Diagnostics**:
+```bash
+# Check process status
+docker exec <container> supervisorctl status
+
+# View process logs
+docker exec <container> supervisorctl tail -f nginx
+docker exec <container> supervisorctl tail -f gunicorn
+
+# Restart services
+docker exec <container> supervisorctl restart nginx
+docker exec <container> supervisorctl restart gunicorn
+
+# Verify frontend build files are present (for debugging)
+docker exec <container> ls -la /var/www/html/
+```
+
 ### Common Issues
 
 #### Services Won't Start
@@ -336,9 +376,16 @@ backend:
 # Check logs
 docker-compose -f docker-compose.prod.yml logs
 
+# Check supervisord status
+docker exec <container> supervisorctl status
+
 # Check system resources
 df -h
 free -h
+
+# Restart individual services
+docker exec <container> supervisorctl restart nginx
+docker exec <container> supervisorctl restart gunicorn
 ```
 
 #### Database Connection Issues

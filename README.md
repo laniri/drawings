@@ -195,6 +195,26 @@ docker-compose -f docker-compose.dev.yml up --build
 docker-compose -f docker-compose.dev.yml down
 ```
 
+### Production Docker Deployment
+
+The production Docker image uses a multi-stage build with supervisord for robust process management:
+
+- **Frontend Build Stage**: Builds React application with optimized production bundle
+- **Backend Stage**: Python 3.11-slim with nginx and supervisord for process orchestration
+- **Process Management**: Supervisord manages both nginx (frontend) and gunicorn (backend) processes
+- **Frontend Serving**: Nginx serves React app at root path (`/`) and handles client-side routing
+- **API Routing**: Nginx proxies `/api/*` requests to FastAPI backend on port 8000
+- **Health Monitoring**: Built-in health checks and automatic process restart capabilities
+- **Security**: Non-root user execution with proper permission management
+
+```bash
+# Build production image
+docker build -f Dockerfile.prod -t children-drawing-app:latest .
+
+# Run production container
+docker run -p 80:80 children-drawing-app:latest
+```
+
 ## Project Structure
 
 ```
@@ -687,7 +707,36 @@ pip install reportlab>=4.0.0
    echo "SKIP_MODEL_LOADING=true" >> .env
    ```
 
-9. **Frontend Test Issues**
+9. **Docker Production Container Issues**
+   ```bash
+   # The production container uses supervisord for process management
+   # Check process status
+   docker exec <container> supervisorctl status
+   
+   # Expected output:
+   # gunicorn                         RUNNING   pid 123, uptime 0:05:30
+   # nginx                            RUNNING   pid 124, uptime 0:05:30
+   
+   # View process logs
+   docker exec <container> supervisorctl tail -f nginx
+   docker exec <container> supervisorctl tail -f gunicorn
+   
+   # Restart individual services
+   docker exec <container> supervisorctl restart nginx
+   docker exec <container> supervisorctl restart gunicorn
+   
+   # Verify frontend build files are present (debugging)
+   docker exec <container> ls -la /var/www/html/
+   
+   # Common issues:
+   # - Frontend not loading: Check nginx status and logs
+   # - API requests failing: Check gunicorn status and logs  
+   # - Both running but not communicating: Check internal networking
+   # - Frontend files missing: Verify build files copied correctly
+   # - Root path returns JSON instead of HTML: Nginx configuration issue
+   
+   # For detailed troubleshooting, see tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md
+   ```
    ```bash
    # Common frontend testing issues and solutions:
    

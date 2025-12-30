@@ -86,22 +86,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
-# Temporary fix: Add root route handler to serve React app
-@app.get("/")
-async def serve_react_app():
-    """
-    Serve the React app index.html file.
-    This is a temporary fix until nginx routing is properly configured.
-    """
-    # Check if the React build exists
-    react_index_path = "/var/www/html/index.html"
-    if os.path.exists(react_index_path):
-        return FileResponse(react_index_path, media_type="text/html")
-    else:
-        # Fallback to demo page if React build is not available
-        return RedirectResponse(url="/demo/", status_code=302)
-
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring."""

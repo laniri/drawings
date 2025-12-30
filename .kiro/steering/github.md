@@ -1,15 +1,14 @@
----
-inclusion: always
----
-always use project's venv when running pytho
-github access using:
-{
-  "owner": "laniri",
-  "repo": "drawings",
-  "path": ".github/workflows"
+## inclusion: always
+
+always use project's venv when running python
+
+github access using:  
+{  
+"owner": "laniri",  
+"repo": "drawings",  
+"path": ".github/workflows"  
 }
-<!------------------------------------------------------------------------------------
-   Add rules to this file or a short description and have Kiro refine them for you.
-   
-   Learn about inclusion modes: https://kiro.dev/docs/steering/#inclusion-modes
--------------------------------------------------------------------------------------> 
+
+when creating add hok files (guides, fixing scripts etcw) place them in tmp\_files folder that apear in .gitignore
+
+if needed to perform aws operation use the following profile: d-9067931f77-921400262514-admin+Q

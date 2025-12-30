@@ -104,9 +104,13 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
-#raw data
+#raw and temporay data
 stringent_cleaned_dataset/*
 .hypothesis/
+tmp_files/
+
+#contains credentials
+.kiro/steering/github.md
 
 # Yarn Integrity file
 .yarn-integrity

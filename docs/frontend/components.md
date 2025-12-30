@@ -38,13 +38,13 @@ The frontend is built with:
 **Purpose**: Interactive demo page serving as the application landing page, showcasing system capabilities with pre-analyzed sample drawings.
 
 **Key Features**:
-- Interactive demo samples with pre-analyzed drawings
+- Interactive demo samples with pre-analyzed drawings and detailed modal views
 - System capability statistics (demo samples, age group models, subject categories, feature dimensions)
 - Technical information about AI vision analysis, age-aware models, and interpretable results
 - Medical disclaimer and educational context
-- Direct navigation to full application features
-- Technical links to documentation, GitHub, research papers, and API docs
+- Research and educational purpose section with GitHub repository link
 - Responsive design with Material-UI components
+- Modal dialogs for detailed sample analysis viewing
 
 **API Dependencies**:
 - `/api/demo/samples` - Fetch demo sample drawings with analysis results
@@ -57,7 +57,13 @@ The frontend is built with:
 
 **Navigation**:
 - Serves as the root route (`/`) of the application
-- Provides navigation to dashboard (`/dashboard`) and upload page (`/upload`)
+- Contains GitHub repository link for source code exploration
+- Prepared for navigation to dashboard and upload pages (handlers implemented but not currently used)
+
+**Recent Updates**:
+- Added dialog components for enhanced sample viewing
+- Prepared navigation infrastructure for future call-to-action buttons
+- Enhanced modal system for detailed analysis display
 
 ### AnalysisPage
 
