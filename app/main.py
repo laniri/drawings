@@ -94,7 +94,7 @@ async def root():
         "version": settings.VERSION,
         "docs_url": "/docs",
         "api_url": f"{settings.API_V1_STR}",
-        "demo_url": "/demo"
+        "demo_url": "/demo",
     }
 
 
