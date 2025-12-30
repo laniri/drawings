@@ -282,18 +282,18 @@ const DocumentationPage: React.FC = () => {
 
   const handleBatchGenerate = () => {
     const batchData = {
-      batch_requests: batchRequests,
-      schedule_delay: 0,
+      sections: batchRequests.flatMap(req => req.categories || []),
+      format: 'markdown',
+      includeExamples: true,
     }
     batchGenerateMutation.mutate(batchData)
   }
 
   const handleScheduleGenerate = () => {
     const scheduleData = {
-      schedule_time: scheduleTime,
-      categories: selectedCategories,
-      force: forceGeneration,
-      validate: validateAfterGeneration,
+      frequency: 'once',
+      sections: selectedCategories,
+      format: 'markdown',
     }
     scheduleMutation.mutate(scheduleData)
   }
@@ -1017,7 +1017,7 @@ const DocumentationPage: React.FC = () => {
                   <List dense>
                     {previewMutation.data.preview.changes_detected.map(
                       (
-                        change: { type: string; description: string; file?: string },
+                        change: { type: string; description: string; file?: string; path?: string; timestamp?: string },
                         index: number  
                       ) => (
                         <ListItem key={index}>
@@ -1029,8 +1029,8 @@ const DocumentationPage: React.FC = () => {
                             />
                           </ListItemIcon>
                           <ListItemText
-                            primary={change.path}
-                            secondary={`${change.type} - ${new Date(change.timestamp).toLocaleString()}`}
+                            primary={change.path || change.file || 'Unknown file'}
+                            secondary={`${change.type} - ${change.timestamp ? new Date(change.timestamp).toLocaleString() : 'Unknown time'}`}
                           />
                         </ListItem>
                       )

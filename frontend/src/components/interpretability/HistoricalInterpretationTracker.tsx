@@ -657,8 +657,7 @@ export default function HistoricalInterpretationTracker({
                     <YAxis domain={[0, 100]} />
                     <RechartsTooltip
                       formatter={(value: number | string, name: string) => [
-                         
-                        name === 'score' ? `${value.toFixed(1)}/100` : value,
+                        name === 'score' ? `${typeof value === 'number' ? value.toFixed(1) : value}/100` : value,
                         name === 'score' ? 'Anomaly Score' : name,
                       ]}
                     />

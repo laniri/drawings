@@ -122,6 +122,7 @@ describe('Interpretability Education Components', () => {
       confidence: 0.85,
       threshold: 0.65,
       age_group: '5-6',
+      percentile: 0.95,
     }
 
     render(

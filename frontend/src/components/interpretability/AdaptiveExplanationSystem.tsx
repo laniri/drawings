@@ -55,8 +55,19 @@ interface AdaptiveContent {
   recommendations?: string[]
 }
 
+interface AnalysisData {
+  is_anomaly: boolean
+  confidence: number
+  anomaly_score: number
+  threshold: number
+  age_group: string
+  percentile: number
+  embedding_dimension?: number
+  sample_count?: number
+}
+
 interface AdaptiveExplanationSystemProps {
-  analysisData: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  analysisData: AnalysisData
   onConfigChange?: (config: ExplanationConfig) => void
   initialConfig?: Partial<ExplanationConfig>
 }
@@ -138,7 +149,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
   }
 
   const generateAdaptiveContent = (
-    data: Record<string, unknown>,
+    data: AnalysisData,
     cfg: ExplanationConfig
   ): AdaptiveContent => {
     const vocabularyMap = {
@@ -190,7 +201,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
         ? `This drawing exhibits ${vocab.anomaly} characteristics with a ${vocab.confidence} level of ${(data.confidence * 100).toFixed(0)}%. The analysis highlights specific visual features that deviate from age-expected patterns.`
         : `This drawing demonstrates age-appropriate developmental characteristics. The analysis shows typical patterns consistent with the child's age group.`
     } else if (cfg.userRole === 'researcher') {
-      summary = `${vocab.reconstruction} analysis yielded an ${vocab.anomaly} score of ${data.anomaly_score.toFixed(3)} (threshold: ${data.threshold.toFixed(3)}). ${vocab.confidence} metrics indicate ${data.confidence > 0.8 ? 'high' : data.confidence > 0.6 ? 'moderate' : 'low'} reliability.`
+      summary = `${vocab.reconstruction} analysis yielded an ${vocab.anomaly} score of ${data.anomaly_score?.toFixed(3)} (threshold: ${data.threshold?.toFixed(3)}). ${vocab.confidence} metrics indicate ${data.confidence > 0.8 ? 'high' : data.confidence > 0.6 ? 'moderate' : 'low'} reliability.`
     } else {
       // clinician
       summary = data.is_anomaly
@@ -241,7 +252,7 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
     const statistics = cfg.showStatistics
       ? [
           `Score: ${data.anomaly_score?.toFixed(3)} (threshold: ${data.threshold?.toFixed(3)})`,
-          `${vocab.confidence.charAt(0).toUpperCase() + vocab.confidence.slice(1)}: ${(data.confidence * 100).toFixed(1)}%`,
+          `${vocab.confidence.charAt(0).toUpperCase() + vocab.confidence.slice(1)}: ${((data.confidence || 0) * 100).toFixed(1)}%`,
           `Age group: ${data.age_group} years`,
           `Sample size: ${data.sample_count || 'N/A'} drawings`,
         ]
@@ -251,8 +262,8 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
     const comparisons = cfg.showComparisons
       ? [
           data.is_anomaly
-            ? `This drawing differs from ${(100 - data.percentile * 100).toFixed(0)}% of drawings in this age group`
-            : `This drawing is similar to ${(data.percentile * 100).toFixed(0)}% of drawings in this age group`,
+            ? `This drawing differs from ${(100 - (data.percentile || 0) * 100).toFixed(0)}% of drawings in this age group`
+            : `This drawing is similar to ${((data.percentile || 0) * 100).toFixed(0)}% of drawings in this age group`,
           `Compared to age-matched peers: ${data.is_anomaly ? 'Atypical' : 'Typical'}`,
         ]
       : undefined
@@ -303,9 +314,9 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
 
   const handleConfigChange = (
     key: keyof ExplanationConfig,
-    value: string | number | boolean
+    value: string | number | boolean | (string | number | boolean)[]
   ) => {
-    setConfig((prev) => ({ ...prev, [key]: value }))
+    setConfig((prev) => ({ ...prev, [key]: Array.isArray(value) ? value[0] : value }))
   }
 
   const getComplexityLabel = (value: number) => {
