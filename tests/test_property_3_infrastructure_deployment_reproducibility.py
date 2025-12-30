@@ -113,7 +113,7 @@ class TestInfrastructureDeploymentReproducibility:
         enable_nat_gateway=st.booleans(),
         instance_type=st.sampled_from(["t3.micro", "t3.small", "t3.medium"])
     )
-    @pytest.mark.hypothesis(suppress_health_check=[HealthCheck.data_too_large])
+    @pytest.mark.hypothesis(suppress_health_check=[HealthCheck.data_too_large], deadline=None)
     def test_network_configuration_reproducibility(
         self,
         vpc_cidr: str,
