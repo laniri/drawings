@@ -110,7 +110,7 @@ class DrawingUploadRequest(BaseModel):
         None, max_length=500, description="Prompt or instruction given to the child"
     )
 
-    @field_validator("drawing_tool", "prompt")
+    @field_validator("prompt")
     @classmethod
     def validate_optional_strings(cls, v):
         """Validate optional string fields - convert empty/whitespace-only strings to None."""
