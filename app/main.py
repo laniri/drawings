@@ -2,12 +2,13 @@
 FastAPI application entry point for Children's Drawing Anomaly Detection System.
 """
 
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
-import os
+from fastapi.staticfiles import StaticFiles
 
 from app.api.api_v1.api import api_router
 from app.api.api_v1.endpoints.auth import router as auth_router
