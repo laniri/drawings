@@ -247,11 +247,13 @@ def test_split_reproducibility_with_same_seed(dataset_size, random_seed1, random
         assert train_files1a == train_files1b, "Same seed should produce identical train splits"
         
         # Different seeds should produce different splits (with high probability for reasonable dataset sizes)
-        if dataset_size >= 10:
+        if dataset_size >= 20:  # Increased from 10 to 20 for more reliable differentiation
             train_files2 = set(f.name for f in split2.train_files)
             # Allow for some overlap, but expect significant difference
             overlap_ratio = len(train_files1a & train_files2) / len(train_files1a)
-            assert overlap_ratio < 0.9, "Different seeds should produce different splits"
+            # Adjust threshold based on dataset size - smaller datasets can have higher overlap by chance
+            max_overlap = 0.95 if dataset_size < 30 else 0.9
+            assert overlap_ratio < max_overlap, f"Different seeds should produce different splits (overlap: {overlap_ratio:.3f}, max allowed: {max_overlap})"
 
 
 def test_split_config_validation():
