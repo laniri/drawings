@@ -86,6 +86,18 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
+@app.get("/")
+async def root():
+    """Root endpoint - returns basic API information."""
+    return {
+        "message": "Children's Drawing Anomaly Detection System",
+        "version": settings.VERSION,
+        "docs_url": "/docs",
+        "api_url": f"{settings.API_V1_STR}",
+        "demo_url": "/demo"
+    }
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring."""
