@@ -1,0 +1,146 @@
+[
+  {
+    "op": "replace",
+    "path": "/DistributionConfig/DefaultRootObject",
+    "value": "index.html"
+  },
+  {
+    "op": "replace",
+    "path": "/DistributionConfig/DefaultCacheBehavior/ForwardedValues/Headers",
+    "value": []
+  },
+  {
+    "op": "replace",
+    "path": "/DistributionConfig/DefaultCacheBehavior/ForwardedValues/QueryString",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/DistributionConfig/DefaultCacheBehavior/ForwardedValues/Cookies/Forward",
+    "value": "none"
+  },
+  {
+    "op": "add",
+    "path": "/DistributionConfig/CacheBehaviors/-",
+    "value": {
+      "PathPattern": "/api/*",
+      "TargetOriginId": "ALBOrigin",
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "AllowedMethods": ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"],
+      "CachedMethods": ["GET", "HEAD"],
+      "Compress": true,
+      "ForwardedValues": {
+        "QueryString": true,
+        "Headers": ["Authorization", "Content-Type"],
+        "Cookies": {
+          "Forward": "all"
+        }
+      },
+      "DefaultTTL": 0,
+      "MaxTTL": 0,
+      "MinTTL": 0,
+      "TrustedSigners": [],
+      "TrustedKeyGroups": [],
+      "LambdaFunctionAssociations": [],
+      "FunctionAssociations": [],
+      "FieldLevelEncryptionId": "",
+      "SmoothStreaming": false,
+      "GrpcConfig": {
+        "Enabled": false
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/DistributionConfig/CacheBehaviors/-",
+    "value": {
+      "PathPattern": "/demo/*",
+      "TargetOriginId": "ALBOrigin",
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "AllowedMethods": ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"],
+      "CachedMethods": ["GET", "HEAD"],
+      "Compress": true,
+      "ForwardedValues": {
+        "QueryString": true,
+        "Headers": ["Authorization", "Content-Type"],
+        "Cookies": {
+          "Forward": "all"
+        }
+      },
+      "DefaultTTL": 0,
+      "MaxTTL": 0,
+      "MinTTL": 0,
+      "TrustedSigners": [],
+      "TrustedKeyGroups": [],
+      "LambdaFunctionAssociations": [],
+      "FunctionAssociations": [],
+      "FieldLevelEncryptionId": "",
+      "SmoothStreaming": false,
+      "GrpcConfig": {
+        "Enabled": false
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/DistributionConfig/CacheBehaviors/-",
+    "value": {
+      "PathPattern": "/health",
+      "TargetOriginId": "ALBOrigin",
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "AllowedMethods": ["GET", "HEAD"],
+      "CachedMethods": ["GET", "HEAD"],
+      "Compress": true,
+      "ForwardedValues": {
+        "QueryString": false,
+        "Headers": [],
+        "Cookies": {
+          "Forward": "none"
+        }
+      },
+      "DefaultTTL": 0,
+      "MaxTTL": 0,
+      "MinTTL": 0,
+      "TrustedSigners": [],
+      "TrustedKeyGroups": [],
+      "LambdaFunctionAssociations": [],
+      "FunctionAssociations": [],
+      "FieldLevelEncryptionId": "",
+      "SmoothStreaming": false,
+      "GrpcConfig": {
+        "Enabled": false
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/DistributionConfig/CacheBehaviors/-",
+    "value": {
+      "PathPattern": "/docs",
+      "TargetOriginId": "ALBOrigin",
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "AllowedMethods": ["GET", "HEAD"],
+      "CachedMethods": ["GET", "HEAD"],
+      "Compress": true,
+      "ForwardedValues": {
+        "QueryString": false,
+        "Headers": [],
+        "Cookies": {
+          "Forward": "none"
+        }
+      },
+      "DefaultTTL": 0,
+      "MaxTTL": 0,
+      "MinTTL": 0,
+      "TrustedSigners": [],
+      "TrustedKeyGroups": [],
+      "LambdaFunctionAssociations": [],
+      "FunctionAssociations": [],
+      "FieldLevelEncryptionId": "",
+      "SmoothStreaming": false,
+      "GrpcConfig": {
+        "Enabled": false
+      }
+    }
+  }
+]

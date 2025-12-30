@@ -107,11 +107,12 @@ const AnalysisPage: React.FC = () => {
         // First try to get analysis by analysis ID
         const response = await axios.get(`/api/analysis/${id}`)
         return response.data
-      } catch (error: any) {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
-        if (error.response?.status === 404) {
-          // If not found, try to get the latest analysis for this drawing ID
-          try {
+      } catch (error: unknown) {
+        if (error instanceof Error && 'response' in error) {
+          const axiosError = error as { response?: { status?: number } }
+          if (axiosError.response?.status === 404) {
+            // If not found, try to get the latest analysis for this drawing ID
+            try {
             const drawingAnalysesResponse = await axios.get(
               `/api/analysis/drawing/${id}`
             )
@@ -129,6 +130,7 @@ const AnalysisPage: React.FC = () => {
             // If both fail, throw the original error
             throw error
           }
+        }
         }
         throw error
       }

@@ -138,10 +138,9 @@ const AdaptiveExplanationSystem: React.FC<AdaptiveExplanationSystemProps> = ({
   }
 
   const generateAdaptiveContent = (
-    data: any,
+    data: Record<string, unknown>,
     cfg: ExplanationConfig
   ): AdaptiveContent => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     const vocabularyMap = {
       basic: {
         anomaly: 'unusual pattern',

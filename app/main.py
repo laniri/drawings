@@ -6,6 +6,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
+import os
 
 from app.api.api_v1.api import api_router
 from app.api.api_v1.endpoints.auth import router as auth_router
@@ -82,15 +84,20 @@ app.include_router(demo_router, prefix="/demo", tags=["demo"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-
+# Temporary fix: Add root route handler to serve React app
 @app.get("/")
-async def root():
-    """Root endpoint providing basic system information."""
-    return {
-        "message": "Children's Drawing Anomaly Detection System",
-        "version": settings.VERSION,
-        "docs_url": "/docs",
-    }
+async def serve_react_app():
+    """
+    Serve the React app index.html file.
+    This is a temporary fix until nginx routing is properly configured.
+    """
+    # Check if the React build exists
+    react_index_path = "/var/www/html/index.html"
+    if os.path.exists(react_index_path):
+        return FileResponse(react_index_path, media_type="text/html")
+    else:
+        # Fallback to demo page if React build is not available
+        return RedirectResponse(url="/demo/", status_code=302)
 
 
 @app.get("/health")

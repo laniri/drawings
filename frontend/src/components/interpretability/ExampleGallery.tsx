@@ -334,8 +334,8 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                         label={`${example.confidence_level} confidence`}
                         size="small"
                         color={
-                          getConfidenceColor(example.confidence_level) as any
-                        } // eslint-disable-line @typescript-eslint/no-explicit-any
+                          getConfidenceColor(example.confidence_level) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+                        }
                         variant="outlined"
                       />
                       <Tooltip title="Click to view details">
@@ -400,8 +400,8 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
                       color={
                         getConfidenceColor(
                           selectedExample.confidence_level
-                        ) as any
-                      } // eslint-disable-line @typescript-eslint/no-explicit-any
+                        ) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+                      }
                       variant="outlined"
                     />
                   </Box>

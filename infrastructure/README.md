@@ -4,9 +4,9 @@ This directory contains CloudFormation templates for deploying the Children's Dr
 
 ## 🚀 Current Deployment Status: SUCCESSFUL ✅
 
-**Live Application**: https://d2e6rjfv7d2rgs.cloudfront.net/demo/  
+**Live Application**: https://d2e6rjfv7d2rgs.cloudfront.net/  
 **API Documentation**: https://d2e6rjfv7d2rgs.cloudfront.net/docs  
-**Last Updated**: December 23, 2025
+**Last Updated**: December 29, 2025
 
 ## Architecture Overview
 
@@ -87,10 +87,10 @@ The script will:
 **Solution**: Update task definition with correct ECR image URI  
 **Prevention**: Verify task definition image URI matches pushed image
 
-### ⚠️ Rate Limiting
-**Issue**: Aggressive rate limiting blocking root path access  
-**Workaround**: Use `/demo/` endpoint for full application access  
-**Status**: Functional but may need adjustment for production use
+### ✅ Demo Integration Completed
+**Issue**: Old dedicated demo page at `/demo/` conflicted with new integrated React app  
+**Solution**: Demo functionality merged into main React app as default route (`/`)  
+**Status**: CloudFront cache invalidation resolves routing to new React app structure
 
 ## Cost Estimation
 
@@ -136,4 +136,4 @@ The script will:
 - ECR Repository: `921400262514.dkr.ecr.eu-west-1.amazonaws.com/children-drawing-app`
 
 **Health Status**: ✅ All systems operational  
-**Last Verified**: December 23, 2025
+**Last Verified**: December 29, 2025

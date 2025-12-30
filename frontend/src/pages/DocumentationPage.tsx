@@ -212,8 +212,12 @@ const DocumentationPage: React.FC = () => {
 
   // Batch generate mutation
   const batchGenerateMutation = useMutation({
-    mutationFn: async (batchData: any) => {
-      // eslint-disable-line @typescript-eslint/no-explicit-any
+    mutationFn: async (batchData: { 
+      sections: string[]
+      format: string
+      includeExamples: boolean 
+    }) => {
+       
       const response = await axios.post(
         '/api/documentation/batch/generate',
         batchData
@@ -229,8 +233,12 @@ const DocumentationPage: React.FC = () => {
 
   // Schedule generation mutation
   const scheduleMutation = useMutation({
-    mutationFn: async (scheduleData: any) => {
-      // eslint-disable-line @typescript-eslint/no-explicit-any
+    mutationFn: async (scheduleData: {
+      frequency: string
+      sections: string[]
+      format: string
+    }) => {
+       
       const response = await axios.post(
         '/api/documentation/schedule',
         scheduleData
@@ -303,8 +311,14 @@ const DocumentationPage: React.FC = () => {
     ])
   }
 
-  const updateBatchRequest = (index: number, updates: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const updateBatchRequest = (index: number, updates: Partial<{
+    name: string
+    categories: string[]
+    force: boolean
+    validate: boolean
+    delay: number
+  }>) => {
+     
     const updated = [...batchRequests]
     updated[index] = { ...updated[index], ...updates }
     setBatchRequests(updated)
@@ -1003,8 +1017,8 @@ const DocumentationPage: React.FC = () => {
                   <List dense>
                     {previewMutation.data.preview.changes_detected.map(
                       (
-                        change: any,
-                        index: number // eslint-disable-line @typescript-eslint/no-explicit-any
+                        change: { type: string; description: string; file?: string },
+                        index: number  
                       ) => (
                         <ListItem key={index}>
                           <ListItemIcon>

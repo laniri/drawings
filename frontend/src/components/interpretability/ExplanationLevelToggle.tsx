@@ -195,8 +195,8 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
                     icon={getConfidenceIcon(simplifiedData.confidence_level)}
                     label={`${simplifiedData.confidence_level} Confidence`}
                     color={
-                      getConfidenceColor(simplifiedData.confidence_level) as any
-                    } // eslint-disable-line @typescript-eslint/no-explicit-any
+                      getConfidenceColor(simplifiedData.confidence_level) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+                    }
                     variant="outlined"
                   />
                   <Typography variant="body2" color="text.secondary">
@@ -283,8 +283,8 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
                 {/* Confidence level explanation */}
                 <Alert
                   severity={
-                    getConfidenceColor(simplifiedData.confidence_level) as any
-                  } // eslint-disable-line @typescript-eslint/no-explicit-any
+                    getConfidenceColor(simplifiedData.confidence_level) as 'error' | 'warning' | 'info' | 'success'
+                  }
                   sx={{ mt: 2 }}
                 >
                   <Typography variant="body2">

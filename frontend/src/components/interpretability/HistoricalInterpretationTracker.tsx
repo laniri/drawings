@@ -133,8 +133,8 @@ export default function HistoricalInterpretationTracker({
 
       // Transform the data to include additional metadata
       const enrichedData: HistoricalAnalysis[] = data.analyses.map(
-        (analysis: any, index: number) => ({
-          // eslint-disable-line @typescript-eslint/no-explicit-any
+        (analysis: HistoricalAnalysis, index: number) => ({
+           
           ...analysis,
           drawing_filename: `drawing_${drawingId}`,
           child_age_at_time: 5 + index * 0.5, // Mock progressive age
@@ -656,8 +656,8 @@ export default function HistoricalInterpretationTracker({
                     <XAxis dataKey="date" />
                     <YAxis domain={[0, 100]} />
                     <RechartsTooltip
-                      formatter={(value: any, name: string) => [
-                        // eslint-disable-line @typescript-eslint/no-explicit-any
+                      formatter={(value: number | string, name: string) => [
+                         
                         name === 'score' ? `${value.toFixed(1)}/100` : value,
                         name === 'score' ? 'Anomaly Score' : name,
                       ]}

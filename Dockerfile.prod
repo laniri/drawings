@@ -1,4 +1,28 @@
 # Production Dockerfile for Children's Drawing Anomaly Detection System
+# Multi-stage build: Frontend + Backend in single container
+
+# ============================================================================
+# Stage 1: Build Frontend
+# ============================================================================
+FROM node:18-alpine AS frontend-build
+
+WORKDIR /frontend
+
+# Copy frontend package files
+COPY frontend/package*.json ./
+
+# Install frontend dependencies
+RUN npm ci --only=production
+
+# Copy frontend source code
+COPY frontend/ ./
+
+# Build the React application
+RUN npm run build
+
+# ============================================================================
+# Stage 2: Python Backend with Frontend Assets
+# ============================================================================
 FROM python:3.11-slim AS base
 
 # Set environment variables for production
@@ -8,11 +32,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install system dependencies
+# Install system dependencies including nginx
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     libpq-dev \
+    nginx \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -34,31 +59,115 @@ COPY alembic.ini ./
 COPY alembic/ ./alembic/
 COPY setup.py ./
 
+# Copy frontend build from previous stage
+COPY --from=frontend-build /frontend/dist /var/www/html
+
+# Create nginx configuration for integrated frontend/backend
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    root /var/www/html; \
+    index index.html; \
+    \
+    # Serve React app for root and client-side routing \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+    \
+    # Proxy API requests to backend \
+    location /api/ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Proxy static file requests to backend \
+    location /static/ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Proxy uploads to backend \
+    location /uploads/ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Proxy auth endpoints to backend \
+    location /auth/ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Proxy demo endpoints to backend \
+    location /demo/ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Proxy health and docs to backend \
+    location ~ ^/(health|docs|openapi\.json)$ { \
+        proxy_pass http://127.0.0.1:8000; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+    \
+    # Enable gzip compression \
+    gzip on; \
+    gzip_vary on; \
+    gzip_min_length 1024; \
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
+}' > /etc/nginx/sites-available/default
+
 # Create necessary directories and set permissions
 RUN mkdir -p uploads static backups logs \
     && chown -R appuser:appuser /app \
-    && chmod -R 755 /app
+    && chmod -R 755 /app \
+    && chown -R www-data:www-data /var/www/html
 
-# Note: Running as root for port 80 binding in production
-# In a production environment, consider using a reverse proxy
-# USER appuser
+# Create startup script to run both nginx and gunicorn
+RUN echo '#!/bin/bash \
+set -e \
+\
+# Start nginx in background \
+nginx -g "daemon off;" & \
+\
+# Start gunicorn in foreground \
+exec gunicorn app.main:app \
+    --bind 127.0.0.1:8000 \
+    --workers 1 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --timeout 120 \
+    --keep-alive 5 \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info' > /app/start.sh \
+    && chmod +x /app/start.sh
 
-# Health check
+# Health check - check both nginx and backend
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:80/health || exit 1
 
 # Expose port
 EXPOSE 80
 
-# Production command with Gunicorn
-CMD ["gunicorn", "app.main:app", \
-     "--bind", "0.0.0.0:80", \
-     "--workers", "1", \
-     "--worker-class", "uvicorn.workers.UvicornWorker", \
-     "--max-requests", "1000", \
-     "--max-requests-jitter", "100", \
-     "--timeout", "120", \
-     "--keep-alive", "5", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "info"]
+# Start both services
+CMD ["/app/start.sh"]

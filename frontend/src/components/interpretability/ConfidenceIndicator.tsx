@@ -265,8 +265,8 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
                   color={
                     getDataSufficiencyColor(
                       confidenceData.data_sufficiency
-                    ) as any
-                  } // eslint-disable-line @typescript-eslint/no-explicit-any
+                    ) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+                  }
                   variant="outlined"
                 />
               </Box>

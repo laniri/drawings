@@ -213,16 +213,14 @@ export default function ExportToolbar({
     }
   }
 
-  const handleOptionChange = (key: keyof ExportOptions, value: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleOptionChange = (key: keyof ExportOptions, value: unknown) => {
     setExportOptions((prev) => ({
       ...prev,
       [key]: value,
     }))
   }
 
-  const handleExportOptionChange = (key: string, value: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleExportOptionChange = (key: string, value: unknown) => {
     setExportOptions((prev) => ({
       ...prev,
       export_options: {
