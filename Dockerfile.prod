@@ -11,14 +11,17 @@ WORKDIR /frontend
 # Copy frontend package files
 COPY frontend/package*.json ./
 
-# Install frontend dependencies
-RUN npm ci --only=production
+# Install frontend dependencies (including dev dependencies for build)
+RUN npm ci --include=dev
 
 # Copy frontend source code
 COPY frontend/ ./
 
 # Build the React application
 RUN npm run build
+
+# Clean node_modules to avoid platform-specific binaries
+RUN rm -rf node_modules
 
 # ============================================================================
 # Stage 2: Python Backend with Frontend Assets
@@ -32,12 +35,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install system dependencies including nginx
+# Install system dependencies including nginx and supervisord
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     libpq-dev \
     nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -69,6 +73,12 @@ RUN echo 'server { \
     root /var/www/html; \
     index index.html; \
     \
+    # Enable gzip compression \
+    gzip on; \
+    gzip_vary on; \
+    gzip_min_length 1024; \
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
+    \
     # Serve React app for root and client-side routing \
     location / { \
         try_files $uri $uri/ /index.html; \
@@ -81,6 +91,9 @@ RUN echo 'server { \
         proxy_set_header X-Real-IP $remote_addr; \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
+        proxy_connect_timeout 30s; \
+        proxy_send_timeout 30s; \
+        proxy_read_timeout 30s; \
     } \
     \
     # Proxy static file requests to backend \
@@ -127,40 +140,38 @@ RUN echo 'server { \
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
         proxy_set_header X-Forwarded-Proto $scheme; \
     } \
-    \
-    # Enable gzip compression \
-    gzip on; \
-    gzip_vary on; \
-    gzip_min_length 1024; \
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
 }' > /etc/nginx/sites-available/default
 
+# Create supervisord configuration
+RUN echo '[supervisord] \
+nodaemon=true \
+user=root \
+logfile=/var/log/supervisor/supervisord.log \
+pidfile=/var/run/supervisord.pid \
+\
+[program:nginx] \
+command=nginx -g "daemon off;" \
+autostart=true \
+autorestart=true \
+stderr_logfile=/var/log/supervisor/nginx.err.log \
+stdout_logfile=/var/log/supervisor/nginx.out.log \
+user=root \
+\
+[program:gunicorn] \
+command=gunicorn app.main:app --bind 127.0.0.1:8000 --workers 1 --worker-class uvicorn.workers.UvicornWorker --max-requests 1000 --max-requests-jitter 100 --timeout 120 --keep-alive 5 --access-logfile - --error-logfile - --log-level info \
+directory=/app \
+autostart=true \
+autorestart=true \
+stderr_logfile=/var/log/supervisor/gunicorn.err.log \
+stdout_logfile=/var/log/supervisor/gunicorn.out.log \
+user=appuser \
+environment=PYTHONPATH="/app"' > /etc/supervisor/conf.d/supervisord.conf
+
 # Create necessary directories and set permissions
-RUN mkdir -p uploads static backups logs \
+RUN mkdir -p uploads static backups logs /var/log/supervisor \
     && chown -R appuser:appuser /app \
     && chmod -R 755 /app \
     && chown -R www-data:www-data /var/www/html
-
-# Create startup script to run both nginx and gunicorn
-RUN echo '#!/bin/bash \
-set -e \
-\
-# Start nginx in background \
-nginx -g "daemon off;" & \
-\
-# Start gunicorn in foreground \
-exec gunicorn app.main:app \
-    --bind 127.0.0.1:8000 \
-    --workers 1 \
-    --worker-class uvicorn.workers.UvicornWorker \
-    --max-requests 1000 \
-    --max-requests-jitter 100 \
-    --timeout 120 \
-    --keep-alive 5 \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level info' > /app/start.sh \
-    && chmod +x /app/start.sh
 
 # Health check - check both nginx and backend
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
@@ -169,5 +180,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 80
 
-# Start both services
-CMD ["/app/start.sh"]
+# Start supervisord to manage both nginx and gunicorn
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
