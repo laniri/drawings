@@ -70,86 +70,112 @@ COPY --from=frontend-build /frontend/dist /var/www/html
 RUN ls -la /var/www/html/ && echo "Frontend build files copied successfully"
 
 # Create nginx configuration for integrated frontend/backend
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    root /var/www/html; \
-    index index.html; \
-    \
-    # Enable gzip compression \
-    gzip on; \
-    gzip_vary on; \
-    gzip_min_length 1024; \
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json; \
-    \
-    # Proxy API requests to backend (BEFORE root location) \
-    location /api/ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-        proxy_connect_timeout 30s; \
-        proxy_send_timeout 30s; \
-        proxy_read_timeout 30s; \
-    } \
-    \
-    # Proxy static file requests to backend \
-    location /static/ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Proxy uploads to backend \
-    location /uploads/ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Proxy auth endpoints to backend \
-    location /auth/ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Proxy demo endpoints to backend \
-    location /demo/ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Proxy health and docs to backend \
-    location ~ ^/(health|docs|openapi\.json)$ { \
-        proxy_pass http://127.0.0.1:8000; \
-        proxy_set_header Host $host; \
-        proxy_set_header X-Real-IP $remote_addr; \
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
-        proxy_set_header X-Forwarded-Proto $scheme; \
-    } \
-    \
-    # Serve React app for root and client-side routing (AFTER all proxy locations) \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-        add_header Cache-Control "no-cache, no-store, must-revalidate"; \
-        add_header Pragma "no-cache"; \
-        add_header Expires "0"; \
-    } \
-}' > /etc/nginx/sites-available/default
+COPY <<EOF /etc/nginx/sites-available/default
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html;
+    index index.html;
+    
+    # Enable gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+    
+    # Proxy API requests to backend (BEFORE root location)
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+    
+    # Proxy static file requests to backend
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Proxy uploads to backend
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Proxy auth endpoints to backend
+    location /auth/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Proxy demo endpoints to backend
+    location /demo/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Proxy health and docs to backend
+    location ~ ^/(health|docs|openapi\.json)$ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Serve React app for root and client-side routing (AFTER all proxy locations)
+    location / {
+        try_files \$uri \$uri/ /index.html;
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        add_header Pragma "no-cache";
+        add_header Expires "0";
+    }
+}
+EOF
 
 # Create supervisord configuration with proper formatting
-RUN printf '[supervisord]\nnodaemon=true\nuser=root\nlogfile=/var/log/supervisor/supervisord.log\npidfile=/var/run/supervisord.pid\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\nstderr_logfile=/var/log/supervisor/nginx.err.log\nstdout_logfile=/var/log/supervisor/nginx.out.log\nuser=root\n\n[program:gunicorn]\ncommand=gunicorn app.main:app --bind 127.0.0.1:8000 --workers 1 --worker-class uvicorn.workers.UvicornWorker --max-requests 1000 --max-requests-jitter 100 --timeout 120 --keep-alive 5 --access-logfile - --error-logfile - --log-level info\ndirectory=/app\nautostart=true\nautorestart=true\nstderr_logfile=/var/log/supervisor/gunicorn.err.log\nstdout_logfile=/var/log/supervisor/gunicorn.out.log\nuser=appuser\nenvironment=PYTHONPATH="/app"\n' > /etc/supervisor/conf.d/supervisord.conf
+COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
+
+[program:nginx]
+command=nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/nginx.err.log
+stdout_logfile=/var/log/supervisor/nginx.out.log
+user=root
+
+[program:uvicorn]
+command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info
+directory=/app
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/uvicorn.err.log
+stdout_logfile=/var/log/supervisor/uvicorn.out.log
+user=appuser
+environment=PYTHONPATH="/app"
+EOF
 
 # Create necessary directories and set permissions
 RUN mkdir -p uploads static backups logs /var/log/supervisor \
