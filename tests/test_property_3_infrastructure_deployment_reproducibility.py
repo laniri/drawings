@@ -292,6 +292,9 @@ class TestInfrastructureDeploymentReproducibility:
         Generate a CloudFormation template based on parameters.
         This simulates the actual template generation logic.
         """
+        # Create a copy of params to avoid modifying the original
+        params = params.copy()
+        
         template_data = {
             "AWSTemplateFormatVersion": "2010-09-09",
             "Description": f"Infrastructure for {params.get('Environment', 'production')} environment",
