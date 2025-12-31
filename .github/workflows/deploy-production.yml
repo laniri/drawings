@@ -385,7 +385,7 @@ jobs:
     - name: Download task definition
       run: |
         aws ecs describe-task-definition \
-          --task-definition ${{ env.ECS_CLUSTER }}-task \
+          --task-definition children-drawing-prod-task \
           --query taskDefinition > task-definition.json
     
     - name: Fill in the new image ID in the Amazon ECS task definition
@@ -519,7 +519,7 @@ jobs:
         
         # Get previous task definition
         PREVIOUS_TASK_DEF=$(aws ecs list-task-definitions \
-          --family-prefix ${{ env.ECS_CLUSTER }}-task \
+          --family-prefix children-drawing-prod-task \
           --status ACTIVE \
           --sort DESC \
           --query 'taskDefinitionArns[1]' \
