@@ -54,8 +54,7 @@ WORKDIR /app
 # Copy requirements and install Python dependencies
 COPY requirements.txt requirements-dev.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt \
-    && pip install gunicorn
+    && pip install -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
@@ -167,12 +166,14 @@ stdout_logfile=/var/log/supervisor/nginx.out.log
 user=root
 
 [program:uvicorn]
-command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info
+command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level debug
 directory=/app
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/supervisor/uvicorn.err.log
 stdout_logfile=/var/log/supervisor/uvicorn.out.log
+stderr_logfile_maxbytes=50MB
+stdout_logfile_maxbytes=50MB
 user=appuser
 environment=PYTHONPATH="/app"
 EOF
@@ -184,11 +185,11 @@ RUN mkdir -p uploads static backups logs /var/log/supervisor \
     && chown -R www-data:www-data /var/www/html
 
 # Health check - check both nginx and backend
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=5 \
     CMD curl -f http://localhost:80/health || exit 1
 
 # Expose port
 EXPOSE 80
 
-# Start supervisord to manage both nginx and gunicorn
+# Start supervisord to manage both nginx and uvicorn
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
