@@ -62,7 +62,7 @@ class TestInfrastructureDeploymentReproducibility:
         enable_cloudfront=st.booleans(),
         enable_route53=st.booleans()
     )
-    @pytest.mark.hypothesis(deadline=None)
+    @settings(deadline=None)
     def test_infrastructure_template_reproducibility(
         self, 
         stack_name: str, 
@@ -113,7 +113,7 @@ class TestInfrastructureDeploymentReproducibility:
         enable_nat_gateway=st.booleans(),
         instance_type=st.sampled_from(["t3.micro", "t3.small", "t3.medium"])
     )
-    @pytest.mark.hypothesis(suppress_health_check=[HealthCheck.data_too_large], deadline=None)
+    @settings(deadline=None, suppress_health_check=[HealthCheck.data_too_large])
     def test_network_configuration_reproducibility(
         self,
         vpc_cidr: str,
@@ -212,7 +212,7 @@ class TestInfrastructureDeploymentReproducibility:
         desired_count=st.integers(min_value=1, max_value=3),
         enable_auto_scaling=st.booleans()
     )
-    @pytest.mark.hypothesis(deadline=None)
+    @settings(deadline=None)
     def test_ecs_configuration_reproducibility(
         self,
         cpu_units: int,
