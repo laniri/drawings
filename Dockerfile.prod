@@ -148,30 +148,8 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/sites-available/default
 
-# Create supervisord configuration
-RUN echo '[supervisord] \
-nodaemon=true \
-user=root \
-logfile=/var/log/supervisor/supervisord.log \
-pidfile=/var/run/supervisord.pid \
-\
-[program:nginx] \
-command=nginx -g "daemon off;" \
-autostart=true \
-autorestart=true \
-stderr_logfile=/var/log/supervisor/nginx.err.log \
-stdout_logfile=/var/log/supervisor/nginx.out.log \
-user=root \
-\
-[program:gunicorn] \
-command=gunicorn app.main:app --bind 127.0.0.1:8000 --workers 1 --worker-class uvicorn.workers.UvicornWorker --max-requests 1000 --max-requests-jitter 100 --timeout 120 --keep-alive 5 --access-logfile - --error-logfile - --log-level info \
-directory=/app \
-autostart=true \
-autorestart=true \
-stderr_logfile=/var/log/supervisor/gunicorn.err.log \
-stdout_logfile=/var/log/supervisor/gunicorn.out.log \
-user=appuser \
-environment=PYTHONPATH="/app"' > /etc/supervisor/conf.d/supervisord.conf
+# Create supervisord configuration with proper formatting
+RUN printf '[supervisord]\nnodaemon=true\nuser=root\nlogfile=/var/log/supervisor/supervisord.log\npidfile=/var/run/supervisord.pid\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\nstderr_logfile=/var/log/supervisor/nginx.err.log\nstdout_logfile=/var/log/supervisor/nginx.out.log\nuser=root\n\n[program:gunicorn]\ncommand=gunicorn app.main:app --bind 127.0.0.1:8000 --workers 1 --worker-class uvicorn.workers.UvicornWorker --max-requests 1000 --max-requests-jitter 100 --timeout 120 --keep-alive 5 --access-logfile - --error-logfile - --log-level info\ndirectory=/app\nautostart=true\nautorestart=true\nstderr_logfile=/var/log/supervisor/gunicorn.err.log\nstdout_logfile=/var/log/supervisor/gunicorn.out.log\nuser=appuser\nenvironment=PYTHONPATH="/app"\n' > /etc/supervisor/conf.d/supervisord.conf
 
 # Create necessary directories and set permissions
 RUN mkdir -p uploads static backups logs /var/log/supervisor \
