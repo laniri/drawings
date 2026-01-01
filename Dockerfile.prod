@@ -33,7 +33,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/app/.cache/huggingface \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface \
+    HF_DATASETS_CACHE=/app/.cache/huggingface \
+    MPLCONFIGDIR=/app/.cache/matplotlib
 
 # Install system dependencies including nginx and supervisord
 RUN apt-get update && apt-get install -y \
@@ -61,6 +65,23 @@ COPY app/ ./app/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 COPY setup.py ./
+
+# Create cache directories for Hugging Face and matplotlib
+RUN mkdir -p /app/.cache/huggingface /app/.cache/matplotlib && \
+    chown -R appuser:appuser /app/.cache
+
+# Pre-download Vision Transformer model to avoid runtime downloads and permission issues
+RUN python -c "
+import os
+os.environ['HF_HOME'] = '/app/.cache/huggingface'
+os.environ['TRANSFORMERS_CACHE'] = '/app/.cache/huggingface'
+os.environ['MPLCONFIGDIR'] = '/app/.cache/matplotlib'
+print('Downloading Vision Transformer model...')
+from transformers import ViTImageProcessor, ViTModel
+ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
+ViTModel.from_pretrained('google/vit-base-patch16-224')
+print('Vision Transformer model downloaded successfully!')
+"
 
 # Copy frontend build from previous stage
 COPY --from=frontend-build /frontend/dist /var/www/html
@@ -172,9 +193,9 @@ export SALIENCY_DIR="/app/static/saliency_maps"
 
 # Create all required directories with proper permissions
 echo "📁 Creating required directories..."
-mkdir -p /app/uploads /app/static /app/static/models /app/static/saliency_maps /app/backups /app/logs
-chown -R appuser:appuser /app/uploads /app/static /app/backups /app/logs
-chmod -R 755 /app/uploads /app/static /app/backups /app/logs
+mkdir -p /app/uploads /app/static /app/static/models /app/static/saliency_maps /app/backups /app/logs /app/.cache/huggingface /app/.cache/matplotlib
+chown -R appuser:appuser /app/uploads /app/static /app/backups /app/logs /app/.cache
+chmod -R 755 /app/uploads /app/static /app/backups /app/logs /app/.cache
 
 # Initialize database if it doesn't exist
 echo "🗄️ Initializing database..."
@@ -248,11 +269,11 @@ stdout_capture_maxbytes=50MB
 user=appuser
 priority=10
 depends_on=startup
-environment=PYTHONPATH="/app",STORAGE_BACKEND="local",DATABASE_URL="sqlite:///./drawings.db",ENVIRONMENT="production",LOG_LEVEL="info",SECRET_KEY="production-secret-key-change-in-real-deployment",CORS_ORIGINS="*",MAX_UPLOAD_SIZE="10485760",UPLOAD_DIR="/app/uploads",STATIC_DIR="/app/static",MODELS_DIR="/app/static/models",SALIENCY_DIR="/app/static/saliency_maps"
+environment=PYTHONPATH="/app",STORAGE_BACKEND="local",DATABASE_URL="sqlite:///./drawings.db",ENVIRONMENT="production",LOG_LEVEL="info",SECRET_KEY="production-secret-key-change-in-real-deployment",CORS_ORIGINS="*",MAX_UPLOAD_SIZE="10485760",UPLOAD_DIR="/app/uploads",STATIC_DIR="/app/static",MODELS_DIR="/app/static/models",SALIENCY_DIR="/app/static/saliency_maps",HF_HOME="/app/.cache/huggingface",TRANSFORMERS_CACHE="/app/.cache/huggingface",HF_DATASETS_CACHE="/app/.cache/huggingface",MPLCONFIGDIR="/app/.cache/matplotlib"
 EOF
 
 # Create necessary directories and set permissions
-RUN mkdir -p uploads static backups logs /var/log/supervisor \
+RUN mkdir -p uploads static backups logs /var/log/supervisor /app/.cache/huggingface /app/.cache/matplotlib \
     && mkdir -p static/models static/saliency_maps static/exports \
     && chown -R appuser:appuser /app \
     && chmod -R 755 /app \
