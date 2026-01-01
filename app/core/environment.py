@@ -193,6 +193,14 @@ class EnvironmentDetector:
         Returns:
             StorageBackend: Appropriate storage backend
         """
+        # Check for explicit STORAGE_BACKEND override first
+        explicit_backend = os.getenv("STORAGE_BACKEND", "").lower()
+        if explicit_backend in ["local", "s3"]:
+            if explicit_backend == "local":
+                return StorageBackend.LOCAL
+            elif explicit_backend == "s3":
+                return StorageBackend.S3
+
         # Check for testing environment conditions
         testing_env = os.getenv("TESTING", "").lower() in ["true", "1", "yes"]
         ci_env = os.getenv("CI", "").lower() in ["true", "1", "yes"]
