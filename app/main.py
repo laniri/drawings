@@ -87,6 +87,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Mount React frontend (only if frontend_build directory exists)
 import os
+
 if os.path.exists("frontend_build"):
     app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
 
