@@ -104,23 +104,6 @@ async def api_root():
     }
 
 
-@app.get("/")
-async def root():
-    """Root endpoint - serves React frontend or API info if frontend not available."""
-    # If frontend is mounted, this won't be reached
-    # This is a fallback for development/testing
-    if os.path.exists("frontend_build"):
-        return FileResponse("frontend_build/index.html")
-    else:
-        return {
-            "message": "Children's Drawing Anomaly Detection System",
-            "version": settings.VERSION,
-            "docs_url": "/docs",
-            "api_url": f"{settings.API_V1_STR}",
-            "demo_url": "/demo",
-        }
-
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint for monitoring."""
