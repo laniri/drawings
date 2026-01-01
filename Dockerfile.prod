@@ -71,17 +71,7 @@ RUN mkdir -p /app/.cache/huggingface /app/.cache/matplotlib && \
     chown -R appuser:appuser /app/.cache
 
 # Pre-download Vision Transformer model to avoid runtime downloads and permission issues
-RUN python -c "
-import os
-os.environ['HF_HOME'] = '/app/.cache/huggingface'
-os.environ['TRANSFORMERS_CACHE'] = '/app/.cache/huggingface'
-os.environ['MPLCONFIGDIR'] = '/app/.cache/matplotlib'
-print('Downloading Vision Transformer model...')
-from transformers import ViTImageProcessor, ViTModel
-ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
-ViTModel.from_pretrained('google/vit-base-patch16-224')
-print('Vision Transformer model downloaded successfully!')
-"
+RUN python -c "import os; os.environ['HF_HOME'] = '/app/.cache/huggingface'; os.environ['TRANSFORMERS_CACHE'] = '/app/.cache/huggingface'; os.environ['HF_DATASETS_CACHE'] = '/app/.cache/huggingface'; os.environ['MPLCONFIGDIR'] = '/app/.cache/matplotlib'; print('Downloading Vision Transformer model...'); from transformers import ViTImageProcessor, ViTModel; ViTImageProcessor.from_pretrained('google/vit-base-patch16-224'); ViTModel.from_pretrained('google/vit-base-patch16-224'); print('Vision Transformer model downloaded successfully!')"
 
 # Copy frontend build from previous stage
 COPY --from=frontend-build /frontend/dist /var/www/html
