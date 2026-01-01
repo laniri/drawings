@@ -149,13 +149,69 @@ server {
 }
 EOF
 
-# Create supervisord configuration with proper formatting
+# Create startup script to validate environment and setup
+COPY <<EOF /app/startup.sh
+#!/bin/bash
+set -e
+
+echo "🚀 Starting application setup..."
+
+# Set comprehensive environment defaults
+export PYTHONPATH="/app"
+export STORAGE_BACKEND="local"
+export DATABASE_URL="sqlite:///./drawings.db"
+export ENVIRONMENT="production"
+export LOG_LEVEL="info"
+export SECRET_KEY="production-secret-key-change-in-real-deployment"
+export CORS_ORIGINS="*"
+export MAX_UPLOAD_SIZE="10485760"
+export UPLOAD_DIR="/app/uploads"
+export STATIC_DIR="/app/static"
+export MODELS_DIR="/app/static/models"
+export SALIENCY_DIR="/app/static/saliency_maps"
+
+# Create all required directories with proper permissions
+echo "📁 Creating required directories..."
+mkdir -p /app/uploads /app/static /app/static/models /app/static/saliency_maps /app/backups /app/logs
+chown -R appuser:appuser /app/uploads /app/static /app/backups /app/logs
+chmod -R 755 /app/uploads /app/static /app/backups /app/logs
+
+# Initialize database if it doesn't exist
+echo "🗄️ Initializing database..."
+if [ ! -f "/app/drawings.db" ]; then
+    echo "Creating new database..."
+    touch /app/drawings.db
+    chown appuser:appuser /app/drawings.db
+    chmod 664 /app/drawings.db
+fi
+
+# Test Python imports
+echo "🐍 Testing Python imports..."
+python -c "
+import sys
+sys.path.insert(0, '/app')
+try:
+    from app.main import app
+    print('✅ FastAPI app import successful')
+except Exception as e:
+    print(f'❌ FastAPI app import failed: {e}')
+    exit(1)
+"
+
+echo "✅ Startup validation complete!"
+EOF
+
+# Make startup script executable
+RUN chmod +x /app/startup.sh
+
+# Create supervisord configuration with comprehensive logging and startup script
 COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
 [supervisord]
 nodaemon=true
 user=root
 logfile=/var/log/supervisor/supervisord.log
 pidfile=/var/run/supervisord.pid
+loglevel=debug
 
 [program:nginx]
 command=nginx -g "daemon off;"
@@ -163,10 +219,23 @@ autostart=true
 autorestart=true
 stderr_logfile=/var/log/supervisor/nginx.err.log
 stdout_logfile=/var/log/supervisor/nginx.out.log
+stderr_logfile_maxbytes=50MB
+stdout_logfile_maxbytes=50MB
 user=root
 
+[program:startup]
+command=/app/startup.sh
+autostart=true
+autorestart=false
+startsecs=0
+exitcodes=0
+stderr_logfile=/var/log/supervisor/startup.err.log
+stdout_logfile=/var/log/supervisor/startup.out.log
+user=root
+priority=1
+
 [program:uvicorn]
-command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level debug
+command=uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info
 directory=/app
 autostart=true
 autorestart=true
@@ -174,15 +243,23 @@ stderr_logfile=/var/log/supervisor/uvicorn.err.log
 stdout_logfile=/var/log/supervisor/uvicorn.out.log
 stderr_logfile_maxbytes=50MB
 stdout_logfile_maxbytes=50MB
+stderr_capture_maxbytes=50MB
+stdout_capture_maxbytes=50MB
 user=appuser
-environment=PYTHONPATH="/app",STORAGE_BACKEND="local"
+priority=10
+depends_on=startup
+environment=PYTHONPATH="/app",STORAGE_BACKEND="local",DATABASE_URL="sqlite:///./drawings.db",ENVIRONMENT="production",LOG_LEVEL="info",SECRET_KEY="production-secret-key-change-in-real-deployment",CORS_ORIGINS="*",MAX_UPLOAD_SIZE="10485760",UPLOAD_DIR="/app/uploads",STATIC_DIR="/app/static",MODELS_DIR="/app/static/models",SALIENCY_DIR="/app/static/saliency_maps"
 EOF
 
 # Create necessary directories and set permissions
 RUN mkdir -p uploads static backups logs /var/log/supervisor \
+    && mkdir -p static/models static/saliency_maps static/exports \
     && chown -R appuser:appuser /app \
     && chmod -R 755 /app \
-    && chown -R www-data:www-data /var/www/html
+    && chown -R www-data:www-data /var/www/html \
+    && touch /app/drawings.db \
+    && chown appuser:appuser /app/drawings.db \
+    && chmod 664 /app/drawings.db
 
 # Health check - check both nginx and backend
 HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=5 \
