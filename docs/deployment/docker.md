@@ -50,7 +50,7 @@ The production container uses supervisord to manage multiple processes:
 - **Debug logging enabled** for detailed troubleshooting
 - **Logs redirected to Docker stdout/stderr** for better integration
 - **Log rotation**: Automatic rotation at 50MB for both stdout and stderr logs
-- **Environment**: Preconfigured with `STORAGE_BACKEND="local"` and `S3_BUCKET_NAME=""` for container deployment
+- **Environment**: Preconfigured with `STORAGE_BACKEND="local"`, `DATABASE_URL="sqlite:///./drawings.db"`, and `ENVIRONMENT="production"` for container deployment
 - Access logging enabled for request monitoring
 - Runs as non-root `appuser` for security
 
@@ -115,7 +115,12 @@ nano .env
 - `PYTHONDONTWRITEBYTECODE=1` - Disable .pyc files
 - `PYTHONUNBUFFERED=1` - Unbuffered output for logging
 - `STORAGE_BACKEND=local` - Storage backend configuration (default for containers)
+- `DATABASE_URL=sqlite:///./drawings.db` - Database connection URL (default for containers)
+- `ENVIRONMENT=production` - Environment setting (default for containers)
 - `S3_BUCKET_NAME=""` - S3 bucket name (empty for local storage mode)
+- `HF_HOME=/app/.cache/huggingface` - Hugging Face cache directory
+- `TRANSFORMERS_CACHE=/app/.cache/huggingface` - Transformers model cache
+- `MPLCONFIGDIR=/app/.cache/matplotlib` - Matplotlib configuration directory
 
 ## Health Checks
 The production container includes comprehensive health monitoring:
@@ -180,6 +185,8 @@ docker logs -f <container>
 
 5. **Storage Configuration Issues**
    - **Default**: Container uses local storage (`STORAGE_BACKEND=local`)
+   - **Database**: Container uses SQLite database (`DATABASE_URL=sqlite:///./drawings.db`)
+   - **Environment**: Container sets production environment (`ENVIRONMENT=production`)
    - **S3 Override**: Set environment variables to enable S3 storage
    - **Configuration**: Override via Docker environment variables or .env file
 

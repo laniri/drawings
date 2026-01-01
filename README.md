@@ -206,7 +206,10 @@ The production Docker image uses a simplified single-process architecture for op
 - **Backend Stage**: Python 3.11-slim with nginx and supervisord for process orchestration
 - **Process Management**: Supervisord manages both nginx (frontend) and uvicorn (backend) processes
 - **Startup Validation**: Comprehensive startup script validates environment, creates directories, and performs lightweight Python import testing (avoiding heavy model loading)
-- **Environment Configuration**: Complete environment defaults with comprehensive variable setup
+- **Environment Configuration**: Complete environment defaults with comprehensive variable setup including:
+  - `STORAGE_BACKEND=local` - Forces local storage mode for container deployment
+  - `DATABASE_URL=sqlite:///./drawings.db` - SQLite database configuration
+  - `ENVIRONMENT=production` - Explicit production environment setting
 - **Directory Management**: Automatic creation of required directories with proper permissions
 - **Database Initialization**: Automatic SQLite database creation and permission setup
 - **Log Management**: Automatic log rotation with 50MB size limits and comprehensive logging configuration
@@ -228,6 +231,10 @@ The production Docker image uses a simplified single-process architecture for op
 - **Faster Startup**: Immediate container readiness without complex process management
 - **Hugging Face Cache Configuration**: Proper cache directories to prevent permission errors
 - **Direct Port 80**: Single service handles both frontend and API requests
+- **Environment Configuration**: Includes same environment defaults as standard container:
+  - `STORAGE_BACKEND=local` - Local storage mode for container deployment
+  - `DATABASE_URL=sqlite:///./drawings.db` - SQLite database configuration
+  - `ENVIRONMENT=production` - Production environment setting
 
 ```bash
 # Build standard production image
@@ -817,6 +824,9 @@ pip install reportlab>=4.0.0
    # - Database is initialized automatically if it doesn't exist
    # - Override these via environment variables if S3 storage is needed
    # - Hugging Face cache directories are pre-configured to prevent permission issues
+   # - STORAGE_BACKEND=local forces local storage mode for container deployment
+   # - DATABASE_URL=sqlite:///./drawings.db provides SQLite database configuration
+   # - ENVIRONMENT=production sets explicit production environment
    
    # For detailed troubleshooting, see tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md
    ```

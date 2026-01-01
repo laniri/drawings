@@ -96,6 +96,8 @@ DATABASE_URL=sqlite:///:memory:
 **Container Storage Configuration**: Docker containers are preconfigured with local storage settings:
 ```bash
 STORAGE_BACKEND=local
+DATABASE_URL=sqlite:///./drawings.db
+ENVIRONMENT=production
 S3_BUCKET_NAME=""
 ```
 
