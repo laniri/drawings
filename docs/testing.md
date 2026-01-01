@@ -773,6 +773,69 @@ for table_name in inspector.get_table_names():
 - Database migration consistency validation now properly isolates application schema from migration infrastructure
 - Property-based migration tests maintain comprehensive coverage while improving accuracy
 
+### Infrastructure Deployment Testing Improvements (December 2025)
+
+**Enhanced Hypothesis Configuration for Complex Operations**: Improved reliability of infrastructure deployment reproducibility tests
+
+**Key Improvements**:
+- **Unlimited Deadline Configuration**: Added `deadline=None` to infrastructure deployment tests to handle complex CloudFormation template generation and validation operations
+- **Health Check Suppression**: Combined `suppress_health_check=[HealthCheck.data_too_large]` with unlimited deadlines for comprehensive infrastructure testing
+- **Complex Operation Support**: Enhanced support for tests that involve extensive AWS resource configuration and validation
+- **Improved Test Stability**: Eliminated timeout-related test failures for infrastructure deployment scenarios
+
+**Infrastructure Testing Coverage**:
+- **Template Reproducibility**: Validates that identical deployment parameters produce identical CloudFormation templates
+- **Network Configuration**: Tests VPC, subnet, security group, and NAT gateway configurations for consistency
+- **Storage Resources**: Validates S3 bucket properties including versioning, encryption, and lifecycle policies
+- **Compute Resources**: Tests ECS Fargate task definitions, service configurations, CPU/memory allocations
+- **Resource Dependencies**: Ensures proper resource relationships and dependency chains in templates
+- **Output Consistency**: Validates that CloudFormation outputs remain consistent across deployments
+
+**Mock CloudFormation Implementation**:
+The tests use a comprehensive `MockCloudFormationTemplate` class that simulates real CloudFormation behavior:
+- Resource property validation and type checking
+- Template structure validation (AWSTemplateFormatVersion, Resources, Outputs)
+- Resource dependency tracking and validation
+- Support for all major AWS resource types (VPC, EC2, S3, ECS, IAM, CloudWatch)
+
+**Technical Details**:
+```python
+@settings(deadline=None, suppress_health_check=[HealthCheck.data_too_large])
+def test_network_configuration_reproducibility(
+    self,
+    vpc_cidr: str,
+    availability_zones: int,
+    enable_nat_gateway: bool,
+    instance_type: str
+):
+    """Test network configurations with unlimited execution time for complex validation."""
+    # Complex CloudFormation template generation and validation
+    # No time constraints for thorough infrastructure testing
+```
+
+**Benefits**:
+- **Reliable Infrastructure Testing**: Complex CloudFormation template generation and validation can complete without time pressure
+- **Comprehensive Validation**: Allows thorough testing of infrastructure deployment reproducibility properties
+- **Reduced Test Flakiness**: Eliminates timeout-related failures in CI/CD environments with varying performance
+- **Enhanced CI/CD Stability**: More predictable test behavior for infrastructure validation scenarios
+
+**Affected Tests**:
+- `test_property_3_infrastructure_deployment_reproducibility.py`: Enhanced with comprehensive infrastructure validation
+  - `test_infrastructure_template_reproducibility`: Core template generation consistency
+  - `test_network_configuration_reproducibility`: VPC and networking resource validation
+  - `test_storage_configuration_reproducibility`: S3 bucket and storage configuration testing
+  - `test_ecs_configuration_reproducibility`: ECS Fargate service and task definition validation
+  - `test_template_validation_consistency`: Template validation and structure verification
+- Infrastructure deployment tests now handle complex AWS resource validation without time constraints
+- Property-based infrastructure testing maintains comprehensive coverage with improved reliability
+
+**Impact on Development**:
+- More reliable infrastructure deployment testing across different environments
+- Better support for complex CloudFormation template validation scenarios
+- Enhanced confidence in infrastructure deployment reproducibility validation
+- Improved CI/CD pipeline stability for infrastructure-related tests
+- Comprehensive coverage of AWS resource configuration consistency
+
 ### Property-Based Testing Improvements (December 2025)
 
 **Enhanced Hypothesis Configuration**: Improved reliability and performance of property-based tests using advanced Hypothesis features
@@ -799,6 +862,18 @@ for table_name in inspector.get_table_names():
 def test_subject_aware_property(self, age, subject):
     """Property-based test with enhanced configuration."""
     # Test implementation with optimized settings
+
+# Infrastructure deployment tests with enhanced reliability
+@given(
+    vpc_cidr=st.sampled_from(["10.0.0.0/16", "172.16.0.0/16", "192.168.0.0/16"]),
+    availability_zones=st.integers(min_value=2, max_value=3),
+    enable_nat_gateway=st.booleans(),
+    instance_type=st.sampled_from(["t3.micro", "t3.small", "t3.medium"])
+)
+@settings(deadline=None, suppress_health_check=[HealthCheck.data_too_large])
+def test_network_configuration_reproducibility(self, vpc_cidr, availability_zones, enable_nat_gateway, instance_type):
+    """Infrastructure deployment test with unlimited deadline for complex CloudFormation operations."""
+    # Test implementation with no time constraints for infrastructure validation
 ```
 
 **Benefits**:
@@ -817,8 +892,16 @@ def test_subject_aware_property(self, age, subject):
 **Configuration Patterns**:
 - `suppress_health_check=[HealthCheck.data_too_large]`: For tests generating large or complex data structures
 - `suppress_health_check=[HealthCheck.function_scoped_fixture]`: For tests using database fixtures
-- `deadline=None` or `deadline=<milliseconds>`: For operations requiring specific timing allowances
+- `deadline=None` or `deadline=<milliseconds>`: For operations requiring specific timing allowances (unlimited time for complex infrastructure operations)
 - `max_examples=<reduced_count>`: For expensive operations requiring fewer but sufficient test cases
+
+**Important**: Use `@settings()` decorator for Hypothesis configuration, not `@pytest.mark.hypothesis()`. The correct pattern is:
+```python
+@given(...)
+@settings(deadline=None, suppress_health_check=[...])
+def test_function(...):
+    pass
+```
 
 **Impact on Development**:
 - More reliable property-based test execution across different environments

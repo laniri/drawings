@@ -50,7 +50,7 @@ The system follows a modern layered architecture with the following technology s
 - **Pydantic v2** for data validation and serialization
 - **SQLAlchemy 2.0** with async support for database ORM
 - **Alembic** for database migrations
-- **Uvicorn** with Gunicorn for production ASGI server
+- **Uvicorn** with standard extras for production ASGI server
 - **Python-Multipart** for file upload handling
 
 **Machine Learning Stack:**

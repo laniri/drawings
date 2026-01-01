@@ -153,7 +153,9 @@ docker-compose -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 ```
 
-**Note**: The production container uses supervisord to manage both nginx (frontend) and gunicorn (backend) processes within a single container. This provides better process management, automatic restarts, and centralized logging compared to separate containers.
+**Note**: The production container uses supervisord to manage both nginx (frontend) and uvicorn (backend) processes within a single container. This provides better process management, automatic restarts, and centralized logging compared to separate containers.
+
+**Important**: In production, nginx is configured to serve the React frontend at the root path (`/`). The FastAPI backend also has a root endpoint that returns API information. Depending on your nginx configuration, direct API access to the root endpoint may be intercepted by nginx to serve the frontend instead. To access the API information endpoint directly, you may need to configure nginx routing or access it through the API prefix.
 
 ### 5. Verify Deployment
 
@@ -187,8 +189,14 @@ Key environment variables in `.env`:
 
 #### Backend (FastAPI)
 - Runs on port 8000 (internal)
-- Uses Gunicorn with 1 worker and uvicorn worker class
-- Managed by supervisord for automatic restart
+- Uses Uvicorn ASGI server with 1 worker
+- **Comprehensive environment validation** with startup script
+- **Automatic directory creation** with proper permissions
+- **Database initialization** for SQLite with proper ownership
+- **Python import validation** to catch configuration issues early (lightweight imports only, avoiding heavy model loading)
+- **Logs redirected to Docker stdout/stderr** for better integration
+- **Hugging Face cache configuration** to prevent model loading permission errors
+- Managed by supervisord for automatic restart with process dependencies
 - Includes health checks and monitoring
 - Runs as non-root user for security
 
@@ -200,7 +208,7 @@ Key environment variables in `.env`:
 - Managed by supervisord alongside backend
 
 #### Process Management (Supervisord)
-- Manages both nginx and gunicorn processes
+- Manages both nginx and uvicorn processes
 - Automatic restart on process failure
 - Centralized logging to `/var/log/supervisor/`
 - Process monitoring and control via supervisorctl
@@ -238,8 +246,10 @@ Logs are stored in the following locations:
 - Application logs: `docker-compose logs backend`
 - Supervisord logs: `/var/log/supervisor/supervisord.log`
 - Nginx logs: `/var/log/supervisor/nginx.err.log` and `/var/log/supervisor/nginx.out.log`
-- Gunicorn logs: `/var/log/supervisor/gunicorn.err.log` and `/var/log/supervisor/gunicorn.out.log`
+- Uvicorn logs: **Redirected to Docker stdout/stderr** (accessible via `docker logs`)
 - Docker logs: `docker-compose logs`
+
+**Important**: The uvicorn process logs are now redirected to Docker's stdout/stderr instead of log files. This provides better integration with Docker logging and makes logs accessible through standard Docker commands.
 
 Access process logs:
 ```bash
@@ -248,10 +258,16 @@ docker exec <container> supervisorctl status
 
 # View specific process logs
 docker exec <container> supervisorctl tail -f nginx
-docker exec <container> supervisorctl tail -f gunicorn
+docker exec <container> supervisorctl tail -f uvicorn
 
 # View supervisord main log
 docker exec <container> cat /var/log/supervisor/supervisord.log
+
+# View uvicorn logs via Docker (recommended)
+docker logs <container>
+
+# View real-time uvicorn logs via Docker
+docker logs -f <container>
 ```
 
 ### Backup
@@ -350,7 +366,7 @@ backend:
 
 ### Docker Supervisord Issues
 
-The production container uses supervisord to manage nginx and gunicorn processes. For detailed troubleshooting of supervisord-related issues, see the [Docker Supervisord Troubleshooting Guide](tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md).
+The production container uses supervisord to manage nginx and uvicorn processes. For detailed troubleshooting of supervisord-related issues, see the [Docker Supervisord Troubleshooting Guide](tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md).
 
 **Quick Diagnostics**:
 ```bash
@@ -359,11 +375,11 @@ docker exec <container> supervisorctl status
 
 # View process logs
 docker exec <container> supervisorctl tail -f nginx
-docker exec <container> supervisorctl tail -f gunicorn
+docker exec <container> supervisorctl tail -f uvicorn
 
 # Restart services
 docker exec <container> supervisorctl restart nginx
-docker exec <container> supervisorctl restart gunicorn
+docker exec <container> supervisorctl restart uvicorn
 
 # Verify frontend build files are present (for debugging)
 docker exec <container> ls -la /var/www/html/
@@ -385,7 +401,7 @@ free -h
 
 # Restart individual services
 docker exec <container> supervisorctl restart nginx
-docker exec <container> supervisorctl restart gunicorn
+docker exec <container> supervisorctl restart uvicorn
 ```
 
 #### Database Connection Issues

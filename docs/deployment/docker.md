@@ -26,9 +26,11 @@ The production Docker image (`Dockerfile.prod`) uses a multi-stage build approac
 The production container uses supervisord to manage multiple processes:
 
 - **nginx**: Serves React frontend and proxies API requests
-- **gunicorn**: Runs FastAPI backend with uvicorn workers
+- **uvicorn**: Runs FastAPI backend with standard ASGI server
 - **Automatic Restart**: Both processes restart automatically on failure
 - **Centralized Logging**: All process logs are managed through supervisord
+- **Log Rotation**: Automatic log rotation at 50MB to prevent disk space issues
+- **Environment Management**: Preconfigured environment variables for container deployment
 
 ### Service Configuration
 
@@ -40,12 +42,16 @@ The production container uses supervisord to manage multiple processes:
 - **Client-Side Routing**: Handles React Router with `try_files` fallback to `index.html`
 - **Performance**: Includes gzip compression and security headers
 - **Reliability**: Configurable proxy timeouts (30s connect/send/read)
+- **Frontend Integration**: Root path (`/`) serves React frontend when available
 
-#### Gunicorn Configuration
-- Binds to `127.0.0.1:8000` (internal only)
-- Single worker with uvicorn worker class
-- Request limits: 1000 max requests with 100 jitter
-- Timeout: 120 seconds
+#### Uvicorn Configuration
+- Binds to `0.0.0.0:8000` (accessible within container network)
+- Single worker process for development/small deployments
+- **Debug logging enabled** for detailed troubleshooting
+- **Logs redirected to Docker stdout/stderr** for better integration
+- **Log rotation**: Automatic rotation at 50MB for both stdout and stderr logs
+- **Environment**: Preconfigured with `STORAGE_BACKEND="local"` and `S3_BUCKET_NAME=""` for container deployment
+- Access logging enabled for request monitoring
 - Runs as non-root `appuser` for security
 
 ## Quick Start
@@ -86,7 +92,7 @@ The Docker Compose configuration includes the following services:
 - **Image**: Combined frontend + backend container
 - **Port**: 80
 - **Process Manager**: Supervisord
-- **Services**: nginx + gunicorn
+- **Services**: nginx + uvicorn
 - **Health Checks**: Built-in endpoint monitoring
 
 ### Database Service
@@ -108,6 +114,8 @@ nano .env
 - `PYTHONPATH=/app` - Python module path
 - `PYTHONDONTWRITEBYTECODE=1` - Disable .pyc files
 - `PYTHONUNBUFFERED=1` - Unbuffered output for logging
+- `STORAGE_BACKEND=local` - Storage backend configuration (default for containers)
+- `S3_BUCKET_NAME=""` - S3 bucket name (empty for local storage mode)
 
 ## Health Checks
 The production container includes comprehensive health monitoring:
@@ -121,7 +129,7 @@ docker exec <container> supervisorctl status
 
 # View process logs
 docker exec <container> supervisorctl tail -f nginx
-docker exec <container> supervisorctl tail -f gunicorn
+docker exec <container> supervisorctl tail -f uvicorn
 ```
 
 ## Troubleshooting
@@ -133,10 +141,13 @@ docker exec <container> supervisorctl status
 
 # Restart individual services
 docker exec <container> supervisorctl restart nginx
-docker exec <container> supervisorctl restart gunicorn
+docker exec <container> supervisorctl restart uvicorn
 
 # View supervisord logs
 docker exec <container> cat /var/log/supervisor/supervisord.log
+
+# View uvicorn logs via Docker (recommended)
+docker logs -f <container>
 ```
 
 ### Common Issues
@@ -152,16 +163,31 @@ docker exec <container> cat /var/log/supervisor/supervisord.log
    - Ensure frontend build completed successfully: `ls -la /var/www/html/`
    - Verify nginx configuration serves React app at root path
    - Test nginx directly: `curl http://localhost:80/` (should return HTML, not JSON)
+   - **Backend Integration**: FastAPI now serves frontend when `frontend_build` exists
+   - **Fallback Behavior**: Without frontend, root path returns API information JSON
 
 3. **API Requests Failing**
-   - Check gunicorn status: `supervisorctl status gunicorn`
-   - Verify backend logs: `tail -f /var/log/supervisor/gunicorn.err.log`
+   - Check uvicorn status: `supervisorctl status uvicorn`
+   - Verify backend logs: `docker logs <container>` (uvicorn logs now via Docker)
    - Test direct backend access: `curl http://127.0.0.1:8000/health`
+   - Check log file sizes: `ls -lh /var/log/supervisor/` (logs rotate at 50MB)
+
+4. **Log Management Issues**
+   - **Log Rotation**: Supervisord automatically rotates logs at 50MB
+   - **Disk Space**: Log rotation prevents disk space exhaustion
+   - **Log Access**: Use `docker logs <container>` for uvicorn logs
+   - **Historical Logs**: Check `/var/log/supervisor/` for rotated log files
+
+5. **Storage Configuration Issues**
+   - **Default**: Container uses local storage (`STORAGE_BACKEND=local`)
+   - **S3 Override**: Set environment variables to enable S3 storage
+   - **Configuration**: Override via Docker environment variables or .env file
 
 4. **Permission Issues**
    - Verify directory permissions: `ls -la /app`
    - Check user configuration: `id appuser`
    - Ensure proper ownership: `chown -R appuser:appuser /app`
+   - Check log directory permissions: `ls -la /var/log/supervisor/`
 
 ## Production Deployment
 For production deployment, consider:
@@ -200,7 +226,7 @@ For production deployment, consider:
 ### Process Optimization
 - Supervisord provides reliable process management
 - Nginx handles static files efficiently
-- Gunicorn worker configuration optimized for workload
+- Uvicorn worker configuration optimized for workload
 - Health checks ensure service availability
 
 ### Resource Management

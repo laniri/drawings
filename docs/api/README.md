@@ -149,7 +149,8 @@ Common error responses across 1 status codes:
 - [POST /api/v1/storage/cleanup](./endpoints/POST__api_v1_storage_cleanup.md)
 
 ### Untagged
-- [GET /](./endpoints/GET__.md)
+- [GET /](./endpoints/GET__.md) - Root endpoint (serves frontend or API info)
+- [GET /api](./endpoints/GET__api.md) - **NEW**: API root information endpoint (always JSON)
 - [GET /health](./endpoints/GET__health.md)
 - [GET /health/detailed](./endpoints/GET__health_detailed.md)
 - [GET /metrics](./endpoints/GET__metrics.md)

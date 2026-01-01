@@ -85,17 +85,39 @@ app.include_router(demo_router, prefix="/demo", tags=["demo"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# Mount React frontend (only if frontend_build directory exists)
+import os
+if os.path.exists("frontend_build"):
+    app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
 
-@app.get("/")
-async def root():
-    """Root endpoint - returns basic API information."""
+
+@app.get("/api")
+async def api_root():
+    """API root endpoint - returns basic API information."""
     return {
-        "message": "Children's Drawing Anomaly Detection System",
+        "message": "Children's Drawing Anomaly Detection System API",
         "version": settings.VERSION,
         "docs_url": "/docs",
         "api_url": f"{settings.API_V1_STR}",
         "demo_url": "/demo",
     }
+
+
+@app.get("/")
+async def root():
+    """Root endpoint - serves React frontend or API info if frontend not available."""
+    # If frontend is mounted, this won't be reached
+    # This is a fallback for development/testing
+    if os.path.exists("frontend_build"):
+        return FileResponse("frontend_build/index.html")
+    else:
+        return {
+            "message": "Children's Drawing Anomaly Detection System",
+            "version": settings.VERSION,
+            "docs_url": "/docs",
+            "api_url": f"{settings.API_V1_STR}",
+            "demo_url": "/demo",
+        }
 
 
 @app.get("/health")

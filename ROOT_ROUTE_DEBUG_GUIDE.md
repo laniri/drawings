@@ -96,7 +96,7 @@ For a more robust architecture, consider:
 ### Option 2: Fix nginx Configuration
 - Debug why nginx isn't serving the React app
 - Ensure nginx is properly configured in the container
-- Check if both nginx and gunicorn are running correctly
+- Check if both nginx and uvicorn are running correctly
 
 ## Troubleshooting
 
@@ -127,7 +127,7 @@ curl http://children-drawing-prod-alb-1755835064.eu-west-1.elb.amazonaws.com/
 
 1. **Rate Limiting**: Wait 60 seconds between requests
 2. **CloudFront Cache**: Wait 2-3 minutes after deployment
-3. **Container Startup**: Check if both nginx and gunicorn are running
+3. **Container Startup**: Check if both nginx and uvicorn are running
 4. **React Build Missing**: Frontend build might not be included in container
 
 ## Monitoring

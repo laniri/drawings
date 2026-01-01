@@ -123,6 +123,8 @@ A machine learning-powered application that analyzes children's drawings to iden
    - Frontend: http://localhost:5173 (Demo page with interactive samples)
    - Dashboard: http://localhost:5173/dashboard
    - Backend API: http://localhost:8000
+   - API Information: http://localhost:8000/api (API root endpoint with system info)
+   - Root Endpoint: http://localhost:8000/ (Serves React frontend if available, otherwise API info)
    - API Documentation: http://localhost:8000/docs
 
 ## Model Training
@@ -197,23 +199,60 @@ docker-compose -f docker-compose.dev.yml down
 
 ### Production Docker Deployment
 
-The production Docker image uses a multi-stage build with supervisord for robust process management:
+The production Docker image uses a simplified single-process architecture for optimal memory usage and reliability:
 
+#### Standard Production Container (Dockerfile.prod)
 - **Frontend Build Stage**: Builds React application with optimized production bundle
 - **Backend Stage**: Python 3.11-slim with nginx and supervisord for process orchestration
-- **Process Management**: Supervisord manages both nginx (frontend) and gunicorn (backend) processes
+- **Process Management**: Supervisord manages both nginx (frontend) and uvicorn (backend) processes
+- **Startup Validation**: Comprehensive startup script validates environment, creates directories, and performs lightweight Python import testing (avoiding heavy model loading)
+- **Environment Configuration**: Complete environment defaults with comprehensive variable setup
+- **Directory Management**: Automatic creation of required directories with proper permissions
+- **Database Initialization**: Automatic SQLite database creation and permission setup
+- **Log Management**: Automatic log rotation with 50MB size limits and comprehensive logging configuration
 - **Frontend Serving**: Nginx serves React app at root path (`/`) and handles client-side routing
 - **API Routing**: Nginx proxies `/api/*` requests to FastAPI backend on port 8000
 - **Health Monitoring**: Built-in health checks and automatic process restart capabilities
 - **Security**: Non-root user execution with proper permission management
+- **Process Dependencies**: Startup script runs before uvicorn to ensure proper initialization
+- **Hugging Face Cache Fix**: Configured cache directories to prevent permission errors during model loading
+
+#### Simplified Production Container (Dockerfile.prod.simplified)
+**Recommended for memory-constrained environments or when experiencing container startup issues:**
+
+- **Single Process Architecture**: Only uvicorn process, no nginx or supervisord
+- **FastAPI Frontend Serving**: FastAPI serves React frontend directly on port 80
+- **Lazy Model Loading**: Vision Transformer models loaded on first API request (not during startup)
+- **Memory Optimized**: Eliminates ~570MB memory usage during startup phase
+- **Simplified Health Checks**: Basic health endpoint without model validation
+- **Faster Startup**: Immediate container readiness without complex process management
+- **Hugging Face Cache Configuration**: Proper cache directories to prevent permission errors
+- **Direct Port 80**: Single service handles both frontend and API requests
 
 ```bash
-# Build production image
+# Build standard production image
 docker build -f Dockerfile.prod -t children-drawing-app:latest .
 
-# Run production container
+# Build simplified production image (recommended for memory-constrained environments)
+docker build -f Dockerfile.prod.simplified -t children-drawing-app:simplified .
+
+# Run standard production container
 docker run -p 80:80 children-drawing-app:latest
+
+# Run simplified production container
+docker run -p 80:80 children-drawing-app:simplified
 ```
+
+**When to use simplified container:**
+- Memory-constrained environments (< 2GB available)
+- Container startup failures with exit code 137 (memory exhaustion)
+- Faster deployment requirements
+- Simpler debugging and troubleshooting needs
+
+**Trade-offs of simplified container:**
+- First API request slower (model downloads on first use)
+- No nginx features (rate limiting, advanced routing)
+- Single point of failure (no process management)
 
 ## Project Structure
 
@@ -389,13 +428,25 @@ The system includes extensive property-based tests using Hypothesis with enhance
 - **Data sufficiency warning generation tests** with optimized test execution
 - **Subject encoding and embedding tests** with health check suppression for large data
 - **Authentication and access control tests** with deadline management
-- **Infrastructure deployment reproducibility tests** with enhanced configuration testing
+- **Infrastructure deployment reproducibility tests** with comprehensive CloudFormation template validation
 - **Database migration consistency tests** with proper timing allowances
 - **Backup and recovery integrity tests** with simplified corruption detection
 
+#### Infrastructure Deployment Testing
+
+The system includes comprehensive property-based tests for infrastructure deployment reproducibility:
+
+- **Template Generation Consistency**: Validates that identical parameters produce identical CloudFormation templates
+- **Network Configuration Reproducibility**: Tests VPC, subnet, and networking resource consistency across deployments
+- **Storage Configuration Reproducibility**: Validates S3 bucket configurations, versioning, encryption, and lifecycle policies
+- **ECS Configuration Reproducibility**: Tests Fargate task definitions, service configurations, and auto-scaling settings
+- **Resource Property Validation**: Ensures all AWS resources maintain consistent properties across deployment cycles
+
+These tests use mock CloudFormation templates to validate that destroying and recreating infrastructure results in functionally equivalent AWS resources, supporting requirements for reliable production deployments.
+
 **Enhanced Reliability Features**:
 - **Health Check Management**: Uses `HealthCheck.data_too_large` suppression for complex test scenarios
-- **Deadline Configuration**: Configurable test deadlines for database operations and model training
+- **Deadline Configuration**: Configurable test deadlines for database operations and model training, with unlimited deadlines for complex infrastructure operations
 - **Function-Scoped Fixture Support**: Proper handling of database fixtures in property-based tests
 - **Optimized Test Execution**: Reduced example counts for expensive operations while maintaining coverage
 
@@ -407,9 +458,11 @@ pytest tests/test_property_*.py -v
 pytest tests/test_property_*.py -v --tb=short
 
 # Run specific property-based test categories
-pytest tests/test_property_*infrastructure*.py -v  # Infrastructure tests
+pytest tests/test_property_*infrastructure*.py -v  # Infrastructure deployment tests
 pytest tests/test_property_*subject*.py -v         # Subject-aware tests
 pytest tests/test_property_*backup*.py -v          # Backup and recovery tests
+pytest tests/test_property_*environment*.py -v     # Environment configuration tests
+pytest tests/test_property_*monitoring*.py -v      # Monitoring and alerting tests
 ```
 
 ### Test Development Guidelines
@@ -527,6 +580,12 @@ npm run test:ui         # Run tests with Vitest UI
 The system provides a comprehensive REST API:
 
 ```bash
+# Get basic API information (always JSON)
+curl "http://localhost:8000/api"
+
+# Get root endpoint (frontend HTML or API JSON fallback)
+curl "http://localhost:8000/"
+
 # Get system statistics
 curl "http://localhost:8000/api/v1/analysis/stats"
 
@@ -685,11 +744,12 @@ pip install reportlab>=4.0.0
    - Check that hybrid embeddings are generated before training
    - Verify database connectivity and subject category data
 
-7. **Vision Transformer Issues**
+8. **Vision Transformer Issues**
    - Ensure PyTorch and transformers are properly installed
    - Check that the embedding service initializes correctly
    - Verify image preprocessing pipeline
    - For testing: Set `SKIP_MODEL_LOADING=true` to bypass model loading
+   - **Docker Permission Issues**: If running in Docker and seeing Hugging Face cache permission errors, ensure cache directories are properly configured with writable permissions
 
 8. **Subject Category Issues**
    - **Missing Subject Information**: System automatically defaults to "unspecified" category
@@ -714,26 +774,51 @@ pip install reportlab>=4.0.0
    docker exec <container> supervisorctl status
    
    # Expected output:
-   # gunicorn                         RUNNING   pid 123, uptime 0:05:30
+   # startup                          EXITED    Jan 01 12:00 AM (startup script completed)
+   # uvicorn                          RUNNING   pid 123, uptime 0:05:30
    # nginx                            RUNNING   pid 124, uptime 0:05:30
    
    # View process logs
    docker exec <container> supervisorctl tail -f nginx
-   docker exec <container> supervisorctl tail -f gunicorn
+   docker exec <container> supervisorctl tail -f uvicorn
+   
+   # View startup validation logs
+   docker exec <container> supervisorctl tail startup
+   
+   # View uvicorn logs via Docker (recommended - logs now redirected)
+   docker logs -f <container>
    
    # Restart individual services
    docker exec <container> supervisorctl restart nginx
-   docker exec <container> supervisorctl restart gunicorn
+   docker exec <container> supervisorctl restart uvicorn
    
    # Verify frontend build files are present (debugging)
    docker exec <container> ls -la /var/www/html/
    
+   # Check environment validation
+   docker exec <container> cat /var/log/supervisor/startup.out.log
+   
    # Common issues:
    # - Frontend not loading: Check nginx status and logs
-   # - API requests failing: Check gunicorn status and logs  
+   # - API requests failing: Check uvicorn status and Docker logs (not files)
    # - Both running but not communicating: Check internal networking
    # - Frontend files missing: Verify build files copied correctly
    # - Root path returns JSON instead of HTML: Nginx configuration issue
+   # - Environment validation failures: Check startup logs for missing variables or directories
+   # - Python import errors: Check startup logs for module import issues
+   # - Hugging Face cache permission errors: Fixed in latest version with proper cache directory configuration
+   
+   # Note: Uvicorn logs are now redirected to Docker stdout/stderr for better integration
+   # Use 'docker logs <container>' instead of checking log files
+   # Log files are automatically rotated at 50MB to prevent disk space issues
+   
+   # Environment Configuration:
+   # - STORAGE_BACKEND is set to "local" for container deployment
+   # - S3_BUCKET_NAME is empty by default (local storage mode)
+   # - All required directories are created automatically with proper permissions
+   # - Database is initialized automatically if it doesn't exist
+   # - Override these via environment variables if S3 storage is needed
+   # - Hugging Face cache directories are pre-configured to prevent permission issues
    
    # For detailed troubleshooting, see tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md
    ```

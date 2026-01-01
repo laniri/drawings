@@ -89,8 +89,21 @@ DATABASE_URL=sqlite:///:memory:
 - **Production**: Uses S3 storage when `APP_ENVIRONMENT=production` or `AWS_REGION` is set
 - **Testing**: Uses LOCAL storage when `TESTING=true` and `CI=true` are both set, **except when `APP_ENVIRONMENT=production` is explicitly set**
 - **Local Development**: Uses LOCAL storage by default
+- **Container Deployment**: Docker containers default to LOCAL storage via `STORAGE_BACKEND=local` and `S3_BUCKET_NAME=""`
 
 **Production Environment Precedence**: When `APP_ENVIRONMENT=production` is explicitly set, it takes precedence over testing overrides. This ensures production deployments work correctly even in CI/testing contexts, which is essential for production deployment pipelines.
+
+**Container Storage Configuration**: Docker containers are preconfigured with local storage settings:
+```bash
+STORAGE_BACKEND=local
+S3_BUCKET_NAME=""
+```
+
+To enable S3 storage in containers, override these environment variables:
+```bash
+# For S3 storage in containers
+docker run -e STORAGE_BACKEND=s3 -e S3_BUCKET_NAME=your-bucket-name <image>
+```
 
 #### Database Configuration
 The system supports flexible SQLite database URL formats:

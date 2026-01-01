@@ -217,6 +217,42 @@ aws ec2 describe-security-groups \
 # 1. Ensure health check endpoint returns 200
 # 2. Verify port 8000 is exposed in container
 # 3. Check security group rules allow port 8000 from ALB
+# 4. Check for Hugging Face cache permission errors in logs
+```
+
+#### Issue: Hugging Face model loading failures
+```bash
+# Error: PermissionError when downloading Vision Transformer models
+# Symptoms: Container crashes during startup, health checks fail
+```
+
+**Solution:**
+```bash
+# Check container logs for Hugging Face cache errors
+aws logs filter-log-events \
+  --log-group-name /ecs/children-drawing-prod \
+  --filter-pattern "huggingface" \
+  --region eu-west-1
+
+# Look for permission denied errors in cache directory
+aws logs filter-log-events \
+  --log-group-name /ecs/children-drawing-prod \
+  --filter-pattern "Permission denied" \
+  --region eu-west-1
+
+# Verify task definition includes cache environment variables:
+aws ecs describe-task-definition \
+  --task-definition children-drawing-prod-task \
+  --query 'taskDefinition.containerDefinitions[0].environment[?contains(name, `HF_`)]'
+
+# Expected environment variables in task definition:
+# - HF_HOME=/app/.cache/huggingface
+# - TRANSFORMERS_CACHE=/app/.cache/huggingface
+# - HF_DATASETS_CACHE=/app/.cache/huggingface
+# - MPLCONFIGDIR=/app/.cache/matplotlib
+
+# If missing, update task definition with proper cache configuration
+# This issue is resolved in the latest Dockerfile.prod version
 ```
 
 ### Load Balancer Issues
