@@ -175,7 +175,7 @@ stdout_logfile=/var/log/supervisor/uvicorn.out.log
 stderr_logfile_maxbytes=50MB
 stdout_logfile_maxbytes=50MB
 user=appuser
-environment=PYTHONPATH="/app"
+environment=PYTHONPATH="/app",STORAGE_BACKEND="local"
 EOF
 
 # Create necessary directories and set permissions
