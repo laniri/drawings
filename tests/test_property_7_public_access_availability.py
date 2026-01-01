@@ -68,11 +68,18 @@ def public_route_data(draw):
 @st.composite
 def request_headers(draw):
     """Generate various request headers to test public access."""
+    import string
+    
     headers = {}
     
     # Add common headers that shouldn't affect public access
     if draw(st.booleans()):
-        headers["User-Agent"] = draw(st.text(min_size=1, max_size=100))
+        # Restrict User-Agent to ASCII characters to avoid Unicode encoding issues
+        headers["User-Agent"] = draw(st.text(
+            alphabet=string.ascii_letters + string.digits + string.punctuation + " ",
+            min_size=1, 
+            max_size=100
+        ))
     
     if draw(st.booleans()):
         headers["Accept"] = draw(st.sampled_from([
@@ -89,10 +96,23 @@ def request_headers(draw):
 @st.composite
 def client_info(draw):
     """Generate client information for testing public access."""
+    import string
+    
     return {
         "ip": f"{draw(st.integers(1, 255))}.{draw(st.integers(1, 255))}.{draw(st.integers(1, 255))}.{draw(st.integers(1, 255))}",
-        "user_agent": draw(st.text(min_size=1, max_size=200)),
-        "referer": draw(st.one_of(st.none(), st.text(min_size=1, max_size=200)))
+        "user_agent": draw(st.text(
+            alphabet=string.ascii_letters + string.digits + string.punctuation + " ",
+            min_size=1, 
+            max_size=200
+        )),
+        "referer": draw(st.one_of(
+            st.none(), 
+            st.text(
+                alphabet=string.ascii_letters + string.digits + string.punctuation + " .-_/:",
+                min_size=1, 
+                max_size=200
+            )
+        ))
     }
 
 
