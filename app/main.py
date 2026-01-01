@@ -90,6 +90,19 @@ import os
 
 if os.path.exists("frontend_build"):
     app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
+else:
+    # Fallback root endpoint when frontend build doesn't exist (e.g., during testing)
+    @app.get("/")
+    async def root_fallback():
+        """Fallback root endpoint when React frontend build is not available."""
+        return {
+            "message": "Children's Drawing Anomaly Detection System",
+            "version": settings.VERSION,
+            "docs_url": "/docs",
+            "api_url": f"{settings.API_V1_STR}",
+            "demo_url": "/demo",
+            "status": "Frontend build not available - API only mode"
+        }
 
 
 @app.get("/api")
