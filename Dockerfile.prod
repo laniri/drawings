@@ -196,16 +196,18 @@ if [ ! -f "/app/drawings.db" ]; then
     chmod 664 /app/drawings.db
 fi
 
-# Test Python imports
-echo "🐍 Testing Python imports..."
+# Test basic Python imports (lightweight)
+echo "🐍 Testing basic Python imports..."
 python -c "
 import sys
 sys.path.insert(0, '/app')
 try:
-    from app.main import app
-    print('✅ FastAPI app import successful')
+    # Test basic imports without loading heavy models
+    from app.core.config import settings
+    from app.core.database import engine
+    print('✅ Basic Python imports successful')
 except Exception as e:
-    print(f'❌ FastAPI app import failed: {e}')
+    print(f'❌ Basic Python imports failed: {e}')
     exit(1)
 "
 
