@@ -101,7 +101,7 @@ else:
             "docs_url": "/docs",
             "api_url": f"{settings.API_V1_STR}",
             "demo_url": "/demo",
-            "status": "Frontend build not available - API only mode"
+            "status": "Frontend build not available - API only mode",
         }
 
 
