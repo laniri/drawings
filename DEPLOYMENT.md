@@ -142,8 +142,11 @@ The system uses PostgreSQL in production. The database will be automatically ini
 
 ### 4. Build and Deploy
 
+The system provides two Docker container options:
+
+#### Standard Production Container (Recommended for most deployments)
 ```bash
-# Build images
+# Build standard production image
 docker-compose -f docker-compose.prod.yml build
 
 # Start services
@@ -152,6 +155,39 @@ docker-compose -f docker-compose.prod.yml up -d
 # Run database migrations
 docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 ```
+
+**Features:**
+- nginx + supervisord + uvicorn architecture
+- Process management with automatic restart
+- Pre-loaded Vision Transformer models
+- Advanced nginx features (rate limiting, security headers)
+- Comprehensive logging and monitoring
+
+#### Simplified Production Container (For memory-constrained environments)
+```bash
+# Build simplified production image
+docker build -f Dockerfile.prod.simplified -t children-drawing-app:simplified .
+
+# Run simplified container
+docker run -d -p 80:80 --name drawing-app children-drawing-app:simplified
+
+# Run database migrations (if needed)
+docker exec drawing-app alembic upgrade head
+```
+
+**Features:**
+- Single uvicorn process architecture
+- FastAPI serves frontend directly on port 80
+- Lazy model loading (models load on first API request)
+- ~570MB less memory usage during startup
+- Faster container startup time
+- Simpler debugging and troubleshooting
+
+**When to use simplified container:**
+- Memory-constrained environments (< 2GB available RAM)
+- Container startup failures with exit code 137 (memory exhaustion)
+- Faster deployment requirements
+- Development or testing environments
 
 **Note**: The production container uses supervisord to manage both nginx (frontend) and uvicorn (backend) processes within a single container. This provides better process management, automatic restarts, and centralized logging compared to separate containers.
 

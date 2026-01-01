@@ -769,7 +769,9 @@ pip install reportlab>=4.0.0
 
 9. **Docker Production Container Issues**
    ```bash
-   # The production container uses supervisord for process management
+   # The production system offers two container options:
+   
+   # 1. Standard Container (Dockerfile.prod) - Full-featured with nginx + supervisord
    # Check process status
    docker exec <container> supervisorctl status
    
@@ -782,37 +784,33 @@ pip install reportlab>=4.0.0
    docker exec <container> supervisorctl tail -f nginx
    docker exec <container> supervisorctl tail -f uvicorn
    
-   # View startup validation logs
-   docker exec <container> supervisorctl tail startup
+   # 2. Simplified Container (Dockerfile.prod.simplified) - Single uvicorn process
+   # Recommended for memory-constrained environments or startup issues
    
-   # View uvicorn logs via Docker (recommended - logs now redirected)
+   # Check container logs directly (simplified container)
    docker logs -f <container>
    
-   # Restart individual services
-   docker exec <container> supervisorctl restart nginx
-   docker exec <container> supervisorctl restart uvicorn
+   # Check if FastAPI is serving frontend correctly
+   curl -I http://localhost:80/  # Should return HTML content-type
+   curl -I http://localhost:80/api  # Should return JSON content-type
    
-   # Verify frontend build files are present (debugging)
-   docker exec <container> ls -la /var/www/html/
+   # Memory exhaustion issues (exit code 137):
+   # - Use simplified container: docker build -f Dockerfile.prod.simplified
+   # - Reduces memory usage by ~570MB during startup
+   # - Models load on first API request instead of startup
    
-   # Check environment validation
-   docker exec <container> cat /var/log/supervisor/startup.out.log
+   # Container architecture comparison:
+   # Standard: nginx + supervisord + uvicorn + pre-loaded models
+   # Simplified: uvicorn only + lazy model loading + FastAPI frontend serving
    
    # Common issues:
-   # - Frontend not loading: Check nginx status and logs
-   # - API requests failing: Check uvicorn status and Docker logs (not files)
-   # - Both running but not communicating: Check internal networking
-   # - Frontend files missing: Verify build files copied correctly
-   # - Root path returns JSON instead of HTML: Nginx configuration issue
-   # - Environment validation failures: Check startup logs for missing variables or directories
-   # - Python import errors: Check startup logs for module import issues
-   # - Hugging Face cache permission errors: Fixed in latest version with proper cache directory configuration
+   # - Memory exhaustion (exit 137): Use simplified container
+   # - Frontend not loading: Check if FastAPI is serving on port 80
+   # - API requests failing: Check uvicorn status and logs
+   # - First request slow (simplified): Expected due to lazy model loading
+   # - Hugging Face cache permission errors: Fixed in both containers
    
-   # Note: Uvicorn logs are now redirected to Docker stdout/stderr for better integration
-   # Use 'docker logs <container>' instead of checking log files
-   # Log files are automatically rotated at 50MB to prevent disk space issues
-   
-   # Environment Configuration:
+   # Environment Configuration (both containers):
    # - STORAGE_BACKEND is set to "local" for container deployment
    # - S3_BUCKET_NAME is empty by default (local storage mode)
    # - All required directories are created automatically with proper permissions
