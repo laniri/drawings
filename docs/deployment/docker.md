@@ -123,19 +123,31 @@ nano .env
 - `MPLCONFIGDIR=/app/.cache/matplotlib` - Matplotlib configuration directory
 
 ## Health Checks
-The production container includes comprehensive health monitoring:
+The production container includes comprehensive health monitoring with multiple endpoints:
 
 ```bash
-# Container health check
+# Ultra-lightweight health check (recommended for ALB)
+curl -f http://localhost:80/health/simple
+
+# Standard health check with environment info
 curl -f http://localhost:80/health
 
-# Check supervisord status
+# Detailed health check with system metrics
+curl -f http://localhost:80/health/detailed
+
+# Check supervisord status (if using multi-process container)
 docker exec <container> supervisorctl status
 
 # View process logs
 docker exec <container> supervisorctl tail -f nginx
 docker exec <container> supervisorctl tail -f uvicorn
 ```
+
+### Health Check Endpoints
+
+- **`/health/simple`**: Ultra-lightweight endpoint returning `{"status": "ok"}` - ideal for load balancer health checks
+- **`/health`**: Standard endpoint with timestamp, environment, and storage backend information
+- **`/health/detailed`**: Comprehensive endpoint with system metrics, middleware stats, and resource usage
 
 ## Troubleshooting
 
@@ -168,8 +180,9 @@ docker logs -f <container>
    - Ensure frontend build completed successfully: `ls -la /var/www/html/`
    - Verify nginx configuration serves React app at root path
    - Test nginx directly: `curl http://localhost:80/` (should return HTML, not JSON)
-   - **Backend Integration**: FastAPI now serves frontend when `frontend_build` exists
-   - **Fallback Behavior**: Without frontend, root path returns API information JSON
+   - **Simplified Container**: FastAPI StaticFiles mount serves frontend directly
+   - **Architecture Change**: Root path now handled by StaticFiles mount, no JSON fallback
+   - **API Information**: Use `/api` endpoint for JSON API information
 
 3. **API Requests Failing**
    - Check uvicorn status: `supervisorctl status uvicorn`

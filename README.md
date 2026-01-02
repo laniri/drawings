@@ -124,7 +124,7 @@ A machine learning-powered application that analyzes children's drawings to iden
    - Dashboard: http://localhost:5173/dashboard
    - Backend API: http://localhost:8000
    - API Information: http://localhost:8000/api (API root endpoint with system info)
-   - Root Endpoint: http://localhost:8000/ (Serves React frontend if available, otherwise API info)
+   - Root Endpoint: http://localhost:8000/ (Serves React frontend via StaticFiles mount)
    - API Documentation: http://localhost:8000/docs
 
 ## Model Training
@@ -203,22 +203,17 @@ The production Docker image uses a simplified single-process architecture for op
 
 #### Standard Production Container (Dockerfile.prod)
 - **Frontend Build Stage**: Builds React application with optimized production bundle
-- **Backend Stage**: Python 3.11-slim with nginx and supervisord for process orchestration
-- **Process Management**: Supervisord manages both nginx (frontend) and uvicorn (backend) processes
-- **Startup Validation**: Comprehensive startup script validates environment, creates directories, and performs lightweight Python import testing (avoiding heavy model loading)
-- **Environment Configuration**: Complete environment defaults with comprehensive variable setup including:
-  - `STORAGE_BACKEND=local` - Forces local storage mode for container deployment
-  - `DATABASE_URL=sqlite:///./drawings.db` - SQLite database configuration
-  - `ENVIRONMENT=production` - Explicit production environment setting
+- **Backend Stage**: Python 3.11-slim with simplified single-process architecture
+- **Process Management**: Single uvicorn process serving both frontend and API on port 80
+- **FastAPI Frontend Serving**: FastAPI serves React frontend directly using StaticFiles mount
+- **Environment Configuration**: Flexible environment configuration controlled by deployment (ECS task definition, docker-compose, etc.)
 - **Directory Management**: Automatic creation of required directories with proper permissions
 - **Database Initialization**: Automatic SQLite database creation and permission setup
-- **Log Management**: Automatic log rotation with 50MB size limits and comprehensive logging configuration
-- **Frontend Serving**: Nginx serves React app at root path (`/`) and handles client-side routing
-- **API Routing**: Nginx proxies `/api/*` requests to FastAPI backend on port 8000
-- **Health Monitoring**: Built-in health checks and automatic process restart capabilities
+- **Enhanced Health Monitoring**: Extended health check with 180s startup grace period for reliable container initialization
+- **Verbose Startup Logging**: Comprehensive startup logging with environment variable output for debugging
 - **Security**: Non-root user execution with proper permission management
-- **Process Dependencies**: Startup script runs before uvicorn to ensure proper initialization
 - **Hugging Face Cache Fix**: Configured cache directories to prevent permission errors during model loading
+- **Lazy Model Loading**: Vision Transformer models loaded on first API request to reduce startup memory usage
 
 #### Simplified Production Container (Dockerfile.prod.simplified)
 **Recommended for memory-constrained environments or when experiencing container startup issues:**
@@ -227,20 +222,17 @@ The production Docker image uses a simplified single-process architecture for op
 - **FastAPI Frontend Serving**: FastAPI serves React frontend directly on port 80
 - **Lazy Model Loading**: Vision Transformer models loaded on first API request (not during startup)
 - **Memory Optimized**: Eliminates ~570MB memory usage during startup phase
-- **Simplified Health Checks**: Basic health endpoint without model validation
+- **Simplified Health Checks**: Basic health endpoint without model validation (90s startup grace period)
 - **Faster Startup**: Immediate container readiness without complex process management
 - **Hugging Face Cache Configuration**: Proper cache directories to prevent permission errors
 - **Direct Port 80**: Single service handles both frontend and API requests
-- **Environment Configuration**: Includes same environment defaults as standard container:
-  - `STORAGE_BACKEND=local` - Local storage mode for container deployment
-  - `DATABASE_URL=sqlite:///./drawings.db` - SQLite database configuration
-  - `ENVIRONMENT=production` - Production environment setting
+- **Environment Configuration**: Flexible environment configuration controlled by deployment
 
 ```bash
 # Build standard production image
 docker build -f Dockerfile.prod -t children-drawing-app:latest .
 
-# Build simplified production image (recommended for memory-constrained environments)
+# Build simplified production image (alternative for memory-constrained environments)
 docker build -f Dockerfile.prod.simplified -t children-drawing-app:simplified .
 
 # Run standard production container
@@ -250,16 +242,19 @@ docker run -p 80:80 children-drawing-app:latest
 docker run -p 80:80 children-drawing-app:simplified
 ```
 
-**When to use simplified container:**
-- Memory-constrained environments (< 2GB available)
-- Container startup failures with exit code 137 (memory exhaustion)
-- Faster deployment requirements
-- Simpler debugging and troubleshooting needs
+**Container Architecture Comparison:**
+- **Standard (Dockerfile.prod)**: Single uvicorn process serving both frontend and API on port 80 with extended startup grace period (180s)
+- **Simplified (Dockerfile.prod.simplified)**: Same architecture with reduced startup grace period (90s vs 180s)
 
-**Trade-offs of simplified container:**
-- First API request slower (model downloads on first use)
-- No nginx features (rate limiting, advanced routing)
-- Single point of failure (no process management)
+**When to use standard container:**
+- Production deployments requiring maximum reliability
+- Environments where longer startup times are acceptable
+- When comprehensive startup logging and debugging is needed
+
+**When to use simplified container:**
+- Faster deployment requirements
+- Development or testing environments
+- When shorter health check periods are preferred
 
 ## Project Structure
 
@@ -590,8 +585,15 @@ The system provides a comprehensive REST API:
 # Get basic API information (always JSON)
 curl "http://localhost:8000/api"
 
-# Get root endpoint (frontend HTML or API JSON fallback)
+# Get root endpoint (frontend HTML or JSON fallback)
 curl "http://localhost:8000/"
+# Returns: HTML (React app) if frontend_build exists
+# Returns: JSON system info if frontend_build doesn't exist
+
+# Health check endpoints
+curl "http://localhost:8000/health/simple"    # Ultra-lightweight: {"status": "ok"}
+curl "http://localhost:8000/health"           # Standard with environment info
+curl "http://localhost:8000/health/detailed"  # Comprehensive system metrics
 
 # Get system statistics
 curl "http://localhost:8000/api/v1/analysis/stats"
@@ -745,6 +747,9 @@ pip install reportlab>=4.0.0
    - Check if backend is running on port 8000
    - Verify Vite proxy configuration in `frontend/vite.config.ts`
    - Ensure API endpoints are accessible
+   - **Root endpoint behavior**: 
+     - With frontend build: Serves React app (HTML)
+     - Without frontend build: Returns JSON system info with available endpoints
 
 6. **Model Training Fails**
    - Ensure sufficient drawings are uploaded (minimum 10 per age group)
@@ -778,44 +783,43 @@ pip install reportlab>=4.0.0
    ```bash
    # The production system offers two container options:
    
-   # 1. Standard Container (Dockerfile.prod) - Full-featured with nginx + supervisord
-   # Check process status
-   docker exec <container> supervisorctl status
+   # 1. Standard Container (Dockerfile.prod) - Single uvicorn process with extended startup
+   # Check container logs for startup information
+   docker logs -f <container>
    
-   # Expected output:
-   # startup                          EXITED    Jan 01 12:00 AM (startup script completed)
-   # uvicorn                          RUNNING   pid 123, uptime 0:05:30
-   # nginx                            RUNNING   pid 124, uptime 0:05:30
+   # Expected startup output:
+   # Starting FastAPI application...
+   # Environment: APP_ENVIRONMENT=<value-from-task-definition>
+   # Storage: STORAGE_BACKEND=<value-from-task-definition>
+   # INFO:     Started server process [1]
+   # INFO:     Waiting for application startup.
+   # INFO:     Application startup complete.
+   # INFO:     Uvicorn running on http://0.0.0.0:80
    
-   # View process logs
-   docker exec <container> supervisorctl tail -f nginx
-   docker exec <container> supervisorctl tail -f uvicorn
-   
-   # 2. Simplified Container (Dockerfile.prod.simplified) - Single uvicorn process
-   # Recommended for memory-constrained environments or startup issues
-   
-   # Check container logs directly (simplified container)
+   # 2. Simplified Container (Dockerfile.prod.simplified) - Same architecture, shorter startup
+   # Check container logs directly
    docker logs -f <container>
    
    # Check if FastAPI is serving frontend correctly
-   curl -I http://localhost:80/  # Should return HTML content-type
+   curl -I http://localhost:80/  # Should return HTML content-type (React app)
    curl -I http://localhost:80/api  # Should return JSON content-type
    
-   # Memory exhaustion issues (exit code 137):
-   # - Use simplified container: docker build -f Dockerfile.prod.simplified
-   # - Reduces memory usage by ~570MB during startup
-   # - Models load on first API request instead of startup
+   # Health check configuration:
+   # Standard container: 180s startup grace period for reliable initialization
+   # Simplified container: 90s startup grace period for faster deployment
    
-   # Container architecture comparison:
-   # Standard: nginx + supervisord + uvicorn + pre-loaded models
-   # Simplified: uvicorn only + lazy model loading + FastAPI frontend serving
+   # Container architecture (both containers):
+   # Single uvicorn process serving both frontend and API on port 80
+   # FastAPI StaticFiles mount serves React frontend at root path
+   # Lazy model loading: Vision Transformer models load on first API request
+   # Reduced memory usage during startup compared to multi-process architectures
    
    # Common issues:
-   # - Memory exhaustion (exit 137): Use simplified container
-   # - Frontend not loading: Check if FastAPI is serving on port 80
+   # - Frontend not loading: Check if FastAPI StaticFiles mount is serving React app
    # - API requests failing: Check uvicorn status and logs
-   # - First request slow (simplified): Expected due to lazy model loading
+   # - First request slow: Expected due to lazy model loading
    # - Hugging Face cache permission errors: Fixed in both containers
+   # - Startup timeout: Standard container has 180s grace period, simplified has 90s
    
    # Environment Configuration (both containers):
    # - STORAGE_BACKEND is set to "local" for container deployment
@@ -826,7 +830,7 @@ pip install reportlab>=4.0.0
    # - Hugging Face cache directories are pre-configured to prevent permission issues
    # - STORAGE_BACKEND=local forces local storage mode for container deployment
    # - DATABASE_URL=sqlite:///./drawings.db provides SQLite database configuration
-   # - ENVIRONMENT=production sets explicit production environment
+   # - APP_ENVIRONMENT=local sets explicit environment for container deployment
    
    # For detailed troubleshooting, see tmp_files/DOCKER_SUPERVISORD_TROUBLESHOOTING.md
    ```
@@ -857,6 +861,7 @@ pip install reportlab>=4.0.0
 - Check logs in `backend.log` for debugging
 - Monitor training progress via API endpoints
 - Use the web interface to verify system status
+- Check application logs for `STORAGE_BACKEND` configuration messages to verify environment detection
 
 ## Contributing
 
