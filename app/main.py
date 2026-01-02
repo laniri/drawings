@@ -4,6 +4,7 @@ FastAPI application entry point for Children's Drawing Anomaly Detection System.
 
 import os
 from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
