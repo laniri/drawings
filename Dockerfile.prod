@@ -69,12 +69,12 @@ RUN mkdir -p uploads static backups logs .cache/huggingface .cache/matplotlib \
 # Create database file
 RUN touch drawings.db && chmod 664 drawings.db
 
-# Simple health check that doesn't load models
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+# Extended health check with longer startup grace period
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
     CMD curl -f http://localhost:80/health || exit 1
 
 # Expose port 80
 EXPOSE 80
 
-# Simple startup - just run uvicorn directly
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "1"]
+# Startup with verbose logging for debugging
+CMD ["sh", "-c", "echo 'Starting FastAPI application...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info"]
