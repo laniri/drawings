@@ -14,22 +14,25 @@ app = FastAPI(
     description="Machine learning system for detecting anomalies in children's drawings",
 )
 
+
 # Lightweight health endpoints available immediately
 @app.get("/health")
 async def health_check():
     """Lightweight health check endpoint for load balancer."""
     return {
-        "status": "healthy", 
+        "status": "healthy",
         "service": "drawing-anomaly-detection",
         "timestamp": datetime.utcnow().isoformat(),
         "environment": os.getenv("APP_ENVIRONMENT", "unknown"),
-        "storage": os.getenv("STORAGE_BACKEND", "unknown")
+        "storage": os.getenv("STORAGE_BACKEND", "unknown"),
     }
+
 
 @app.get("/health/simple")
 async def simple_health_check():
     """Ultra-lightweight health check for ALB - no dependencies."""
     return {"status": "ok"}
+
 
 # Track service initialization status
 SERVICES_INITIALIZED = False
@@ -62,9 +65,9 @@ try:
     app.title = settings.PROJECT_NAME
     app.version = settings.VERSION
     app.openapi_url = f"{settings.API_V1_STR}/openapi.json"
-    
+
     SERVICES_INITIALIZED = True
-    
+
 except Exception as e:
     INITIALIZATION_ERROR = str(e)
     print(f"Warning: Service initialization failed: {e}")
@@ -117,6 +120,7 @@ if SERVICES_INITIALIZED:
 
     # Include demo router at root level for public access
     from app.api.api_v1.endpoints.demo import router as demo_router
+
     app.include_router(demo_router, prefix="/demo", tags=["demo"])
 
     # Mount static files for serving uploaded images and results
@@ -125,7 +129,9 @@ if SERVICES_INITIALIZED:
 
     # Mount React frontend (only if frontend_build directory exists)
     if os.path.exists("frontend_build"):
-        app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
+        app.mount(
+            "/", StaticFiles(directory="frontend_build", html=True), name="frontend"
+        )
     else:
         # Fallback root endpoint when frontend build doesn't exist (e.g., during testing)
         @app.get("/")
@@ -139,6 +145,7 @@ if SERVICES_INITIALIZED:
                 "demo_url": "/demo",
                 "status": "Frontend build not available - API only mode",
             }
+
 else:
     # Minimal functionality when services failed to initialize
     @app.get("/")
@@ -148,7 +155,7 @@ else:
             "message": "Children's Drawing Anomaly Detection System",
             "status": "degraded",
             "error": "Services not fully initialized",
-            "health_check": "/health"
+            "health_check": "/health",
         }
 
 
@@ -160,9 +167,9 @@ async def api_root():
             "message": "Children's Drawing Anomaly Detection System API",
             "status": "degraded",
             "error": INITIALIZATION_ERROR,
-            "health_check": "/health"
+            "health_check": "/health",
         }
-    
+
     return {
         "message": "Children's Drawing Anomaly Detection System API",
         "version": settings.VERSION,
