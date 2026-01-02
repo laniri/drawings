@@ -3,111 +3,166 @@ FastAPI application entry point for Children's Drawing Anomaly Detection System.
 """
 
 import os
-
-import uvicorn
+from datetime import datetime
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 
-from app.api.api_v1.api import api_router
-from app.api.api_v1.endpoints.auth import router as auth_router
-from app.core.auth_middleware import AuthenticationMiddleware
-from app.core.config import settings
-from app.core.metrics_middleware import MetricsCollectionMiddleware
-from app.core.middleware import (
-    ErrorHandlingMiddleware,
-    RequestLoggingMiddleware,
-    ResourceMonitoringMiddleware,
-    setup_error_monitoring,
-)
-from app.core.security_middleware import SecurityMiddleware
-
-# Initialize error monitoring
-setup_error_monitoring()
-
+# Create minimal FastAPI app first for immediate health checks
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
+    title="Children's Drawing Anomaly Detection System",
+    version="0.1.0",
     description="Machine learning system for detecting anomalies in children's drawings",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
-# Add security middleware (first for rate limiting and security headers)
-security_middleware = SecurityMiddleware(app)
-app.add_middleware(SecurityMiddleware)
+# Lightweight health endpoints available immediately
+@app.get("/health")
+async def health_check():
+    """Lightweight health check endpoint for load balancer."""
+    return {
+        "status": "healthy", 
+        "service": "drawing-anomaly-detection",
+        "timestamp": datetime.utcnow().isoformat(),
+        "environment": os.getenv("APP_ENVIRONMENT", "unknown"),
+        "storage": os.getenv("STORAGE_BACKEND", "unknown")
+    }
 
-# Add metrics collection middleware
-metrics_middleware = MetricsCollectionMiddleware(app)
-app.add_middleware(MetricsCollectionMiddleware)
+@app.get("/health/simple")
+async def simple_health_check():
+    """Ultra-lightweight health check for ALB - no dependencies."""
+    return {"status": "ok"}
 
-# Add authentication middleware (before other middleware)
-app.add_middleware(AuthenticationMiddleware)
+# Track service initialization status
+SERVICES_INITIALIZED = False
+INITIALIZATION_ERROR = None
 
-# Add error handling middleware (first to catch all errors)
-error_middleware = ErrorHandlingMiddleware(app)
-app.add_middleware(ErrorHandlingMiddleware)
+# Now proceed with heavy imports and initialization
+try:
+    import uvicorn
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import FileResponse, RedirectResponse
+    from fastapi.staticfiles import StaticFiles
 
-# Add request logging middleware
-app.add_middleware(RequestLoggingMiddleware)
+    from app.api.api_v1.api import api_router
+    from app.api.api_v1.endpoints.auth import router as auth_router
+    from app.core.auth_middleware import AuthenticationMiddleware
+    from app.core.config import settings
+    from app.core.metrics_middleware import MetricsCollectionMiddleware
+    from app.core.middleware import (
+        ErrorHandlingMiddleware,
+        RequestLoggingMiddleware,
+        ResourceMonitoringMiddleware,
+        setup_error_monitoring,
+    )
+    from app.core.security_middleware import SecurityMiddleware
 
-# Add resource monitoring middleware
-resource_middleware = ResourceMonitoringMiddleware(app, max_concurrent_requests=10)
-app.add_middleware(ResourceMonitoringMiddleware, max_concurrent_requests=10)
+    # Initialize error monitoring
+    setup_error_monitoring()
 
-# Store middleware references in app state for metrics access
-app.state.security_middleware = security_middleware
-app.state.metrics_middleware = metrics_middleware
-app.state.error_middleware = error_middleware
-app.state.resource_middleware = resource_middleware
+    # Update app configuration with settings
+    app.title = settings.PROJECT_NAME
+    app.version = settings.VERSION
+    app.openapi_url = f"{settings.API_V1_STR}/openapi.json"
+    
+    SERVICES_INITIALIZED = True
+    
+except Exception as e:
+    INITIALIZATION_ERROR = str(e)
+    print(f"Warning: Service initialization failed: {e}")
+    # Continue with minimal app functionality
 
-# Set up CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Only add middleware and routes if services initialized successfully
+if SERVICES_INITIALIZED:
+    # Add security middleware (first for rate limiting and security headers)
+    security_middleware = SecurityMiddleware(app)
+    app.add_middleware(SecurityMiddleware)
 
-# Include API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
+    # Add metrics collection middleware
+    metrics_middleware = MetricsCollectionMiddleware(app)
+    app.add_middleware(MetricsCollectionMiddleware)
 
-# Include authentication router (without API prefix)
-app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+    # Add authentication middleware (before other middleware)
+    app.add_middleware(AuthenticationMiddleware)
 
-# Include demo router at root level for public access
-from app.api.api_v1.endpoints.demo import router as demo_router
+    # Add error handling middleware (first to catch all errors)
+    error_middleware = ErrorHandlingMiddleware(app)
+    app.add_middleware(ErrorHandlingMiddleware)
 
-app.include_router(demo_router, prefix="/demo", tags=["demo"])
+    # Add request logging middleware
+    app.add_middleware(RequestLoggingMiddleware)
 
-# Mount static files for serving uploaded images and results
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+    # Add resource monitoring middleware
+    resource_middleware = ResourceMonitoringMiddleware(app, max_concurrent_requests=10)
+    app.add_middleware(ResourceMonitoringMiddleware, max_concurrent_requests=10)
 
-# Mount React frontend (only if frontend_build directory exists)
-import os
+    # Store middleware references in app state for metrics access
+    app.state.security_middleware = security_middleware
+    app.state.metrics_middleware = metrics_middleware
+    app.state.error_middleware = error_middleware
+    app.state.resource_middleware = resource_middleware
 
-if os.path.exists("frontend_build"):
-    app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
+    # Set up CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Include API router
+    app.include_router(api_router, prefix=settings.API_V1_STR)
+
+    # Include authentication router (without API prefix)
+    app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+
+    # Include demo router at root level for public access
+    from app.api.api_v1.endpoints.demo import router as demo_router
+    app.include_router(demo_router, prefix="/demo", tags=["demo"])
+
+    # Mount static files for serving uploaded images and results
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+    # Mount React frontend (only if frontend_build directory exists)
+    if os.path.exists("frontend_build"):
+        app.mount("/", StaticFiles(directory="frontend_build", html=True), name="frontend")
+    else:
+        # Fallback root endpoint when frontend build doesn't exist (e.g., during testing)
+        @app.get("/")
+        async def root_fallback():
+            """Fallback root endpoint when React frontend build is not available."""
+            return {
+                "message": "Children's Drawing Anomaly Detection System",
+                "version": settings.VERSION,
+                "docs_url": "/docs",
+                "api_url": f"{settings.API_V1_STR}",
+                "demo_url": "/demo",
+                "status": "Frontend build not available - API only mode",
+            }
 else:
-    # Fallback root endpoint when frontend build doesn't exist (e.g., during testing)
+    # Minimal functionality when services failed to initialize
     @app.get("/")
-    async def root_fallback():
-        """Fallback root endpoint when React frontend build is not available."""
+    async def degraded_root():
+        """Root endpoint in degraded mode."""
         return {
             "message": "Children's Drawing Anomaly Detection System",
-            "version": settings.VERSION,
-            "docs_url": "/docs",
-            "api_url": f"{settings.API_V1_STR}",
-            "demo_url": "/demo",
-            "status": "Frontend build not available - API only mode",
+            "status": "degraded",
+            "error": "Services not fully initialized",
+            "health_check": "/health"
         }
 
 
 @app.get("/api")
 async def api_root():
     """API root endpoint - returns basic API information."""
+    if not SERVICES_INITIALIZED:
+        return {
+            "message": "Children's Drawing Anomaly Detection System API",
+            "status": "degraded",
+            "error": INITIALIZATION_ERROR,
+            "health_check": "/health"
+        }
+    
     return {
         "message": "Children's Drawing Anomaly Detection System API",
         "version": settings.VERSION,
@@ -115,12 +170,6 @@ async def api_root():
         "api_url": f"{settings.API_V1_STR}",
         "demo_url": "/demo",
     }
-
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint for monitoring."""
-    return {"status": "healthy", "service": "drawing-anomaly-detection"}
 
 
 @app.get("/health/detailed")

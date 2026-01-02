@@ -25,7 +25,7 @@ RUN npm run build
 # ============================================================================
 FROM python:3.11-slim
 
-# Set minimal environment variables
+# Set minimal environment variables (let task definition control APP_ENVIRONMENT and STORAGE_BACKEND)
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
@@ -34,10 +34,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/app/.cache/huggingface \
     TRANSFORMERS_CACHE=/app/.cache/huggingface \
     HF_DATASETS_CACHE=/app/.cache/huggingface \
-    MPLCONFIGDIR=/app/.cache/matplotlib \
-    STORAGE_BACKEND=local \
-    DATABASE_URL=sqlite:///./drawings.db \
-    APP_ENVIRONMENT=local
+    MPLCONFIGDIR=/app/.cache/matplotlib
 
 # Install minimal system dependencies
 RUN apt-get update && apt-get install -y \
@@ -69,12 +66,12 @@ RUN mkdir -p uploads static backups logs .cache/huggingface .cache/matplotlib \
 # Create database file
 RUN touch drawings.db && chmod 664 drawings.db
 
-# Extended health check with longer startup grace period
+# Extended health check with longer startup grace period - try simple endpoint first
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
-    CMD curl -f http://localhost:80/health || exit 1
+    CMD curl -f http://localhost:80/health/simple || curl -f http://localhost:80/health || exit 1
 
 # Expose port 80
 EXPOSE 80
 
-# Startup with verbose logging for debugging
-CMD ["sh", "-c", "echo 'Starting FastAPI application...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info"]
+# Startup with enhanced logging and error handling for debugging
+CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
