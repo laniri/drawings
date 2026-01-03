@@ -50,6 +50,7 @@ try:
     from app.api.api_v1.endpoints.auth import router as auth_router
     from app.core.auth_middleware import AuthenticationMiddleware
     from app.core.config import settings
+    from app.core.database import init_db
     from app.core.metrics_middleware import MetricsCollectionMiddleware
     from app.core.middleware import (
         ErrorHandlingMiddleware,
@@ -73,6 +74,20 @@ except Exception as e:
     INITIALIZATION_ERROR = str(e)
     print(f"Warning: Service initialization failed: {e}")
     # Continue with minimal app functionality
+
+
+# Database initialization on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables on application startup."""
+    try:
+        print("Initializing database tables...")
+        init_db()
+        print("Database tables initialized successfully")
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+        # Continue startup even if database init fails
+        pass
 
 # Only add middleware and routes if services initialized successfully
 if SERVICES_INITIALIZED:
