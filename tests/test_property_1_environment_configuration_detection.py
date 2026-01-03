@@ -29,10 +29,13 @@ class TestEnvironmentConfigurationDetection:
     def setup_method(self):
         """Reset environment configuration before each test"""
         reset_environment_config()
+        # Ensure we're using test-specific database paths
+        self._original_cwd = os.getcwd()
     
     def teardown_method(self):
         """Clean up after each test"""
         reset_environment_config()
+        os.chdir(self._original_cwd)
     
     @given(
         app_environment=st.one_of(
@@ -118,7 +121,7 @@ class TestEnvironmentConfigurationDetection:
             if detected_env == EnvironmentType.PRODUCTION:
                 assert "production" in db_url
             else:
-                assert "drawings.db" in db_url
+                assert db_url.endswith("drawings.db") or "drawings.db" in db_url
     
     @given(
         explicit_db_url=st.one_of(
@@ -229,7 +232,7 @@ class TestEnvironmentConfigurationDetection:
             
             assert local_config.environment == EnvironmentType.LOCAL
             assert local_config.storage_backend == StorageBackend.LOCAL
-            assert "drawings.db" in local_config.database_url
+            assert local_config.database_url.endswith("drawings.db") or "drawings.db" in local_config.database_url
         
         # Test production environment (without DATABASE_URL to test natural behavior)
         prod_env = base_env.copy()
