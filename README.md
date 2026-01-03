@@ -832,6 +832,28 @@ pip install reportlab>=4.0.0
    echo "SKIP_MODEL_LOADING=true" >> .env
    ```
 
+9. **Flaky Test Issues in CI**
+   ```bash
+   # Some property-based tests may fail due to timing issues in CI environments
+   # These tests use @settings(deadline=None) to prevent Hypothesis timeout errors
+   
+   # If you encounter "DeadlineExceeded" errors in CI:
+   # 1. Check if the test already has @settings(deadline=None)
+   # 2. For new tests with complex operations, add unlimited deadline:
+   
+   from hypothesis import given, settings
+   
+   @given(...)
+   @settings(deadline=None)  # Prevents timing issues in CI
+   def test_complex_operation(...):
+       pass
+   
+   # Tests with unlimited deadlines:
+   # - test_data_export_integrity: Fixed for backup/export timing variability
+   # - Infrastructure deployment tests: Complex CloudFormation operations
+   # - Model training tests: Subject-aware model training operations
+   ```
+
 9. **Docker Production Container Issues**
    ```bash
    # The production system offers two container options:

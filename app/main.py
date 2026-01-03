@@ -81,13 +81,21 @@ except Exception as e:
 async def startup_event():
     """Initialize database tables on application startup."""
     try:
-        print("Initializing database tables...")
+        print("=" * 50)
+        print("STARTING DATABASE INITIALIZATION")
+        print("=" * 50)
         init_db()
-        print("Database tables initialized successfully")
+        print("=" * 50)
+        print("DATABASE INITIALIZATION COMPLETED SUCCESSFULLY")
+        print("=" * 50)
     except Exception as e:
-        print(f"Warning: Database initialization failed: {e}")
-        # Continue startup even if database init fails
-        pass
+        print("=" * 50)
+        print(f"CRITICAL ERROR: Database initialization failed: {e}")
+        print("=" * 50)
+        import traceback
+        traceback.print_exc()
+        # Don't continue startup if database init fails - this is critical
+        raise RuntimeError(f"Database initialization failed: {e}")
 
 
 # Only add middleware and routes if services initialized successfully

@@ -84,14 +84,45 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db():
     """Initialize the database by creating all tables."""
+    # Import models to ensure they're registered with Base.metadata
+    # This is critical - SQLAlchemy only creates tables for imported models
+    from app.models import database  # noqa: F401
+    
+    print(f"Database models imported. Available tables: {list(Base.metadata.tables.keys())}")
+    
     # Get database URL for path extraction
     database_url = get_database_url()
+    print(f"Database URL: {database_url}")
 
     # Ensure the database directory exists
     db_path = database_url.replace("sqlite:///", "")
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
+        print(f"Creating database directory: {db_dir}")
         os.makedirs(db_dir)
 
+    # Check if database file exists
+    if os.path.exists(db_path):
+        print(f"Database file exists at: {db_path}")
+        print(f"Database file size: {os.path.getsize(db_path)} bytes")
+    else:
+        print(f"Database file does not exist at: {db_path}")
+
     # Create all tables
+    print("Creating database tables...")
     create_tables()
+    
+    # Verify tables were created
+    try:
+        # Test database connection and table existence
+        from sqlalchemy import inspect
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        print(f"Tables created successfully: {existing_tables}")
+        
+        if not existing_tables:
+            raise Exception("No tables were created - this indicates a problem with model registration")
+            
+    except Exception as e:
+        print(f"Error verifying database tables: {e}")
+        raise

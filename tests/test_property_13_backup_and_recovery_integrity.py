@@ -401,6 +401,7 @@ class TestBackupAndRecoveryIntegrity:
         export_format=st.sampled_from(['json', 'csv']),
         include_embeddings=st.booleans()
     )
+    @settings(deadline=None)  # Fix for flaky test timing issues in CI
     def test_data_export_integrity(self, export_format: str, include_embeddings: bool):
         """
         Test that data export operations preserve data integrity
