@@ -89,6 +89,7 @@ async def startup_event():
         # Continue startup even if database init fails
         pass
 
+
 # Only add middleware and routes if services initialized successfully
 if SERVICES_INITIALIZED:
     # Add security middleware (first for rate limiting and security headers)
