@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "name": "Auto-Poll CI Status",
-  "description": "Automatically checks the status of the remote CI pipeline Actions after a push and opens remediation tasks for any detected failures via GitHub MCP integration. if polling for status to steblize, wailt at least 1 minute between polls.",
+  "description": "Automatically checks the status of the remote CI pipeline Actions only after a push and opens remediation tasks for any detected failures via GitHub MCP integration. if polling for status to steblize, wailt at least 1 minute between polls.",
   "version": "1",
   "when": {
     "type": "agentStop"

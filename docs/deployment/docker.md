@@ -63,8 +63,11 @@ cd children-drawing-anomaly-detection
 # Development deployment
 docker-compose up -d
 
-# Production deployment
+# Production deployment (PostgreSQL)
 docker-compose -f docker-compose.prod.yml up -d
+
+# Production deployment (SQLite - simplified)
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up -d
 
 # View logs
 docker-compose logs -f
@@ -73,8 +76,37 @@ docker-compose logs -f
 docker-compose down
 ```
 
-## Services
-The Docker Compose configuration includes the following services:
+## Deployment Options
+
+### Development Deployment
+```bash
+# Standard development with hot reload
+docker-compose up -d
+```
+
+### Production Deployment Options
+
+#### Option 1: PostgreSQL Production (Full-featured)
+```bash
+# Production with PostgreSQL database
+docker-compose -f docker-compose.prod.yml up -d
+```
+- **Database**: PostgreSQL with persistent volumes
+- **Scalability**: Designed for high-traffic production environments
+- **Features**: Full database features, connection pooling, advanced queries
+- **Use Case**: Large-scale deployments, multiple concurrent users
+
+#### Option 2: SQLite Production (Simplified)
+```bash
+# Production with SQLite database (simplified deployment)
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up -d
+```
+- **Database**: SQLite with local file storage
+- **Simplicity**: Single-file database, no separate database container
+- **Performance**: Excellent for small to medium workloads
+- **Use Case**: Single-server deployments, development staging, cost-effective production
+
+## Services Configuration
 
 ### Backend Service (Development)
 - **Image**: Custom Python application
@@ -88,16 +120,21 @@ The Docker Compose configuration includes the following services:
 - **Dependencies**: Backend service
 - **Hot Reload**: Enabled with Vite dev server
 
-### Production Service
+### Production Service (PostgreSQL)
 - **Image**: Combined frontend + backend container
 - **Port**: 80
 - **Process Manager**: Supervisord
 - **Services**: nginx + uvicorn
+- **Database**: PostgreSQL container
 - **Health Checks**: Built-in endpoint monitoring
 
-### Database Service
-- **Image**: SQLite (file-based)
-- **Storage**: Persistent volume
+### Production Service (SQLite)
+- **Image**: Combined frontend + backend container
+- **Port**: 80 (backend), 80/443 (frontend)
+- **Database**: SQLite file mounted from host
+- **Storage**: Local directories mounted from host
+- **Services**: Backend, Frontend, Redis, Nginx
+- **Resource Limits**: Optimized for single-server deployment
 
 ## Configuration
 Environment variables can be configured in `.env` file:
@@ -110,12 +147,40 @@ cp .env.example .env
 nano .env
 ```
 
+### SQLite Production Configuration
+The SQLite production deployment uses simplified configuration:
+
+```yaml
+# Key environment variables for SQLite production
+environment:
+  - DATABASE_URL=sqlite:///./drawings.db
+  - DEBUG=false
+  - LOG_LEVEL=info
+  - MAX_FILE_SIZE=52428800  # 50MB
+  - CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+  - SECRET_KEY=${SECRET_KEY}
+```
+
+### Volume Mounts (SQLite Production)
+```yaml
+volumes:
+  # Database file (SQLite)
+  - ./drawings.db:/app/drawings.db
+  # Application data directories
+  - ./uploads:/app/uploads
+  - ./static:/app/static
+  - ./backups:/app/backups
+  # Logs (Docker volume)
+  - logs_data:/app/logs
+```
+
 ### Key Environment Variables
 - `PYTHONPATH=/app` - Python module path
 - `PYTHONDONTWRITEBYTECODE=1` - Disable .pyc files
 - `PYTHONUNBUFFERED=1` - Unbuffered output for logging
 - `STORAGE_BACKEND=local` - Storage backend configuration (default for containers)
-- `DATABASE_URL=sqlite:///./drawings.db` - Database connection URL (default for containers)
+- `DATABASE_URL=sqlite:///./drawings.db` - Database connection URL (SQLite production)
+- `DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/drawings` - Database URL (PostgreSQL production)
 - `ENVIRONMENT=production` - Environment setting (default for containers)
 - `S3_BUCKET_NAME=""` - S3 bucket name (empty for local storage mode)
 - `HF_HOME=/app/.cache/huggingface` - Hugging Face cache directory
@@ -190,20 +255,34 @@ docker logs -f <container>
    - Test direct backend access: `curl http://127.0.0.1:8000/health`
    - Check log file sizes: `ls -lh /var/log/supervisor/` (logs rotate at 50MB)
 
-4. **Log Management Issues**
+4. **SQLite Database Issues (SQLite Production)**
+   - **File Permissions**: Ensure `drawings.db` is writable by container user
+   - **File Location**: Verify database file exists in project root: `ls -la ./drawings.db`
+   - **Mount Issues**: Check volume mount is correct: `docker inspect <container> | grep Mounts`
+   - **Database Corruption**: Restore from backup or recreate: `rm drawings.db && docker restart <container>`
+   - **Concurrent Access**: SQLite handles concurrent reads but limited concurrent writes
+   - **Backup Strategy**: Regular file-based backups: `cp drawings.db backups/drawings-$(date +%Y%m%d).db`
+
+5. **PostgreSQL Database Issues (PostgreSQL Production)**
+   - **Connection Issues**: Check database container status: `docker-compose logs db`
+   - **Password Issues**: Verify `POSTGRES_PASSWORD` environment variable
+   - **Network Issues**: Ensure containers are on same network
+   - **Data Persistence**: Check PostgreSQL volume mount
+
+6. **Log Management Issues**
    - **Log Rotation**: Supervisord automatically rotates logs at 50MB
    - **Disk Space**: Log rotation prevents disk space exhaustion
    - **Log Access**: Use `docker logs <container>` for uvicorn logs
    - **Historical Logs**: Check `/var/log/supervisor/` for rotated log files
 
-5. **Storage Configuration Issues**
+7. **Storage Configuration Issues**
    - **Default**: Container uses local storage (`STORAGE_BACKEND=local`)
    - **Database**: Container uses SQLite database (`DATABASE_URL=sqlite:///./drawings.db`)
    - **Environment**: Container sets production environment (`ENVIRONMENT=production`)
    - **S3 Override**: Set environment variables to enable S3 storage
    - **Configuration**: Override via Docker environment variables or .env file
 
-4. **Permission Issues**
+8. **Permission Issues**
    - Verify directory permissions: `ls -la /app`
    - Check user configuration: `id appuser`
    - Ensure proper ownership: `chown -R appuser:appuser /app`

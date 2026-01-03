@@ -199,7 +199,43 @@ docker-compose -f docker-compose.dev.yml down
 
 ### Production Docker Deployment
 
-The production Docker image uses a simplified single-process architecture for optimal memory usage and reliability:
+The system provides multiple production deployment options to suit different environments and requirements:
+
+#### PostgreSQL Production Deployment (docker-compose.prod.yml)
+**Recommended for high-traffic production environments:**
+
+```bash
+# Build and start PostgreSQL production services
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+- **Database**: PostgreSQL with persistent volumes and advanced SQL features
+- **Scalability**: Designed for high-traffic production environments with multiple concurrent users
+- **Features**: Full database features, connection pooling, advanced queries, horizontal scaling support
+- **Architecture**: Multi-container setup with dedicated database service
+- **Use Case**: Large-scale deployments, enterprise environments, high-availability requirements
+
+#### SQLite Production Deployment (docker-compose.prod.sqlite.yml)
+**Recommended for single-server and cost-effective deployments:**
+
+```bash
+# Build and start SQLite production services
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
+```
+
+- **Database**: SQLite with local file storage (single-file database)
+- **Simplicity**: No separate database container, simplified deployment and maintenance
+- **Performance**: Excellent for small to medium workloads with concurrent reads
+- **Storage**: Local directories mounted from host (uploads, static, backups)
+- **Architecture**: Multi-service setup with Redis caching and Nginx load balancing
+- **Use Case**: Single-server deployments, development staging, cost-effective production
+
+**SQLite Production Benefits:**
+- **Lower Resource Usage**: No database container overhead
+- **Simplified Backup**: File-based backup and restore (`cp drawings.db backup/`)
+- **Cost Effective**: Reduced hosting costs and complexity
+- **Fast Setup**: Quick deployment without database configuration
+- **Reliability**: Fewer moving parts, battle-tested SQLite engine
 
 #### Standard Production Container (Dockerfile.prod)
 - **Frontend Build Stage**: Builds React application with optimized production bundle
@@ -241,6 +277,23 @@ docker run -p 80:80 children-drawing-app:latest
 # Run simplified production container
 docker run -p 80:80 children-drawing-app:simplified
 ```
+
+**Deployment Comparison:**
+
+| Feature | PostgreSQL Production | SQLite Production | Simplified Container |
+|---------|----------------------|-------------------|---------------------|
+| **Database** | PostgreSQL container | SQLite file | SQLite file |
+| **Concurrent Users** | High (100+) | Medium (50-100) | Low-Medium (10-50) |
+| **Resource Usage** | High | Medium | Low |
+| **Backup Complexity** | Database dumps | File copy | File copy |
+| **Scaling** | Horizontal | Vertical | Single instance |
+| **Setup Complexity** | High | Medium | Low |
+| **Cost** | High | Medium | Low |
+
+**When to use each option:**
+- **PostgreSQL Production**: Enterprise deployments, high traffic, multiple servers
+- **SQLite Production**: Single-server production, cost-effective hosting, moderate traffic
+- **Simplified Container**: Development, testing, memory-constrained environments
 
 **Container Architecture Comparison:**
 - **Standard (Dockerfile.prod)**: Single uvicorn process serving both frontend and API on port 80 with extended startup grace period (180s)

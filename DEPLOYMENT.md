@@ -112,7 +112,34 @@ Edit the file with your production values:
 - Domain names
 - SSL certificate paths
 
-### 2. SSL Certificates
+### 2. Choose Database Backend
+
+#### Option A: PostgreSQL (Recommended for high-traffic production)
+```bash
+# Use PostgreSQL configuration
+DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/drawings
+```
+
+#### Option B: SQLite (Simplified single-server deployment)
+```bash
+# Use SQLite configuration
+DATABASE_URL=sqlite:///./drawings.db
+```
+
+**SQLite Benefits:**
+- Single file database (no separate container)
+- Excellent performance for small to medium workloads
+- Simplified backup and restore
+- Lower resource requirements
+- Perfect for single-server deployments
+
+**PostgreSQL Benefits:**
+- Better concurrent access handling
+- Advanced database features
+- Horizontal scaling capabilities
+- Better for high-traffic applications
+
+### 3. SSL Certificates
 
 For production, obtain real SSL certificates:
 
@@ -136,15 +163,15 @@ cp your-certificate.crt nginx/ssl/server.crt
 cp your-private-key.key nginx/ssl/server.key
 ```
 
-### 3. Database Setup
+### 4. Database Setup
 
 The system uses PostgreSQL in production. The database will be automatically initialized with the required schema.
 
-### 4. Build and Deploy
+### 5. Build and Deploy
 
-The system provides two Docker container options:
+The system provides multiple Docker container deployment options:
 
-#### Standard Production Container (Recommended for most deployments)
+#### Standard Production Container (PostgreSQL - Recommended for most deployments)
 ```bash
 # Build standard production image
 docker-compose -f docker-compose.prod.yml build
@@ -162,6 +189,40 @@ docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 - Pre-loaded Vision Transformer models
 - Advanced nginx features (rate limiting, security headers)
 - Comprehensive logging and monitoring
+- PostgreSQL database with full SQL features
+
+#### SQLite Production Container (Simplified single-server deployment)
+```bash
+# Build and start SQLite production services
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
+
+# Run database migrations (if needed)
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml exec backend alembic upgrade head
+```
+
+**Features:**
+- Single-file SQLite database (no separate database container)
+- Local file storage with host directory mounts
+- Excellent performance for small to medium workloads
+- Simplified backup and restore (file-based)
+- Lower resource requirements
+- Perfect for single-server deployments
+- Redis for caching and session management
+- Nginx for load balancing and SSL termination
+
+**SQLite Production Benefits:**
+- **Simplicity**: No database container management
+- **Performance**: Excellent for concurrent reads, good for moderate writes
+- **Backup**: Simple file copy for backups
+- **Cost**: Lower resource usage and hosting costs
+- **Reliability**: Fewer moving parts, less complexity
+
+**When to use SQLite production:**
+- Single-server deployments
+- Small to medium user base (< 100 concurrent users)
+- Cost-effective production environments
+- Development staging environments
+- Simplified maintenance requirements
 
 #### Simplified Production Container (For memory-constrained environments)
 ```bash
@@ -193,8 +254,9 @@ docker exec drawing-app alembic upgrade head
 
 **Important**: In production, nginx is configured to serve the React frontend at the root path (`/`). The FastAPI backend also has a root endpoint that returns API information. Depending on your nginx configuration, direct API access to the root endpoint may be intercepted by nginx to serve the frontend instead. To access the API information endpoint directly, you may need to configure nginx routing or access it through the API prefix.
 
-### 5. Verify Deployment
+### 6. Verify Deployment
 
+#### PostgreSQL Production Verification
 ```bash
 # Check service status
 docker-compose -f docker-compose.prod.yml ps
@@ -204,6 +266,24 @@ docker-compose -f docker-compose.prod.yml logs
 
 # Test health endpoint
 curl -f http://localhost:8000/health
+```
+
+#### SQLite Production Verification
+```bash
+# Check service status
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml ps
+
+# Check logs
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml logs
+
+# Test health endpoint
+curl -f http://localhost:8000/health
+
+# Verify SQLite database
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml exec backend sqlite3 /app/drawings.db ".tables"
+
+# Check database file permissions
+ls -la ./drawings.db
 ```
 
 ## Configuration

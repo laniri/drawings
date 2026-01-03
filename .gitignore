@@ -43,8 +43,8 @@ venv.bak/
 .python-version
 
 # Database
-*.db
-*.sqlite3
+#*.db
+#*.sqlite3
 
 # Uploads and static files
 uploads/

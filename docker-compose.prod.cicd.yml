@@ -1,0 +1,73 @@
+# Production Docker Compose for CI/CD with embedded database
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+    environment:
+      # Use the database file copied into the container
+      - DATABASE_URL=sqlite:///./drawings.db
+      - DEBUG=false
+      - LOG_LEVEL=info
+      - MAX_FILE_SIZE=52428800  # 50MB
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+      - SECRET_KEY=${SECRET_KEY}
+      - APP_ENVIRONMENT=production
+    volumes:
+      # Mount volumes for uploads and generated content (not the database)
+      - uploads_data:/app/uploads
+      - static_data:/app/static
+      - logs_data:/app/logs
+    restart: unless-stopped
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+volumes:
+  uploads_data:
+    driver: local
+  static_data:
+    driver: local
+  logs_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

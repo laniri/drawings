@@ -47,8 +47,7 @@ WORKDIR /app
 
 # Copy and install Python dependencies
 COPY requirements.txt ./
-# Copy database file
-COPY drawings.db /app/drawings.dbRUN pip install --upgrade pip \
+RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
 # Copy application code
