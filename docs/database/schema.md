@@ -1,10 +1,22 @@
 # Database Schema
 
 **Version**: 2.0.0 (Subject-Aware)  
-**Last Updated**: 2025-12-18  
+**Last Updated**: 2025-01-03  
 **Status**: Production
 
 This document describes the database schema for the Children's Drawing Anomaly Detection System with subject-aware functionality.
+
+## Database Initialization
+
+**Enhanced Initialization Process (January 2025)**: The database initialization has been improved with comprehensive logging and verification:
+
+- **Model Import Verification**: Ensures all SQLAlchemy models are properly registered
+- **Table Creation Logging**: Detailed progress reporting during schema creation
+- **Verification Checks**: Confirms successful table creation with error detection
+- **File Status Reporting**: Database file existence and size information (SQLite)
+- **Error Handling**: Clear error messages for troubleshooting initialization issues
+
+The enhanced logging provides visibility into the database setup process, making it easier to diagnose issues during development and deployment.
 
 ## Table: drawings
 

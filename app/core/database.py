@@ -87,9 +87,11 @@ def init_db():
     # Import models to ensure they're registered with Base.metadata
     # This is critical - SQLAlchemy only creates tables for imported models
     from app.models import database  # noqa: F401
-    
-    print(f"Database models imported. Available tables: {list(Base.metadata.tables.keys())}")
-    
+
+    print(
+        f"Database models imported. Available tables: {list(Base.metadata.tables.keys())}"
+    )
+
     # Get database URL for path extraction
     database_url = get_database_url()
     print(f"Database URL: {database_url}")
@@ -111,18 +113,21 @@ def init_db():
     # Create all tables
     print("Creating database tables...")
     create_tables()
-    
+
     # Verify tables were created
     try:
         # Test database connection and table existence
         from sqlalchemy import inspect
+
         inspector = inspect(engine)
         existing_tables = inspector.get_table_names()
         print(f"Tables created successfully: {existing_tables}")
-        
+
         if not existing_tables:
-            raise Exception("No tables were created - this indicates a problem with model registration")
-            
+            raise Exception(
+                "No tables were created - this indicates a problem with model registration"
+            )
+
     except Exception as e:
         print(f"Error verifying database tables: {e}")
         raise

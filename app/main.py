@@ -93,6 +93,7 @@ async def startup_event():
         print(f"CRITICAL ERROR: Database initialization failed: {e}")
         print("=" * 50)
         import traceback
+
         traceback.print_exc()
         # Don't continue startup if database init fails - this is critical
         raise RuntimeError(f"Database initialization failed: {e}")

@@ -854,7 +854,34 @@ pip install reportlab>=4.0.0
    # - Model training tests: Subject-aware model training operations
    ```
 
-9. **Docker Production Container Issues**
+9. **Database Initialization Issues**
+   ```bash
+   # Enhanced database initialization logging (December 2024)
+   # The system now provides detailed logging during database setup:
+   
+   # Expected database initialization output:
+   # Database models imported. Available tables: ['drawings', 'drawing_embeddings', ...]
+   # Database URL: sqlite:///./drawings.db
+   # Database file exists at: ./drawings.db
+   # Database file size: 12345678 bytes
+   # Creating database tables...
+   # Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
+   
+   # If database initialization fails, check logs for:
+   # - Model import errors: "No tables were created - this indicates a problem with model registration"
+   # - File permission issues: Check database file and directory permissions
+   # - SQLAlchemy connection errors: Verify DATABASE_URL format
+   
+   # For troubleshooting database issues:
+   python -c "from app.core.database import init_db; init_db()"
+   
+   # Common database initialization issues:
+   # - Missing database directory: Automatically created with proper permissions
+   # - Model registration problems: Enhanced logging shows which models are imported
+   # - Table creation failures: Detailed error messages with specific failure reasons
+   ```
+
+10. **Docker Production Container Issues**
    ```bash
    # The production system offers two container options:
    
@@ -866,6 +893,10 @@ pip install reportlab>=4.0.0
    # Starting FastAPI application...
    # Environment: APP_ENVIRONMENT=<value-from-task-definition>
    # Storage: STORAGE_BACKEND=<value-from-task-definition>
+   # Database models imported. Available tables: ['drawings', 'drawing_embeddings', ...]
+   # Database URL: sqlite:///./drawings.db
+   # Creating database tables...
+   # Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
    # INFO:     Started server process [1]
    # INFO:     Waiting for application startup.
    # INFO:     Application startup complete.

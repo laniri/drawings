@@ -165,7 +165,24 @@ cp your-private-key.key nginx/ssl/server.key
 
 ### 4. Database Setup
 
-The system uses PostgreSQL in production. The database will be automatically initialized with the required schema.
+The system uses PostgreSQL in production and SQLite for development/single-server deployments. The database will be automatically initialized with the required schema.
+
+**Enhanced Database Initialization (December 2024)**: The system now provides comprehensive logging during database setup, making it easier to troubleshoot initialization issues:
+
+```bash
+# Expected database initialization logs:
+Database models imported. Available tables: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
+Database URL: sqlite:///./drawings.db (or PostgreSQL URL)
+Database file exists at: ./drawings.db
+Database file size: 12345678 bytes
+Creating database tables...
+Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
+```
+
+**Troubleshooting Database Issues**:
+- **Model Import Errors**: Check for "No tables were created" message indicating model registration problems
+- **File Permission Issues**: Verify database file and directory permissions (SQLite)
+- **Connection Errors**: Validate DATABASE_URL format and database server availability (PostgreSQL)
 
 ### 5. Build and Deploy
 
@@ -308,7 +325,7 @@ Key environment variables in `.env`:
 - Uses Uvicorn ASGI server with 1 worker
 - **Comprehensive environment validation** with startup script
 - **Automatic directory creation** with proper permissions
-- **Database initialization** for SQLite with proper ownership
+- **Enhanced database initialization** with comprehensive logging and verification (December 2024)
 - **Python import validation** to catch configuration issues early (lightweight imports only, avoiding heavy model loading)
 - **Logs redirected to Docker stdout/stderr** for better integration
 - **Hugging Face cache configuration** to prevent model loading permission errors
@@ -522,13 +539,31 @@ docker exec <container> supervisorctl restart uvicorn
 
 #### Database Connection Issues
 ```bash
-# Check database status
+# Check database status (PostgreSQL)
 docker-compose -f docker-compose.prod.yml exec db pg_isready -U postgres
 
-# Reset database
+# Check database status (SQLite)
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml exec backend sqlite3 /app/drawings.db ".tables"
+
+# Enhanced database initialization logging (December 2024)
+# Check container logs for detailed database setup information:
+docker logs <container> | grep -A 10 "Database models imported"
+
+# Expected database initialization output:
+# Database models imported. Available tables: ['drawings', 'drawing_embeddings', ...]
+# Database URL: sqlite:///./drawings.db
+# Creating database tables...
+# Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
+
+# Reset database (PostgreSQL)
 docker-compose -f docker-compose.prod.yml down
 docker volume rm drawings_postgres_data
 docker-compose -f docker-compose.prod.yml up -d
+
+# Reset database (SQLite)
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml down
+rm -f drawings.db  # Remove local database file
+docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up -d
 ```
 
 #### SSL Certificate Issues
