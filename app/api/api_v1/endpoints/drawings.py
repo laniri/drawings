@@ -3,6 +3,7 @@ Drawing management API endpoints.
 """
 
 import logging
+import uuid
 from typing import List, Optional
 
 from fastapi import (
@@ -341,8 +342,6 @@ async def batch_upload_drawings(
         )
 
     # Generate upload ID for progress tracking
-    import uuid
-
     upload_id = str(uuid.uuid4())
 
     # Initialize progress
