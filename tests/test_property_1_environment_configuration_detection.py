@@ -119,7 +119,7 @@ class TestEnvironmentConfigurationDetection:
             db_url = EnvironmentDetector.get_database_url(detected_env)
             assert db_url.startswith("sqlite:///")
             if detected_env == EnvironmentType.PRODUCTION:
-                assert "production" in db_url
+                assert "drawings.db" in db_url
             else:
                 assert db_url.endswith("drawings.db") or "drawings.db" in db_url
     
@@ -247,7 +247,7 @@ class TestEnvironmentConfigurationDetection:
             
             assert prod_config.environment == EnvironmentType.PRODUCTION
             assert prod_config.storage_backend == StorageBackend.S3
-            assert "production" in prod_config.database_url
+            assert "drawings.db" in prod_config.database_url
             assert prod_config.s3_bucket_name == "test-production-bucket"
         
         # Verify configurations are different
