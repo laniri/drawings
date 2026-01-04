@@ -380,8 +380,8 @@ async def process_batch_upload(upload_id: str, files: List[UploadFile], db: Sess
                 )
 
                 if validation_result.is_valid:
-                    filename, file_path = await get_storage_service().save_uploaded_file(
-                        file, "drawings"
+                    filename, file_path = (
+                        await get_storage_service().save_uploaded_file(file, "drawings")
                     )
 
                     # Create database record with minimal metadata

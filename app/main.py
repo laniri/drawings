@@ -88,10 +88,11 @@ async def startup_event():
         print("=" * 50)
         print("DATABASE INITIALIZATION COMPLETED SUCCESSFULLY")
         print("=" * 50)
-        
+
         # Log storage configuration for debugging
         try:
             from app.services.environment_storage import get_storage_service
+
             storage_service = get_storage_service()
             storage_info = storage_service.get_storage_info()
             print("=" * 50)
@@ -102,7 +103,7 @@ async def startup_event():
             print("=" * 50)
         except Exception as e:
             print(f"Warning: Failed to initialize storage service: {e}")
-            
+
     except Exception as e:
         print("=" * 50)
         print(f"CRITICAL ERROR: Database initialization failed: {e}")

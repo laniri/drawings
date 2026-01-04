@@ -83,7 +83,9 @@ class DemoService:
         saliency_map_url = None
 
         if interpretability and interpretability.saliency_map_path:
-            saliency_map_url = storage_service.get_file_url(interpretability.saliency_map_path)
+            saliency_map_url = storage_service.get_file_url(
+                interpretability.saliency_map_path
+            )
 
         # Create analysis result
         analysis_result = {
