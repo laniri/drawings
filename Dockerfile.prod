@@ -64,23 +64,24 @@ COPY --from=frontend-build /frontend/dist ./frontend_build
 RUN mkdir -p uploads static backups logs .cache/huggingface .cache/matplotlib \
     && mkdir -p static/models static/saliency_maps static/exports
 
-# CRITICAL: Copy database file AFTER all other operations to prevent overwrite
-# Use absolute paths consistently and verify integrity with available commands
+# DEBUG: Check if database exists in build context BEFORE copy
+RUN echo "=== PRE-COPY DEBUG ===" \
+    && echo "Checking build context for database file..." \
+    && ls -la . | grep -E "(drawings|db)" || echo "No database files found in build context"
+
+# CRITICAL: Copy database file and immediately verify
 COPY drawings.db /app/drawings.db
 
-# Comprehensive database verification using commands available in slim image
-RUN echo "=== DATABASE INTEGRITY VERIFICATION ===" \
-    && echo "Checking database file existence and permissions..." \
+# IMMEDIATE verification after copy using ONLY available commands
+RUN echo "=== IMMEDIATE POST-COPY VERIFICATION ===" \
+    && echo "Database file after COPY:" \
     && ls -la /app/drawings.db \
-    && echo "Database file size: $(stat -c%s /app/drawings.db) bytes" \
-    && echo "Expected size: ~373MB (373219328 bytes)" \
-    && echo "Verifying database file header (SQLite signature)..." \
-    && head -c 16 /app/drawings.db | hexdump -C \
-    && echo "Setting proper permissions..." \
+    && echo "File size: $(stat -c%s /app/drawings.db) bytes" \
+    && echo "Expected: ~373MB (373219328 bytes)" \
+    && echo "First 32 bytes of file:" \
+    && head -c 32 /app/drawings.db | od -c \
     && chmod 664 /app/drawings.db \
-    && echo "Final verification:" \
-    && ls -la /app/drawings.db \
-    && echo "=== DATABASE SETUP COMPLETE ==="
+    && echo "=== COPY VERIFICATION COMPLETE ==="
 
 # Extended health check with longer startup grace period - try simple endpoint first
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
