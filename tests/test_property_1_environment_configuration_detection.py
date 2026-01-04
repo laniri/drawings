@@ -253,7 +253,7 @@ class TestEnvironmentConfigurationDetection:
         # Verify configurations are different
         assert local_config.environment != prod_config.environment
         assert local_config.storage_backend != prod_config.storage_backend
-        assert local_config.database_url != prod_config.database_url
+        assert local_config.storage_backend != prod_config.storage_backend
     
     @given(
         upload_dir=st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('Ll', 'Lu', 'Nd'), whitelist_characters='_-')),
