@@ -30,11 +30,7 @@ from app.schemas.drawings import (
     DrawingUploadRequest,
     ExpertLabel,
 )
-from app.services import (
-    DataPipelineService,
-    DrawingMetadata,
-    ValidationResult,
-)
+from app.services import DataPipelineService, DrawingMetadata, ValidationResult
 from app.services.environment_storage import get_storage_service
 
 logger = logging.getLogger(__name__)
