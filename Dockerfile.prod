@@ -65,15 +65,21 @@ RUN mkdir -p uploads static backups logs .cache/huggingface .cache/matplotlib \
     && mkdir -p static/models static/saliency_maps static/exports
 
 # CRITICAL: Copy database file AFTER all other operations to prevent overwrite
-# Use absolute paths consistently and verify integrity
+# Use absolute paths consistently and verify integrity with available commands
 COPY drawings.db /app/drawings.db
 
-# Verify database file integrity and set permissions
-RUN echo "=== DATABASE INTEGRITY CHECK ===" \
+# Comprehensive database verification using commands available in slim image
+RUN echo "=== DATABASE INTEGRITY VERIFICATION ===" \
+    && echo "Checking database file existence and permissions..." \
     && ls -la /app/drawings.db \
     && echo "Database file size: $(stat -c%s /app/drawings.db) bytes" \
-    && file /app/drawings.db \
+    && echo "Expected size: ~373MB (373219328 bytes)" \
+    && echo "Verifying database file header (SQLite signature)..." \
+    && head -c 16 /app/drawings.db | hexdump -C \
+    && echo "Setting proper permissions..." \
     && chmod 664 /app/drawings.db \
+    && echo "Final verification:" \
+    && ls -la /app/drawings.db \
     && echo "=== DATABASE SETUP COMPLETE ==="
 
 # Extended health check with longer startup grace period - try simple endpoint first
@@ -84,4 +90,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
 EXPOSE 80
 
 # Startup with enhanced logging and error handling for debugging
-CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Database file check:' && ls -la /app/drawings.db && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
+CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Database file check:' && ls -la /app/drawings.db && echo 'Database size: '$(stat -c%s /app/drawings.db)' bytes' && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
