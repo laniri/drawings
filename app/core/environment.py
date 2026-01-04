@@ -269,7 +269,7 @@ class EnvironmentDetector:
 
         # Default SQLite configuration for both environments
         if environment == EnvironmentType.PRODUCTION:
-            return "sqlite:///./production_drawings.db"
+            return "sqlite:///./drawings.db"
         return "sqlite:///./drawings.db"
 
     @classmethod
