@@ -32,16 +32,15 @@ from app.schemas.drawings import (
 from app.services import (
     DataPipelineService,
     DrawingMetadata,
-    FileStorageService,
     ValidationResult,
 )
+from app.services.environment_storage import get_storage_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Initialize services
 data_pipeline = DataPipelineService()
-file_storage = FileStorageService()
 
 
 class UploadProgress:
@@ -119,7 +118,7 @@ async def upload_drawing(
 
         # Save file to storage
         try:
-            filename, file_path = await file_storage.save_uploaded_file(
+            filename, file_path = await get_storage_service().save_uploaded_file(
                 file, "drawings"
             )
         except Exception as e:
@@ -158,7 +157,7 @@ async def upload_drawing(
 
         except Exception as e:
             # Clean up file if database operation fails
-            file_storage.delete_file(file_path)
+            get_storage_service().delete_file(file_path)
             logger.error(f"Database operation failed: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -221,7 +220,7 @@ async def get_drawing_file(drawing_id: int, db: Session = Depends(get_db)):
         )
 
     # Check if file exists
-    file_info = file_storage.get_file_info(drawing.file_path)
+    file_info = get_storage_service().get_file_info(drawing.file_path)
     if not file_info or not file_info["exists"]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -310,7 +309,7 @@ async def delete_drawing(drawing_id: int, db: Session = Depends(get_db)):
         )
 
     # Delete associated file
-    file_deleted = file_storage.delete_file(drawing.file_path)
+    file_deleted = get_storage_service().delete_file(drawing.file_path)
     if not file_deleted:
         logger.warning(
             f"Failed to delete file for drawing {drawing_id}: {drawing.file_path}"
@@ -381,7 +380,7 @@ async def process_batch_upload(upload_id: str, files: List[UploadFile], db: Sess
                 )
 
                 if validation_result.is_valid:
-                    filename, file_path = await file_storage.save_uploaded_file(
+                    filename, file_path = await get_storage_service().save_uploaded_file(
                         file, "drawings"
                     )
 
@@ -441,7 +440,7 @@ async def get_drawing_stats(db: Session = Depends(get_db)):
             label_stats[label.value] = count
 
         # Storage stats
-        storage_stats = file_storage.get_storage_stats()
+        storage_stats = get_storage_service().get_storage_stats()
 
         return {
             "total_drawings": total_drawings,

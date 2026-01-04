@@ -18,6 +18,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import ConfigurationError
 from app.models.database import AnomalyAnalysis, Drawing, InterpretabilityResult
+from app.services.environment_storage import get_storage_service
 
 logger = logging.getLogger(__name__)
 
@@ -76,12 +77,13 @@ class DemoService:
         else:
             description = f"A typical {subject} drawing by a {age}-year-old showing expected developmental features"
 
-        # Build file URLs
-        original_image_url = f"/{drawing.file_path}"
+        # Build file URLs using environment-aware storage service
+        storage_service = get_storage_service()
+        original_image_url = storage_service.get_file_url(drawing.file_path)
         saliency_map_url = None
 
         if interpretability and interpretability.saliency_map_path:
-            saliency_map_url = f"/{interpretability.saliency_map_path}"
+            saliency_map_url = storage_service.get_file_url(interpretability.saliency_map_path)
 
         # Create analysis result
         analysis_result = {
