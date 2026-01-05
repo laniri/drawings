@@ -18,8 +18,8 @@ User journey workflow for BatchProcessingPage component
 | user_task_3 | userTask | Click  => removeFile(batchFile.id) | actor=user |
 | user_task_4 | userTask | Click startAnalysis | actor=user |
 | user_task_5 | userTask | Click  => setShowResults(true) | actor=user |
-| system_task_6 | serviceTask | GET Request to /api/analysis/batch/jobs | actor=system |
-| system_task_7 | serviceTask | POST Request to /api/analysis/batch/upload | actor=system |
+| system_task_6 | serviceTask | GET Request to /api/v1/analysis/batch/jobs | actor=system |
+| system_task_7 | serviceTask | POST Request to /api/v1/analysis/batch/upload | actor=system |
 | system_task_8 | serviceTask | Update BatchFiles | actor=system |
 | system_task_9 | serviceTask | Update BatchFiles | actor=system |
 | system_task_10 | serviceTask | Update CurrentJob | actor=system |
@@ -35,8 +35,8 @@ User journey workflow for BatchProcessingPage component
 
 ## System Responses
 
-- GET Request to /api/analysis/batch/jobs
-- POST Request to /api/analysis/batch/upload
+- GET Request to /api/v1/analysis/batch/jobs
+- POST Request to /api/v1/analysis/batch/upload
 - Update BatchFiles
 - Update BatchFiles
 - Update CurrentJob

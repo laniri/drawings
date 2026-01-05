@@ -146,6 +146,17 @@ Common error responses across 1 status codes:
 - [DELETE /api/v1/backup/{backup_name}](./endpoints/DELETE__api_v1_backup_backup_name.md)
 - [POST /api/v1/cleanup](./endpoints/POST__api_v1_cleanup.md)
 - [GET /api/v1/storage/info](./endpoints/GET__api_v1_storage_info.md)
+
+## Storage Services
+
+The system uses an **Environment-Aware Storage Service** that automatically switches between local filesystem and AWS S3 based on environment configuration:
+
+- **Local Development**: Direct file serving from filesystem
+- **Production**: Secure presigned URLs from S3 (1-hour expiration)
+- **Demo Service**: Uses environment-aware storage for image URLs
+- **File Uploads**: Automatically routed to appropriate backend
+
+For detailed information, see [Environment-Aware Storage Contract](../interfaces/services/environment-storage-contract.md).
 - [POST /api/v1/storage/cleanup](./endpoints/POST__api_v1_storage_cleanup.md)
 
 ### Untagged

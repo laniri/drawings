@@ -5,6 +5,20 @@ Service contract for File Storage (service)
 
 **Source File**: `app/services/file_storage.py`
 
+> **⚠️ MIGRATION NOTICE**: This service is being migrated to `EnvironmentAwareStorageService` for better environment support. See [Environment-Aware Storage Contract](./environment-storage-contract.md) for the new unified storage service.
+
+## Migration Status
+
+### Services Migrated to EnvironmentAwareStorageService
+- ✅ **Demo Service** (`app/services/demo_service.py`) - Updated to use environment-aware storage for image URLs
+- ✅ **Drawings Endpoint** (`app/api/api_v1/endpoints/drawings.py`) - **COMPLETED**: All file operations now use environment-aware storage
+- 🔄 **Additional endpoints** - Migration in progress
+
+### Legacy FileStorageService Usage
+- ⚠️ **Deprecated**: `FileStorageService` is deprecated in favor of `EnvironmentAwareStorageService`
+- New development should use `EnvironmentAwareStorageService`
+- Existing code should be migrated to use `get_storage_service()` for environment-aware storage
+
 ## Interface Specification
 
 ### Classes

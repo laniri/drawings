@@ -262,11 +262,11 @@
   - **Validates: Requirements 7.3**
 
 - [x] 10.7 Implement enhanced interpretability API endpoints
-  - Add GET /api/interpretability/{analysis_id}/interactive for interactive saliency data
-  - Create GET /api/interpretability/{analysis_id}/simplified for simplified explanations
-  - Implement GET /api/interpretability/{analysis_id}/confidence for confidence metrics
-  - Add POST /api/interpretability/{analysis_id}/export for result export functionality
-  - Create GET /api/interpretability/examples/{age_group} for comparison examples
+  - Add GET /api/v1/interpretability/{analysis_id}/interactive for interactive saliency data
+  - Create GET /api/v1/interpretability/{analysis_id}/simplified for simplified explanations
+  - Implement GET /api/v1/interpretability/{analysis_id}/confidence for confidence metrics
+  - Add POST /api/v1/interpretability/{analysis_id}/export for result export functionality
+  - Create GET /api/v1/interpretability/examples/{age_group} for comparison examples
   - _Requirements: 9.1, 9.2, 9.3, 10.3, 11.1_
 
 - [x] 10.8 Enhance interpretability engine with interactive features
@@ -550,7 +550,7 @@
   - Add attribution information to interactive interpretability
   - Include subject-specific context in explanations
   - Update comparison examples endpoint to support subject filtering
-  - Add GET /api/interpretability/{analysis_id}/attribution endpoint
+  - Add GET /api/v1/interpretability/{analysis_id}/attribution endpoint
   - _Requirements: 6.5, 6.7_
 
 - [x] 20.3 Update configuration endpoints for subject management

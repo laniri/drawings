@@ -10,6 +10,7 @@ This document describes the database schema for the Children's Drawing Anomaly D
 
 **Enhanced Initialization Process (January 2025)**: The database initialization has been improved with comprehensive logging and verification:
 
+- **S3 Database Integration**: Automatically downloads database from S3 in production environments
 - **Model Import Verification**: Ensures all SQLAlchemy models are properly registered
 - **Table Creation Logging**: Detailed progress reporting during schema creation
 - **Verification Checks**: Confirms successful table creation with error detection
@@ -17,6 +18,41 @@ This document describes the database schema for the Children's Drawing Anomaly D
 - **Error Handling**: Clear error messages for troubleshooting initialization issues
 
 The enhanced logging provides visibility into the database setup process, making it easier to diagnose issues during development and deployment.
+
+### S3 Database Download
+
+The system includes automatic S3 database download functionality for production deployments:
+
+**Timing**: Database download occurs at **container startup** (runtime), not during database initialization
+
+**Function**: Implemented in the Dockerfile.prod CMD command
+
+**Behavior**:
+- Only activates when `APP_ENVIRONMENT=production`
+- Skips download if local database file already exists
+- Downloads from S3 bucket: `children-drawing-production-drawings-921400262514`
+- S3 key: `database/drawings.db`
+- AWS region: `eu-west-1`
+
+**Container Startup Process**:
+1. Container starts and checks environment variables
+2. If `APP_ENVIRONMENT=production` AND database file doesn't exist:
+   - Downloads database from S3 using AWS CLI
+   - Logs download progress and success
+3. If database exists or not in production mode:
+   - Skips download and continues startup
+4. Proceeds with normal application initialization
+
+**Error Handling**:
+- Gracefully handles missing AWS credentials
+- Logs warnings for S3 access issues
+- Container startup continues even if S3 download fails
+- Provides clear error messages for troubleshooting
+
+**Integration**:
+- Runs before uvicorn server startup
+- Ensures production deployments have access to the full database
+- No longer part of the database initialization process (`init_db()`)
 
 ## Table: drawings
 

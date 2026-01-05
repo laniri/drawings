@@ -38,6 +38,9 @@ A machine learning-powered application that analyzes children's drawings to iden
 - **SQLAlchemy** with SQLite database for data persistence
 - **Alembic** for database migrations
 - **Pydantic** for data validation and settings management
+- **Environment-Aware Storage Service**: Unified storage interface that automatically switches between:
+  - **Local Storage**: Direct filesystem access for development
+  - **AWS S3 Storage**: Secure presigned URLs for production deployment
 - **ReportLab** for PDF generation and comprehensive export reports (optional)
 - **Pillow** for core image processing and saliency map generation
 - **OpenCV** for advanced image processing (optional, with PIL fallback)
@@ -244,9 +247,10 @@ docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
 - **FastAPI Frontend Serving**: FastAPI serves React frontend directly using StaticFiles mount
 - **Environment Configuration**: Flexible environment configuration controlled by deployment (ECS task definition, docker-compose, etc.)
 - **Directory Management**: Automatic creation of required directories with proper permissions
-- **Database Initialization**: Automatic SQLite database creation and permission setup
+- **Runtime S3 Database Integration**: Conditionally downloads database from S3 at container startup (only if APP_ENVIRONMENT=production and database doesn't exist locally)
+- **AWS CLI Integration**: Includes AWS CLI for runtime S3 database download operations
 - **Enhanced Health Monitoring**: Extended health check with 180s startup grace period for reliable container initialization
-- **Verbose Startup Logging**: Comprehensive startup logging with environment variable output for debugging
+- **Verbose Startup Logging**: Comprehensive startup logging with environment variable output and database status for debugging
 - **Security**: Non-root user execution with proper permission management
 - **Hugging Face Cache Fix**: Configured cache directories to prevent permission errors during model loading
 - **Lazy Model Loading**: Vision Transformer models loaded on first API request to reduce startup memory usage
@@ -271,8 +275,8 @@ docker build -f Dockerfile.prod -t children-drawing-app:latest .
 # Build simplified production image (alternative for memory-constrained environments)
 docker build -f Dockerfile.prod.simplified -t children-drawing-app:simplified .
 
-# Run standard production container
-docker run -p 80:80 children-drawing-app:latest
+# Run standard production container (requires S3 database in production)
+docker run -p 80:80 -e APP_ENVIRONMENT=production -e AWS_REGION=eu-west-1 children-drawing-app:latest
 
 # Run simplified production container
 docker run -p 80:80 children-drawing-app:simplified
@@ -592,11 +596,16 @@ npm run test:ui         # Run tests with Vitest UI
 
 ## Usage
 
-### Web Interface
+### Demo Page and File Serving
+
+The system provides an interactive demo page with real analyzed samples:
 
 1. **Demo Page** (http://localhost:5173)
    - Interactive demo samples showcasing system capabilities
    - Pre-analyzed drawings with AI analysis results and interpretability visualizations
+   - **Environment-Aware Image Serving**: Images are automatically served from the appropriate storage backend:
+     - **Local Development**: Direct file serving from local filesystem
+     - **Production**: Secure presigned URLs from AWS S3 (1-hour expiration)
    - System statistics and technical information
    - Direct access to full application features
 
@@ -881,7 +890,74 @@ pip install reportlab>=4.0.0
    # - Table creation failures: Detailed error messages with specific failure reasons
    ```
 
-10. **Docker Production Container Issues**
+10. **S3 Database Integration Issues**
+   ```bash
+   # The system automatically downloads database from S3 in production environments
+   # This happens at container startup, not during database initialization
+   
+   # Expected S3 database download output (at container startup):
+   # 📥 Downloading database from S3...
+   # ✅ Database downloaded successfully
+   
+   # S3 database configuration:
+   # - Bucket: children-drawing-production-drawings-921400262514
+   # - Key: database/drawings.db
+   # - Region: eu-west-1
+   
+   # Common S3 database issues:
+   # - Missing AWS credentials: Ensure proper IAM role or credentials
+   # - Network connectivity: Check AWS region and S3 access
+   # - Bucket permissions: Verify read access to S3 bucket
+   # - File not found: Ensure database exists at s3://bucket/database/drawings.db
+   
+   # Manual S3 database download for troubleshooting:
+   aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db ./drawings.db --region eu-west-1
+   
+   # The download only occurs when:
+   # - APP_ENVIRONMENT=production
+   # - Local database file doesn't exist
+   # - AWS credentials are available
+   
+   # For local development, S3 download is skipped automatically
+   ```
+
+11. **Demo Images Not Loading**
+   ```bash
+   # Check storage service configuration
+   curl "http://localhost:8000/api/v1/storage/info"
+   
+   # Expected response shows current storage backend:
+   # {
+   #   "environment": "local",
+   #   "storage_backend": "local",
+   #   "upload_dir": "uploads",
+   #   "static_dir": "static"
+   # }
+   
+   # In production, should show S3 configuration:
+   # {
+   #   "environment": "production", 
+   #   "storage_backend": "s3",
+   #   "s3_bucket_name": "your-bucket-name",
+   #   "aws_region": "eu-west-1"
+   # }
+   
+   # Common issues:
+   # - Missing S3 permissions: Check IAM role has S3 access
+   # - Expired presigned URLs: URLs expire after 1 hour
+   # - Incorrect bucket configuration: Verify S3_BUCKET_NAME setting
+   # - Network connectivity: Check AWS region and connectivity
+   
+   # For local development, ensure files exist:
+   ls -la static/saliency_maps/
+   ls -la uploads/drawings/
+   
+   # Check application logs for storage service initialization:
+   # "Initialized S3 storage backend: bucket-name" (production)
+   # "Initialized local storage backend" (local)
+   ```
+
+11. **Docker Production Container Issues**
    ```bash
    # The production system offers two container options:
    
@@ -893,6 +969,12 @@ pip install reportlab>=4.0.0
    # Starting FastAPI application...
    # Environment: APP_ENVIRONMENT=<value-from-task-definition>
    # Storage: STORAGE_BACKEND=<value-from-task-definition>
+   # AWS Region: AWS_REGION=<value-from-task-definition>
+   # Database file check:
+   # 📥 Downloading database from S3... (only if APP_ENVIRONMENT=production and database doesn't exist)
+   # ✅ Database downloaded successfully (if download occurred)
+   # 🔧 Database already exists or not in production mode (if download skipped)
+   # Database status: <file details>
    # Database models imported. Available tables: ['drawings', 'drawing_embeddings', ...]
    # Database URL: sqlite:///./drawings.db
    # Creating database tables...

@@ -258,41 +258,41 @@ The system follows a modern layered architecture with the following technology s
 ### API Endpoints (FastAPI)
 
 **Drawing Management:**
-- `POST /api/drawings/upload` - Upload drawing with metadata
-- `GET /api/drawings/{id}` - Retrieve drawing details
-- `GET /api/drawings` - List drawings with filtering
-- `DELETE /api/drawings/{id}` - Delete drawing and associated data
+- `POST /api/v1/drawings/upload` - Upload drawing with metadata
+- `GET /api/v1/drawings/{id}` - Retrieve drawing details
+- `GET /api/v1/drawings` - List drawings with filtering
+- `DELETE /api/v1/drawings/{id}` - Delete drawing and associated data
 
 **Analysis Operations:**
-- `POST /api/analysis/analyze/{drawing_id}` - Analyze specific drawing
-- `POST /api/analysis/batch` - Batch analyze multiple drawings
-- `GET /api/analysis/{analysis_id}` - Get analysis results
-- `GET /api/analysis/drawing/{drawing_id}` - Get all analyses for a drawing
+- `POST /api/v1/analysis/analyze/{drawing_id}` - Analyze specific drawing
+- `POST /api/v1/analysis/batch` - Batch analyze multiple drawings
+- `GET /api/v1/analysis/{analysis_id}` - Get analysis results
+- `GET /api/v1/analysis/drawing/{drawing_id}` - Get all analyses for a drawing
 
 **Model Management:**
-- `GET /api/models/age-groups` - List available age group models
-- `POST /api/models/train` - Train new age group model
-- `PUT /api/models/{model_id}/threshold` - Update model threshold
-- `GET /api/models/status` - Get model training status
-- `POST /api/models/deploy` - Deploy trained model parameters to production
-- `GET /api/models/training-reports/{report_id}` - Get training summary report
-- `POST /api/models/export` - Export model parameters for deployment
+- `GET /api/v1/models/age-groups` - List available age group models
+- `POST /api/v1/models/train` - Train new age group model
+- `PUT /api/v1/models/{model_id}/threshold` - Update model threshold
+- `GET /api/v1/models/status` - Get model training status
+- `POST /api/v1/models/deploy` - Deploy trained model parameters to production
+- `GET /api/v1/models/training-reports/{report_id}` - Get training summary report
+- `POST /api/v1/models/export` - Export model parameters for deployment
 
 **Configuration:**
-- `GET /api/config/` - Get current system configuration
-- `PUT /api/config/threshold` - Update global threshold settings
-- `PUT /api/config/age-grouping` - Modify age grouping strategy
-- `GET /api/config/subjects/statistics` - Get subject-specific statistics
+- `GET /api/v1/config/` - Get current system configuration
+- `PUT /api/v1/config/threshold` - Update global threshold settings
+- `PUT /api/v1/config/age-grouping` - Modify age grouping strategy
+- `GET /api/v1/config/subjects/statistics` - Get subject-specific statistics
 
 **Enhanced Interpretability:**
-- `GET /api/interpretability/{analysis_id}/interactive` - Get interactive saliency data with region mappings
-- `GET /api/interpretability/{analysis_id}/simplified` - Get simplified explanations for non-technical users
-- `GET /api/interpretability/{analysis_id}/confidence` - Get confidence metrics and reliability scores
-- `POST /api/interpretability/{analysis_id}/export` - Export interpretability results in multiple formats
-- `GET /api/interpretability/examples/{age_group}` - Get comparison examples for educational purposes
-- `GET /api/interpretability/examples/{age_group}/{subject}` - Get subject-specific comparison examples
-- `POST /api/interpretability/{analysis_id}/annotate` - Add user annotations to interpretability results
-- `GET /api/interpretability/{analysis_id}/attribution` - Get detailed anomaly attribution breakdown (age vs subject vs visual)
+- `GET /api/v1/interpretability/{analysis_id}/interactive` - Get interactive saliency data with region mappings
+- `GET /api/v1/interpretability/{analysis_id}/simplified` - Get simplified explanations for non-technical users
+- `GET /api/v1/interpretability/{analysis_id}/confidence` - Get confidence metrics and reliability scores
+- `POST /api/v1/interpretability/{analysis_id}/export` - Export interpretability results in multiple formats
+- `GET /api/v1/interpretability/examples/{age_group}` - Get comparison examples for educational purposes
+- `GET /api/v1/interpretability/examples/{age_group}/{subject}` - Get subject-specific comparison examples
+- `POST /api/v1/interpretability/{analysis_id}/annotate` - Add user annotations to interpretability results
+- `GET /api/v1/interpretability/{analysis_id}/attribution` - Get detailed anomaly attribution breakdown (age vs subject vs visual)
 
 ### Frontend Components (React + TypeScript)
 

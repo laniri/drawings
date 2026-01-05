@@ -17,7 +17,7 @@ User journey workflow for UploadPage component
 | user_task_2 | userTask | Click  => navigate(`/analysis/${analysisId | actor=user |
 | user_task_3 | userTask | Submit Submit(onSubmit) | actor=user |
 | user_task_4 | userTask | Change (e) => field.onChange(parseFloat(e.target.value)) | actor=user |
-| system_task_5 | serviceTask | POST Request to /api/drawings/upload | actor=system |
+| system_task_5 | serviceTask | POST Request to /api/v1/drawings/upload | actor=system |
 | system_task_6 | serviceTask | Update UploadProgress | actor=system |
 | system_task_7 | serviceTask | Update UploadError | actor=system |
 | system_task_8 | serviceTask | Update UploadedFile | actor=system |
@@ -33,7 +33,7 @@ User journey workflow for UploadPage component
 
 ## System Responses
 
-- POST Request to /api/drawings/upload
+- POST Request to /api/v1/drawings/upload
 - Update UploadProgress
 - Update UploadError
 - Update UploadedFile
