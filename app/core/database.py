@@ -82,8 +82,49 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+
+def download_database_from_s3():
+    """Download database from S3 if not present locally."""
+    import os
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    
+    db_path = "drawings.db"
+    
+    # Skip if database already exists
+    if os.path.exists(db_path):
+        return True
+    
+    # Only download in production
+    if os.getenv("APP_ENVIRONMENT") != "production":
+        return True
+    
+    try:
+        print("📥 Database not found locally - downloading from S3...")
+        
+        s3_client = boto3.client('s3', region_name="eu-west-1")
+        s3_client.download_file(
+            "children-drawing-production-drawings-921400262514",
+            "database/drawings.db",
+            db_path
+        )
+        
+        print("✅ Database downloaded from S3 successfully")
+        return True
+        
+    except (ClientError, NoCredentialsError) as e:
+        print(f"⚠️  Could not download database from S3: {e}")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error downloading database: {e}")
+        return False
+
+
 def init_db():
-    """Initialize the database by creating all tables."""
+    """Initialize database tables."""
+    # Download database from S3 if needed
+    download_database_from_s3()
+    
     # Import models to ensure they're registered with Base.metadata
     # This is critical - SQLAlchemy only creates tables for imported models
     from app.models import database  # noqa: F401

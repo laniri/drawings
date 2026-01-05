@@ -14,6 +14,11 @@ services:
       - backups_data:/app/backups
       - logs_data:/app/logs
     environment:
+      # AWS Configuration for S3 database download
+      - AWS_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/drawings
       - DEBUG=false
       - LOG_LEVEL=info
@@ -59,6 +64,11 @@ services:
   db:
     image: postgres:15-alpine
     environment:
+      # AWS Configuration for S3 database download
+      - AWS_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       POSTGRES_DB: drawings
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

@@ -9,6 +9,11 @@ services:
     ports:
       - "80:80"
     environment:
+      # AWS Configuration for S3 database download
+      - AWS_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       # Use the database file copied into the container
       - DATABASE_URL=sqlite:///./drawings.db
       - DEBUG=false

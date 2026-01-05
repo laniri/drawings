@@ -274,6 +274,12 @@ jobs:
         role-session-name: GitHubActions-BuildPush-${{ github.run_id }}
         aws-region: ${{ env.AWS_REGION }}
     
+    - name: Verify S3 database availability
+      run: |
+        echo "🔍 Checking S3 database availability..."
+        aws s3 ls s3://children-drawing-production-drawings-921400262514/database/drawings.db --region eu-west-1
+        echo "✅ S3 database is accessible"
+    
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
