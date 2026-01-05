@@ -89,7 +89,7 @@ const DashboardPage: React.FC = () => {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats', subjectFilter],
     queryFn: async () => {
-      let url = '/api/analysis/stats'
+      let url = '/api/v1/analysis/stats'
       if (subjectFilter) {
         url += `?subject=${encodeURIComponent(subjectFilter)}`
       }

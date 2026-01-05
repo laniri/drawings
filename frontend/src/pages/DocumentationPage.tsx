@@ -125,7 +125,7 @@ const DocumentationPage: React.FC = () => {
     useQuery<DocumentationStatus>({
       queryKey: ['documentation-status'],
       queryFn: async () => {
-        const response = await axios.get('/api/documentation/status')
+        const response = await axios.get('/api/v1/documentation/status')
         return response.data
       },
       refetchInterval: 5000, // Poll every 5 seconds
@@ -136,7 +136,7 @@ const DocumentationPage: React.FC = () => {
     useQuery<DocumentationMetrics>({
       queryKey: ['documentation-metrics'],
       queryFn: async () => {
-        const response = await axios.get('/api/documentation/metrics')
+        const response = await axios.get('/api/v1/documentation/metrics')
         return response.data
       },
       refetchInterval: 30000,
@@ -159,7 +159,7 @@ const DocumentationPage: React.FC = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ['documentation-categories'],
     queryFn: async () => {
-      const response = await axios.get('/api/documentation/categories')
+      const response = await axios.get('/api/v1/documentation/categories')
       return response.data
     },
   })
@@ -167,7 +167,7 @@ const DocumentationPage: React.FC = () => {
   // Generate documentation mutation
   const generateMutation = useMutation({
     mutationFn: async (request: GenerationRequest) => {
-      const response = await axios.post('/api/documentation/generate', request)
+      const response = await axios.post('/api/v1/documentation/generate', request)
       return response.data
     },
     onSuccess: () => {
@@ -181,7 +181,7 @@ const DocumentationPage: React.FC = () => {
   // Clear cache mutation
   const clearCacheMutation = useMutation({
     mutationFn: async () => {
-      const response = await axios.delete('/api/documentation/cache')
+      const response = await axios.delete('/api/v1/documentation/cache')
       return response.data
     },
     onSuccess: () => {
@@ -192,7 +192,7 @@ const DocumentationPage: React.FC = () => {
   // Validate documentation mutation
   const validateMutation = useMutation({
     mutationFn: async (categories?: string[]) => {
-      const response = await axios.post('/api/documentation/validate', {
+      const response = await axios.post('/api/v1/documentation/validate', {
         categories,
       })
       return response.data
@@ -219,7 +219,7 @@ const DocumentationPage: React.FC = () => {
     }) => {
        
       const response = await axios.post(
-        '/api/documentation/batch/generate',
+        '/api/v1/documentation/batch/generate',
         batchData
       )
       return response.data
@@ -240,7 +240,7 @@ const DocumentationPage: React.FC = () => {
     }) => {
        
       const response = await axios.post(
-        '/api/documentation/schedule',
+        '/api/v1/documentation/schedule',
         scheduleData
       )
       return response.data

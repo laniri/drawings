@@ -81,7 +81,7 @@ const BatchProcessingPage: React.FC = () => {
   useQuery<BatchJob[]>({
     queryKey: ['batch-jobs'],
     queryFn: async () => {
-      const response = await axios.get('/api/analysis/batch/jobs')
+      const response = await axios.get('/api/v1/analysis/batch/jobs')
       return response.data
     },
     refetchInterval: 2000, // Poll every 2 seconds when batch is running
@@ -116,7 +116,7 @@ const BatchProcessingPage: React.FC = () => {
       })
 
       const response = await axios.post(
-        '/api/analysis/batch/upload',
+        '/api/v1/analysis/batch/upload',
         formData,
         {
           headers: {

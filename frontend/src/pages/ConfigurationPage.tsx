@@ -98,7 +98,7 @@ const ConfigurationPage: React.FC = () => {
   const { data: config, isLoading: configLoading } = useQuery<SystemConfig>({
     queryKey: ['system-config'],
     queryFn: async () => {
-      const response = await axios.get('/api/config/')
+      const response = await axios.get('/api/v1/config/')
       return response.data
     },
   })
@@ -109,7 +109,7 @@ const ConfigurationPage: React.FC = () => {
   >({
     queryKey: ['age-group-models'],
     queryFn: async () => {
-      const response = await axios.get('/api/models/age-groups')
+      const response = await axios.get('/api/v1/models/age-groups')
       return response.data.models
     },
   })
@@ -120,7 +120,7 @@ const ConfigurationPage: React.FC = () => {
   >({
     queryKey: ['subject-statistics'],
     queryFn: async () => {
-      const response = await axios.get('/api/config/subject-statistics')
+      const response = await axios.get('/api/v1/config/subject-statistics')
       return response.data.statistics
     },
   })
@@ -145,7 +145,7 @@ const ConfigurationPage: React.FC = () => {
   // Update threshold configuration
   const updateThresholdMutation = useMutation({
     mutationFn: async (percentile: number) => {
-      const response = await axios.put('/api/config/threshold', {
+      const response = await axios.put('/api/v1/config/threshold', {
         percentile: percentile,
       })
       return response.data
@@ -165,7 +165,7 @@ const ConfigurationPage: React.FC = () => {
       min_samples_per_group?: number
       max_age_group_span?: number
     }) => {
-      const response = await axios.put('/api/config/age-grouping', data)
+      const response = await axios.put('/api/v1/config/age-grouping', data)
       return response.data
     },
     onSuccess: (_, variables) => {
@@ -200,7 +200,7 @@ const ConfigurationPage: React.FC = () => {
   // Update general configuration (fallback)
   const updateConfigMutation = useMutation({
     mutationFn: async (data: ConfigFormData) => {
-      const response = await axios.put('/api/config/', data)
+      const response = await axios.put('/api/v1/config/', data)
       return response.data
     },
     onSuccess: () => {
@@ -214,7 +214,7 @@ const ConfigurationPage: React.FC = () => {
   // Train new model
   const trainModelMutation = useMutation({
     mutationFn: async (ageGroup: string) => {
-      const response = await axios.post('/api/models/train', {
+      const response = await axios.post('/api/v1/models/train', {
         age_group: ageGroup,
       })
       return response.data
