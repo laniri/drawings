@@ -103,7 +103,9 @@ async def startup_event():
             print("=" * 50)
         except Exception as e:
             print(f"Warning: Failed to initialize storage service: {e}")
-            print("🚀 Continuing without storage service - core functionality available")
+            print(
+                "🚀 Continuing without storage service - core functionality available"
+            )
 
     except Exception as e:
         print("=" * 50)
@@ -112,11 +114,15 @@ async def startup_event():
         import traceback
 
         traceback.print_exc()
-        
+
         # In production, try to continue with minimal functionality
         if os.getenv("APP_ENVIRONMENT") == "production":
-            print("🚨 PRODUCTION MODE: Attempting to continue with minimal functionality")
-            print("⚠️  Some features may not be available until database issues are resolved")
+            print(
+                "🚨 PRODUCTION MODE: Attempting to continue with minimal functionality"
+            )
+            print(
+                "⚠️  Some features may not be available until database issues are resolved"
+            )
             # Don't raise - allow service to start with degraded functionality
         else:
             # In development, fail fast to catch issues early
