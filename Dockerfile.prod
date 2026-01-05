@@ -76,17 +76,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
 # Expose port 80
 EXPOSE 80
 
-# Startup with enhanced logging and error handling for debugging
-
-# Download database from S3 (resolves Git LFS budget limitation)
-RUN if [ "$APP_ENVIRONMENT" = "production" ]; then \
-        echo "📥 Downloading database from S3..." && \
-        aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db /app/drawings.db --region eu-west-1 && \
-        echo "✅ Database downloaded successfully" && \
-        ls -lh /app/drawings.db; \
-    else \
-        echo "🔧 Development mode - using local database"; \
-    fi
-
-
-CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Database file check:' && ls -la /app/drawings.db && echo 'Database size: '$(stat -c%s /app/drawings.db)' bytes' && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
+CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Database file check:' && if [ '$APP_ENVIRONMENT' = 'production' ] && [ ! -f '/app/drawings.db' ]; then echo '📥 Downloading database from S3...' && aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db /app/drawings.db --region eu-west-1 && echo '✅ Database downloaded successfully' && ls -lh /app/drawings.db; else echo '🔧 Database already exists or not in production mode'; fi && echo 'Database status:' && ls -la /app/drawings.db 2>/dev/null || echo 'Database file not found' && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
