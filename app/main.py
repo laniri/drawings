@@ -103,16 +103,25 @@ async def startup_event():
             print("=" * 50)
         except Exception as e:
             print(f"Warning: Failed to initialize storage service: {e}")
+            print("🚀 Continuing without storage service - core functionality available")
 
     except Exception as e:
         print("=" * 50)
-        print(f"CRITICAL ERROR: Database initialization failed: {e}")
+        print(f"ERROR: Database initialization failed: {e}")
         print("=" * 50)
         import traceback
 
         traceback.print_exc()
-        # Don't continue startup if database init fails - this is critical
-        raise RuntimeError(f"Database initialization failed: {e}")
+        
+        # In production, try to continue with minimal functionality
+        if os.getenv("APP_ENVIRONMENT") == "production":
+            print("🚨 PRODUCTION MODE: Attempting to continue with minimal functionality")
+            print("⚠️  Some features may not be available until database issues are resolved")
+            # Don't raise - allow service to start with degraded functionality
+        else:
+            # In development, fail fast to catch issues early
+            print("🔧 DEVELOPMENT MODE: Failing startup to catch database issues early")
+            raise RuntimeError(f"Database initialization failed: {e}")
 
 
 # Only add middleware and routes if services initialized successfully
