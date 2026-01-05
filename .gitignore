@@ -47,8 +47,19 @@ venv.bak/
 #*.sqlite3
 
 # Uploads and static files
-uploads/
-static/
+# Uploads directory - ignore contents but keep directory structure
+uploads/*
+!uploads/.gitkeep
+
+# Static files - ignore contents but keep directory structure
+static/*
+!static/.gitkeep
+static/models/*
+!static/models/.gitkeep
+static/saliency_maps/*
+!static/saliency_maps/.gitkeep
+static/exports/*
+!static/exports/.gitkeep
 # ML model files (but not Python models directory)
 *.pkl
 *.pth
