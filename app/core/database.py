@@ -82,7 +82,6 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-
 def download_database_from_s3():
     """Download database from S3 if not present locally."""
     import os
