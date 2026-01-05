@@ -1,5 +1,5 @@
-# Simplified Production Dockerfile for Children's Drawing Anomaly Detection System
-# Single-stage build with minimal complexity to resolve memory exhaustion issues
+# Production Dockerfile for Children's Drawing Anomaly Detection System
+# Optimized for static file serving and S3 synchronization
 
 # ============================================================================
 # Stage 1: Build Frontend
@@ -21,11 +21,11 @@ COPY frontend/ ./
 RUN npm run build
 
 # ============================================================================
-# Stage 2: Simplified Python Backend
+# Stage 2: Python Backend with Static File Optimization
 # ============================================================================
 FROM python:3.11-slim
 
-# Set minimal environment variables (let task definition control APP_ENVIRONMENT and STORAGE_BACKEND)
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
@@ -36,10 +36,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_DATASETS_CACHE=/app/.cache/huggingface \
     MPLCONFIGDIR=/app/.cache/matplotlib
 
-# Install minimal system dependencies including AWS CLI
+# Install system dependencies including AWS CLI
 RUN apt-get update && apt-get install -y \
     curl \
     unzip \
+    nginx \
     && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install \
@@ -52,9 +53,7 @@ WORKDIR /app
 
 # Copy and install Python dependencies
 COPY requirements.txt ./
-
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
@@ -65,15 +64,125 @@ COPY setup.py ./
 # Copy frontend build from previous stage
 COPY --from=frontend-build /frontend/dist ./frontend_build
 
-# Create required directories
+# Create required directories with proper permissions
 RUN mkdir -p uploads static backups logs .cache/huggingface .cache/matplotlib \
-    && mkdir -p static/models static/saliency_maps static/exports
+    && mkdir -p static/models static/saliency_maps static/exports static/uploads \
+    && chmod -R 755 static uploads \
+    && chown -R www-data:www-data static uploads
 
-# Extended health check with longer startup grace period - try simple endpoint first
+# Create nginx configuration for static file serving
+RUN mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+COPY <<'NGINX_EOF' /etc/nginx/sites-available/default
+server {
+    listen 80;
+    server_name _;
+    
+    # Increase client max body size for file uploads
+    client_max_body_size 50M;
+    
+    # Serve static files directly with nginx
+    location /static/ {
+        alias /app/static/;
+        expires 1d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri $uri/ =404;
+    }
+    
+    location /uploads/ {
+        alias /app/uploads/;
+        expires 1d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri $uri/ =404;
+    }
+    
+    # Proxy API requests to FastAPI
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 75s;
+    }
+    
+    # Proxy health checks
+    location /health {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+    
+    # Serve React frontend
+    location / {
+        root /app/frontend_build;
+        try_files $uri $uri/ /index.html;
+        expires 1h;
+        add_header Cache-Control "public";
+    }
+}
+NGINX_EOF
+
+# Link the site configuration
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
+    && rm -f /etc/nginx/sites-enabled/default
+
+# Create startup script
+COPY <<'STARTUP_EOF' /app/startup.sh
+#!/bin/bash
+set -e
+
+echo "🚀 Starting Children's Drawing Anomaly Detection System"
+echo "Environment: $APP_ENVIRONMENT"
+echo "Storage Backend: $STORAGE_BACKEND"
+echo "AWS Region: $AWS_REGION"
+
+# Sync files from S3 if in production
+if [ "$APP_ENVIRONMENT" = "production" ]; then
+    echo "📥 Syncing files from S3..."
+    
+    # Download database
+    if [ ! -f "/app/drawings.db" ]; then
+        echo "📥 Downloading database from S3..."
+        aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db /app/drawings.db --region eu-west-1 || echo "⚠️ Database download failed"
+    fi
+    
+    # Sync static files
+    echo "📥 Syncing static files from S3..."
+    aws s3 sync s3://children-drawing-production-drawings-921400262514/static/ /app/static/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --delete || echo "⚠️ Static files sync failed"
+    
+    # Sync uploads
+    echo "📥 Syncing uploads from S3..."
+    aws s3 sync s3://children-drawing-production-drawings-921400262514/uploads/ /app/uploads/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --delete || echo "⚠️ Uploads sync failed"
+    
+    # Set proper permissions
+    chmod -R 755 /app/static /app/uploads
+    chown -R www-data:www-data /app/static /app/uploads
+    
+    echo "✅ S3 sync completed"
+    echo "📊 Static files status:"
+    ls -la /app/static/ | head -10
+    echo "📊 Uploads status:"
+    ls -la /app/uploads/ | head -10
+fi
+
+# Start nginx
+echo "🌐 Starting nginx..."
+nginx -t && nginx -g "daemon on;"
+
+# Start FastAPI application
+echo "🐍 Starting FastAPI application..."
+exec uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --log-level info --access-log
+STARTUP_EOF
+
+RUN chmod +x /app/startup.sh
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
-    CMD curl -f http://localhost:80/health/simple || curl -f http://localhost:80/health || exit 1
+    CMD curl -f http://localhost:80/health/simple || exit 1
 
 # Expose port 80
 EXPOSE 80
 
-CMD ["sh", "-c", "echo 'Container starting...' && echo 'Environment: APP_ENVIRONMENT='$APP_ENVIRONMENT && echo 'Storage: STORAGE_BACKEND='$STORAGE_BACKEND && echo 'AWS Region: AWS_REGION='$AWS_REGION && echo 'Database file check:' && if [ '$APP_ENVIRONMENT' = 'production' ] && [ ! -f '/app/drawings.db' ]; then echo '📥 Downloading database from S3...' && aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db /app/drawings.db --region eu-west-1 && echo '✅ Database downloaded successfully' && ls -lh /app/drawings.db; else echo '🔧 Database already exists or not in production mode'; fi && echo 'Static files sync:' && if [ '$APP_ENVIRONMENT' = 'production' ]; then echo '📥 Syncing static files from S3...' && aws s3 sync s3://children-drawing-production-drawings-921400262514/static/ /app/static/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' && echo '📥 Syncing uploads from S3...' && aws s3 sync s3://children-drawing-production-drawings-921400262514/uploads/ /app/uploads/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' && echo '✅ Static files synced successfully' && echo 'Static files status:' && ls -la /app/static/ && ls -la /app/uploads/; else echo '🔧 Not in production mode, skipping S3 sync'; fi && echo 'Database status:' && ls -la /app/drawings.db 2>/dev/null || echo 'Database file not found' && echo 'Starting uvicorn server...' && uvicorn app.main:app --host 0.0.0.0 --port 80 --workers 1 --log-level info --access-log"]
+# Use startup script
+CMD ["/app/startup.sh"]

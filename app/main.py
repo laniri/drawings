@@ -165,9 +165,44 @@ if SERVICES_INITIALIZED:
 
     app.include_router(demo_router, prefix="/demo", tags=["demo"])
 
-    # Mount static files for serving uploaded images and results
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+    # Mount static files for serving uploaded images and results with better error handling
+    try:
+        if os.path.exists("static"):
+            app.mount("/static", StaticFiles(directory="static", check_dir=False), name="static")
+            print("✅ Static files mounted at /static")
+        else:
+            print("⚠️ Static directory not found, creating it...")
+            os.makedirs("static", exist_ok=True)
+            os.makedirs("static/models", exist_ok=True)
+            os.makedirs("static/saliency_maps", exist_ok=True)
+            os.makedirs("static/exports", exist_ok=True)
+            app.mount("/static", StaticFiles(directory="static", check_dir=False), name="static")
+            print("✅ Static files mounted at /static")
+            
+        if os.path.exists("uploads"):
+            app.mount("/uploads", StaticFiles(directory="uploads", check_dir=False), name="uploads")
+            print("✅ Uploads mounted at /uploads")
+        else:
+            print("⚠️ Uploads directory not found, creating it...")
+            os.makedirs("uploads", exist_ok=True)
+            app.mount("/uploads", StaticFiles(directory="uploads", check_dir=False), name="uploads")
+            print("✅ Uploads mounted at /uploads")
+    except Exception as e:
+        print(f"⚠️ Error mounting static files: {e}")
+        # Create fallback endpoints for static files
+        @app.get("/static/{file_path:path}")
+        async def serve_static_fallback(file_path: str):
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Static file not found", "path": file_path}
+            )
+        
+        @app.get("/uploads/{file_path:path}")
+        async def serve_uploads_fallback(file_path: str):
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Upload file not found", "path": file_path}
+            )
 
     # Mount React frontend (only if frontend_build directory exists)
     if os.path.exists("frontend_build"):
