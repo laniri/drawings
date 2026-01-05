@@ -196,7 +196,7 @@ if SERVICES_INITIALIZED:
                 status_code=404,
                 content={"error": "Static file not found", "path": file_path}
             )
-        
+
         @app.get("/uploads/{file_path:path}")
         async def serve_uploads_fallback(file_path: str):
             return JSONResponse(
