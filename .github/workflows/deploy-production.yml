@@ -47,8 +47,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        lfs: true
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -201,8 +199,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        lfs: true
     
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
@@ -264,8 +260,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        lfs: true
     
     - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
@@ -345,8 +339,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        lfs: true
     
     - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
@@ -394,8 +386,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        lfs: true
     
     - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
