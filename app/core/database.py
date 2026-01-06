@@ -87,7 +87,7 @@ def check_database_exists():
     import os
 
     db_path = "drawings.db"
-    
+
     if os.path.exists(db_path):
         file_size = os.path.getsize(db_path)
         print(f"✅ Database exists at {db_path} ({file_size} bytes)")
@@ -207,9 +207,7 @@ def init_db():
     if os.getenv("APP_ENVIRONMENT") == "production":
         # Start background sync if database is small or doesn't exist
         if not db_exists or file_size < 50 * 1024 * 1024:  # Less than 50MB
-            print(
-                "🔄 Starting background sync for historical data (non-blocking)"
-            )
+            print("🔄 Starting background sync for historical data (non-blocking)")
             start_background_database_sync()
         else:
             print(
