@@ -1,126 +1,97 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:eu-west-1:921400262514:task-definition/children-drawing-prod-cluster-task:9",
-    "containerDefinitions": [
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "921400262514.dkr.ecr.eu-west-1.amazonaws.com/children-drawing-anomaly-detection:latest",
+      "cpu": 0,
+      "portMappings": [
         {
-            "name": "app",
-            "image": "921400262514.dkr.ecr.eu-west-1.amazonaws.com/children-drawing-anomaly-detection:662ade49d2c96bef42db406cb0a9ab71e4cb7fe3",
-            "cpu": 0,
-            "portMappings": [
-                {
-                    "containerPort": 80,
-                    "hostPort": 80,
-                    "protocol": "tcp"
-                }
-            ],
-            "essential": true,
-            "environment": [
-                {
-                    "name": "ENABLE_METRICS",
-                    "value": "true"
-                },
-                {
-                    "name": "S3_BUCKET_DRAWINGS",
-                    "value": "children-drawing-production-drawings-921400262514"
-                },
-                {
-                    "name": "AWS_REGION",
-                    "value": "eu-west-1"
-                },
-                {
-                    "name": "S3_BUCKET_MODELS",
-                    "value": "children-drawing-production-models-921400262514"
-                },
-                {
-                    "name": "ENABLE_SECRETS_MANAGER",
-                    "value": "true"
-                },
-                {
-                    "name": "ENVIRONMENT",
-                    "value": "production"
-                },
-                {
-                    "name": "AWS_DEFAULT_REGION",
-                    "value": "eu-west-1"
-                },
-                {
-                    "name": "S3_BUCKET_NAME",
-                    "value": "children-drawing-production-drawings-921400262514"
-                },
-                {
-                    "name": "APP_ENVIRONMENT",
-                    "value": "production"
-                },
-                {
-                    "name": "S3_BUCKET_BACKUPS",
-                    "value": "children-drawing-production-backups-921400262514"
-                }
-            ],
-            "mountPoints": [],
-            "volumesFrom": [],
-            "secrets": [
-                {
-                    "name": "ADMIN_PASSWORD_SECRET_ARN",
-                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:921400262514:secret:children-drawing-prod-admin-password-tJoR5r"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/children-drawing-prod",
-                    "awslogs-region": "eu-west-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            },
-            "systemControls": []
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
         }
-    ],
-    "family": "children-drawing-prod-cluster-task",
-    "taskRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-execution-role",
-    "networkMode": "awsvpc",
-    "revision": 9,
-    "volumes": [],
-    "status": "ACTIVE",
-    "requiresAttributes": [
+      ],
+      "essential": true,
+      "environment": [
         {
-            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+          "name": "ENABLE_METRICS",
+          "value": "true"
         },
         {
-            "name": "ecs.capability.execution-role-awslogs"
+          "name": "S3_BUCKET_DRAWINGS",
+          "value": "children-drawing-production-drawings-921400262514"
         },
         {
-            "name": "com.amazonaws.ecs.capability.ecr-auth"
+          "name": "AWS_REGION",
+          "value": "eu-west-1"
         },
         {
-            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+          "name": "S3_BUCKET_MODELS",
+          "value": "children-drawing-production-models-921400262514"
         },
         {
-            "name": "ecs.capability.secrets.asm.environment-variables"
+          "name": "ENABLE_SECRETS_MANAGER",
+          "value": "true"
         },
         {
-            "name": "com.amazonaws.ecs.capability.task-iam-role"
+          "name": "ENVIRONMENT",
+          "value": "production"
         },
         {
-            "name": "ecs.capability.execution-role-ecr-pull"
+          "name": "AWS_DEFAULT_REGION",
+          "value": "eu-west-1"
         },
         {
-            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+          "name": "S3_BUCKET_NAME",
+          "value": "children-drawing-production-drawings-921400262514"
         },
         {
-            "name": "ecs.capability.task-eni"
+          "name": "APP_ENVIRONMENT",
+          "value": "production"
+        },
+        {
+          "name": "S3_BUCKET_BACKUPS",
+          "value": "children-drawing-production-backups-921400262514"
         }
-    ],
-    "placementConstraints": [],
-    "compatibilities": [
-        "EC2",
-        "FARGATE",
-        "MANAGED_INSTANCES"
-    ],
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "cpu": "512",
-    "memory": "2048",
-    "registeredAt": "2025-12-29T20:03:45.130000+02:00",
-    "registeredBy": "arn:aws:sts::921400262514:assumed-role/GitHubActionsRole-ChildrenDrawing/GitHubActions-Deploy-20578705027"
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "secrets": [
+        {
+          "name": "ADMIN_PASSWORD_SECRET_ARN",
+          "valueFrom": "arn:aws:secretsmanager:eu-west-1:921400262514:secret:children-drawing-prod-admin-password-tJoR5r"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/children-drawing-prod",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      },
+      "systemControls": [],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost/health || exit 1"
+        ],
+        "interval": 60,
+        "timeout": 30,
+        "retries": 5,
+        "startPeriod": 300
+      }
+    }
+  ],
+  "family": "children-drawing-prod-task",
+  "taskRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-task-role",
+  "executionRoleArn": "arn:aws:iam::921400262514:role/children-drawing-prod-ecs-execution-role",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "3072"
 }
