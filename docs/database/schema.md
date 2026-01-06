@@ -8,51 +8,59 @@ This document describes the database schema for the Children's Drawing Anomaly D
 
 ## Database Initialization
 
-**Enhanced Initialization Process (January 2025)**: The database initialization has been improved with comprehensive logging and verification:
+**Enhanced Initialization Process (January 2025)**: The database initialization has been improved with comprehensive logging, verification, and background synchronization:
 
-- **S3 Database Integration**: Automatically downloads database from S3 in production environments
+- **Background S3 Database Integration**: Asynchronously downloads database from S3 after startup in production environments
 - **Model Import Verification**: Ensures all SQLAlchemy models are properly registered
 - **Table Creation Logging**: Detailed progress reporting during schema creation
 - **Verification Checks**: Confirms successful table creation with error detection
 - **File Status Reporting**: Database file existence and size information (SQLite)
 - **Error Handling**: Clear error messages for troubleshooting initialization issues
+- **Non-blocking Startup**: Service starts immediately, historical data loads in background
 
 The enhanced logging provides visibility into the database setup process, making it easier to diagnose issues during development and deployment.
 
-### S3 Database Download
+### Background S3 Database Sync
 
-The system includes automatic S3 database download functionality for production deployments:
+The system includes automatic background S3 database synchronization for production deployments:
 
-**Timing**: Database download occurs at **container startup** (runtime), not during database initialization
+**Timing**: Database sync occurs **in background after startup**, not during database initialization
 
-**Function**: Implemented in the Dockerfile.prod CMD command
+**Function**: Implemented in `start_background_database_sync()` function
 
 **Behavior**:
 - Only activates when `APP_ENVIRONMENT=production`
-- Skips download if local database file already exists
+- Runs in background thread after 30-second startup delay
+- Only syncs if database is small (< 100MB) or doesn't exist
 - Downloads from S3 bucket: `children-drawing-production-drawings-921400262514`
 - S3 key: `database/drawings.db`
 - AWS region: `eu-west-1`
+- Uses atomic file replacement for safe updates
 
-**Container Startup Process**:
-1. Container starts and checks environment variables
-2. If `APP_ENVIRONMENT=production` AND database file doesn't exist:
-   - Downloads database from S3 using AWS CLI
-   - Logs download progress and success
-3. If database exists or not in production mode:
-   - Skips download and continues startup
-4. Proceeds with normal application initialization
+**Application Startup Process**:
+1. Container starts and initializes database immediately
+2. Service becomes available for requests
+3. Background sync thread starts after 30-second delay
+4. If `APP_ENVIRONMENT=production` AND database is small/missing:
+   - Downloads database from S3 to temporary file
+   - Atomically replaces existing database
+   - Logs sync progress and completion
+5. If database is large or not in production mode:
+   - Skips sync and logs reason
+6. Service continues running with updated data
 
 **Error Handling**:
 - Gracefully handles missing AWS credentials
 - Logs warnings for S3 access issues
-- Container startup continues even if S3 download fails
+- Service remains fully functional even if background sync fails
 - Provides clear error messages for troubleshooting
+- Automatic cleanup of temporary files
 
 **Integration**:
-- Runs before uvicorn server startup
-- Ensures production deployments have access to the full database
-- No longer part of the database initialization process (`init_db()`)
+- Runs after application startup is complete
+- Does not block service availability
+- Historical data becomes available after sync completion
+- Part of the database initialization process (`init_db()`)
 
 ## Table: drawings
 

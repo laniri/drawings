@@ -343,7 +343,7 @@ Key environment variables in `.env`:
 - Uses Uvicorn ASGI server with 1 worker
 - **Comprehensive environment validation** with startup script
 - **Automatic directory creation** with proper permissions
-- **Runtime S3 database download** in production environments (conditional, only if database doesn't exist locally)
+- **Background S3 database sync** in production environments (non-blocking, after startup)
 - **Enhanced database initialization** with comprehensive logging and verification (December 2024)
 - **Python import validation** to catch configuration issues early (lightweight imports only, avoiding heavy model loading)
 - **Logs redirected to Docker stdout/stderr** for better integration

@@ -82,50 +82,19 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def download_database_from_s3():
-    """Download database from S3 if not present locally (optional for startup)."""
+def check_database_exists():
+    """Check if database exists locally (non-blocking)."""
     import os
 
-    import boto3
-    from botocore.exceptions import ClientError, NoCredentialsError
-
     db_path = "drawings.db"
-
-    # Skip if database already exists
+    
     if os.path.exists(db_path):
-        print(
-            f"✅ Database already exists at {db_path} ({os.path.getsize(db_path)} bytes)"
-        )
-        return True
-
-    # Only download in production
-    if os.getenv("APP_ENVIRONMENT") != "production":
-        print("🔧 Development environment - skipping S3 database download")
-        return True
-
-    try:
-        print("📥 Database not found locally - attempting S3 download...")
-
-        s3_client = boto3.client("s3", region_name="eu-west-1")
-        s3_client.download_file(
-            "children-drawing-production-drawings-921400262514",
-            "database/drawings.db",
-            db_path,
-        )
-
-        print(
-            f"✅ Database downloaded from S3 successfully ({os.path.getsize(db_path)} bytes)"
-        )
-        return True
-
-    except (ClientError, NoCredentialsError) as e:
-        print(f"⚠️  Could not download database from S3: {e}")
-        print("🚀 Continuing with empty database - service will be fully functional")
-        return True  # Changed: Don't fail startup, continue with empty DB
-    except Exception as e:
-        print(f"⚠️  Unexpected error downloading database: {e}")
-        print("🚀 Continuing with empty database - service will be fully functional")
-        return True  # Changed: Don't fail startup, continue with empty DB
+        file_size = os.path.getsize(db_path)
+        print(f"✅ Database exists at {db_path} ({file_size} bytes)")
+        return True, file_size
+    else:
+        print(f"📄 Database not found at {db_path} - will create empty database")
+        return False, 0
 
 
 def start_background_database_sync():
@@ -139,8 +108,8 @@ def start_background_database_sync():
 
     def background_sync():
         """Background thread to sync database from S3."""
-        # Wait a bit for startup to complete
-        time.sleep(30)
+        # Wait for startup to complete
+        time.sleep(10)  # Reduced from 30 to 10 seconds
 
         db_path = "drawings.db"
         temp_db_path = "drawings_sync.db"
@@ -152,8 +121,8 @@ def start_background_database_sync():
 
         # Skip if we already have a large database (likely already synced)
         if (
-            os.path.exists(db_path) and os.path.getsize(db_path) > 100 * 1024 * 1024
-        ):  # 100MB
+            os.path.exists(db_path) and os.path.getsize(db_path) > 50 * 1024 * 1024
+        ):  # 50MB (reduced from 100MB)
             print(
                 f"✅ Large database already present ({os.path.getsize(db_path)} bytes) - skipping sync"
             )
@@ -190,8 +159,10 @@ def start_background_database_sync():
 
         except (ClientError, NoCredentialsError) as e:
             print(f"⚠️  Background database sync failed: {e}")
+            print("🚀 Service continues with local database - all features available")
         except Exception as e:
             print(f"⚠️  Unexpected error in background sync: {e}")
+            print("🚀 Service continues with local database - all features available")
         finally:
             # Clean up temp file if it exists
             if os.path.exists(temp_db_path):
@@ -204,14 +175,14 @@ def start_background_database_sync():
     sync_thread = threading.Thread(target=background_sync, daemon=True)
     sync_thread.start()
     print(
-        "🔄 Background database sync started - historical data will be available shortly"
+        "🔄 Background database sync started - historical data will be available in ~10 seconds"
     )
 
 
 def init_db():
     """Initialize database tables and start background sync."""
-    # Try to download database from S3 (non-blocking, returns True even if fails)
-    download_success = download_database_from_s3()
+    # Quick check if database exists (non-blocking)
+    db_exists, file_size = check_database_exists()
 
     # Import models to ensure they're registered with Base.metadata
     # This is critical - SQLAlchemy only creates tables for imported models
@@ -232,24 +203,18 @@ def init_db():
         print(f"Creating database directory: {db_dir}")
         os.makedirs(db_dir)
 
-    # Check if database file exists and its size
-    if os.path.exists(db_path):
-        file_size = os.path.getsize(db_path)
-        print(f"Database file exists at: {db_path}")
-        print(f"Database file size: {file_size} bytes")
-
-        # If database is small (likely empty), start background sync
-        if file_size < 100 * 1024 * 1024:  # Less than 100MB
+    # Always start background sync for production (non-blocking)
+    if os.getenv("APP_ENVIRONMENT") == "production":
+        # Start background sync if database is small or doesn't exist
+        if not db_exists or file_size < 50 * 1024 * 1024:  # Less than 50MB
             print(
-                "🔄 Small database detected - starting background sync for historical data"
+                "🔄 Starting background sync for historical data (non-blocking)"
             )
             start_background_database_sync()
-    else:
-        print(
-            f"Database file does not exist at: {db_path} - will create empty database"
-        )
-        # Start background sync to get historical data
-        start_background_database_sync()
+        else:
+            print(
+                f"✅ Large database present ({file_size} bytes) - skipping background sync"
+            )
 
     # Create all tables (works with empty or existing database)
     print("Creating database tables...")
@@ -270,10 +235,7 @@ def init_db():
             )
 
         print("✅ Database initialization completed successfully")
-        if os.getenv("APP_ENVIRONMENT") == "production":
-            print(
-                "🔄 Background database sync is running - historical data will be available shortly"
-            )
+        print("🚀 Service is ready - health checks will pass immediately")
 
     except Exception as e:
         print(f"Error verifying database tables: {e}")

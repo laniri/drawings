@@ -247,7 +247,7 @@ docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
 - **FastAPI Frontend Serving**: FastAPI serves React frontend directly using StaticFiles mount
 - **Environment Configuration**: Flexible environment configuration controlled by deployment (ECS task definition, docker-compose, etc.)
 - **Directory Management**: Automatic creation of required directories with proper permissions
-- **Runtime S3 Database Integration**: Conditionally downloads database from S3 at container startup (only if APP_ENVIRONMENT=production and database doesn't exist locally)
+- **Background S3 Database Integration**: Asynchronously downloads database from S3 in background after startup (only if APP_ENVIRONMENT=production and database is small/missing)
 - **AWS CLI Integration**: Includes AWS CLI for runtime S3 database download operations
 - **Enhanced Health Monitoring**: Extended health check with 180s startup grace period for reliable container initialization
 - **Verbose Startup Logging**: Comprehensive startup logging with environment variable output and database status for debugging
@@ -275,7 +275,7 @@ docker build -f Dockerfile.prod -t children-drawing-app:latest .
 # Build simplified production image (alternative for memory-constrained environments)
 docker build -f Dockerfile.prod.simplified -t children-drawing-app:simplified .
 
-# Run standard production container (requires S3 database in production)
+# Run standard production container (background S3 sync in production)
 docker run -p 80:80 -e APP_ENVIRONMENT=production -e AWS_REGION=eu-west-1 children-drawing-app:latest
 
 # Run simplified production container
@@ -907,12 +907,14 @@ pip install reportlab>=4.0.0
 
 10. **S3 Database Integration Issues**
    ```bash
-   # The system automatically downloads database from S3 in production environments
-   # This happens at container startup, not during database initialization
+   # The system automatically downloads database from S3 in background after startup
+   # This happens asynchronously and does not block application startup
    
-   # Expected S3 database download output (at container startup):
-   # 📥 Downloading database from S3...
-   # ✅ Database downloaded successfully
+   # Expected S3 database download output (in background after startup):
+   # 🔄 Background database sync started - historical data will be available shortly
+   # 🔄 Starting background database sync from S3...
+   # ✅ Background database sync completed (150MB bytes)
+   # 📊 Historical data is now available in dashboard and analysis
    
    # S3 database configuration:
    # - Bucket: children-drawing-production-drawings-921400262514
@@ -928,12 +930,13 @@ pip install reportlab>=4.0.0
    # Manual S3 database download for troubleshooting:
    aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db ./drawings.db --region eu-west-1
    
-   # The download only occurs when:
+   # The background sync only occurs when:
    # - APP_ENVIRONMENT=production
-   # - Local database file doesn't exist
+   # - Local database is small (< 100MB) or doesn't exist
    # - AWS credentials are available
    
-   # For local development, S3 download is skipped automatically
+   # For local development, background sync is skipped automatically
+   # Service starts immediately and remains fully functional without historical data
    ```
 
 11. **Demo Images Not Loading**
@@ -986,9 +989,9 @@ pip install reportlab>=4.0.0
    # Storage: STORAGE_BACKEND=<value-from-task-definition>
    # AWS Region: AWS_REGION=<value-from-task-definition>
    # Database file check:
-   # 📥 Downloading database from S3... (only if APP_ENVIRONMENT=production and database doesn't exist)
-   # ✅ Database downloaded successfully (if download occurred)
-   # 🔧 Database already exists or not in production mode (if download skipped)
+   # 🔄 Background database sync started - historical data will be available shortly (only if APP_ENVIRONMENT=production and database is small)
+   # ✅ Background database sync completed (if sync occurred)
+   # 🔧 Background sync skipped - not in production or database already large (if sync skipped)
    # Database status: <file details>
    # Database models imported. Available tables: ['drawings', 'drawing_embeddings', ...]
    # Database URL: sqlite:///./drawings.db
