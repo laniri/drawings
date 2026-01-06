@@ -71,7 +71,8 @@ jobs:
         DOCKER_FILES=$(echo "$CHANGED_FILES" | grep -E '^(Dockerfile|docker-compose|\.dockerignore)' || true)
         
         # Check for code files (excluding docs, configs, and Docker files)
-        CODE_FILES=$(echo "$CHANGED_FILES" | grep -vE '^(README|CHANGELOG|docs/|\.github/workflows/|Dockerfile|docker-compose|\.dockerignore|\.md$|\.txt$|\.yml$|\.yaml$|tmp_files/)' || true)
+        # Note: .github/workflows/ files ARE considered code changes that should trigger full tests
+        CODE_FILES=$(echo "$CHANGED_FILES" | grep -vE '^(README|CHANGELOG|docs/|Dockerfile|docker-compose|\.dockerignore|\.md$|\.txt$|tmp_files/|docker-compose.*\.ya?ml$)' || true)
         
         # Determine if only Docker files changed
         if [ -n "$DOCKER_FILES" ] && [ -z "$CODE_FILES" ]; then
