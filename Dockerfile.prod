@@ -1,5 +1,6 @@
 # Production Dockerfile for Children's Drawing Anomaly Detection System
 # Optimized for fast startup and background S3 sync
+# Updated: 2026-01-06 - Fixed nginx configuration for health checks
 
 # ============================================================================
 # Stage 1: Build Frontend

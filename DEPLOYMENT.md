@@ -225,6 +225,7 @@ docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 - Advanced nginx features (rate limiting, security headers)
 - Comprehensive logging and monitoring
 - PostgreSQL database with full SQL features
+- **Enhanced Health Check Configuration** (Updated Jan 2026): Optimized nginx proxy configuration for `/health` and `/health/simple` endpoints with improved ECS health check compatibility
 
 #### SQLite Production Container (Simplified single-server deployment)
 ```bash
@@ -556,6 +557,11 @@ free -h
 # Restart individual services
 docker exec <container> supervisorctl restart nginx
 docker exec <container> supervisorctl restart uvicorn
+
+# Test health check endpoints (Updated Jan 2026)
+# The nginx configuration has been optimized for better ECS health check compatibility
+curl -f http://localhost:80/health/simple  # ECS-optimized endpoint
+curl -f http://localhost:80/health         # Standard health check
 ```
 
 #### Database Connection Issues
