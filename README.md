@@ -242,14 +242,16 @@ docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
 
 #### Standard Production Container (Dockerfile.prod)
 - **Frontend Build Stage**: Builds React application with optimized production bundle
-- **Backend Stage**: Python 3.11-slim with simplified single-process architecture
+- **Backend Stage**: Python 3.11-slim with optimized single-process architecture
 - **Process Management**: Single uvicorn process serving both frontend and API on port 80
 - **FastAPI Frontend Serving**: FastAPI serves React frontend directly using StaticFiles mount
 - **Environment Configuration**: Flexible environment configuration controlled by deployment (ECS task definition, docker-compose, etc.)
 - **Directory Management**: Automatic creation of required directories with proper permissions
-- **Background S3 Database Integration**: Asynchronously downloads database from S3 in background after startup (only if APP_ENVIRONMENT=production and database is small/missing)
-- **AWS CLI Integration**: Includes AWS CLI for runtime S3 database download operations
-- **Enhanced Health Monitoring**: Extended health check with 180s startup grace period for reliable container initialization
+- **Fast Startup Architecture**: Non-blocking startup with background sync for optimal performance
+- **Background Database Sync**: Python-based background database sync from S3 (non-blocking, production only)
+- **Lightweight Static Sync**: Background sync for non-critical static files (uploads, saliency maps)
+- **AWS CLI Integration**: Includes AWS CLI for runtime static file operations
+- **Enhanced Health Monitoring**: Extended health check with 300s startup grace period for reliable container initialization
 - **Verbose Startup Logging**: Comprehensive startup logging with environment variable output and database status for debugging
 - **Security**: Non-root user execution with proper permission management
 - **Hugging Face Cache Fix**: Configured cache directories to prevent permission errors during model loading
@@ -300,8 +302,8 @@ docker run -p 80:80 children-drawing-app:simplified
 - **Simplified Container**: Development, testing, memory-constrained environments
 
 **Container Architecture Comparison:**
-- **Standard (Dockerfile.prod)**: Single uvicorn process serving both frontend and API on port 80 with extended startup grace period (180s)
-- **Simplified (Dockerfile.prod.simplified)**: Same architecture with reduced startup grace period (90s vs 180s)
+- **Standard (Dockerfile.prod)**: Single uvicorn process serving both frontend and API on port 80 with fast startup and background sync (300s startup grace period)
+- **Simplified (Dockerfile.prod.simplified)**: Same architecture with reduced startup grace period (90s vs 300s)
 
 **When to use standard container:**
 - Production deployments requiring maximum reliability
