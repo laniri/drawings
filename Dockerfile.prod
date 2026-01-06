@@ -133,60 +133,75 @@ NGINX_EOF
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/sites-enabled/default
 
-# Create lightweight static file sync script (non-blocking)
+# Create lightweight static file sync script (truly non-blocking)
 COPY <<'STATIC_SYNC_EOF' /app/static_sync.sh
 #!/bin/bash
-set -e
 
-echo "🔄 Starting background static file sync..."
+echo "🔄 Starting background static file sync (non-blocking)..."
 
 if [ "$APP_ENVIRONMENT" = "production" ]; then
-    # Sync ML models in background (critical but non-blocking for startup)
-    echo "📥 Syncing ML models from S3 (background - critical)..."
-    aws s3 sync s3://children-drawing-production-drawings-921400262514/static/models/ /app/static/models/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' &
+    # Create a completely detached background process
+    (
+        # Sync only critical ML models first (small, essential files)
+        echo "📥 Syncing ML models from S3 (critical)..."
+        aws s3 sync s3://children-drawing-production-drawings-921400262514/static/models/ /app/static/models/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --quiet
+        
+        # Set permissions for models
+        chmod -R 755 /app/static/models
+        chown -R www-data:www-data /app/static/models
+        echo "✅ ML models sync completed"
+        
+        # Sync uploads (medium priority, can be done later)
+        echo "📥 Syncing uploads from S3 (background)..."
+        aws s3 sync s3://children-drawing-production-drawings-921400262514/uploads/ /app/uploads/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --delete --quiet
+        chmod -R 755 /app/uploads
+        chown -R www-data:www-data /app/uploads
+        echo "✅ Uploads sync completed"
+        
+        # Skip saliency maps sync during startup (too many files, not critical)
+        # These will be generated on-demand or synced later
+        echo "⏭️  Skipping saliency maps sync during startup (too many files)"
+        echo "✅ Background sync process completed"
+        
+    ) > /tmp/sync.log 2>&1 &
     
-    # Sync uploads in background (non-critical for startup)
-    echo "📥 Syncing uploads from S3 (background)..."
-    aws s3 sync s3://children-drawing-production-drawings-921400262514/uploads/ /app/uploads/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --delete &
-    
-    # Sync saliency maps in background (non-critical for startup)
-    echo "📥 Syncing saliency maps from S3 (background)..."
-    aws s3 sync s3://children-drawing-production-drawings-921400262514/static/saliency_maps/ /app/static/saliency_maps/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' --delete &
-    
-    # Set proper permissions
-    chmod -R 755 /app/static /app/uploads
-    chown -R www-data:www-data /app/static /app/uploads
-    
-    echo "✅ Background sync started for all static files (models, uploads, saliency maps)"
+    echo "✅ Background sync started (detached process)"
+else
+    echo "ℹ️  Development mode - skipping S3 sync"
 fi
 STATIC_SYNC_EOF
 
 RUN chmod +x /app/static_sync.sh
 
-# Create fast startup script (no blocking operations)
+# Create fast startup script (completely non-blocking)
 COPY <<'STARTUP_EOF' /app/startup.sh
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Children's Drawing Anomaly Detection System (Fast Startup)"
+echo "🚀 Starting Children's Drawing Anomaly Detection System (Ultra-Fast Startup)"
 echo "Environment: $APP_ENVIRONMENT"
 echo "Storage Backend: $STORAGE_BACKEND"
 echo "AWS Region: $AWS_REGION"
 
-# Start background static file sync (non-blocking, no database sync)
-if [ "$APP_ENVIRONMENT" = "production" ]; then
-    echo "🔄 Starting background static file sync..."
-    /app/static_sync.sh &
-    echo "✅ Background sync started (non-blocking)"
-fi
-
-# Start nginx immediately
+# Start nginx immediately (no dependencies)
 echo "🌐 Starting nginx..."
 nginx -t && nginx -g "daemon on;"
+echo "✅ Nginx started successfully"
 
-# Start FastAPI application immediately (no waiting)
+# Start background static file sync (completely detached, no waiting)
+if [ "$APP_ENVIRONMENT" = "production" ]; then
+    echo "🔄 Initiating background static file sync..."
+    /app/static_sync.sh
+    echo "✅ Background sync initiated (non-blocking)"
+else
+    echo "ℹ️  Development mode - skipping S3 sync"
+fi
+
+# Start FastAPI application immediately (no waiting for anything)
 echo "🐍 Starting FastAPI application..."
-echo "📊 Database sync will happen in background via Python"
+echo "📊 All background processes will continue independently"
+echo "🏥 Health checks available immediately at /health and /health/simple"
+
 exec uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --log-level info --access-log
 STARTUP_EOF
 
