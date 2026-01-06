@@ -34,23 +34,27 @@ The production container uses supervisord to manage multiple processes:
 
 ### Static File Sync Architecture
 
-The production container includes intelligent static file synchronization:
+The production container includes intelligent static file synchronization with truly non-blocking startup:
 
 1. **Critical ML Models Sync**: 
-   - Syncs ML models from S3 first (blocking operation)
-   - Essential for application functionality
-   - Fails gracefully with warning if sync fails
+   - Syncs ML models from S3 first in detached background process
+   - Essential for application functionality but non-blocking for startup
+   - Proper permissions set automatically (755 + www-data ownership)
    - Location: `s3://bucket/static/models/` → `/app/static/models/`
+   - Uses `--quiet` flag for cleaner logs
 
 2. **Background Static File Sync**:
-   - Non-critical files synced in background (non-blocking)
-   - Uploads: `s3://bucket/uploads/` → `/app/uploads/`
-   - Saliency maps: `s3://bucket/static/saliency_maps/` → `/app/static/saliency_maps/`
-   - Continues after application startup
+   - Completely detached background process with comprehensive logging
+   - Uploads: `s3://bucket/uploads/` → `/app/uploads/` (medium priority)
+   - Saliency maps: Skipped during startup (too many files, generated on-demand)
+   - All operations logged to `/tmp/sync.log` for debugging
 
-3. **Permission Management**:
-   - Automatic permission setting for synced files
-   - Proper ownership assignment to `www-data:www-data`
+3. **Enhanced Sync Process**:
+   - **Detached Process**: Uses subshell with output redirection for true non-blocking operation
+   - **Priority-Based**: ML models first, then uploads, saliency maps skipped
+   - **Permission Management**: Automatic chmod 755 and chown www-data:www-data
+   - **Error Handling**: Graceful handling with detailed status messages
+   - **Development Mode**: Automatically skips S3 sync when not in production
 
 ### Service Configuration
 #### Nginx Configuration
@@ -301,14 +305,21 @@ docker logs -f <container>
    - **Configuration**: Override via Docker environment variables or .env file
 
 8. **ML Models Sync Issues (Production)**
-   - **Critical Sync**: ML models are synced first during startup (blocking operation)
-   - **Sync Failure**: Application continues with warning if models sync fails
-   - **Expected Output**: `📥 Syncing ML models from S3 (critical)...`
-   - **Success Message**: `✅ ML models synced, background sync continuing...`
-   - **Failure Message**: `⚠️ Models sync failed` (application continues)
-   - **Manual Sync**: `aws s3 sync s3://bucket/static/models/ /app/static/models/ --region eu-west-1`
+   - **Detached Background Sync**: ML models sync runs in completely detached background process
+   - **Non-blocking Startup**: Application starts immediately, models sync in background
+   - **Expected Output**: `🔄 Starting background static file sync (non-blocking)...`
+   - **Success Messages**: 
+     - `📥 Syncing ML models from S3 (critical)...`
+     - `✅ ML models sync completed`
+     - `📥 Syncing uploads from S3 (background)...`
+     - `✅ Uploads sync completed`
+     - `⏭️ Skipping saliency maps sync during startup (too many files)`
+     - `✅ Background sync process completed`
+   - **Sync Logs**: Check `/tmp/sync.log` inside container for detailed sync output
+   - **Manual Sync**: `aws s3 sync s3://bucket/static/models/ /app/static/models/ --region eu-west-1 --quiet`
    - **Troubleshooting**: Check AWS credentials, S3 bucket access, and network connectivity
-   - **Local Development**: Models sync is skipped when `APP_ENVIRONMENT != production`
+   - **Local Development**: All sync operations skipped when `APP_ENVIRONMENT != production`
+   - **Saliency Maps**: Skipped during startup (too many files), generated on-demand or synced later
 
 9. **Permission Issues**
    - Verify directory permissions: `ls -la /app`
