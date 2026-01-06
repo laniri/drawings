@@ -18,3 +18,5 @@ when using github MCP do the following when access fails:
 when creating add hok files (guides, fixing scripts etcw) place them in tmp\_files folder that apear in .gitignore
 
 if needed to perform aws operation use the following profile: d-9067931f77-921400262514-admin+Q
+
+when debugging a failure. if log exists, use it before deciding about the root cause

@@ -7,7 +7,7 @@ Parameters:
     Default: production
     AllowedValues: [production, staging, dev]
     Description: Environment name
-
+   
   DomainName:
     Type: String
     Description: Domain name for the application (e.g., example.com)
@@ -64,7 +64,7 @@ Resources:
           Value: !Sub ${AWS::StackName}-vpc
         - Key: Environment
           Value: !Ref Environment
-
+##
   # Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway

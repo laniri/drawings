@@ -163,7 +163,7 @@ cp your-certificate.crt nginx/ssl/server.crt
 cp your-private-key.key nginx/ssl/server.key
 ```
 
-### 4. Database Setup
+### Database Setup
 
 The system uses PostgreSQL in production and SQLite for development/single-server deployments. The database will be automatically initialized with the required schema.
 
@@ -179,10 +179,28 @@ Creating database tables...
 Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
 ```
 
+**Background Database Sync (January 2025)**: The system now includes intelligent background database synchronization for production environments:
+
+- **Non-blocking startup**: Service starts immediately with empty database if S3 sync fails
+- **Background sync**: Automatically downloads historical data from S3 after startup (30-second delay)
+- **Smart detection**: Only syncs if local database is small (< 100MB) or missing
+- **Atomic replacement**: Uses temporary files for safe database replacement
+- **Production-only**: Background sync only runs when `APP_ENVIRONMENT=production`
+- **Graceful fallback**: Service remains fully functional even without historical data
+
+**Expected Background Sync Output**:
+```bash
+🔄 Background database sync started - historical data will be available shortly
+🔄 Starting background database sync from S3...
+✅ Background database sync completed (150MB bytes)
+📊 Historical data is now available in dashboard and analysis
+```
+
 **Troubleshooting Database Issues**:
 - **Model Import Errors**: Check for "No tables were created" message indicating model registration problems
 - **File Permission Issues**: Verify database file and directory permissions (SQLite)
 - **Connection Errors**: Validate DATABASE_URL format and database server availability (PostgreSQL)
+- **S3 Sync Issues**: Check AWS credentials and S3 bucket access for background sync
 
 ### 5. Build and Deploy
 
@@ -555,6 +573,16 @@ docker logs <container> | grep -A 10 "Database models imported"
 # Database URL: sqlite:///./drawings.db
 # Creating database tables...
 # Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
+
+# Background database sync monitoring (January 2025)
+# Check for background sync status in container logs:
+docker logs <container> | grep -A 5 "Background database sync"
+
+# Expected background sync output:
+# 🔄 Background database sync started - historical data will be available shortly
+# 🔄 Starting background database sync from S3...
+# ✅ Background database sync completed (150MB bytes)
+# 📊 Historical data is now available in dashboard and analysis
 
 # Reset database (PostgreSQL)
 docker-compose -f docker-compose.prod.yml down

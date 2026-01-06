@@ -876,6 +876,14 @@ pip install reportlab>=4.0.0
    # Creating database tables...
    # Tables created successfully: ['drawings', 'drawing_embeddings', 'age_group_models', ...]
    
+   # Background Database Sync (January 2025)
+   # The system now includes intelligent background database synchronization:
+   # 🔄 Small database detected - starting background sync for historical data
+   # 🔄 Background database sync started - historical data will be available shortly
+   # 🔄 Starting background database sync from S3...
+   # ✅ Background database sync completed (150MB bytes)
+   # 📊 Historical data is now available in dashboard and analysis
+   
    # If database initialization fails, check logs for:
    # - Model import errors: "No tables were created - this indicates a problem with model registration"
    # - File permission issues: Check database file and directory permissions
@@ -888,6 +896,13 @@ pip install reportlab>=4.0.0
    # - Missing database directory: Automatically created with proper permissions
    # - Model registration problems: Enhanced logging shows which models are imported
    # - Table creation failures: Detailed error messages with specific failure reasons
+   
+   # Background sync features (January 2025):
+   # - Non-blocking startup: Service starts immediately even if S3 sync fails
+   # - Smart detection: Only syncs if database is small (< 100MB) or missing
+   # - Production-only: Background sync only runs when APP_ENVIRONMENT=production
+   # - Atomic replacement: Uses temporary files for safe database updates
+   # - Graceful fallback: Service remains fully functional without historical data
    ```
 
 10. **S3 Database Integration Issues**
