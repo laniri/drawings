@@ -249,7 +249,8 @@ docker-compose -f tmp_files/docker-compose.prod.sqlite.yml up --build -d
 - **Directory Management**: Automatic creation of required directories with proper permissions
 - **Fast Startup Architecture**: Non-blocking startup with background sync for optimal performance
 - **Background Database Sync**: Python-based background database sync from S3 (non-blocking, production only)
-- **Lightweight Static Sync**: Background sync for non-critical static files (uploads, saliency maps)
+- **Critical ML Models Sync**: Prioritized sync of ML models from S3 (critical for application functionality)
+- **Background Static Sync**: Background sync for non-critical static files (uploads, saliency maps)
 - **AWS CLI Integration**: Includes AWS CLI for runtime static file operations
 - **Enhanced Health Monitoring**: Extended health check with 300s startup grace period for reliable container initialization
 - **Verbose Startup Logging**: Comprehensive startup logging with environment variable output and database status for debugging
@@ -990,6 +991,9 @@ pip install reportlab>=4.0.0
    # Environment: APP_ENVIRONMENT=<value-from-task-definition>
    # Storage: STORAGE_BACKEND=<value-from-task-definition>
    # AWS Region: AWS_REGION=<value-from-task-definition>
+   # 📥 Syncing ML models from S3 (critical)... (only if APP_ENVIRONMENT=production)
+   # ✅ ML models synced, background sync continuing... (if models sync succeeded)
+   # ⚠️ Models sync failed (if models sync failed, application continues)
    # Database file check:
    # 🔄 Background database sync started - historical data will be available shortly (only if APP_ENVIRONMENT=production and database is small)
    # ✅ Background database sync completed (if sync occurred)

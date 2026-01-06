@@ -32,11 +32,29 @@ The production container uses supervisord to manage multiple processes:
 - **Log Rotation**: Automatic log rotation at 50MB to prevent disk space issues
 - **Environment Management**: Preconfigured environment variables for container deployment
 
-### Service Configuration
+### Static File Sync Architecture
 
+The production container includes intelligent static file synchronization:
+
+1. **Critical ML Models Sync**: 
+   - Syncs ML models from S3 first (blocking operation)
+   - Essential for application functionality
+   - Fails gracefully with warning if sync fails
+   - Location: `s3://bucket/static/models/` → `/app/static/models/`
+
+2. **Background Static File Sync**:
+   - Non-critical files synced in background (non-blocking)
+   - Uploads: `s3://bucket/uploads/` → `/app/uploads/`
+   - Saliency maps: `s3://bucket/static/saliency_maps/` → `/app/static/saliency_maps/`
+   - Continues after application startup
+
+3. **Permission Management**:
+   - Automatic permission setting for synced files
+   - Proper ownership assignment to `www-data:www-data`
+
+### Service Configuration
 #### Nginx Configuration
 - **Primary Frontend Serving**: Serves React app from `/var/www/html` at root path (`/`)
-- **API Proxying**: Proxies `/api/*` requests to backend on port 8000
 - **Static File Handling**: Serves `/static/*`, `/uploads/*`, `/auth/*`, `/demo/*` endpoints
 - **Health & Documentation**: Proxies `/health`, `/docs`, `/openapi.json` to backend
 - **Client-Side Routing**: Handles React Router with `try_files` fallback to `index.html`
@@ -282,7 +300,17 @@ docker logs -f <container>
    - **S3 Override**: Set environment variables to enable S3 storage
    - **Configuration**: Override via Docker environment variables or .env file
 
-8. **Permission Issues**
+8. **ML Models Sync Issues (Production)**
+   - **Critical Sync**: ML models are synced first during startup (blocking operation)
+   - **Sync Failure**: Application continues with warning if models sync fails
+   - **Expected Output**: `📥 Syncing ML models from S3 (critical)...`
+   - **Success Message**: `✅ ML models synced, background sync continuing...`
+   - **Failure Message**: `⚠️ Models sync failed` (application continues)
+   - **Manual Sync**: `aws s3 sync s3://bucket/static/models/ /app/static/models/ --region eu-west-1`
+   - **Troubleshooting**: Check AWS credentials, S3 bucket access, and network connectivity
+   - **Local Development**: Models sync is skipped when `APP_ENVIRONMENT != production`
+
+9. **Permission Issues**
    - Verify directory permissions: `ls -la /app`
    - Check user configuration: `id appuser`
    - Ensure proper ownership: `chown -R appuser:appuser /app`

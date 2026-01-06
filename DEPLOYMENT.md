@@ -344,6 +344,8 @@ Key environment variables in `.env`:
 - **Comprehensive environment validation** with startup script
 - **Automatic directory creation** with proper permissions
 - **Background S3 database sync** in production environments (non-blocking, after startup)
+- **Critical ML models sync** prioritized for application functionality (blocking, before startup completion)
+- **Background static file sync** for non-critical files (uploads, saliency maps)
 - **Enhanced database initialization** with comprehensive logging and verification (December 2024)
 - **Python import validation** to catch configuration issues early (lightweight imports only, avoiding heavy model loading)
 - **Logs redirected to Docker stdout/stderr** for better integration
