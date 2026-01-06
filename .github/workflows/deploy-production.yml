@@ -37,12 +37,95 @@ env:
 
 jobs:
   # ============================================================================
-  # Test Job - Run on all PRs and pushes (unless skipped)
+  # Detect Changes - Determine what files were changed
+  # ============================================================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      docker-only: ${{ steps.changes.outputs.docker-only }}
+      has-code-changes: ${{ steps.changes.outputs.has-code-changes }}
+      has-docker-changes: ${{ steps.changes.outputs.has-docker-changes }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+    
+    - name: Detect file changes
+      id: changes
+      run: |
+        # Get list of changed files
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          # For PRs, compare against base branch
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+        else
+          # For pushes, compare against previous commit
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+        fi
+        
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+        
+        # Check for Docker-related files
+        DOCKER_FILES=$(echo "$CHANGED_FILES" | grep -E '^(Dockerfile|docker-compose|\.dockerignore)' || true)
+        
+        # Check for code files (excluding docs, configs, and Docker files)
+        CODE_FILES=$(echo "$CHANGED_FILES" | grep -vE '^(README|CHANGELOG|docs/|\.github/workflows/|Dockerfile|docker-compose|\.dockerignore|\.md$|\.txt$|\.yml$|\.yaml$|tmp_files/)' || true)
+        
+        # Determine if only Docker files changed
+        if [ -n "$DOCKER_FILES" ] && [ -z "$CODE_FILES" ]; then
+          echo "docker-only=true" >> $GITHUB_OUTPUT
+          echo "Only Docker-related files changed - skipping functional tests"
+        else
+          echo "docker-only=false" >> $GITHUB_OUTPUT
+          echo "Code changes detected - running full test suite"
+        fi
+        
+        # Set individual flags
+        if [ -n "$CODE_FILES" ]; then
+          echo "has-code-changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-code-changes=false" >> $GITHUB_OUTPUT
+        fi
+        
+        if [ -n "$DOCKER_FILES" ]; then
+          echo "has-docker-changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-docker-changes=false" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "Summary:"
+        echo "- Docker files changed: $([ -n "$DOCKER_FILES" ] && echo "yes" || echo "no")"
+        echo "- Code files changed: $([ -n "$CODE_FILES" ] && echo "yes" || echo "no")"
+        echo "- Docker-only deployment: $([ -n "$DOCKER_FILES" ] && [ -z "$CODE_FILES" ] && echo "yes" || echo "no")"
+    
+    - name: Create change detection summary
+      run: |
+        echo "## File Change Detection" >> $GITHUB_STEP_SUMMARY
+        echo "| Change Type | Detected |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------------|----------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Docker files | ${{ steps.changes.outputs.has-docker-changes == 'true' && '✅ Yes' || '❌ No' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Code files | ${{ steps.changes.outputs.has-code-changes == 'true' && '✅ Yes' || '❌ No' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Docker-only deployment | ${{ steps.changes.outputs.docker-only == 'true' && '✅ Yes' || '❌ No' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.changes.outputs.docker-only }}" == "true" ]; then
+          echo "🚀 **Fast Docker-only deployment**: Functional tests will be skipped" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "🧪 **Full deployment**: All tests will run" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # ============================================================================
+  # Test Job - Run on all PRs and pushes (unless skipped or Docker-only)
   # ============================================================================
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    if: github.event.inputs.skip_tests != 'true' && !contains(github.event.head_commit.message, '[skip-tests]')
+    needs: [detect-changes]
+    if: |
+      github.event.inputs.skip_tests != 'true' && 
+      !contains(github.event.head_commit.message, '[skip-tests]') &&
+      needs.detect-changes.outputs.docker-only != 'true'
     
     steps:
     - name: Checkout code
@@ -184,6 +267,37 @@ jobs:
           pytest-report.xml
 
   # ============================================================================
+  # Test Skipped Job - Show when tests are skipped for Docker-only changes
+  # ============================================================================
+  test-skipped:
+    name: Tests Skipped (Docker-only changes)
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      needs.detect-changes.outputs.docker-only == 'true' &&
+      github.event.inputs.skip_tests != 'true' && 
+      !contains(github.event.head_commit.message, '[skip-tests]')
+    
+    steps:
+    - name: Tests skipped notification
+      run: |
+        echo "## ⚡ Fast Docker-only Deployment" >> $GITHUB_STEP_SUMMARY
+        echo "Functional tests skipped - only Docker configuration files changed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### What's happening:" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Only Docker-related files were modified" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚡ Skipping time-consuming functional tests" >> $GITHUB_STEP_SUMMARY
+        echo "- 🚀 Proceeding directly to container build and deployment" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔍 Security scans will still run" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Files that trigger fast deployment:" >> $GITHUB_STEP_SUMMARY
+        echo "- Dockerfile*" >> $GITHUB_STEP_SUMMARY
+        echo "- docker-compose*" >> $GITHUB_STEP_SUMMARY
+        echo "- .dockerignore" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "💡 **Tip**: If you need to run full tests, add `[run-tests]` to your commit message"
+
+  # ============================================================================
   # Security Scan Job
   # ============================================================================
   security-scan:
@@ -246,8 +360,12 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: [test]
-    if: github.ref == 'refs/heads/main' && (always() && (needs.test.result == 'success' || needs.test.result == 'skipped'))
+    needs: [detect-changes, test, test-skipped]
+    if: |
+      github.ref == 'refs/heads/main' && 
+      (always() && (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+       (needs.test-skipped.result == 'success' || needs.test-skipped.result == 'skipped')) &&
+      needs.detect-changes.outputs.has-docker-changes == 'true'
     
     # Required for OIDC
     permissions:
