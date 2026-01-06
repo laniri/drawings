@@ -130,8 +130,7 @@ server {
 NGINX_EOF
 
 # Link the site configuration
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
-    && rm -f /etc/nginx/sites-enabled/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 # Create lightweight static file sync script (truly non-blocking)
 COPY <<'STATIC_SYNC_EOF' /app/static_sync.sh
