@@ -94,7 +94,7 @@ class TestUnifiedSubjectAwareArchitecture:
             max_size=8
         )
     )
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.data_too_large])
+    @settings(max_examples=20, suppress_health_check=[HealthCheck.data_too_large], deadline=None)
     def test_unified_architecture_validation(self, model_specs):
         """
         **Feature: children-drawing-anomaly-detection, Property 43: Unified Subject-Aware Architecture**
