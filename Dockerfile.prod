@@ -135,8 +135,9 @@ set -e
 echo "🔄 Starting background static file sync..."
 
 if [ "$APP_ENVIRONMENT" = "production" ]; then
-    # Sync only non-critical static files in background (models, uploads, saliency maps)
-    # Database sync is handled by Python background sync
+    # Sync ML models in background (critical but non-blocking for startup)
+    echo "📥 Syncing ML models from S3 (background - critical)..."
+    aws s3 sync s3://children-drawing-production-drawings-921400262514/static/models/ /app/static/models/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' &
     
     # Sync uploads in background (non-critical for startup)
     echo "📥 Syncing uploads from S3 (background)..."
@@ -150,7 +151,7 @@ if [ "$APP_ENVIRONMENT" = "production" ]; then
     chmod -R 755 /app/static /app/uploads
     chown -R www-data:www-data /app/static /app/uploads
     
-    echo "✅ Background static file sync started..."
+    echo "✅ Background sync started for all static files (models, uploads, saliency maps)"
 fi
 STATIC_SYNC_EOF
 
