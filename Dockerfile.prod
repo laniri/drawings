@@ -127,23 +127,16 @@ NGINX_EOF
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
     && rm -f /etc/nginx/sites-enabled/default
 
-# Create background S3 sync script
-COPY <<'S3_SYNC_EOF' /app/s3_sync.sh
+# Create lightweight static file sync script (non-blocking)
+COPY <<'STATIC_SYNC_EOF' /app/static_sync.sh
 #!/bin/bash
 set -e
 
-echo "🔄 Starting background S3 sync..."
+echo "🔄 Starting background static file sync..."
 
 if [ "$APP_ENVIRONMENT" = "production" ]; then
-    # Download database first (critical)
-    if [ ! -f "/app/drawings.db" ]; then
-        echo "📥 Downloading database from S3..."
-        aws s3 cp s3://children-drawing-production-drawings-921400262514/database/drawings.db /app/drawings.db --region eu-west-1 || echo "⚠️ Database download failed"
-    fi
-    
-    # Sync only essential static files (models)
-    echo "📥 Syncing essential static files from S3..."
-    aws s3 sync s3://children-drawing-production-drawings-921400262514/static/models/ /app/static/models/ --region eu-west-1 --exclude '*.tmp' --exclude '*.log' || echo "⚠️ Models sync failed"
+    # Sync only non-critical static files in background (models, uploads, saliency maps)
+    # Database sync is handled by Python background sync
     
     # Sync uploads in background (non-critical for startup)
     echo "📥 Syncing uploads from S3 (background)..."
@@ -157,13 +150,13 @@ if [ "$APP_ENVIRONMENT" = "production" ]; then
     chmod -R 755 /app/static /app/uploads
     chown -R www-data:www-data /app/static /app/uploads
     
-    echo "✅ Essential S3 sync completed, background sync continuing..."
+    echo "✅ Background static file sync started..."
 fi
-S3_SYNC_EOF
+STATIC_SYNC_EOF
 
-RUN chmod +x /app/s3_sync.sh
+RUN chmod +x /app/static_sync.sh
 
-# Create fast startup script
+# Create fast startup script (no blocking operations)
 COPY <<'STARTUP_EOF' /app/startup.sh
 #!/bin/bash
 set -e
@@ -173,28 +166,20 @@ echo "Environment: $APP_ENVIRONMENT"
 echo "Storage Backend: $STORAGE_BACKEND"
 echo "AWS Region: $AWS_REGION"
 
-# Start background S3 sync (non-blocking)
+# Start background static file sync (non-blocking, no database sync)
 if [ "$APP_ENVIRONMENT" = "production" ]; then
-    echo "🔄 Starting background S3 sync..."
-    /app/s3_sync.sh &
-    S3_PID=$!
-    
-    # Wait for essential files (database and models) - max 60 seconds
-    echo "⏳ Waiting for essential files..."
-    timeout 60 bash -c '
-        while [ ! -f "/app/drawings.db" ] || [ ! -d "/app/static/models" ] || [ $(ls -1 /app/static/models/*.pkl 2>/dev/null | wc -l) -lt 5 ]; do
-            echo "Waiting for essential files..."
-            sleep 2
-        done
-    ' || echo "⚠️ Timeout waiting for essential files, continuing anyway..."
+    echo "🔄 Starting background static file sync..."
+    /app/static_sync.sh &
+    echo "✅ Background sync started (non-blocking)"
 fi
 
 # Start nginx immediately
 echo "🌐 Starting nginx..."
 nginx -t && nginx -g "daemon on;"
 
-# Start FastAPI application immediately
+# Start FastAPI application immediately (no waiting)
 echo "🐍 Starting FastAPI application..."
+echo "📊 Database sync will happen in background via Python"
 exec uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --log-level info --access-log
 STARTUP_EOF
 
