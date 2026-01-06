@@ -394,11 +394,17 @@ jobs:
         role-session-name: GitHubActions-Deploy-${{ github.run_id }}
         aws-region: ${{ env.AWS_REGION }}
     
-    - name: Download task definition
+    - name: Use optimized task definition
       run: |
-        aws ecs describe-task-definition \
-          --task-definition children-drawing-prod-task \
-          --query taskDefinition > task-definition.json
+        # Use our optimized task definition instead of downloading from AWS
+        cp current-task-def.json task-definition.json
+        echo "Using optimized task definition with CPU: 1024, Memory: 3072 MB"
+        
+        # Verify the task definition has correct resource allocation
+        echo "Task definition CPU allocation:"
+        jq -r '.cpu' task-definition.json
+        echo "Task definition Memory allocation:"
+        jq -r '.memory' task-definition.json
     
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
