@@ -206,7 +206,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 ),
                 "demo": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=600, requests_per_hour=10000, burst_limit=100
+                        requests_per_minute=600,
+                        requests_per_hour=10000,
+                        burst_limit=100,
                     )
                 ),
                 "upload": RateLimiter(
