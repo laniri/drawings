@@ -125,7 +125,9 @@ def start_background_database_sync():
         current_size = 0
         if os.path.exists(db_path):
             current_size = os.path.getsize(db_path)
-            print(f"📊 Current database size: {current_size:,} bytes ({current_size / (1024*1024):.1f} MB)")
+            print(
+                f"📊 Current database size: {current_size:,} bytes ({current_size / (1024*1024):.1f} MB)"
+            )
 
         # Skip if we already have a large database (likely already synced)
         if current_size > 50 * 1024 * 1024:  # 50MB
@@ -136,16 +138,18 @@ def start_background_database_sync():
 
         try:
             print("🔄 Starting background database sync from S3...")
-            print(f"📍 Source: s3://children-drawing-production-drawings-921400262514/database/drawings.db")
+            print(
+                f"📍 Source: s3://children-drawing-production-drawings-921400262514/database/drawings.db"
+            )
             print(f"📍 Target: {os.path.abspath(db_path)}")
 
             # Configure boto3 with increased timeouts for large file
             boto_config = Config(
                 connect_timeout=300,  # 5 minutes connection timeout
-                read_timeout=300,     # 5 minutes read timeout
-                retries={'max_attempts': 3, 'mode': 'standard'}
+                read_timeout=300,  # 5 minutes read timeout
+                retries={"max_attempts": 3, "mode": "standard"},
             )
-            
+
             s3_client = boto3.client("s3", region_name="eu-west-1", config=boto_config)
 
             # Check if file exists in S3 first
@@ -153,11 +157,15 @@ def start_background_database_sync():
             try:
                 head_response = s3_client.head_object(
                     Bucket="children-drawing-production-drawings-921400262514",
-                    Key="database/drawings.db"
+                    Key="database/drawings.db",
                 )
-                s3_file_size = head_response['ContentLength']
-                print(f"✅ S3 file found: {s3_file_size:,} bytes ({s3_file_size / (1024*1024):.1f} MB)")
-                print(f"⏱️  Estimated download time: {s3_file_size / (1024*1024) / 10:.0f}-{s3_file_size / (1024*1024) / 5:.0f} seconds")
+                s3_file_size = head_response["ContentLength"]
+                print(
+                    f"✅ S3 file found: {s3_file_size:,} bytes ({s3_file_size / (1024*1024):.1f} MB)"
+                )
+                print(
+                    f"⏱️  Estimated download time: {s3_file_size / (1024*1024) / 10:.0f}-{s3_file_size / (1024*1024) / 5:.0f} seconds"
+                )
             except ClientError as e:
                 print(f"❌ S3 file not found or not accessible: {e}")
                 print(f"📋 Error details: {e.response.get('Error', {})}")
@@ -166,37 +174,44 @@ def start_background_database_sync():
             # Download to temporary file first
             print(f"📥 Downloading database to {temp_db_path}...")
             download_start = time.time()
-            
+
             s3_client.download_file(
                 "children-drawing-production-drawings-921400262514",
                 "database/drawings.db",
                 temp_db_path,
             )
-            
+
             download_duration = time.time() - download_start
             print(f"⏱️  Download completed in {download_duration:.1f} seconds")
 
             # Verify download
             if os.path.exists(temp_db_path):
                 temp_size = os.path.getsize(temp_db_path)
-                print(f"✅ Downloaded file size: {temp_size:,} bytes ({temp_size / (1024*1024):.1f} MB)")
-                
+                print(
+                    f"✅ Downloaded file size: {temp_size:,} bytes ({temp_size / (1024*1024):.1f} MB)"
+                )
+
                 if temp_size > 0:
                     # Verify it's a valid SQLite database
                     try:
                         import sqlite3
+
                         conn = sqlite3.connect(temp_db_path)
                         cursor = conn.cursor()
-                        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                        cursor.execute(
+                            "SELECT name FROM sqlite_master WHERE type='table'"
+                        )
                         tables = cursor.fetchall()
                         conn.close()
-                        print(f"✅ Valid SQLite database with {len(tables)} tables: {[t[0] for t in tables]}")
+                        print(
+                            f"✅ Valid SQLite database with {len(tables)} tables: {[t[0] for t in tables]}"
+                        )
                     except Exception as e:
                         print(f"⚠️  Database validation failed: {e}")
                         if os.path.exists(temp_db_path):
                             os.remove(temp_db_path)
                         return
-                    
+
                     # Atomic replace
                     print(f"🔄 Replacing database file...")
                     if os.path.exists(db_path):
@@ -205,12 +220,17 @@ def start_background_database_sync():
                         os.rename(temp_db_path, db_path)
 
                     final_size = os.path.getsize(db_path)
-                    print(f"✅ Background database sync completed: {final_size:,} bytes ({final_size / (1024*1024):.1f} MB)")
-                    print("📊 Historical data is now available in dashboard and analysis")
-                    
+                    print(
+                        f"✅ Background database sync completed: {final_size:,} bytes ({final_size / (1024*1024):.1f} MB)"
+                    )
+                    print(
+                        "📊 Historical data is now available in dashboard and analysis"
+                    )
+
                     # Log record counts
                     try:
                         import sqlite3
+
                         conn = sqlite3.connect(db_path)
                         cursor = conn.cursor()
                         cursor.execute("SELECT COUNT(*) FROM drawings")
@@ -218,7 +238,9 @@ def start_background_database_sync():
                         cursor.execute("SELECT COUNT(*) FROM anomaly_analyses")
                         analysis_count = cursor.fetchone()[0]
                         conn.close()
-                        print(f"📊 Database contains {drawing_count:,} drawings and {analysis_count:,} analyses")
+                        print(
+                            f"📊 Database contains {drawing_count:,} drawings and {analysis_count:,} analyses"
+                        )
                     except Exception as e:
                         print(f"⚠️  Could not query database: {e}")
                 else:
@@ -232,7 +254,7 @@ def start_background_database_sync():
             print(f"❌ Background database sync failed (AWS error): {e}")
             print(f"📋 Error type: {type(e).__name__}")
             print(f"📋 Error details: {str(e)}")
-            if hasattr(e, 'response'):
+            if hasattr(e, "response"):
                 print(f"📋 Response: {e.response}")
             print("🚀 Service continues with local database - all features available")
         except Exception as e:
