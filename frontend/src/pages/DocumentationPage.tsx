@@ -150,7 +150,7 @@ const DocumentationPage: React.FC = () => {
       if (categoryFilter) params.append('category', categoryFilter)
       if (searchTerm) params.append('search', searchTerm)
 
-      const response = await axios.get(`/api/documentation/files?${params}`)
+      const response = await axios.get(`/api/v1/documentation/files?${params}`)
       return response.data
     },
   })
