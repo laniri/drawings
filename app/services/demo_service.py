@@ -174,88 +174,99 @@ class DemoService:
         try:
             db = next(get_db())
 
-            # Get threshold manager for dynamic anomaly classification
-            from app.services.threshold_manager import get_threshold_manager
+            try:
+                # Get threshold manager for dynamic anomaly classification
+                from app.services.threshold_manager import get_threshold_manager
 
-            threshold_manager = get_threshold_manager()
+                threshold_manager = get_threshold_manager()
 
-            # Get diverse subjects for better demo variety
-            target_subjects = ["phone", "cat", "train", "bear", "apple"]
+                # First, check if we have any drawings at all
+                total_drawings = db.query(Drawing).count()
+                logger.info(f"Total drawings in database: {total_drawings}")
 
-            # Get drawings with analyses (we'll classify them dynamically)
-            all_drawings = (
-                db.query(Drawing)
-                .join(AnomalyAnalysis)
-                .filter(Drawing.subject.isnot(None))
-                .filter(AnomalyAnalysis.anomaly_score.isnot(None))
-                .limit(50)  # Get more to ensure we have variety
-                .all()
-            )
+                # Get drawings with analyses (we'll classify them dynamically)
+                all_drawings = (
+                    db.query(Drawing)
+                    .join(AnomalyAnalysis)
+                    .filter(Drawing.subject.isnot(None))
+                    .filter(AnomalyAnalysis.anomaly_score.isnot(None))
+                    .limit(50)  # Get more to ensure we have variety
+                    .all()
+                )
 
-            # Classify drawings dynamically
-            normal_drawings = []
-            anomalous_drawings = []
+                logger.info(f"Found {len(all_drawings)} drawings with analyses")
 
-            for drawing in all_drawings:
-                if drawing.analyses:
-                    analysis = drawing.analyses[0]
-                    # Use threshold manager to determine if anomaly
-                    is_anomaly, _, _ = threshold_manager.is_anomaly(
-                        analysis.anomaly_score, drawing.age_years, db
-                    )
+                # Classify drawings dynamically
+                normal_drawings = []
+                anomalous_drawings = []
 
-                    if is_anomaly:
-                        if len(anomalous_drawings) < 2:
-                            anomalous_drawings.append(drawing)
-                    else:
-                        if len(normal_drawings) < 3:
-                            normal_drawings.append(drawing)
+                for drawing in all_drawings:
+                    if drawing.analyses:
+                        analysis = drawing.analyses[0]
+                        # Use threshold manager to determine if anomaly
+                        is_anomaly, _, _ = threshold_manager.is_anomaly(
+                            analysis.anomaly_score, drawing.age_years, db
+                        )
 
-                    # Stop if we have enough samples
-                    if len(normal_drawings) >= 3 and len(anomalous_drawings) >= 2:
-                        break
+                        if is_anomaly:
+                            if len(anomalous_drawings) < 2:
+                                anomalous_drawings.append(drawing)
+                        else:
+                            if len(normal_drawings) < 3:
+                                normal_drawings.append(drawing)
 
-            demo_samples = []
-            sample_id = 1
+                        # Stop if we have enough samples
+                        if len(normal_drawings) >= 3 and len(anomalous_drawings) >= 2:
+                            break
 
-            # Process normal examples
-            for drawing in normal_drawings:
-                analysis = drawing.analyses[0] if drawing.analyses else None
-                if analysis:
-                    # Try to get interpretability data
-                    interpretability = (
-                        analysis.interpretability[0]
-                        if analysis.interpretability
-                        else None
-                    )
+                logger.info(
+                    f"Classified: {len(normal_drawings)} normal, {len(anomalous_drawings)} anomalous"
+                )
 
-                    sample = self._create_demo_sample_from_real_data(
-                        drawing, analysis, interpretability, sample_id
-                    )
-                    demo_samples.append(sample)
-                    sample_id += 1
+                demo_samples = []
+                sample_id = 1
 
-            # Process anomalous examples
-            for drawing in anomalous_drawings:
-                analysis = drawing.analyses[0] if drawing.analyses else None
-                if analysis:
-                    # Try to get interpretability data
-                    interpretability = (
-                        analysis.interpretability[0]
-                        if analysis.interpretability
-                        else None
-                    )
+                # Process normal examples
+                for drawing in normal_drawings:
+                    analysis = drawing.analyses[0] if drawing.analyses else None
+                    if analysis:
+                        # Try to get interpretability data
+                        interpretability = (
+                            analysis.interpretability[0]
+                            if analysis.interpretability
+                            else None
+                        )
 
-                    sample = self._create_demo_sample_from_real_data(
-                        drawing, analysis, interpretability, sample_id
-                    )
-                    demo_samples.append(sample)
-                    sample_id += 1
+                        sample = self._create_demo_sample_from_real_data(
+                            drawing, analysis, interpretability, sample_id
+                        )
+                        demo_samples.append(sample)
+                        sample_id += 1
 
-            logger.info(
-                f"Created {len(demo_samples)} real demo samples with diverse subjects"
-            )
-            return demo_samples
+                # Process anomalous examples
+                for drawing in anomalous_drawings:
+                    analysis = drawing.analyses[0] if drawing.analyses else None
+                    if analysis:
+                        # Try to get interpretability data
+                        interpretability = (
+                            analysis.interpretability[0]
+                            if analysis.interpretability
+                            else None
+                        )
+
+                        sample = self._create_demo_sample_from_real_data(
+                            drawing, analysis, interpretability, sample_id
+                        )
+                        demo_samples.append(sample)
+                        sample_id += 1
+
+                logger.info(
+                    f"Created {len(demo_samples)} real demo samples with diverse subjects"
+                )
+                return demo_samples
+
+            finally:
+                db.close()
 
         except Exception as e:
             logger.error(f"Error fetching real demo samples: {e}")
