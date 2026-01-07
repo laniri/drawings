@@ -497,6 +497,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-push]
     if: |
+      always() &&
       github.ref == 'refs/heads/main' && 
       needs.build-and-push.result == 'success'
     
@@ -580,6 +581,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-application]
     if: |
+      always() &&
       github.ref == 'refs/heads/main' && 
       needs.deploy-application.result == 'success'
     
