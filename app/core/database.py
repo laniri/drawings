@@ -102,8 +102,10 @@ def start_background_database_sync():
     import os
     import threading
     import time
+    import traceback
 
     import boto3
+    from botocore.config import Config
     from botocore.exceptions import ClientError, NoCredentialsError
 
     def background_sync():
@@ -119,63 +121,139 @@ def start_background_database_sync():
             print("🔧 Development environment - skipping background database sync")
             return
 
+        # Check current database status
+        current_size = 0
+        if os.path.exists(db_path):
+            current_size = os.path.getsize(db_path)
+            print(f"📊 Current database size: {current_size:,} bytes ({current_size / (1024*1024):.1f} MB)")
+
         # Skip if we already have a large database (likely already synced)
-        if (
-            os.path.exists(db_path) and os.path.getsize(db_path) > 50 * 1024 * 1024
-        ):  # 50MB (reduced from 100MB)
+        if current_size > 50 * 1024 * 1024:  # 50MB
             print(
-                f"✅ Large database already present ({os.path.getsize(db_path)} bytes) - skipping sync"
+                f"✅ Large database already present ({current_size:,} bytes) - skipping sync"
             )
             return
 
         try:
             print("🔄 Starting background database sync from S3...")
+            print(f"📍 Source: s3://children-drawing-production-drawings-921400262514/database/drawings.db")
+            print(f"📍 Target: {os.path.abspath(db_path)}")
 
-            s3_client = boto3.client("s3", region_name="eu-west-1")
+            # Configure boto3 with increased timeouts for large file
+            boto_config = Config(
+                connect_timeout=300,  # 5 minutes connection timeout
+                read_timeout=300,     # 5 minutes read timeout
+                retries={'max_attempts': 3, 'mode': 'standard'}
+            )
+            
+            s3_client = boto3.client("s3", region_name="eu-west-1", config=boto_config)
+
+            # Check if file exists in S3 first
+            print("🔍 Checking S3 file existence...")
+            try:
+                head_response = s3_client.head_object(
+                    Bucket="children-drawing-production-drawings-921400262514",
+                    Key="database/drawings.db"
+                )
+                s3_file_size = head_response['ContentLength']
+                print(f"✅ S3 file found: {s3_file_size:,} bytes ({s3_file_size / (1024*1024):.1f} MB)")
+                print(f"⏱️  Estimated download time: {s3_file_size / (1024*1024) / 10:.0f}-{s3_file_size / (1024*1024) / 5:.0f} seconds")
+            except ClientError as e:
+                print(f"❌ S3 file not found or not accessible: {e}")
+                print(f"📋 Error details: {e.response.get('Error', {})}")
+                return
 
             # Download to temporary file first
+            print(f"📥 Downloading database to {temp_db_path}...")
+            download_start = time.time()
+            
             s3_client.download_file(
                 "children-drawing-production-drawings-921400262514",
                 "database/drawings.db",
                 temp_db_path,
             )
+            
+            download_duration = time.time() - download_start
+            print(f"⏱️  Download completed in {download_duration:.1f} seconds")
 
             # Verify download
-            if os.path.exists(temp_db_path) and os.path.getsize(temp_db_path) > 0:
-                # Atomic replace
-                if os.path.exists(db_path):
-                    os.replace(temp_db_path, db_path)
-                else:
-                    os.rename(temp_db_path, db_path)
+            if os.path.exists(temp_db_path):
+                temp_size = os.path.getsize(temp_db_path)
+                print(f"✅ Downloaded file size: {temp_size:,} bytes ({temp_size / (1024*1024):.1f} MB)")
+                
+                if temp_size > 0:
+                    # Verify it's a valid SQLite database
+                    try:
+                        import sqlite3
+                        conn = sqlite3.connect(temp_db_path)
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                        tables = cursor.fetchall()
+                        conn.close()
+                        print(f"✅ Valid SQLite database with {len(tables)} tables: {[t[0] for t in tables]}")
+                    except Exception as e:
+                        print(f"⚠️  Database validation failed: {e}")
+                        if os.path.exists(temp_db_path):
+                            os.remove(temp_db_path)
+                        return
+                    
+                    # Atomic replace
+                    print(f"🔄 Replacing database file...")
+                    if os.path.exists(db_path):
+                        os.replace(temp_db_path, db_path)
+                    else:
+                        os.rename(temp_db_path, db_path)
 
-                print(
-                    f"✅ Background database sync completed ({os.path.getsize(db_path)} bytes)"
-                )
-                print("📊 Historical data is now available in dashboard and analysis")
+                    final_size = os.path.getsize(db_path)
+                    print(f"✅ Background database sync completed: {final_size:,} bytes ({final_size / (1024*1024):.1f} MB)")
+                    print("📊 Historical data is now available in dashboard and analysis")
+                    
+                    # Log record counts
+                    try:
+                        import sqlite3
+                        conn = sqlite3.connect(db_path)
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT COUNT(*) FROM drawings")
+                        drawing_count = cursor.fetchone()[0]
+                        cursor.execute("SELECT COUNT(*) FROM anomaly_analyses")
+                        analysis_count = cursor.fetchone()[0]
+                        conn.close()
+                        print(f"📊 Database contains {drawing_count:,} drawings and {analysis_count:,} analyses")
+                    except Exception as e:
+                        print(f"⚠️  Could not query database: {e}")
+                else:
+                    print("❌ Downloaded file is empty")
+                    if os.path.exists(temp_db_path):
+                        os.remove(temp_db_path)
             else:
-                print("⚠️  Downloaded file appears to be empty or invalid")
-                if os.path.exists(temp_db_path):
-                    os.remove(temp_db_path)
+                print("❌ Downloaded file does not exist")
 
         except (ClientError, NoCredentialsError) as e:
-            print(f"⚠️  Background database sync failed: {e}")
+            print(f"❌ Background database sync failed (AWS error): {e}")
+            print(f"📋 Error type: {type(e).__name__}")
+            print(f"📋 Error details: {str(e)}")
+            if hasattr(e, 'response'):
+                print(f"📋 Response: {e.response}")
             print("🚀 Service continues with local database - all features available")
         except Exception as e:
-            print(f"⚠️  Unexpected error in background sync: {e}")
+            print(f"❌ Unexpected error in background sync: {e}")
+            print(f"📋 Error type: {type(e).__name__}")
+            print(f"📋 Traceback:\n{traceback.format_exc()}")
             print("🚀 Service continues with local database - all features available")
         finally:
             # Clean up temp file if it exists
             if os.path.exists(temp_db_path):
                 try:
+                    print(f"🧹 Cleaning up temporary file: {temp_db_path}")
                     os.remove(temp_db_path)
-                except:
-                    pass
+                except Exception as e:
+                    print(f"⚠️  Could not remove temp file: {e}")
 
     # Start background thread
     sync_thread = threading.Thread(target=background_sync, daemon=True)
     sync_thread.start()
     print(
-        "🔄 Background database sync started - historical data will be available in ~10 seconds"
+        "🔄 Background database sync started - historical data will be available in ~10-60 seconds"
     )
 
 
