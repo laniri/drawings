@@ -366,7 +366,8 @@ jobs:
       github.ref == 'refs/heads/main' && 
       (always() && (needs.test.result == 'success' || needs.test.result == 'skipped') &&
        (needs.test-skipped.result == 'success' || needs.test-skipped.result == 'skipped')) &&
-      needs.detect-changes.outputs.has-docker-changes == 'true'
+      (needs.detect-changes.outputs.has-docker-changes == 'true' || 
+       needs.detect-changes.outputs.has-code-changes == 'true')
     
     # Required for OIDC
     permissions:
