@@ -495,7 +495,9 @@ jobs:
     name: Deploy to ECS
     runs-on: ubuntu-latest
     needs: [build-and-push]
-    if: github.ref == 'refs/heads/main'
+    if: |
+      github.ref == 'refs/heads/main' && 
+      needs.build-and-push.result == 'success'
     
     # Required for OIDC
     permissions:
@@ -576,7 +578,9 @@ jobs:
     name: Health Check and Rollback
     runs-on: ubuntu-latest
     needs: [deploy-application]
-    if: github.ref == 'refs/heads/main'
+    if: |
+      github.ref == 'refs/heads/main' && 
+      needs.deploy-application.result == 'success'
     
     # Required for OIDC
     permissions:
