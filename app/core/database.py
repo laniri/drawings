@@ -242,10 +242,9 @@ def start_background_database_sync():
 
                     # Log record counts with fresh connection
                     try:
-                        import sqlite3
-
                         # Debug: Print working directory and file paths
                         import os
+                        import sqlite3
 
                         print(f"🔍 Working directory: {os.getcwd()}")
                         print(f"🔍 Database path: {db_path}")
