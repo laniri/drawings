@@ -86,7 +86,8 @@ def check_database_exists():
     """Check if database exists locally (non-blocking)."""
     import os
 
-    db_path = "drawings.db"
+    # Use the same path as DATABASE_URL to ensure consistency
+    db_path = "./drawings.db"  # Match sqlite:///./drawings.db
 
     if os.path.exists(db_path):
         file_size = os.path.getsize(db_path)
@@ -113,8 +114,9 @@ def start_background_database_sync():
         # Wait for startup to complete
         time.sleep(10)  # Reduced from 30 to 10 seconds
 
-        db_path = "drawings.db"
-        temp_db_path = "drawings_sync.db"
+        # Use the same path as DATABASE_URL to ensure consistency
+        db_path = "./drawings.db"  # Match sqlite:///./drawings.db
+        temp_db_path = "./drawings_sync.db"
 
         # Only sync in production
         if os.getenv("APP_ENVIRONMENT") != "production":
