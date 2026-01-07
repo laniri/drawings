@@ -66,13 +66,23 @@ class Settings(BaseSettings):
         """Get AWS region"""
         return self.env_config.aws_region
 
-    # CORS
+    # CORS - environment aware
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
 
     @property
     def cors_origins(self) -> List[str]:
-        """Get CORS origins as a list."""
-        return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
+        """Get CORS origins as a list with environment-specific additions."""
+        origins = [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
+        
+        # Add production CloudFront URL in production environment
+        if self.is_production:
+            cloudfront_url = os.getenv("CLOUDFRONT_URL")
+            if cloudfront_url:
+                origins.append(cloudfront_url)
+            # Also add the CloudFront URL without protocol for flexibility
+            origins.append("https://d2e6rjfv7d2rgs.cloudfront.net")
+        
+        return origins
 
     # File storage - environment aware
     @property
