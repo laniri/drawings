@@ -172,6 +172,11 @@ if SERVICES_INITIALIZED:
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
+    # Add alias for /api/* to /api/v1/* for production compatibility
+    # This handles the case where frontend calls /api/drawings/upload
+    # but backend expects /api/v1/drawings/upload
+    app.include_router(api_router, prefix="/api")
+
     # Include authentication router (without API prefix)
     app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
@@ -218,6 +223,24 @@ if SERVICES_INITIALIZED:
                 name="uploads",
             )
             print("✅ Uploads mounted at /uploads")
+
+        # Mount docs directory for documentation files
+        if os.path.exists("docs"):
+            app.mount(
+                "/docs",
+                StaticFiles(directory="docs", check_dir=False, html=True),
+                name="docs",
+            )
+            print("✅ Documentation files mounted at /docs")
+        else:
+            print("⚠️ Docs directory not found, creating it...")
+            os.makedirs("docs", exist_ok=True)
+            app.mount(
+                "/docs",
+                StaticFiles(directory="docs", check_dir=False, html=True),
+                name="docs",
+            )
+            print("✅ Documentation files mounted at /docs")
     except Exception as e:
         print(f"⚠️ Error mounting static files: {e}")
 
