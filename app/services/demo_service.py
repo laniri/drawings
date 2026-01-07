@@ -174,62 +174,46 @@ class DemoService:
         try:
             db = next(get_db())
 
+            # Get threshold manager for dynamic anomaly classification
+            from app.services.threshold_manager import get_threshold_manager
+
+            threshold_manager = get_threshold_manager()
+
             # Get diverse subjects for better demo variety
             target_subjects = ["phone", "cat", "train", "bear", "apple"]
 
-            # Get 3 normal examples from different subjects
+            # Get drawings with analyses (we'll classify them dynamically)
+            all_drawings = (
+                db.query(Drawing)
+                .join(AnomalyAnalysis)
+                .filter(Drawing.subject.isnot(None))
+                .filter(AnomalyAnalysis.anomaly_score.isnot(None))
+                .limit(50)  # Get more to ensure we have variety
+                .all()
+            )
+
+            # Classify drawings dynamically
             normal_drawings = []
-            for subject in target_subjects[:3]:
-                drawing = (
-                    db.query(Drawing)
-                    .join(AnomalyAnalysis)
-                    .filter(AnomalyAnalysis.is_anomaly == False)
-                    .filter(Drawing.subject == subject)
-                    .first()
-                )
-                if drawing:
-                    normal_drawings.append(drawing)
-
-            # If we don't have enough diverse subjects, fill with any normal drawings
-            if len(normal_drawings) < 3:
-                additional_normal = (
-                    db.query(Drawing)
-                    .join(AnomalyAnalysis)
-                    .filter(AnomalyAnalysis.is_anomaly == False)
-                    .filter(Drawing.subject.isnot(None))
-                    .filter(~Drawing.subject.in_([d.subject for d in normal_drawings]))
-                    .limit(3 - len(normal_drawings))
-                    .all()
-                )
-                normal_drawings.extend(additional_normal)
-
-            # Get 2 anomalous examples from different subjects
             anomalous_drawings = []
-            for subject in target_subjects[3:]:
-                drawing = (
-                    db.query(Drawing)
-                    .join(AnomalyAnalysis)
-                    .filter(AnomalyAnalysis.is_anomaly == True)
-                    .filter(Drawing.subject == subject)
-                    .first()
-                )
-                if drawing:
-                    anomalous_drawings.append(drawing)
 
-            # If we don't have enough diverse anomalous subjects, fill with any anomalous drawings
-            if len(anomalous_drawings) < 2:
-                additional_anomalous = (
-                    db.query(Drawing)
-                    .join(AnomalyAnalysis)
-                    .filter(AnomalyAnalysis.is_anomaly == True)
-                    .filter(Drawing.subject.isnot(None))
-                    .filter(
-                        ~Drawing.subject.in_([d.subject for d in anomalous_drawings])
+            for drawing in all_drawings:
+                if drawing.analyses:
+                    analysis = drawing.analyses[0]
+                    # Use threshold manager to determine if anomaly
+                    is_anomaly, _, _ = threshold_manager.is_anomaly(
+                        analysis.anomaly_score, drawing.age_years, db
                     )
-                    .limit(2 - len(anomalous_drawings))
-                    .all()
-                )
-                anomalous_drawings.extend(additional_anomalous)
+
+                    if is_anomaly:
+                        if len(anomalous_drawings) < 2:
+                            anomalous_drawings.append(drawing)
+                    else:
+                        if len(normal_drawings) < 3:
+                            normal_drawings.append(drawing)
+
+                    # Stop if we have enough samples
+                    if len(normal_drawings) >= 3 and len(anomalous_drawings) >= 2:
+                        break
 
             demo_samples = []
             sample_id = 1
@@ -275,6 +259,7 @@ class DemoService:
 
         except Exception as e:
             logger.error(f"Error fetching real demo samples: {e}")
+            logger.exception("Full traceback:")
             return self._get_fallback_demo_samples()
 
     def _get_fallback_demo_samples(self) -> List[Dict[str, Any]]:

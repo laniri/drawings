@@ -197,33 +197,35 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 ),
             }
         else:
-            # Production - balanced rate limits (increased from overly strict limits)
+            # Production - generous rate limits for CloudFront traffic
             self.rate_limiters = {
                 "default": RateLimiter(
-                    RateLimitRule(
-                        requests_per_minute=120, requests_per_hour=2000, burst_limit=20
-                    )
-                ),
-                "demo": RateLimiter(
                     RateLimitRule(
                         requests_per_minute=600,
                         requests_per_hour=10000,
                         burst_limit=100,
                     )
                 ),
+                "demo": RateLimiter(
+                    RateLimitRule(
+                        requests_per_minute=1000,
+                        requests_per_hour=20000,
+                        burst_limit=200,
+                    )
+                ),
                 "upload": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=60, requests_per_hour=600, burst_limit=20
+                        requests_per_minute=200, requests_per_hour=2000, burst_limit=50
                     )
                 ),
                 "analysis": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=60, requests_per_hour=1000, burst_limit=15
+                        requests_per_minute=300, requests_per_hour=5000, burst_limit=50
                     )
                 ),
                 "auth": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=20, requests_per_hour=200, burst_limit=5
+                        requests_per_minute=50, requests_per_hour=500, burst_limit=10
                     )
                 ),
             }
@@ -507,8 +509,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         Returns:
             Response object
         """
-        # Skip security checks for health endpoints
-        if request.url.path in ["/health", "/health/detailed"]:
+        # Skip security checks for health and API health endpoints
+        if request.url.path in ["/health", "/health/detailed", "/api/v1/health"]:
             response = await call_next(request)
             return self._add_security_headers(response)
 
