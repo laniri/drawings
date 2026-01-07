@@ -197,31 +197,31 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 ),
             }
         else:
-            # Production - strict rate limits
+            # Production - balanced rate limits (increased from overly strict limits)
             self.rate_limiters = {
                 "default": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=60, requests_per_hour=1000, burst_limit=10
+                        requests_per_minute=120, requests_per_hour=2000, burst_limit=20
                     )
                 ),
                 "demo": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=300, requests_per_hour=5000, burst_limit=50
+                        requests_per_minute=600, requests_per_hour=10000, burst_limit=100
                     )
                 ),
                 "upload": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=10, requests_per_hour=100, burst_limit=3
+                        requests_per_minute=30, requests_per_hour=300, burst_limit=10
                     )
                 ),
                 "analysis": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=30, requests_per_hour=500, burst_limit=5
+                        requests_per_minute=60, requests_per_hour=1000, burst_limit=15
                     )
                 ),
                 "auth": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=5, requests_per_hour=50, burst_limit=2
+                        requests_per_minute=20, requests_per_hour=200, burst_limit=5
                     )
                 ),
             }
