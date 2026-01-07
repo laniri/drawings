@@ -227,11 +227,25 @@ def start_background_database_sync():
                         "📊 Historical data is now available in dashboard and analysis"
                     )
 
-                    # Log record counts
+                    # Force SQLAlchemy to close all existing connections
+                    # This ensures fresh connections will read the new database file
+                    try:
+                        print("🔄 Refreshing database connections...")
+                        from app.core.database import engine
+
+                        engine.dispose()
+                        print("✅ Database connections refreshed")
+                    except Exception as e:
+                        print(f"⚠️  Could not refresh connections: {e}")
+
+                    # Log record counts with fresh connection
                     try:
                         import sqlite3
 
+                        # Use a fresh connection to the replaced database
                         conn = sqlite3.connect(db_path)
+                        # Force checkpoint to ensure WAL is flushed
+                        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                         cursor = conn.cursor()
                         cursor.execute("SELECT COUNT(*) FROM drawings")
                         drawing_count = cursor.fetchone()[0]
@@ -243,6 +257,7 @@ def start_background_database_sync():
                         )
                     except Exception as e:
                         print(f"⚠️  Could not query database: {e}")
+                        print(f"📋 Error details: {traceback.format_exc()}")
                 else:
                     print("❌ Downloaded file is empty")
                     if os.path.exists(temp_db_path):
