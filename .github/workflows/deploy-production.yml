@@ -72,7 +72,7 @@ jobs:
         
         # Check for code files (excluding docs, configs, and Docker files)
         # Note: .github/workflows/ files ARE considered code changes that should trigger full tests
-        CODE_FILES=$(echo "$CHANGED_FILES" | grep -vE '^(README|CHANGELOG|docs/|Dockerfile|docker-compose|\.dockerignore|\.md$|\.txt$|tmp_files/|docker-compose.*\.ya?ml$)' || true)
+        CODE_FILES=$(echo "$CHANGED_FILES" | grep -vE '^(README|CHANGELOG|docs/|Dockerfile|docker-compose|\.dockerignore|.*\.md$|.*\.txt$|tmp_files/|docker-compose.*\.ya?ml$)' || true)
         
         # Determine if only Docker files changed
         if [ -n "$DOCKER_FILES" ] && [ -z "$CODE_FILES" ]; then
