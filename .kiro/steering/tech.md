@@ -124,6 +124,9 @@ docker-compose -f docker-compose.dev.yml down
 
 - **Environment**: `.env` file (copy from `.env.example`)
 - **Database**: SQLite with Alembic migrations
+  - **Path**: `sqlite:///./drawings.db` (relative path with `./` prefix)
+  - **Critical**: All file operations must use `./drawings.db` to match DATABASE_URL
+  - **Production**: 373MB database synced from S3 on container startup
 - **CORS**: Configured for localhost:3000 and localhost:5173
 - **File uploads**: Max 10MB, stored in `uploads/` directory
 - **API Proxy**: Vite dev server proxy routes `/api/*` to backend at `localhost:8000/api/v1/*` and `/static/*` to `localhost:8000/static/*`
@@ -138,6 +141,12 @@ docker-compose -f docker-compose.dev.yml down
 - **Enhanced Export System**: Multi-format exports (PNG, PDF, JSON, CSV, HTML) with comprehensive reports and composite visualizations
 
 ## Troubleshooting
+
+### Database Sync Issues (Production)
+- **Symptom**: Queries return 0 records despite successful S3 sync
+- **Root Cause**: Path mismatch between DATABASE_URL and file operations
+- **Solution**: Ensure all database file operations use `./drawings.db` (with `./` prefix)
+- **Verification**: Check CloudWatch logs for "Database contains X drawings" after sync
 
 ### Dashboard Not Updating After Configuration Changes
 - **Fixed**: Dashboard now uses dynamic anomaly classification instead of stored flags
