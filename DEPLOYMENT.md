@@ -377,6 +377,12 @@ The nginx configuration includes:
 - Security headers
 - Gzip compression
 - Static file serving
+- **API endpoint proxying**:
+  - `/api/v1/*` → FastAPI backend (versioned API endpoints)
+  - `/demo/*` → FastAPI backend (public demo endpoints, no authentication)
+  - `/auth/*` → FastAPI backend (authentication endpoints)
+  - `/health*` → FastAPI backend (health check endpoints)
+  - `/static/*` → FastAPI backend (static file serving)
 
 ## Monitoring and Maintenance
 

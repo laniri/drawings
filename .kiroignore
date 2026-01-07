@@ -49,6 +49,8 @@ venv.bak/
 # Uploads and static files
 # Uploads directory - ignore contents but keep directory structure
 uploads/*
+uploads/drawings/*
+
 
 # Static files - ignore contents but keep directory structure
 static/*

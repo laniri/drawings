@@ -660,6 +660,15 @@ curl "http://localhost:8000/health/simple"    # Ultra-lightweight: {"status": "o
 curl "http://localhost:8000/health"           # Standard with environment info
 curl "http://localhost:8000/health/detailed"  # Comprehensive system metrics
 
+# Demo endpoints (public access, no authentication required)
+curl "http://localhost:8000/demo/samples"     # Get demo drawing samples
+curl "http://localhost:8000/demo/stats"       # Get demo statistics
+
+# Authentication endpoints
+curl -X POST "http://localhost:8000/auth/login" \
+     -H "Content-Type: application/json" \
+     -d '{"username": "user", "password": "pass"}'
+
 # Get system statistics
 curl "http://localhost:8000/api/v1/analysis/stats"
 

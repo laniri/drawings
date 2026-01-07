@@ -168,6 +168,8 @@ For detailed information, see [Environment-Aware Storage Contract](../interfaces
 - [GET /metrics](./endpoints/GET__metrics.md)
 
 ### Demo
+**Note**: Demo endpoints are registered at `/demo/*` (not `/api/v1/demo/*`) for public access without API versioning. In production deployments with nginx, these endpoints are proxied directly to the FastAPI backend.
+
 - [GET /api/v1/demo/](./endpoints/GET__api_v1_demo_.md)
 - [GET /api/v1/demo/samples](./endpoints/GET__api_v1_demo_samples.md)
 - [GET /api/v1/demo/samples/{sample_id}](./endpoints/GET__api_v1_demo_samples_sample_id.md)
@@ -175,6 +177,11 @@ For detailed information, see [Environment-Aware Storage Contract](../interfaces
 - [GET /api/v1/demo/disclaimer](./endpoints/GET__api_v1_demo_disclaimer.md)
 - [GET /api/v1/demo/technical-links](./endpoints/GET__api_v1_demo_technical-links.md)
 - [GET /api/v1/demo/statistics](./endpoints/GET__api_v1_demo_statistics.md)
+
+### Authentication
+**Note**: Authentication endpoints are registered at `/auth/*` (not `/api/v1/auth/*`) for direct access. In production deployments with nginx, these endpoints are proxied directly to the FastAPI backend.
+
+Authentication endpoints provide user login, logout, and session management functionality.
 
 
 ## Interactive Documentation
