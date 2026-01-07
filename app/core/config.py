@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         """Get CORS origins as a list with environment-specific additions."""
         origins = [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
-        
+
         # Add production CloudFront URL in production environment
         if self.is_production:
             cloudfront_url = os.getenv("CLOUDFRONT_URL")
@@ -81,7 +81,7 @@ class Settings(BaseSettings):
                 origins.append(cloudfront_url)
             # Also add the CloudFront URL without protocol for flexibility
             origins.append("https://d2e6rjfv7d2rgs.cloudfront.net")
-        
+
         return origins
 
     # File storage - environment aware
