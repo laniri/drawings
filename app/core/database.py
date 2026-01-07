@@ -244,6 +244,16 @@ def start_background_database_sync():
                     try:
                         import sqlite3
 
+                        # Debug: Print working directory and file paths
+                        import os
+
+                        print(f"🔍 Working directory: {os.getcwd()}")
+                        print(f"🔍 Database path: {db_path}")
+                        print(f"🔍 Absolute path: {os.path.abspath(db_path)}")
+                        print(f"🔍 File exists: {os.path.exists(db_path)}")
+                        if os.path.exists(db_path):
+                            print(f"🔍 File size: {os.path.getsize(db_path):,} bytes")
+
                         # Use a fresh connection to the replaced database
                         conn = sqlite3.connect(db_path)
                         # Force checkpoint to ensure WAL is flushed
