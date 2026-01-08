@@ -216,16 +216,28 @@ async def get_drawing_file(drawing_id: int, db: Session = Depends(get_db)):
             detail=f"Drawing with ID {drawing_id} not found",
         )
 
+    # Get storage service and download file to local path if needed (handles S3)
+    storage_service = get_storage_service()
+
     # Check if file exists
-    file_info = get_storage_service().get_file_info(drawing.file_path)
+    file_info = storage_service.get_file_info(drawing.file_path)
     if not file_info or not file_info["exists"]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Drawing file not found on disk",
+            detail="Drawing file not found",
+        )
+
+    # Download to local path (handles both S3 and local storage)
+    try:
+        local_path = storage_service.download_to_local(drawing.file_path)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve drawing file: {str(e)}",
         )
 
     return FileResponse(
-        path=drawing.file_path, filename=drawing.filename, media_type="image/*"
+        path=local_path, filename=drawing.filename, media_type="image/*"
     )
 
 
