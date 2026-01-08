@@ -310,12 +310,47 @@ class S3StorageBackend(StorageBackendInterface):
             # Extract S3 key from S3 URL
             s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
 
-            # Return API endpoint that will serve the file from S3
-            # This avoids presigned URL expiration issues and allows CloudFront caching
+            # Check if file exists locally (from container startup sync)
+            local_path = self._get_local_path_for_s3_key(s3_key)
+            if local_path and Path(local_path).exists():
+                # File exists locally, return local URL
+                # nginx will serve it directly
+                return f"/{local_path}"
+
+            # File not available locally, return API endpoint that will download it
+            # This handles edge cases where file wasn't synced
             return f"/api/v1/files/s3/{s3_key}"
 
         # Fallback for non-S3 paths
         return f"{base_url}/{file_path}"
+
+    def _get_local_path_for_s3_key(self, s3_key: str) -> Optional[str]:
+        """
+        Map S3 key to local file path.
+        
+        During container startup, files are synced from S3:
+        - s3://bucket/drawings/* -> uploads/
+        - s3://bucket/saliency_maps/* -> static/saliency_maps/
+        
+        Args:
+            s3_key: S3 object key (e.g., "drawings/file.png")
+            
+        Returns:
+            Local file path if mapping exists, None otherwise
+        """
+        if s3_key.startswith("drawings/"):
+            # Drawing files are synced to uploads/
+            filename = s3_key.replace("drawings/", "")
+            return f"uploads/{filename}"
+        elif s3_key.startswith("saliency_maps/"):
+            # Saliency maps are synced to static/saliency_maps/
+            return f"static/{s3_key}"
+        elif s3_key.startswith("overlays/"):
+            # Overlay images are synced to static/overlays/
+            return f"static/{s3_key}"
+        
+        # Unknown S3 key pattern
+        return None
 
     def delete_file(self, file_path: str) -> bool:
         """Delete a file from S3"""

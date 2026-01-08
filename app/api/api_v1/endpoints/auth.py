@@ -275,22 +275,26 @@ async def login(
     session_token = auth_service.authenticate(password, client_ip)
 
     if session_token:
+        # Check if request came through HTTPS (CloudFront forwards this header)
+        is_https = request.headers.get("X-Forwarded-Proto") == "https"
+        
         # Set session cookie
         response = RedirectResponse(
-            url=redirect_url or "/api/v1/config/", status_code=302
+            url=redirect_url or "/dashboard", status_code=302
         )
 
-        # Set secure cookie
+        # Set secure cookie with proper path and security settings
         response.set_cookie(
             key="session_token",
             value=session_token,
             max_age=3600,  # 1 hour
+            path="/",  # Valid for entire site
             httponly=True,
-            secure=settings.is_production,  # HTTPS only in production
+            secure=is_https,  # Only send over HTTPS if original request was HTTPS
             samesite="lax",
         )
 
-        logger.info(f"Successful login from {client_ip}")
+        logger.info(f"Successful login from {client_ip}, cookie secure={is_https}")
         return response
     else:
         # Login failed - show error page
