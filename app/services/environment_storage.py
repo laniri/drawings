@@ -335,7 +335,7 @@ class S3StorageBackend(StorageBackendInterface):
 
         During container startup, only drawings are synced from S3:
         - s3://bucket/drawings/* -> /app/uploads/
-        
+
         Saliency maps are NOT synced (too many files) and must be fetched on-demand.
 
         Args:
