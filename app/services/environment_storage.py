@@ -370,7 +370,10 @@ class S3StorageBackend(StorageBackendInterface):
             return None
 
     def download_to_local(self, file_path: str) -> str:
-        """Download an S3 file to a temporary local path for processing"""
+        """Download an S3 file to a temporary local path for processing.
+
+        Optimized to check if file was already synced locally before downloading.
+        """
         try:
             if not file_path.startswith("s3://"):
                 # Already a local path
@@ -379,8 +382,28 @@ class S3StorageBackend(StorageBackendInterface):
             s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             filename = Path(s3_key).name
 
-            # Create temporary local path
+            # Check if file was already synced to local uploads directory
+            # The background sync copies files to /app/uploads/
+            if s3_key.startswith("uploads/") or s3_key.startswith("drawings/"):
+                # Try local path first (from background sync)
+                local_synced_path = Path("/app") / s3_key
+                if local_synced_path.exists():
+                    logger.debug(f"Using locally synced file: {local_synced_path}")
+                    return str(local_synced_path)
+
+                # Also check uploads directory directly
+                uploads_path = Path("/app/uploads") / filename
+                if uploads_path.exists():
+                    logger.debug(f"Using locally synced file: {uploads_path}")
+                    return str(uploads_path)
+
+            # Create temporary local path for download
             local_path = self.temp_upload_dir / filename
+
+            # Check if already downloaded to temp
+            if local_path.exists():
+                logger.debug(f"Using cached temp file: {local_path}")
+                return str(local_path)
 
             # Download from S3
             self.s3_client.download_file(
