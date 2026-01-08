@@ -116,7 +116,6 @@ def start_background_database_sync():
 
         # Start immediately - no delay needed
         # The FastAPI app will be ready to serve requests while sync happens
-
         # Use the same path as DATABASE_URL to ensure consistency
         db_path = "./drawings.db"  # Match sqlite:///./drawings.db
         temp_db_path = "./drawings_sync.db"

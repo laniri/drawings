@@ -275,6 +275,7 @@ async def perform_single_analysis(
                 try:
                     # Load the image for interpretability analysis
                     from PIL import Image
+
                     from app.services.environment_storage import get_storage_service
 
                     storage_service = get_storage_service()
@@ -521,6 +522,7 @@ async def perform_single_analysis(
         try:
             # Load image for hybrid embedding generation
             from PIL import Image
+
             from app.services.environment_storage import get_storage_service
 
             storage_service = get_storage_service()
@@ -595,6 +597,7 @@ async def perform_single_analysis(
             )
             # Load image and regenerate as hybrid embedding
             from PIL import Image
+
             from app.services.environment_storage import get_storage_service
 
             storage_service = get_storage_service()
@@ -718,6 +721,7 @@ async def perform_single_analysis(
         from pathlib import Path
 
         from PIL import Image, ImageDraw, ImageFilter
+
         from app.services.environment_storage import get_storage_service
 
         storage_service = get_storage_service()
@@ -1302,6 +1306,7 @@ async def generate_embedding(drawing_id: int, db: Session = Depends(get_db)):
 
         # Generate hybrid embedding with subject information
         from PIL import Image
+
         from app.services.environment_storage import get_storage_service
 
         storage_service = get_storage_service()

@@ -597,6 +597,7 @@ async def _generate_simplified_interactive_data(
 
         # Get image dimensions
         from PIL import Image
+
         from app.services.environment_storage import get_storage_service
 
         try:
@@ -639,6 +640,7 @@ async def _generate_interactive_data(
     try:
         # Load the original image for analysis
         from PIL import Image
+
         from app.services.environment_storage import get_storage_service
 
         storage_service = get_storage_service()
@@ -982,6 +984,7 @@ async def _export_interpretability_data(
 
         # Load image for export
         from PIL import Image
+
         from app.services.environment_storage import get_storage_service
 
         storage_service = get_storage_service()
