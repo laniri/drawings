@@ -131,6 +131,21 @@ docker-compose -f docker-compose.dev.yml down
 - **File uploads**: Max 10MB, stored in `uploads/` directory
 - **API Proxy**: Vite dev server proxy routes `/api/*` to backend at `localhost:8000/api/v1/*` and `/static/*` to `localhost:8000/static/*`
 
+## Production Architecture
+
+**Container**: `/app` working dir, nginx → FastAPI:8000, CloudFront (HTTPS) → ALB → HTTP
+
+**File Storage**:
+| Type | S3 | Synced? | Served By | URL |
+|------|----|---------|-----------|----|
+| Drawings | `drawings/` | ✅ `/app/uploads/` | nginx | `/uploads/file.png` |
+| New Saliency | N/A | N/A (local) | nginx | `/static/saliency_maps/file.png` |
+| Old Saliency | `saliency_maps/` | ❌ (37k+ files) | API | `/api/v1/files/s3/saliency_maps/file.png` |
+| Models | `static/models/` | ✅ `/app/static/models/` | nginx | `/static/models/file.pt` |
+
+**Auth**: Cookie `path="/"`, `secure` via `X-Forwarded-Proto: https`  
+**Rate Limiting**: 100 req/min per IP, exempt `/demo/*`
+
 ## Recent Improvements
 
 - **Real-time Dashboard Updates**: Dashboard stats now recalculate anomaly classifications dynamically
@@ -142,26 +157,25 @@ docker-compose -f docker-compose.dev.yml down
 
 ## Troubleshooting
 
-### Database Sync Issues (Production)
-- **Symptom**: Queries return 0 records despite successful S3 sync
-- **Root Cause**: Path mismatch between DATABASE_URL and file operations
-- **Solution**: Ensure all database file operations use `./drawings.db` (with `./` prefix)
-- **Verification**: Check CloudWatch logs for "Database contains X drawings" after sync
+### Session Cookie Redirect Loop
+**Symptom**: Login succeeds but redirects back to login  
+**Fix**: Set `path="/"` and check `X-Forwarded-Proto` for `secure` flag
 
-### Dashboard Not Updating After Configuration Changes
-- **Fixed**: Dashboard now uses dynamic anomaly classification instead of stored flags
-- **Verification**: Change threshold percentile in configuration, return to dashboard to see updated counts
+### Images Not Loading
+**Symptom**: Placeholder images in demo/old drawings  
+**Fix**: Check both relative and `/app/` paths; use API endpoint for non-synced S3 files
 
-### Slow Threshold Recalculation
-- **Fixed**: Optimized to use existing analysis results instead of recalculating reconstruction losses
-- **Performance**: Threshold updates now complete in seconds instead of minutes
+### Blank Screen After Deploy
+**Symptom**: White screen on production  
+**Fix**: Exempt `/demo/*` from rate limiting
 
-### Configuration Errors with Custom Percentiles
-- **Fixed**: Robust handling of arbitrary percentile values (not just 90%, 95%, 99%)
-- **Support**: Any percentile between 50.0 and 99.9 is now supported
+### Wrong Password Error
+**Symptom**: Login always fails  
+**Fix**: Update IAM policy with correct Secrets Manager ARN pattern
 
-### AWS Dependencies Missing (Local Development)
-- **Expected**: AWS services are optional for local development
-- **Behavior**: Cost optimization, monitoring, and security services provide local functionality
-- **Fallback**: All core features work without AWS clients
-- **Production**: AWS integration required for cloud resource management
+### Database Sync Issues
+**Symptom**: Queries return 0 records despite S3 sync  
+**Fix**: Use `./drawings.db` (with `./` prefix) consistently
+
+### AWS Dependencies Missing (Local)
+**Expected**: AWS services optional for local dev, provide local functionality without AWS clients
