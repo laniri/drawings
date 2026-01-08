@@ -90,6 +90,42 @@ server {
         alias /app/static/;
         expires 1d;
         add_header Cache-Control "public, immutable";
+        
+        # Handle exported files for inline viewing
+        location /static/exports/ {
+            alias /app/static/exports/;
+            expires 1h;
+            add_header Cache-Control "public";
+            
+            # Markdown files - view inline as plain text
+            location ~ \.md$ {
+                add_header Content-Type "text/plain; charset=utf-8";
+                add_header Content-Disposition "inline";
+                add_header Cache-Control "public";
+            }
+            
+            # JSON files - view inline
+            location ~ \.json$ {
+                add_header Content-Type "application/json; charset=utf-8";
+                add_header Content-Disposition "inline";
+                add_header Cache-Control "public";
+            }
+            
+            # CSV files - view inline as plain text
+            location ~ \.csv$ {
+                add_header Content-Type "text/csv; charset=utf-8";
+                add_header Content-Disposition "inline";
+                add_header Cache-Control "public";
+            }
+            
+            # HTML files - view inline
+            location ~ \.html$ {
+                add_header Content-Type "text/html; charset=utf-8";
+                add_header Content-Disposition "inline";
+                add_header Cache-Control "public";
+            }
+        }
+        
         try_files $uri $uri/ =404;
     }
     
