@@ -597,9 +597,12 @@ async def _generate_simplified_interactive_data(
 
         # Get image dimensions
         from PIL import Image
+        from app.services.environment_storage import get_storage_service
 
         try:
-            image = Image.open(drawing.file_path)
+            storage_service = get_storage_service()
+            local_path = storage_service.download_to_local(drawing.file_path)
+            image = Image.open(local_path)
             image_dimensions = [image.width, image.height]
         except Exception:
             image_dimensions = [224, 224]  # Default size
@@ -636,8 +639,11 @@ async def _generate_interactive_data(
     try:
         # Load the original image for analysis
         from PIL import Image
+        from app.services.environment_storage import get_storage_service
 
-        image = Image.open(drawing.file_path)
+        storage_service = get_storage_service()
+        local_path = storage_service.download_to_local(drawing.file_path)
+        image = Image.open(local_path)
 
         # Get age group model
         age_group_model = (
@@ -976,8 +982,11 @@ async def _export_interpretability_data(
 
         # Load image for export
         from PIL import Image
+        from app.services.environment_storage import get_storage_service
 
-        image = Image.open(drawing.file_path)
+        storage_service = get_storage_service()
+        local_path = storage_service.download_to_local(drawing.file_path)
+        image = Image.open(local_path)
 
         # Generate export based on format
         if export_request.format == "png":

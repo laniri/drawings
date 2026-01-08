@@ -275,8 +275,11 @@ async def perform_single_analysis(
                 try:
                     # Load the image for interpretability analysis
                     from PIL import Image
+                    from app.services.environment_storage import get_storage_service
 
-                    image = Image.open(drawing.file_path)
+                    storage_service = get_storage_service()
+                    local_path = storage_service.download_to_local(drawing.file_path)
+                    image = Image.open(local_path)
 
                     # Get age group model for interpretability generation
                     existing_age_group_model = (
@@ -518,8 +521,11 @@ async def perform_single_analysis(
         try:
             # Load image for hybrid embedding generation
             from PIL import Image
+            from app.services.environment_storage import get_storage_service
 
-            image = Image.open(drawing.file_path).convert("RGB")
+            storage_service = get_storage_service()
+            local_path = storage_service.download_to_local(drawing.file_path)
+            image = Image.open(local_path).convert("RGB")
 
             # Generate hybrid embedding using subject information
             embedding_data = embedding_service.generate_hybrid_embedding(
@@ -712,8 +718,11 @@ async def perform_single_analysis(
         from pathlib import Path
 
         from PIL import Image, ImageDraw, ImageFilter
+        from app.services.environment_storage import get_storage_service
 
-        image = Image.open(drawing.file_path)
+        storage_service = get_storage_service()
+        local_path = storage_service.download_to_local(drawing.file_path)
+        image = Image.open(local_path)
 
         # Create static directory if it doesn't exist
         static_dir = Path("static/saliency_maps")
