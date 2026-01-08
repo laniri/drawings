@@ -144,16 +144,44 @@ class LocalStorageBackend(StorageBackendInterface):
         """Generate a URL for accessing a locally stored file"""
         path = Path(file_path)
 
+        # Handle absolute paths
         if path.is_absolute():
+            # Try to make relative to static_dir
             try:
                 relative_path = path.relative_to(self.static_dir)
+                url = f"/static/{str(relative_path).replace(os.sep, '/')}"
+                logger.debug(f"Local URL (absolute->static): {file_path} -> {url}")
+                return url
             except ValueError:
-                relative_path = path.name
-        else:
-            relative_path = path
+                # Try to make relative to upload_dir
+                try:
+                    relative_path = path.relative_to(self.upload_dir)
+                    url = f"/uploads/{str(relative_path).replace(os.sep, '/')}"
+                    logger.debug(f"Local URL (absolute->uploads): {file_path} -> {url}")
+                    return url
+                except ValueError:
+                    # Can't determine base, use filename only
+                    url = f"{base_url}/{path.name}"
+                    logger.warning(f"Local URL (fallback): {file_path} -> {url}")
+                    return url
 
-        url = f"{base_url}/{str(relative_path).replace(os.sep, '/')}"
-        return url
+        # Handle relative paths - they already include the directory structure
+        path_str = str(path).replace(os.sep, "/")
+
+        # If path already starts with uploads/ or static/, just prepend /
+        if path_str.startswith("uploads/"):
+            url = f"/{path_str}"
+            logger.debug(f"Local URL (relative uploads): {file_path} -> {url}")
+            return url
+        elif path_str.startswith("static/"):
+            url = f"/{path_str}"
+            logger.debug(f"Local URL (relative static): {file_path} -> {url}")
+            return url
+        else:
+            # Otherwise use base_url
+            url = f"{base_url}/{path_str}"
+            logger.debug(f"Local URL (base_url): {file_path} -> {url}")
+            return url
 
     def delete_file(self, file_path: str) -> bool:
         """Delete a file from local storage"""
@@ -320,14 +348,20 @@ class S3StorageBackend(StorageBackendInterface):
                 if Path(local_path).exists() or absolute_path.exists():
                     # File exists locally, return local URL
                     # nginx will serve it directly
-                    return f"/{local_path}"
+                    url = f"/{local_path}"
+                    logger.debug(f"S3 URL (synced local): {file_path} -> {url}")
+                    return url
 
             # File not synced or doesn't exist locally
             # Return API endpoint that will download it on-demand
-            return f"/api/v1/files/s3/{s3_key}"
+            url = f"/api/v1/files/s3/{s3_key}"
+            logger.debug(f"S3 URL (API endpoint): {file_path} -> {url}")
+            return url
 
         # Fallback for non-S3 paths
-        return f"{base_url}/{file_path}"
+        url = f"{base_url}/{file_path}"
+        logger.debug(f"S3 URL (fallback): {file_path} -> {url}")
+        return url
 
     def _get_local_path_for_s3_key(self, s3_key: str) -> Optional[str]:
         """
