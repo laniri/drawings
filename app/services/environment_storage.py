@@ -334,33 +334,49 @@ class S3StorageBackend(StorageBackendInterface):
 
     def get_file_url(self, file_path: str, base_url: str = "/static") -> str:
         """Generate a URL for accessing an S3 stored file"""
-        if file_path.startswith("s3://"):
-            # Extract S3 key from S3 URL
-            s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
+        # Handle relative paths that are stored in database (uploads/..., static/...)
+        if not file_path.startswith("s3://"):
+            # These are relative paths stored in DB - treat them as local paths
+            # that should be served directly by nginx
+            path_str = file_path.replace(os.sep, "/")
 
-            # Check if file type is synced during container startup
-            # Only drawings/uploads are synced; saliency maps are NOT synced (too many files)
-            local_path = self._get_local_path_for_s3_key(s3_key)
-            if local_path and s3_key.startswith("drawings/"):
-                # Drawings are synced to /app/uploads/ during startup
-                # Check both relative path and absolute path (for container)
-                absolute_path = Path("/app") / local_path
-                if Path(local_path).exists() or absolute_path.exists():
-                    # File exists locally, return local URL
-                    # nginx will serve it directly
-                    url = f"/{local_path}"
-                    logger.debug(f"S3 URL (synced local): {file_path} -> {url}")
-                    return url
+            # If path already starts with uploads/ or static/, just prepend /
+            if path_str.startswith("uploads/"):
+                url = f"/{path_str}"
+                logger.debug(f"S3 URL (relative uploads): {file_path} -> {url}")
+                return url
+            elif path_str.startswith("static/"):
+                url = f"/{path_str}"
+                logger.debug(f"S3 URL (relative static): {file_path} -> {url}")
+                return url
+            else:
+                # Otherwise use base_url
+                url = f"{base_url}/{path_str}"
+                logger.debug(f"S3 URL (base_url fallback): {file_path} -> {url}")
+                return url
 
-            # File not synced or doesn't exist locally
-            # Return API endpoint that will download it on-demand
-            url = f"/api/v1/files/s3/{s3_key}"
-            logger.debug(f"S3 URL (API endpoint): {file_path} -> {url}")
-            return url
+        # Handle S3 URLs (s3://bucket/key)
+        # Extract S3 key from S3 URL
+        s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
 
-        # Fallback for non-S3 paths
-        url = f"{base_url}/{file_path}"
-        logger.debug(f"S3 URL (fallback): {file_path} -> {url}")
+        # Check if file type is synced during container startup
+        # Only drawings/uploads are synced; saliency maps are NOT synced (too many files)
+        local_path = self._get_local_path_for_s3_key(s3_key)
+        if local_path and s3_key.startswith("drawings/"):
+            # Drawings are synced to /app/uploads/ during startup
+            # Check both relative path and absolute path (for container)
+            absolute_path = Path("/app") / local_path
+            if Path(local_path).exists() or absolute_path.exists():
+                # File exists locally, return local URL
+                # nginx will serve it directly
+                url = f"/{local_path}"
+                logger.debug(f"S3 URL (synced local): {file_path} -> {url}")
+                return url
+
+        # File not synced or doesn't exist locally
+        # Return API endpoint that will download it on-demand
+        url = f"/api/v1/files/s3/{s3_key}"
+        logger.debug(f"S3 URL (API endpoint): {file_path} -> {url}")
         return url
 
     def _get_local_path_for_s3_key(self, s3_key: str) -> Optional[str]:
