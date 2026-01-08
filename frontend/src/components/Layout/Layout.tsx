@@ -13,6 +13,11 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  BottomNavigation,
+  BottomNavigationAction,
+  Paper,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Dashboard,
@@ -51,10 +56,19 @@ const menuItems = [
   { text: 'Documentation', icon: <Description />, path: '/documentation', protected: false },
 ]
 
+// Mobile-only navigation items
+const mobileMenuItems = [
+  { text: 'Demo', icon: <PlayArrow />, path: '/' },
+  { text: 'Documentation', icon: <Description />, path: '/documentation' },
+  { text: 'Upload', icon: <Upload />, path: '/upload' },
+]
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [authStatus, setAuthStatus] = useState<SessionStatus | null>(null)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')) // < 900px
 
   useEffect(() => {
     // Check authentication status
@@ -118,55 +132,98 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
+      {/* Desktop Sidebar - Hidden on mobile */}
+      {!isMobile && (
+        <Drawer
+          variant="permanent"
+          sx={{
             width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  selected={location.pathname === item.path}
-                  onClick={() => navigate(item.path)}
-                >
-                  <ListItemIcon>
-                    {item.icon}
-                    {item.protected && !authStatus?.authenticated && (
-                      <Lock sx={{ fontSize: 12, ml: -1, mt: -1 }} />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    secondary={item.protected && !authStatus?.authenticated ? 'Login required' : undefined}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ overflow: 'auto' }}>
+            <List>
+              {menuItems.map((item) => (
+                <ListItem key={item.text} disablePadding>
+                  <ListItemButton
+                    selected={location.pathname === item.path}
+                    onClick={() => navigate(item.path)}
+                  >
+                    <ListItemIcon>
+                      {item.icon}
+                      {item.protected && !authStatus?.authenticated && (
+                        <Lock sx={{ fontSize: 12, ml: -1, mt: -1 }} />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary={item.text}
+                      secondary={item.protected && !authStatus?.authenticated ? 'Login required' : undefined}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
+      )}
 
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          p: isMobile ? 2 : 3,
+          width: isMobile ? '100%' : { sm: `calc(100% - ${drawerWidth}px)` },
+          pb: isMobile ? 10 : 3, // Extra padding at bottom for mobile nav
         }}
       >
         <Toolbar />
         {children}
       </Box>
+
+      {/* Mobile Bottom Navigation - Only visible on mobile */}
+      {isMobile && (
+        <Paper
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: (theme) => theme.zIndex.appBar,
+          }}
+          elevation={3}
+        >
+          <BottomNavigation
+            value={location.pathname}
+            onChange={(event, newValue) => {
+              navigate(newValue)
+            }}
+            showLabels
+          >
+            {mobileMenuItems.map((item) => (
+              <BottomNavigationAction
+                key={item.text}
+                label={item.text}
+                value={item.path}
+                icon={item.icon}
+                sx={{
+                  '& .MuiBottomNavigationAction-label': {
+                    fontSize: '0.75rem',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    fontSize: '2rem', // Large icons
+                  },
+                }}
+              />
+            ))}
+          </BottomNavigation>
+        </Paper>
+      )}
     </Box>
   )
 }
