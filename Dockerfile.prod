@@ -63,6 +63,7 @@ COPY app/ ./app/
 COPY alembic.ini ./
 COPY alembic/ ./alembic/
 COPY scripts/ ./scripts/
+COPY docs/ ./docs/
 COPY setup.py ./
 
 # Copy frontend build from previous stage
@@ -96,6 +97,14 @@ server {
         alias /app/uploads/;
         expires 1d;
         add_header Cache-Control "public, immutable";
+        try_files $uri $uri/ =404;
+    }
+    
+    # Serve documentation files
+    location /docs/ {
+        alias /app/docs/;
+        expires 1h;
+        add_header Cache-Control "public";
         try_files $uri $uri/ =404;
     }
     

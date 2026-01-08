@@ -100,17 +100,20 @@ def check_database_exists():
 
 def start_background_database_sync():
     """Start background sync of database from S3 after startup."""
-    import os
     import threading
-    import time
-    import traceback
-
-    import boto3
-    from botocore.config import Config
-    from botocore.exceptions import ClientError, NoCredentialsError
 
     def background_sync():
         """Background thread to sync database from S3."""
+        # Import required modules at function scope
+        import os
+        import sqlite3
+        import time
+        import traceback
+        
+        import boto3
+        from botocore.config import Config
+        from botocore.exceptions import ClientError, NoCredentialsError
+        
         # Start immediately - no delay needed
         # The FastAPI app will be ready to serve requests while sync happens
 
@@ -196,8 +199,6 @@ def start_background_database_sync():
                 if temp_size > 0:
                     # Verify it's a valid SQLite database
                     try:
-                        import sqlite3
-
                         conn = sqlite3.connect(temp_db_path)
                         cursor = conn.cursor()
                         cursor.execute(
@@ -243,9 +244,6 @@ def start_background_database_sync():
                     # Log record counts with fresh connection
                     try:
                         # Debug: Print working directory and file paths
-                        import os
-                        import sqlite3
-
                         print(f"🔍 Working directory: {os.getcwd()}")
                         print(f"🔍 Database path: {db_path}")
                         print(f"🔍 Absolute path: {os.path.abspath(db_path)}")
