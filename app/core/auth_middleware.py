@@ -31,11 +31,12 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.auth_service = get_auth_service()
 
-        # Define protected route patterns (admin-only write operations)
+        # Define protected route patterns
         self.protected_patterns = {
-            "/api/v1/config/age-grouping",  # PUT - modify config
-            "/api/v1/config/threshold",  # PUT - modify threshold
+            "/api/v1/config",
+            "/api/v1/analysis/stats",
             "/api/v1/analysis/batch",
+            "/api/v1/models",
             "/api/v1/training",
             "/api/v1/backup",
             "/api/v1/database",
@@ -46,28 +47,21 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             "/",
             "/health",
             "/health/detailed",
-            "/health/simple",
             "/metrics",
             "/docs",
             "/openapi.json",
             "/redoc",
         }
 
-        # Define public route patterns (read-only access)
+        # Define public route patterns
         self.public_patterns = {
             "/static",
             "/api/v1/drawings",
             "/api/v1/analysis/analyze",
             "/api/v1/analysis/embeddings",
             "/api/v1/analysis/drawing",
-            "/api/v1/analysis/stats",  # Dashboard stats - read-only
-            "/api/v1/analysis/",  # GET analysis by ID
             "/api/v1/interpretability",
             "/api/v1/documentation",
-            "/api/v1/config/",  # GET config - read-only
-            "/api/v1/config/subject-statistics",  # GET subject stats
-            "/api/v1/models/age-groups",  # GET age groups - read-only
-            "/demo",  # Demo endpoints
         }
 
         # Authentication routes
