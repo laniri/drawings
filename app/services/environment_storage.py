@@ -310,15 +310,20 @@ class S3StorageBackend(StorageBackendInterface):
             # Extract S3 key from S3 URL
             s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
 
-            # Check if file exists locally (from container startup sync)
+            # Check if file type is synced during container startup
+            # Only drawings/uploads are synced; saliency maps are NOT synced (too many files)
             local_path = self._get_local_path_for_s3_key(s3_key)
-            if local_path and Path(local_path).exists():
-                # File exists locally, return local URL
-                # nginx will serve it directly
-                return f"/{local_path}"
+            if local_path and s3_key.startswith("drawings/"):
+                # Drawings are synced to /app/uploads/ during startup
+                # Check both relative path and absolute path (for container)
+                absolute_path = Path("/app") / local_path
+                if Path(local_path).exists() or absolute_path.exists():
+                    # File exists locally, return local URL
+                    # nginx will serve it directly
+                    return f"/{local_path}"
 
-            # File not available locally, return API endpoint that will download it
-            # This handles edge cases where file wasn't synced
+            # File not synced or doesn't exist locally
+            # Return API endpoint that will download it on-demand
             return f"/api/v1/files/s3/{s3_key}"
 
         # Fallback for non-S3 paths
@@ -328,9 +333,10 @@ class S3StorageBackend(StorageBackendInterface):
         """
         Map S3 key to local file path.
 
-        During container startup, files are synced from S3:
-        - s3://bucket/drawings/* -> uploads/
-        - s3://bucket/saliency_maps/* -> static/saliency_maps/
+        During container startup, only drawings are synced from S3:
+        - s3://bucket/drawings/* -> /app/uploads/
+        
+        Saliency maps are NOT synced (too many files) and must be fetched on-demand.
 
         Args:
             s3_key: S3 object key (e.g., "drawings/file.png")
@@ -343,10 +349,11 @@ class S3StorageBackend(StorageBackendInterface):
             filename = s3_key.replace("drawings/", "")
             return f"uploads/{filename}"
         elif s3_key.startswith("saliency_maps/"):
-            # Saliency maps are synced to static/saliency_maps/
+            # Saliency maps are NOT synced - return path for reference only
+            # Caller should check if file exists before using
             return f"static/{s3_key}"
         elif s3_key.startswith("overlays/"):
-            # Overlay images are synced to static/overlays/
+            # Overlay images are NOT synced - return path for reference only
             return f"static/{s3_key}"
 
         # Unknown S3 key pattern
