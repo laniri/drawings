@@ -200,7 +200,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         >
           <BottomNavigation
             value={location.pathname}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               navigate(newValue)
             }}
             showLabels
