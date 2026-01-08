@@ -105,6 +105,15 @@ server {
         alias /app/docs/;
         expires 1h;
         add_header Cache-Control "public";
+        add_header Content-Disposition "inline";
+        
+        # Set correct MIME types for markdown files
+        location ~ \.md$ {
+            add_header Content-Type "text/plain; charset=utf-8";
+            add_header Content-Disposition "inline";
+            add_header Cache-Control "public";
+        }
+        
         try_files $uri $uri/ =404;
     }
     

@@ -215,12 +215,16 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 ),
                 "upload": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=200, requests_per_hour=2000, burst_limit=50
+                        requests_per_minute=500,  # Increased from 200
+                        requests_per_hour=5000,  # Increased from 2000
+                        burst_limit=100,  # Increased from 50
                     )
                 ),
                 "analysis": RateLimiter(
                     RateLimitRule(
-                        requests_per_minute=300, requests_per_hour=5000, burst_limit=50
+                        requests_per_minute=500,  # Increased from 300
+                        requests_per_hour=10000,  # Increased from 5000
+                        burst_limit=100,  # Increased from 50
                     )
                 ),
                 "auth": RateLimiter(

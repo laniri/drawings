@@ -252,16 +252,43 @@ def start_background_database_sync():
 
                         # Use a fresh connection to the replaced database
                         conn = sqlite3.connect(db_path)
-                        # Force checkpoint to ensure WAL is flushed
-                        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+
+                        # Force FULL checkpoint to ensure all WAL data is in main database
+                        print("🔄 Forcing WAL checkpoint...")
+                        conn.execute("PRAGMA wal_checkpoint(FULL)")
+                        conn.commit()
+
+                        # Verify database integrity
+                        print("🔍 Checking database integrity...")
                         cursor = conn.cursor()
+                        cursor.execute("PRAGMA integrity_check")
+                        integrity_result = cursor.fetchone()[0]
+                        if integrity_result != "ok":
+                            print(
+                                f"⚠️  Database integrity check failed: {integrity_result}"
+                            )
+                            conn.close()
+                            return
+                        print("✅ Database integrity check passed")
+
+                        # Check table structure
+                        cursor.execute(
+                            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                        )
+                        tables = [row[0] for row in cursor.fetchall()]
+                        print(f"📋 Tables in database: {tables}")
+
+                        # Count records
                         cursor.execute("SELECT COUNT(*) FROM drawings")
                         drawing_count = cursor.fetchone()[0]
                         cursor.execute("SELECT COUNT(*) FROM anomaly_analyses")
                         analysis_count = cursor.fetchone()[0]
+                        cursor.execute("SELECT COUNT(*) FROM age_group_models")
+                        model_count = cursor.fetchone()[0]
+
                         conn.close()
                         print(
-                            f"📊 Database contains {drawing_count:,} drawings and {analysis_count:,} analyses"
+                            f"📊 Database contains {drawing_count:,} drawings, {analysis_count:,} analyses, and {model_count} models"
                         )
                     except Exception as e:
                         print(f"⚠️  Could not query database: {e}")
