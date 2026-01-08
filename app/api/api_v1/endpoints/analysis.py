@@ -589,8 +589,11 @@ async def perform_single_analysis(
             )
             # Load image and regenerate as hybrid embedding
             from PIL import Image
+            from app.services.environment_storage import get_storage_service
 
-            image = Image.open(drawing.file_path).convert("RGB")
+            storage_service = get_storage_service()
+            local_path = storage_service.download_to_local(drawing.file_path)
+            image = Image.open(local_path).convert("RGB")
             embedding_data = embedding_service.generate_hybrid_embedding(
                 image=image,
                 subject=drawing.subject,
@@ -1290,8 +1293,11 @@ async def generate_embedding(drawing_id: int, db: Session = Depends(get_db)):
 
         # Generate hybrid embedding with subject information
         from PIL import Image
+        from app.services.environment_storage import get_storage_service
 
-        image = Image.open(drawing.file_path).convert("RGB")
+        storage_service = get_storage_service()
+        local_path = storage_service.download_to_local(drawing.file_path)
+        image = Image.open(local_path).convert("RGB")
 
         embedding_data = embedding_service.generate_hybrid_embedding(
             image=image,

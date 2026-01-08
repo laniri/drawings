@@ -111,8 +111,8 @@ def start_background_database_sync():
 
     def background_sync():
         """Background thread to sync database from S3."""
-        # Wait for startup to complete
-        time.sleep(10)  # Reduced from 30 to 10 seconds
+        # Start immediately - no delay needed
+        # The FastAPI app will be ready to serve requests while sync happens
 
         # Use the same path as DATABASE_URL to ensure consistency
         db_path = "./drawings.db"  # Match sqlite:///./drawings.db

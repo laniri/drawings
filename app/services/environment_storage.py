@@ -195,6 +195,10 @@ class LocalStorageBackend(StorageBackendInterface):
             )
             return None
 
+    def download_to_local(self, file_path: str) -> str:
+        """For local storage, just return the path as-is"""
+        return file_path
+
 
 class S3StorageBackend(StorageBackendInterface):
     """AWS S3 storage backend"""
@@ -365,6 +369,31 @@ class S3StorageBackend(StorageBackendInterface):
             logger.error(f"Failed to get file info from S3 for {file_path}: {str(e)}")
             return None
 
+    def download_to_local(self, file_path: str) -> str:
+        """Download an S3 file to a temporary local path for processing"""
+        try:
+            if not file_path.startswith("s3://"):
+                # Already a local path
+                return file_path
+
+            s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
+            filename = Path(s3_key).name
+
+            # Create temporary local path
+            local_path = self.temp_upload_dir / filename
+
+            # Download from S3
+            self.s3_client.download_file(
+                Bucket=self.bucket_name, Key=s3_key, Filename=str(local_path)
+            )
+
+            logger.info(f"Downloaded S3 file to local: {file_path} -> {local_path}")
+            return str(local_path)
+
+        except Exception as e:
+            logger.error(f"Failed to download S3 file {file_path}: {str(e)}")
+            raise StorageError(f"S3 file download failed: {str(e)}")
+
 
 class EnvironmentAwareStorageService:
     """
@@ -428,6 +457,10 @@ class EnvironmentAwareStorageService:
     def get_file_info(self, file_path: str) -> Optional[Dict[str, Any]]:
         """Get information about a stored file"""
         return self.backend.get_file_info(file_path)
+
+    def download_to_local(self, file_path: str) -> str:
+        """Download a file to local path for processing (handles both S3 and local paths)"""
+        return self.backend.download_to_local(file_path)
 
     def get_storage_info(self) -> Dict[str, Any]:
         """Get information about the current storage configuration"""
