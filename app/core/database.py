@@ -109,11 +109,11 @@ def start_background_database_sync():
         import sqlite3
         import time
         import traceback
-        
+
         import boto3
         from botocore.config import Config
         from botocore.exceptions import ClientError, NoCredentialsError
-        
+
         # Start immediately - no delay needed
         # The FastAPI app will be ready to serve requests while sync happens
 
