@@ -277,11 +277,9 @@ async def login(
     if session_token:
         # Check if request came through HTTPS (CloudFront forwards this header)
         is_https = request.headers.get("X-Forwarded-Proto") == "https"
-        
+
         # Set session cookie
-        response = RedirectResponse(
-            url=redirect_url or "/dashboard", status_code=302
-        )
+        response = RedirectResponse(url=redirect_url or "/dashboard", status_code=302)
 
         # Set secure cookie with proper path and security settings
         response.set_cookie(

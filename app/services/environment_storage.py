@@ -327,14 +327,14 @@ class S3StorageBackend(StorageBackendInterface):
     def _get_local_path_for_s3_key(self, s3_key: str) -> Optional[str]:
         """
         Map S3 key to local file path.
-        
+
         During container startup, files are synced from S3:
         - s3://bucket/drawings/* -> uploads/
         - s3://bucket/saliency_maps/* -> static/saliency_maps/
-        
+
         Args:
             s3_key: S3 object key (e.g., "drawings/file.png")
-            
+
         Returns:
             Local file path if mapping exists, None otherwise
         """
@@ -348,7 +348,7 @@ class S3StorageBackend(StorageBackendInterface):
         elif s3_key.startswith("overlays/"):
             # Overlay images are synced to static/overlays/
             return f"static/{s3_key}"
-        
+
         # Unknown S3 key pattern
         return None
 
