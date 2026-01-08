@@ -14,6 +14,7 @@ from app.api.api_v1.endpoints import (
     demo,
     documentation,
     drawings,
+    files,
     health,
     interpretability,
     metrics,
@@ -38,6 +39,7 @@ api_router.include_router(
 )
 api_router.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
 api_router.include_router(demo.router, prefix="/demo", tags=["demo"])
+api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(database.router, prefix="/database", tags=["database"])
 api_router.include_router(security.router, prefix="/security", tags=["security"])
 api_router.include_router(

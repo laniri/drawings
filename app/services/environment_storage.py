@@ -310,19 +310,9 @@ class S3StorageBackend(StorageBackendInterface):
             # Extract S3 key from S3 URL
             s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
 
-            # Generate presigned URL for secure access
-            try:
-                url = self.s3_client.generate_presigned_url(
-                    "get_object",
-                    Params={"Bucket": self.bucket_name, "Key": s3_key},
-                    ExpiresIn=3600,  # 1 hour
-                )
-                return url
-            except Exception as e:
-                logger.error(
-                    f"Failed to generate presigned URL for {file_path}: {str(e)}"
-                )
-                return f"https://{self.bucket_name}.s3.{self.aws_region}.amazonaws.com/{s3_key}"
+            # Return API endpoint that will serve the file from S3
+            # This avoids presigned URL expiration issues and allows CloudFront caching
+            return f"/api/v1/files/s3/{s3_key}"
 
         # Fallback for non-S3 paths
         return f"{base_url}/{file_path}"
