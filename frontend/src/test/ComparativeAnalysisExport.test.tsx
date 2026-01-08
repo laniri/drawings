@@ -38,7 +38,7 @@ describe('Comparative Analysis and Export Features', () => {
     vi.clearAllMocks()
     // Setup default mock responses
     mockFetch.mockImplementation((url) => {
-      if (url.includes('/api/interpretability/')) {
+      if (url.includes('/api/v1/interpretability/')) {
         return Promise.resolve({
           ok: true,
           json: () =>
@@ -51,7 +51,7 @@ describe('Comparative Analysis and Export Features', () => {
             }),
         })
       }
-      if (url.includes('/api/analysis/drawing/')) {
+      if (url.includes('/api/v1/analysis/drawing/')) {
         return Promise.resolve({
           ok: true,
           json: () =>
@@ -331,7 +331,7 @@ describe('Comparative Analysis and Export Features', () => {
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
-          '/api/interpretability/1/export',
+          '/api/v1/interpretability/1/export',
           expect.objectContaining({
             method: 'POST',
             headers: {
@@ -439,7 +439,7 @@ describe('Comparative Analysis and Export Features', () => {
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
-          '/api/interpretability/1/annotate',
+          '/api/v1/interpretability/1/annotate',
           expect.objectContaining({
             method: 'POST',
             headers: {

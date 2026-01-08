@@ -67,7 +67,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
     queryKey: ['confidence-metrics', analysisId],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/interpretability/${analysisId}/confidence`
+        `/api/v1/interpretability/${analysisId}/confidence`
       )
       return response.data
     },

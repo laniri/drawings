@@ -87,7 +87,7 @@ const InteractiveInterpretabilityViewer: React.FC<
     queryKey: ['interactive-interpretability', analysisId],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/interpretability/${analysisId}/interactive`
+        `/api/v1/interpretability/${analysisId}/interactive`
       )
       return response.data
     },

@@ -85,7 +85,7 @@ const UploadPage: React.FC = () => {
         formData.append('prompt', data.metadata.prompt)
       }
 
-      const response = await axios.post('/api/drawings/upload', formData, {
+      const response = await axios.post('/api/v1/drawings/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -111,7 +111,7 @@ const UploadPage: React.FC = () => {
       setAnalysisId(null)
       try {
         const analysisResponse = await axios.post(
-          `/api/analysis/analyze/${uploadResult.id}`
+          `/api/v1/analysis/analyze/${uploadResult.id}`
         )
         const newAnalysisId = analysisResponse.data.analysis.id
         setAnalysisId(newAnalysisId)

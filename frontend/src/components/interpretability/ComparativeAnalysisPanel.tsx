@@ -134,7 +134,7 @@ export default function ComparativeAnalysisPanel({
       setError(null)
 
       // Try to get subject-specific examples first
-      let url = `/api/interpretability/examples/${currentAnalysis.age_group}?example_type=both&limit=5`
+      let url = `/api/v1/interpretability/examples/${currentAnalysis.age_group}?example_type=both&limit=5`
       if (currentDrawing.subject) {
         url += `&subject=${encodeURIComponent(currentDrawing.subject)}`
       }
@@ -161,7 +161,7 @@ export default function ComparativeAnalysisPanel({
 
   const loadAnalysisHistory = async () => {
     try {
-      const response = await fetch(`/api/analysis/drawing/${currentDrawing.id}`)
+      const response = await fetch(`/api/v1/analysis/drawing/${currentDrawing.id}`)
 
       if (!response.ok) {
         throw new Error('Failed to load analysis history')

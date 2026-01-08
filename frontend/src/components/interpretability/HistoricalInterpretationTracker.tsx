@@ -123,7 +123,7 @@ export default function HistoricalInterpretationTracker({
       setError(null)
 
       // Load historical analyses for this drawing
-      const response = await fetch(`/api/analysis/drawing/${drawingId}`)
+      const response = await fetch(`/api/v1/analysis/drawing/${drawingId}`)
 
       if (!response.ok) {
         throw new Error('Failed to load historical data')

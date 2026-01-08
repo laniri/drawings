@@ -186,7 +186,7 @@ export default function AnnotationTools({
       }
 
       const response = await fetch(
-        `/api/interpretability/${analysisId}/annotate`,
+        `/api/v1/interpretability/${analysisId}/annotate`,
         {
           method: 'POST',
           headers: {

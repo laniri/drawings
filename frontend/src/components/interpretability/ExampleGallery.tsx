@@ -93,7 +93,7 @@ const ExampleGallery: React.FC<ExampleGalleryProps> = ({
       params.append('user_role', userRole)
 
       const response = await axios.get(
-        `/api/interpretability/examples?${params}`
+        `/api/v1/interpretability/examples?${params}`
       )
       return response.data
     },

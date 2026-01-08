@@ -164,7 +164,7 @@ const BatchProcessingPage: React.FC = () => {
 
   const batchAnalyzeMutation = useMutation({
     mutationFn: async (jobId: string) => {
-      const response = await axios.post(`/api/analysis/batch/${jobId}/analyze`)
+      const response = await axios.post(`/api/v1/analysis/batch/${jobId}/analyze`)
       return response.data
     },
     onSuccess: () => {

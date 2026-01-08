@@ -36,8 +36,8 @@ const mockAnalysisData = {
     analysis_timestamp: '2023-01-01T01:00:00Z',
   },
   interpretability: {
-    saliency_map_url: '/api/saliency/123.png',
-    overlay_image_url: '/api/overlay/123.png',
+    saliency_map_url: '/api/v1/saliency/123.png',
+    overlay_image_url: '/api/v1/overlay/123.png',
     explanation_text: 'The drawing shows normal developmental patterns.',
     importance_regions: [
       { x: 10, y: 20, width: 30, height: 40, importance: 0.8 },

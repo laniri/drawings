@@ -105,7 +105,7 @@ const AnalysisPage: React.FC = () => {
     queryFn: async () => {
       try {
         // First try to get analysis by analysis ID
-        const response = await axios.get(`/api/analysis/${id}`)
+        const response = await axios.get(`/api/v1/analysis/${id}`)
         return response.data
       } catch (error: unknown) {
         if (error instanceof Error && 'response' in error) {
@@ -114,7 +114,7 @@ const AnalysisPage: React.FC = () => {
             // If not found, try to get the latest analysis for this drawing ID
             try {
             const drawingAnalysesResponse = await axios.get(
-              `/api/analysis/drawing/${id}`
+              `/api/v1/analysis/drawing/${id}`
             )
             const analyses = drawingAnalysesResponse.data.analyses
             if (analyses && analyses.length > 0) {
@@ -122,7 +122,7 @@ const AnalysisPage: React.FC = () => {
               const latestAnalysisId = analyses[0].id
               // Now fetch the complete analysis result
               const analysisResponse = await axios.get(
-                `/api/analysis/${latestAnalysisId}`
+                `/api/v1/analysis/${latestAnalysisId}`
               )
               return analysisResponse.data
             }
@@ -145,7 +145,7 @@ const AnalysisPage: React.FC = () => {
         return Promise.reject(new Error('Drawing ID not available'))
       }
       const response = await axios.post(
-        `/api/analysis/analyze/${analysisData.drawing.id}`
+        `/api/v1/analysis/analyze/${analysisData.drawing.id}`
       )
       return response.data
     },
@@ -245,7 +245,7 @@ const AnalysisPage: React.FC = () => {
             <CardMedia
               component="img"
               height="300"
-              image={`/api/drawings/${drawing.id}/file`}
+              image={`/api/v1/drawings/${drawing.id}/file`}
               alt={drawing.filename}
               sx={{ objectFit: 'contain' }}
             />
@@ -500,7 +500,7 @@ const AnalysisPage: React.FC = () => {
                     <Grid item xs={12} lg={8}>
                       <InteractiveInterpretabilityViewer
                         analysisId={analysis.id}
-                        drawingImageUrl={`/api/drawings/${drawing.id}/file`}
+                        drawingImageUrl={`/api/v1/drawings/${drawing.id}/file`}
                         saliencyMapUrl={interpretability.saliency_map_url}
                         onRegionClick={(_, explanation) => {
                           setSelectedRegionExplanation(explanation)
@@ -587,7 +587,7 @@ const AnalysisPage: React.FC = () => {
                           </Typography>
                           <Box
                             component="img"
-                            src={`/api/drawings/${drawing.id}/file`}
+                            src={`/api/v1/drawings/${drawing.id}/file`}
                             alt="Original"
                             sx={{
                               width: '100%',
@@ -610,7 +610,7 @@ const AnalysisPage: React.FC = () => {
                               component="img"
                               src={
                                 showSaliency
-                                  ? `/api/drawings/${drawing.id}/file`
+                                  ? `/api/v1/drawings/${drawing.id}/file`
                                   : interpretability.saliency_map_url
                               }
                               alt="Base"

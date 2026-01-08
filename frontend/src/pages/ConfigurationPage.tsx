@@ -229,7 +229,7 @@ const ConfigurationPage: React.FC = () => {
   // Delete model
   const deleteModelMutation = useMutation({
     mutationFn: async (modelId: number) => {
-      await axios.delete(`/api/models/${modelId}`)
+      await axios.delete(`/api/v1/models/${modelId}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['age-group-models'] })

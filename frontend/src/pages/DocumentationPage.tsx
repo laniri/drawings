@@ -205,7 +205,7 @@ const DocumentationPage: React.FC = () => {
   // Preview documentation mutation
   const previewMutation = useMutation({
     mutationFn: async (category: string) => {
-      const response = await axios.get(`/api/documentation/preview/${category}`)
+      const response = await axios.get(`/api/v1/documentation/preview/${category}`)
       return response.data
     },
   })

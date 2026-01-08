@@ -164,7 +164,7 @@ export default function ExportToolbar({
       setExportSuccess(null)
 
       const response = await fetch(
-        `/api/interpretability/${analysisId}/export`,
+        `/api/v1/interpretability/${analysisId}/export`,
         {
           method: 'POST',
           headers: {

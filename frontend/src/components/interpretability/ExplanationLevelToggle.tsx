@@ -72,7 +72,7 @@ const ExplanationLevelToggle: React.FC<ExplanationLevelToggleProps> = ({
     queryKey: ['simplified-explanation', analysisId, userRole],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/interpretability/${analysisId}/simplified`,
+        `/api/v1/interpretability/${analysisId}/simplified`,
         {
           params: { user_role: userRole },
         }
