@@ -518,6 +518,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             return self._add_security_headers(response)
 
+        # Skip rate limiting for demo endpoints (public, read-only, cacheable)
+        # These endpoints are safe to access frequently and should not be rate-limited
+        if request.url.path.startswith("/demo/") or request.url.path == "/demo":
+            response = await call_next(request)
+            # Add cache headers for demo endpoints
+            response.headers["Cache-Control"] = "public, max-age=300"  # 5 minutes
+            return self._add_security_headers(response)
+
         # Check if we're in testing mode (TestClient sets specific headers)
         is_testing = (
             request.headers.get("user-agent") == "testclient"

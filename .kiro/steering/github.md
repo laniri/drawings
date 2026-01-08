@@ -19,6 +19,10 @@ when creating add hok files (guides, fixing scripts etcw) place them in tmp\_fil
 
 if needed to perform aws operation use the following profile: d-9067931f77-921400262514-admin+Q
 
-when debugging a failure. if log exists, use it before deciding about the root cause
+when debugging a failure. 
+1. if log exists, use it before deciding about the root cause
+2. read last 2 commits comments of the files that are suspicious to see if there is relvant info there
+
+when adding a new feature read last 2 commits comments of the files that are about to be modified
 
 when inspecting logs and reports, pay attention to time zone diffrences that can happen between local, aws and github
