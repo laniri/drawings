@@ -10,6 +10,7 @@ import ConfigurationPage from './pages/ConfigurationPage'
 import BatchProcessingPage from './pages/BatchProcessingPage'
 import DocumentationPage from './pages/DocumentationPage'
 import DemoPage from './pages/DemoPage'
+import MarkdownViewerPage from './pages/MarkdownViewerPage'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/documentation" element={<DocumentationPage />} />
+          <Route path="/markdown-viewer" element={<MarkdownViewerPage />} />
           
           {/* Protected routes - require authentication */}
           <Route 

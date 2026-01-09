@@ -28,6 +28,7 @@ import {
   PlayArrow,
   Logout,
   Lock,
+  Article,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -54,6 +55,7 @@ const menuItems = [
   { text: 'Batch Processing', icon: <BatchPrediction />, path: '/batch', protected: true },
   { text: 'Configuration', icon: <Settings />, path: '/config', protected: true },
   { text: 'Documentation', icon: <Description />, path: '/documentation', protected: false },
+  { text: 'Markdown Viewer', icon: <Article />, path: '/markdown-viewer', protected: false },
 ]
 
 // Mobile-only navigation items

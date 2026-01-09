@@ -154,3 +154,65 @@ async def check_s3_file(file_path: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to check file",
         )
+
+
+@router.get("/markdown")
+async def serve_markdown_file(path: str):
+    """
+    Serve a markdown file from the local filesystem.
+
+    Args:
+        path: Relative path to markdown file (e.g., "tmp_files/analysis.md")
+
+    Returns:
+        Markdown file content as plain text
+    """
+    try:
+        logger.info(f"[Markdown Serve] Requested path: {path}")
+
+        # Security: Prevent directory traversal
+        if ".." in path or path.startswith("/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file path",
+            )
+
+        # Construct full path relative to project root
+        file_path = Path(path)
+        
+        # Check if file exists
+        if not file_path.exists():
+            logger.warning(f"[Markdown Serve] File not found: {file_path}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"File not found: {path}",
+            )
+
+        # Verify it's a markdown file
+        if file_path.suffix.lower() not in [".md", ".markdown"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only markdown files (.md, .markdown) are supported",
+            )
+
+        # Read and return file content
+        content = file_path.read_text(encoding="utf-8")
+        logger.info(f"[Markdown Serve] Successfully served: {path}")
+
+        return Response(
+            content=content,
+            media_type="text/markdown; charset=utf-8",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Markdown Serve] Error serving file {path}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to serve markdown file: {str(e)}",
+        )
