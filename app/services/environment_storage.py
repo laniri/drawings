@@ -348,9 +348,8 @@ class S3StorageBackend(StorageBackendInterface):
             # Saliency maps in static/saliency_maps/ are NOT synced (too many files)
             # Must be served via API endpoint for on-demand S3 fetch
             elif path_str.startswith("static/saliency_maps/"):
-                # Extract just the saliency_maps/file.png part
-                s3_key = path_str.replace("static/", "")
-                url = f"/api/v1/files/s3/{s3_key}"
+                # Keep the full path including static/ for S3 key
+                url = f"/api/v1/files/s3/{path_str}"
                 logger.debug(f"S3 URL (saliency on-demand): {file_path} -> {url}")
                 return url
             # Other static/ files might be synced - serve directly
