@@ -335,7 +335,7 @@ class S3StorageBackend(StorageBackendInterface):
     def get_file_url(self, file_path: str, base_url: str = "/static") -> str:
         """Generate a URL for accessing an S3 stored file"""
         logger.info(f"[S3 URL Generation] Input path: {file_path}")
-        
+
         # Handle relative paths that are stored in database (uploads/..., static/...)
         if not file_path.startswith("s3://"):
             # These are relative paths stored in DB - treat them as local paths
@@ -346,7 +346,9 @@ class S3StorageBackend(StorageBackendInterface):
             # Drawings in uploads/ are synced during startup - serve directly
             if path_str.startswith("uploads/"):
                 url = f"/{path_str}"
-                logger.info(f"[S3 URL Generation] Drawing (synced): {file_path} -> {url}")
+                logger.info(
+                    f"[S3 URL Generation] Drawing (synced): {file_path} -> {url}"
+                )
                 return url
             # Saliency maps in static/saliency_maps/ are NOT synced (too many files)
             # Must be served via API endpoint for on-demand S3 fetch
@@ -354,13 +356,19 @@ class S3StorageBackend(StorageBackendInterface):
             elif path_str.startswith("static/saliency_maps/"):
                 # Keep the full path including static/ for S3 key
                 url = f"/api/v1/files/s3/{path_str}"
-                logger.info(f"[S3 URL Generation] Saliency (on-demand): {file_path} -> {url}")
-                logger.info(f"[S3 URL Generation] Will fetch from S3: s3://{self.bucket_name}/{path_str}")
+                logger.info(
+                    f"[S3 URL Generation] Saliency (on-demand): {file_path} -> {url}"
+                )
+                logger.info(
+                    f"[S3 URL Generation] Will fetch from S3: s3://{self.bucket_name}/{path_str}"
+                )
                 return url
             # Other static/ files might be synced - serve directly
             elif path_str.startswith("static/"):
                 url = f"/{path_str}"
-                logger.info(f"[S3 URL Generation] Static (synced): {file_path} -> {url}")
+                logger.info(
+                    f"[S3 URL Generation] Static (synced): {file_path} -> {url}"
+                )
                 return url
             else:
                 # Otherwise use base_url
