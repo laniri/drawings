@@ -138,12 +138,13 @@ async def upload_drawing(
             )
 
             db.add(drawing)
+            logger.info(f"[Upload] Added drawing to session: filename={filename}")
+            
             db.commit()
+            logger.info(f"[Upload] Committed drawing to database")
+            
             db.refresh(drawing)
-
-            logger.info(
-                f"Drawing uploaded successfully: ID={drawing.id}, filename={filename}"
-            )
+            logger.info(f"[Upload] Drawing uploaded successfully: ID={drawing.id}, filename={filename}, file_path={file_path}")
 
             # Schedule background preprocessing (for future embedding generation)
             background_tasks.add_task(

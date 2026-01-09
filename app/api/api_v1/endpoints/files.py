@@ -66,16 +66,19 @@ async def serve_s3_file(file_path: str):
         File response with caching headers
     """
     try:
+        logger.info(f"[S3 File Serve] Requested path: {file_path}")
         storage_service = get_storage_service()
 
         # Construct S3 URL
         s3_url = f"s3://{settings.s3_bucket_name}/{file_path}"
+        logger.info(f"[S3 File Serve] Constructed S3 URL: {s3_url}")
 
         # Download file from S3 to local temp storage
         local_path = storage_service.backend.download_to_local(s3_url)
+        logger.info(f"[S3 File Serve] Downloaded to local: {local_path}")
 
         if not local_path or not Path(local_path).exists():
-            logger.warning(f"File not found in S3: {s3_url}")
+            logger.warning(f"[S3 File Serve] File not found in S3: {s3_url}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"File not found: {file_path}",
@@ -83,6 +86,7 @@ async def serve_s3_file(file_path: str):
 
         # Determine content type
         content_type = _get_content_type(local_path)
+        logger.info(f"[S3 File Serve] Content type: {content_type}")
 
         # Generate ETag for caching
         etag = _generate_etag(local_path)
@@ -101,7 +105,7 @@ async def serve_s3_file(file_path: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error serving S3 file {file_path}: {e}")
+        logger.error(f"[S3 File Serve] Error serving file {file_path}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to serve file: {str(e)}",

@@ -109,36 +109,64 @@ const UploadPage: React.FC = () => {
       // Wait briefly for database commit and file write to complete
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Automatically trigger analysis for the uploaded drawing
+      // Automatically trigger analysis with retry logic
       setAnalysisStatus('Analyzing drawing...')
       setAnalysisId(null)
-      try {
-        const analysisResponse = await axios.post(
-          `/api/v1/analysis/analyze/${uploadResult.id}`,
-          {},
-          { timeout: 60000 } // 60 second timeout for model loading
+      
+      let analysisSuccess = false
+      let lastError: any = null
+      
+      // Retry up to 3 times with exponential backoff
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`[Upload Success] Attempt ${attempt}/3 to analyze drawing ${uploadResult.id}`)
+          
+          const analysisResponse = await axios.post(
+            `/api/v1/analysis/analyze/${uploadResult.id}`,
+            {},
+            { timeout: 60000 } // 60 second timeout for model loading
+          )
+          
+          const newAnalysisId = analysisResponse.data.analysis.id
+          setAnalysisId(newAnalysisId)
+          setAnalysisStatus('Analysis complete! Click to view results.')
+          analysisSuccess = true
+          console.log(
+            `Analysis completed for drawing ${uploadResult.id}, analysis ID: ${newAnalysisId}`
+          )
+          break // Success - exit retry loop
+          
+        } catch (error) {
+          lastError = error
+          console.error(`Analysis attempt ${attempt} failed:`, error)
+          
+          if (attempt < 3) {
+            // Wait before retry with exponential backoff (2s, 4s)
+            const waitTime = 2000 * attempt
+            setAnalysisStatus(`Analysis in progress... (attempt ${attempt}/3, retrying in ${waitTime/1000}s)`)
+            await new Promise(resolve => setTimeout(resolve, waitTime))
+          }
+        }
+      }
+      
+      if (!analysisSuccess) {
+        // All retries failed - show helpful message
+        console.error('All analysis attempts failed:', lastError)
+        setAnalysisStatus(
+          `Upload successful! Drawing ID: ${uploadResult.id}. ` +
+          `Analysis is taking longer than expected. You can view the drawing from the dashboard and try analyzing it again.`
         )
-        const newAnalysisId = analysisResponse.data.analysis.id
-        setAnalysisId(newAnalysisId)
-        setAnalysisStatus('Analysis complete! Click to view results.')
-        console.log(
-          `Analysis completed for drawing ${uploadResult.id}, analysis ID: ${newAnalysisId}`
-        )
-
-        // Keep the link visible longer for user to see it
+        // Keep message visible longer for user to read
         setTimeout(() => {
           setAnalysisStatus(null)
           setAnalysisId(null)
-        }, 30000) // 30 seconds instead of 15
-      } catch (error) {
-        console.error('Analysis error:', error)
-        // Provide helpful error message with drawing ID
-        setAnalysisStatus(
-          `Upload successful! Drawing ID: ${uploadResult.id}. ` +
-          `Analysis may take a moment. You can view it from the dashboard or try analyzing again.`
-        )
-        // Keep message visible longer
-        setTimeout(() => setAnalysisStatus(null), 20000)
+        }, 30000) // 30 seconds
+      } else {
+        // Keep the success link visible longer for user to see it
+        setTimeout(() => {
+          setAnalysisStatus(null)
+          setAnalysisId(null)
+        }, 30000) // 30 seconds
       }
     },
     onError: (error: unknown) => {

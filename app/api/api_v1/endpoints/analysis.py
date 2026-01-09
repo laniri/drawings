@@ -245,13 +245,18 @@ async def perform_single_analysis(
     Returns:
         Complete analysis result
     """
+    logger.info(f"[Analysis] Starting analysis for drawing_id={drawing_id}, force_reanalysis={force_reanalysis}")
+    
     # Get drawing
     drawing = db.query(Drawing).filter(Drawing.id == drawing_id).first()
     if not drawing:
+        logger.error(f"[Analysis] Drawing not found: drawing_id={drawing_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Drawing with ID {drawing_id} not found",
         )
+    
+    logger.info(f"[Analysis] Found drawing: id={drawing.id}, filename={drawing.filename}, age={drawing.age_years}")
 
     # Check if analysis already exists
     if not force_reanalysis:
