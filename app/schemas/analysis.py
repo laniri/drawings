@@ -29,7 +29,6 @@ class VisionModel(str, Enum):
 class AnalysisRequest(BaseModel):
     """Request model for analyzing a drawing."""
 
-    drawing_id: int = Field(..., gt=0, description="ID of the drawing to analyze")
     force_reanalysis: bool = Field(
         False, description="Force re-analysis even if results exist"
     )
