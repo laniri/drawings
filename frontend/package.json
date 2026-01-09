@@ -30,7 +30,7 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.47.0",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^6.18.0",
+    "react-router-dom": "^6.30.3",
     "recharts": "^2.8.0",
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",
