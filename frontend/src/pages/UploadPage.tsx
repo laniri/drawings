@@ -114,7 +114,7 @@ const UploadPage: React.FC = () => {
       setAnalysisId(null)
       
       let analysisSuccess = false
-      let lastError: any = null
+      let lastError: Error | null = null
       
       // Retry up to 3 times with exponential backoff
       for (let attempt = 1; attempt <= 3; attempt++) {
