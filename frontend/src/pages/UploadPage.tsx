@@ -106,12 +106,17 @@ const UploadPage: React.FC = () => {
       reset()
       setUploadProgress(0)
 
+      // Wait briefly for database commit and file write to complete
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       // Automatically trigger analysis for the uploaded drawing
       setAnalysisStatus('Analyzing drawing...')
       setAnalysisId(null)
       try {
         const analysisResponse = await axios.post(
-          `/api/v1/analysis/analyze/${uploadResult.id}`
+          `/api/v1/analysis/analyze/${uploadResult.id}`,
+          {},
+          { timeout: 60000 } // 60 second timeout for model loading
         )
         const newAnalysisId = analysisResponse.data.analysis.id
         setAnalysisId(newAnalysisId)
@@ -120,15 +125,20 @@ const UploadPage: React.FC = () => {
           `Analysis completed for drawing ${uploadResult.id}, analysis ID: ${newAnalysisId}`
         )
 
-        // Clear analysis status after a longer time to let user see the link
+        // Keep the link visible longer for user to see it
         setTimeout(() => {
           setAnalysisStatus(null)
           setAnalysisId(null)
-        }, 15000)
+        }, 30000) // 30 seconds instead of 15
       } catch (error) {
-        console.warn('Failed to trigger automatic analysis:', error)
-        setAnalysisStatus('Analysis failed, but upload was successful')
-        setTimeout(() => setAnalysisStatus(null), 5000)
+        console.error('Analysis error:', error)
+        // Provide helpful error message with drawing ID
+        setAnalysisStatus(
+          `Upload successful! Drawing ID: ${uploadResult.id}. ` +
+          `Analysis may take a moment. You can view it from the dashboard or try analyzing again.`
+        )
+        // Keep message visible longer
+        setTimeout(() => setAnalysisStatus(null), 20000)
       }
     },
     onError: (error: unknown) => {
