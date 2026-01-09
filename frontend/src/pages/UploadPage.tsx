@@ -137,7 +137,7 @@ const UploadPage: React.FC = () => {
           break // Success - exit retry loop
           
         } catch (error) {
-          lastError = error
+          lastError = error instanceof Error ? error : new Error(String(error))
           console.error(`Analysis attempt ${attempt} failed:`, error)
           
           if (attempt < 3) {
