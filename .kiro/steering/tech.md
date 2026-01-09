@@ -143,6 +143,8 @@ docker-compose -f docker-compose.dev.yml down
 | Old Saliency | `saliency_maps/` | ❌ (37k+ files) | API | `/api/v1/files/s3/saliency_maps/file.png` |
 | Models | `static/models/` | ✅ `/app/static/models/` | nginx | `/static/models/file.pt` |
 
+**Important**: Database stores paths as `static/saliency_maps/file.png` but S3 bucket structure is `saliency_maps/file.png` (without `static/` prefix). The `environment_storage.py` service strips the `static/` prefix when generating S3 API URLs.
+
 **Auth**: Cookie `path="/"`, `secure` via `X-Forwarded-Proto: https`  
 **Rate Limiting**: 100 req/min per IP, exempt `/demo/*`
 
