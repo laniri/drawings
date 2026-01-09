@@ -31,7 +31,7 @@ async def get_usage_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
     - Processing time statistics
     """
     try:
-        metrics = metrics_service.get_dashboard_metrics(db)
+        metrics = metrics_service.get_dashboard_stats()
         return {"status": "success", "data": metrics}
     except Exception as e:
         logger.error(f"Failed to get usage metrics: {e}")
