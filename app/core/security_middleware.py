@@ -64,6 +64,13 @@ class RateLimiter:
     def _refill_tokens(self, client_id: str) -> None:
         """Refill tokens for client based on time elapsed."""
         now = time.time()
+
+        # Initialize new clients with full burst capacity
+        if client_id not in self.tokens:
+            self.tokens[client_id] = float(self.rule.burst_limit)
+            self.last_refill[client_id] = now
+            return
+
         elapsed = now - self.last_refill[client_id]
 
         # Refill rate: requests_per_minute / 60 tokens per second
