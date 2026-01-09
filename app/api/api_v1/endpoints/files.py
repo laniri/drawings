@@ -179,7 +179,7 @@ async def serve_markdown_file(path: str):
 
         # Construct full path relative to project root
         file_path = Path(path)
-        
+
         # Check if file exists
         if not file_path.exists():
             logger.warning(f"[Markdown Serve] File not found: {file_path}")
