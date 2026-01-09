@@ -301,6 +301,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         if path.startswith("/demo/") or path == "/demo":
             return self.rate_limiters["demo"]
+        elif path.startswith("/api/v1/files/"):
+            # Files endpoint (saliency maps, etc.) - use demo limiter for high throughput
+            return self.rate_limiters["demo"]
         elif path.startswith("/api/v1/drawings/upload"):
             return self.rate_limiters["upload"]
         elif path.startswith("/api/v1/analysis"):
