@@ -454,11 +454,14 @@ class S3StorageBackend(StorageBackendInterface):
             if file_path.startswith("s3://"):
                 s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             else:
-                # For relative paths like "uploads/file.png", map to S3 key
+                # For relative paths like "uploads/file.png" or "uploads/drawings/file.png"
                 # Database stores paths as "uploads/..." but S3 has them as "drawings/..."
                 if file_path.startswith("uploads/"):
-                    # Map uploads/ to drawings/ in S3
-                    s3_key = file_path.replace("uploads/", "drawings/", 1)
+                    # Strip "uploads/" prefix
+                    s3_key = file_path[len("uploads/"):]
+                    # If the result doesn't already start with "drawings/", add it
+                    if not s3_key.startswith("drawings/"):
+                        s3_key = f"drawings/{s3_key}"
                 else:
                     # Use as-is for other paths
                     s3_key = file_path
@@ -492,10 +495,13 @@ class S3StorageBackend(StorageBackendInterface):
             if file_path.startswith("s3://"):
                 s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             else:
-                # For relative paths like "uploads/file.png", map to S3 key
+                # For relative paths like "uploads/file.png" or "uploads/drawings/file.png"
                 if file_path.startswith("uploads/"):
-                    # Map uploads/ to drawings/ in S3
-                    s3_key = file_path.replace("uploads/", "drawings/", 1)
+                    # Strip "uploads/" prefix
+                    s3_key = file_path[len("uploads/"):]
+                    # If the result doesn't already start with "drawings/", add it
+                    if not s3_key.startswith("drawings/"):
+                        s3_key = f"drawings/{s3_key}"
                 else:
                     # Already a local path - return as-is
                     if Path(file_path).exists():
