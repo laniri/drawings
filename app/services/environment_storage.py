@@ -533,7 +533,9 @@ class S3StorageBackend(StorageBackendInterface):
                 return str(local_path)
 
             # Download from S3
-            logger.info(f"Downloading from S3: s3://{self.bucket_name}/{s3_key} -> {local_path}")
+            logger.info(
+                f"Downloading from S3: s3://{self.bucket_name}/{s3_key} -> {local_path}"
+            )
             self.s3_client.download_file(
                 Bucket=self.bucket_name, Key=s3_key, Filename=str(local_path)
             )

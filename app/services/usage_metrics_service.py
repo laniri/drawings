@@ -397,6 +397,7 @@ class UsageMetricsService:
 
             # Get system metrics
             import psutil
+
             memory_usage_mb = psutil.Process().memory_info().rss / (1024 * 1024)
             cpu_usage_percent = psutil.cpu_percent(interval=0.1)
 
@@ -499,7 +500,11 @@ class UsageMetricsService:
         )
 
         # Get recent system health metrics
-        recent_health = list(self._system_health_metrics)[-10:] if self._system_health_metrics else []
+        recent_health = (
+            list(self._system_health_metrics)[-10:]
+            if self._system_health_metrics
+            else []
+        )
 
         if recent_health:
             avg_cpu = sum(m.cpu_usage for m in recent_health) / len(recent_health)
