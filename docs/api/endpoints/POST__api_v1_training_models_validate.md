@@ -9,14 +9,55 @@ Validate exported model for compatibility and integrity.
 This endpoint performs comprehensive validation of an exported model,
 checking file integrity, compatibility, and performance metrics.
 
+## Tags
+training
+
 ## Parameters
-- **model_id** (query): No description
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| model_id | query | string | Yes | No description |
 
 ## Responses
-- **200**: Successful Response
-- **422**: Validation Error
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 POST /api/v1/training/models/validate
+Content-Type: application/json
+Accept: application/json
 ```
+

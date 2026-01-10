@@ -9,13 +9,27 @@ Get comprehensive system statistics.
 This endpoint provides detailed statistics about the system
 including data distribution, model performance, and usage metrics.
 
+## Tags
+configuration
+
 ## Parameters
-No parameters
+No parameters required.
 
 ## Responses
-- **200**: Successful Response
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+
+## Complete Request Example
+
 ```http
 GET /api/v1/config/stats
+Content-Type: application/json
+Accept: application/json
 ```
+

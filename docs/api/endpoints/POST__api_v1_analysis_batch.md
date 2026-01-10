@@ -9,17 +9,70 @@ Batch analyze multiple drawings.
 This endpoint accepts a list of drawing IDs and processes them
 in the background, returning a batch ID for progress tracking.
 
+## Tags
+analysis
+
 ## Parameters
-No parameters
+No parameters required.
 
 ## Request Body
 Request body required
 
-## Responses
-- **200**: Successful Response
-- **422**: Validation Error
+### Request Body Examples
 
-## Example
+**application/json**:
+```json
+{
+  "drawing_ids": [
+    42,
+    42
+  ],
+  "force_reanalysis": true
+}
+```
+
+
+## Responses
+
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 POST /api/v1/analysis/batch
+Content-Type: application/json
+Accept: application/json
 ```
+

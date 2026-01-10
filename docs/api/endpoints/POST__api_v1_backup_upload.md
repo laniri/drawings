@@ -6,17 +6,66 @@ Upload backup file
 ## Description
 Upload a backup file for restoration.
 
+## Tags
+backup
+
 ## Parameters
-No parameters
+No parameters required.
 
 ## Request Body
 Request body required
 
-## Responses
-- **200**: Successful Response
-- **422**: Validation Error
+### Request Body Examples
 
-## Example
+**multipart/form-data**:
+```json
+{
+  "file": "example_string"
+}
+```
+
+
+## Responses
+
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 POST /api/v1/backup/upload
+Content-Type: application/json
+Accept: application/json
 ```
+

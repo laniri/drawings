@@ -6,14 +6,55 @@ Historical metrics
 ## Description
 Get historical system metrics.
 
+## Tags
+health
+
 ## Parameters
-- **hours** (query): Hours of history to retrieve
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| hours | query | integer | No | Hours of history to retrieve |
 
 ## Responses
-- **200**: Successful Response
-- **422**: Validation Error
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 GET /api/v1/metrics/history
+Content-Type: application/json
+Accept: application/json
 ```
+

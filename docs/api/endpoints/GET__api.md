@@ -1,52 +1,32 @@
 # GET /api
 
 ## Summary
-API Root Information Endpoint
+Api Root
 
 ## Description
-Returns basic information about the Children's Drawing Anomaly Detection System API, including version, documentation URLs, and available endpoints. This endpoint always returns JSON API information, unlike the root endpoint (`/`) which may serve the React frontend.
+API root endpoint - returns basic API information.
+
+## Tags
+untagged
 
 ## Parameters
-No parameters
+No parameters required.
 
 ## Responses
-- **200**: JSON object with API information
 
-## Response Schema
+### 200 - Successful Response
+
+**application/json**:
 ```json
-{
-  "message": "string",
-  "version": "string", 
-  "docs_url": "string",
-  "api_url": "string",
-  "demo_url": "string"
-}
+{}
 ```
 
-## Example
+
+## Complete Request Example
+
 ```http
 GET /api
+Content-Type: application/json
+Accept: application/json
 ```
 
-**Response**:
-```json
-{
-  "message": "Children's Drawing Anomaly Detection System API",
-  "version": "0.1.0",
-  "docs_url": "/docs",
-  "api_url": "/api/v1",
-  "demo_url": "/demo"
-}
-```
-
-## Architecture Notes
-- **Guaranteed JSON**: Always returns JSON, regardless of frontend availability
-- **API Discovery**: Use this endpoint for programmatic API discovery
-- **Distinction**: Unlike `/` which may serve HTML frontend, this always serves API info
-- **Integration**: Ideal for API clients and automated tools
-
-## Related Endpoints
-- `/` - Root endpoint (may serve frontend or API info)
-- `/api/v1/health` - Backend health check
-- `/docs` - API documentation
-- `/api/v1/` - Main API endpoints

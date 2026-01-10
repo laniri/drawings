@@ -1,40 +1,32 @@
 # GET /health
 
 ## Summary
-Lightweight Health Check
+Health Check
 
 ## Description
-Lightweight health check endpoint for load balancer monitoring. Returns basic system status with environment information.
+Lightweight health check endpoint for load balancer.
+
+## Tags
+untagged
 
 ## Parameters
-No parameters
+No parameters required.
 
 ## Responses
-- **200**: Successful Response
 
-### Response Schema
+### 200 - Successful Response
+
+**application/json**:
 ```json
-{
-  "status": "healthy",
-  "service": "drawing-anomaly-detection", 
-  "timestamp": "2024-12-24T10:30:45.123456",
-  "environment": "production",
-  "storage": "s3"
-}
+{}
 ```
 
-## Example
+
+## Complete Request Example
+
 ```http
 GET /health
+Content-Type: application/json
+Accept: application/json
 ```
 
-### Example Response
-```json
-{
-  "status": "healthy",
-  "service": "drawing-anomaly-detection",
-  "timestamp": "2024-12-24T10:30:45.123456", 
-  "environment": "production",
-  "storage": "s3"
-}
-```

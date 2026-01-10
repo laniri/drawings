@@ -10,17 +10,117 @@ This endpoint performs anomaly detection on a single drawing,
 generating embeddings, computing anomaly scores, and providing
 interpretability results if the drawing is flagged as anomalous.
 
+## Tags
+analysis
+
 ## Parameters
-- **drawing_id** (path): No description
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| drawing_id | path | integer | Yes | No description |
 
 ## Request Body
 Request body required
 
-## Responses
-- **200**: Successful Response
-- **422**: Validation Error
+### Request Body Examples
 
-## Example
+**application/json**:
+```json
+{
+  "force_reanalysis": true
+}
+```
+
+
+## Responses
+
+### 200 - Successful Response
+
+**application/json**:
+```json
+{
+  "drawing": {
+    "id": 42,
+    "filename": "example_string",
+    "age_years": 3.14,
+    "subject": {},
+    "expert_label": {},
+    "drawing_tool": {},
+    "prompt": {},
+    "upload_timestamp": "example_string"
+  },
+  "analysis": {
+    "id": 42,
+    "drawing_id": 42,
+    "anomaly_score": 3.14,
+    "normalized_score": 3.14,
+    "visual_anomaly_score": {},
+    "subject_anomaly_score": {},
+    "anomaly_attribution": {},
+    "analysis_type": "example_string",
+    "subject_category": {},
+    "is_anomaly": true,
+    "confidence": 3.14,
+    "age_group": "example_string",
+    "method_used": "example_string",
+    "vision_model": "example_string",
+    "analysis_timestamp": "example_string"
+  },
+  "interpretability": {},
+  "comparison_examples": [
+    {
+      "drawing_id": 42,
+      "filename": "example_string",
+      "age_years": 3.14,
+      "subject": {},
+      "similarity_score": 3.14,
+      "anomaly_score": 3.14,
+      "normalized_score": 3.14
+    },
+    {
+      "drawing_id": 42,
+      "filename": "example_string",
+      "age_years": 3.14,
+      "subject": {},
+      "similarity_score": 3.14,
+      "anomaly_score": 3.14,
+      "normalized_score": 3.14
+    }
+  ]
+}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 POST /api/v1/analysis/analyze/{drawing_id}
+Content-Type: application/json
+Accept: application/json
 ```
+

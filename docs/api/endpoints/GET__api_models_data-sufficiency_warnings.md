@@ -1,0 +1,63 @@
+# GET /api/models/data-sufficiency/warnings
+
+## Summary
+Get Data Warnings
+
+## Description
+Get data sufficiency warnings for all age groups.
+
+This endpoint returns warnings about data quality issues,
+optionally filtered by severity level.
+
+## Tags
+models
+
+## Parameters
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| severity | query | unknown | No | No description |
+
+## Responses
+
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
+```http
+GET /api/models/data-sufficiency/warnings
+Content-Type: application/json
+Accept: application/json
+```
+

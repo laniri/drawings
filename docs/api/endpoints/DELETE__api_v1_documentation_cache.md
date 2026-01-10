@@ -8,13 +8,27 @@ Clear documentation generation cache.
 
 Forces regeneration of all documentation by clearing the cache.
 
+## Tags
+documentation
+
 ## Parameters
-No parameters
+No parameters required.
 
 ## Responses
-- **200**: Successful Response
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+
+## Complete Request Example
+
 ```http
 DELETE /api/v1/documentation/cache
+Content-Type: application/json
+Accept: application/json
 ```
+

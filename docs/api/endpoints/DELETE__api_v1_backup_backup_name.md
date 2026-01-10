@@ -6,14 +6,55 @@ Delete backup file
 ## Description
 Delete a specific backup file.
 
+## Tags
+backup
+
 ## Parameters
-- **backup_name** (path): No description
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| backup_name | path | string | Yes | No description |
 
 ## Responses
-- **200**: Successful Response
-- **422**: Validation Error
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 DELETE /api/v1/backup/{backup_name}
+Content-Type: application/json
+Accept: application/json
 ```
+

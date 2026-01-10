@@ -1,38 +1,32 @@
 # GET /health/simple
 
 ## Summary
-Ultra-Lightweight Health Check
+Simple Health Check
 
 ## Description
-Ultra-lightweight health check for ALB (Application Load Balancer) with no dependencies. Returns minimal response for fast health verification.
+Ultra-lightweight health check for ALB - no dependencies.
+
+## Tags
+untagged
 
 ## Parameters
-No parameters
+No parameters required.
 
 ## Responses
-- **200**: Successful Response
 
-### Response Schema
+### 200 - Successful Response
+
+**application/json**:
 ```json
-{
-  "status": "ok"
-}
+{}
 ```
 
-## Example
+
+## Complete Request Example
+
 ```http
 GET /health/simple
+Content-Type: application/json
+Accept: application/json
 ```
 
-### Example Response
-```json
-{
-  "status": "ok"
-}
-```
-
-## Usage Notes
-- Designed for load balancer health checks where minimal response time is critical
-- No database queries or external dependencies
-- Fastest possible health check endpoint
-- Recommended for ALB target group health checks in AWS deployments

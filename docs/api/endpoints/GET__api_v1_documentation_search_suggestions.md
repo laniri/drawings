@@ -9,15 +9,56 @@ Get search suggestions for autocomplete.
 Provides intelligent search suggestions based on indexed content
 and common search patterns.
 
+## Tags
+documentation
+
 ## Parameters
-- **query** (query): Partial query for suggestions
-- **limit** (query): Maximum number of suggestions
+| Name | Location | Type | Required | Description |
+|------|----------|------|----------|-------------|
+| query | query | string | Yes | Partial query for suggestions |
+| limit | query | integer | No | Maximum number of suggestions |
 
 ## Responses
-- **200**: Successful Response
-- **422**: Validation Error
 
-## Example
+### 200 - Successful Response
+
+**application/json**:
+```json
+{}
+```
+
+### 422 - Validation Error
+
+**application/json**:
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    },
+    {
+      "loc": [
+        {},
+        {}
+      ],
+      "msg": "example_string",
+      "type": "example_string"
+    }
+  ]
+}
+```
+
+
+## Complete Request Example
+
 ```http
 GET /api/v1/documentation/search/suggestions
+Content-Type: application/json
+Accept: application/json
 ```
+
