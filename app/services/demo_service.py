@@ -170,13 +170,14 @@ class DemoService:
         }
 
     def _get_real_demo_samples(self) -> List[Dict[str, Any]]:
-        """Get real demo samples from the database."""
+        """Get real demo samples from the database with randomness."""
         try:
             db = next(get_db())
 
             try:
                 # Get threshold manager for dynamic anomaly classification
                 from app.services.threshold_manager import get_threshold_manager
+                import random
 
                 threshold_manager = get_threshold_manager()
 
@@ -185,12 +186,14 @@ class DemoService:
                 logger.info(f"Total drawings in database: {total_drawings}")
 
                 # Get drawings with analyses (we'll classify them dynamically)
+                # Order by random to get variety
                 all_drawings = (
                     db.query(Drawing)
                     .join(AnomalyAnalysis)
                     .filter(Drawing.subject.isnot(None))
                     .filter(AnomalyAnalysis.anomaly_score.isnot(None))
-                    .limit(50)  # Get more to ensure we have variety
+                    .order_by(func.random())
+                    .limit(100)  # Get more to ensure we have variety
                     .all()
                 )
 
@@ -209,25 +212,34 @@ class DemoService:
                         )
 
                         if is_anomaly:
-                            if len(anomalous_drawings) < 2:
-                                anomalous_drawings.append(drawing)
+                            anomalous_drawings.append(drawing)
                         else:
-                            if len(normal_drawings) < 3:
-                                normal_drawings.append(drawing)
+                            normal_drawings.append(drawing)
 
-                        # Stop if we have enough samples
-                        if len(normal_drawings) >= 3 and len(anomalous_drawings) >= 2:
-                            break
+                # Randomly select from available drawings
+                selected_normal = (
+                    random.sample(normal_drawings, min(3, len(normal_drawings)))
+                    if normal_drawings
+                    else []
+                )
+                selected_anomalous = (
+                    random.sample(anomalous_drawings, min(2, len(anomalous_drawings)))
+                    if anomalous_drawings
+                    else []
+                )
 
                 logger.info(
                     f"Classified: {len(normal_drawings)} normal, {len(anomalous_drawings)} anomalous"
+                )
+                logger.info(
+                    f"Randomly selected: {len(selected_normal)} normal, {len(selected_anomalous)} anomalous"
                 )
 
                 demo_samples = []
                 sample_id = 1
 
                 # Process normal examples
-                for drawing in normal_drawings:
+                for drawing in selected_normal:
                     analysis = drawing.analyses[0] if drawing.analyses else None
                     if analysis:
                         # Try to get interpretability data
@@ -244,7 +256,7 @@ class DemoService:
                         sample_id += 1
 
                 # Process anomalous examples
-                for drawing in anomalous_drawings:
+                for drawing in selected_anomalous:
                     analysis = drawing.analyses[0] if drawing.analyses else None
                     if analysis:
                         # Try to get interpretability data
