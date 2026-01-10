@@ -176,8 +176,9 @@ class DemoService:
 
             try:
                 # Get threshold manager for dynamic anomaly classification
-                from app.services.threshold_manager import get_threshold_manager
                 import random
+
+                from app.services.threshold_manager import get_threshold_manager
 
                 threshold_manager = get_threshold_manager()
 

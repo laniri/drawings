@@ -382,9 +382,10 @@ class UsageMetricsService:
         Returns:
             Dictionary containing dashboard statistics with nested structure
         """
+        from sqlalchemy import func
+
         from app.core.database import get_db
         from app.models.database import AnomalyAnalysis, Drawing
-        from sqlalchemy import func
 
         with self._lock:
             now = datetime.now(timezone.utc)
