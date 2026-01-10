@@ -119,20 +119,24 @@ async def get_performance_metrics() -> Dict[str, Any]:
         with metrics_service._lock:
             # Calculate metrics from deque
             total_analyses = len(metrics_service._analysis_metrics)
-            
+
             if total_analyses > 0:
-                processing_times = [m.processing_time for m in metrics_service._analysis_metrics]
+                processing_times = [
+                    m.processing_time for m in metrics_service._analysis_metrics
+                ]
                 average_processing_time = sum(processing_times) / len(processing_times)
                 recent_processing_times = processing_times[-10:]
-                
-                anomaly_count = sum(1 for m in metrics_service._analysis_metrics if m.anomaly_detected)
+
+                anomaly_count = sum(
+                    1 for m in metrics_service._analysis_metrics if m.anomaly_detected
+                )
                 normal_count = total_analyses - anomaly_count
             else:
                 average_processing_time = 0.0
                 recent_processing_times = []
                 anomaly_count = 0
                 normal_count = 0
-            
+
             analysis_metrics = {
                 "total_analyses": total_analyses,
                 "average_processing_time": round(average_processing_time, 3),
@@ -142,15 +146,26 @@ async def get_performance_metrics() -> Dict[str, Any]:
             }
 
             # Calculate system metrics from response times
-            if hasattr(metrics_service, "_response_times") and metrics_service._response_times:
+            if (
+                hasattr(metrics_service, "_response_times")
+                and metrics_service._response_times
+            ):
                 total_requests = len(metrics_service._response_times)
                 successful_requests = sum(
-                    1 for rt in metrics_service._response_times if rt["status_code"] < 400
+                    1
+                    for rt in metrics_service._response_times
+                    if rt["status_code"] < 400
                 )
                 failed_requests = total_requests - successful_requests
-                error_rate = (failed_requests / total_requests * 100) if total_requests > 0 else 0.0
-                
-                response_times = [rt["duration"] for rt in metrics_service._response_times]
+                error_rate = (
+                    (failed_requests / total_requests * 100)
+                    if total_requests > 0
+                    else 0.0
+                )
+
+                response_times = [
+                    rt["duration"] for rt in metrics_service._response_times
+                ]
                 average_response_time = sum(response_times) / len(response_times)
                 recent_response_times = response_times[-10:]
             else:
@@ -160,9 +175,10 @@ async def get_performance_metrics() -> Dict[str, Any]:
                 error_rate = 0.0
                 average_response_time = 0.0
                 recent_response_times = []
-            
+
             # Get current system metrics
             import psutil
+
             memory_usage_mb = psutil.Process().memory_info().rss / (1024 * 1024)
             cpu_usage_percent = psutil.cpu_percent(interval=0.1)
 
