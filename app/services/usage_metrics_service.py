@@ -392,33 +392,18 @@ class UsageMetricsService:
             db = next(get_db())
 
             try:
-                # Get database statistics (real data)
+                # Get database statistics (real data) - use simple counts only
                 total_drawings = db.query(Drawing).count()
                 total_analyses = db.query(AnomalyAnalysis).count()
 
-                # Get threshold manager for dynamic anomaly classification
-                from app.services.threshold_manager import get_threshold_manager
-
-                threshold_manager = get_threshold_manager()
-
-                # Count anomalies dynamically based on current thresholds
-                analyses_with_drawings = (
+                # Use simple count of is_anomaly field instead of recalculating
+                # This is much faster than loading all analyses and checking thresholds
+                anomaly_count = (
                     db.query(AnomalyAnalysis)
-                    .join(Drawing)
-                    .filter(AnomalyAnalysis.anomaly_score.isnot(None))
-                    .all()
+                    .filter(AnomalyAnalysis.is_anomaly == True)
+                    .count()
                 )
-
-                anomaly_count = 0
-                normal_count = 0
-                for analysis in analyses_with_drawings:
-                    is_anomaly, _, _ = threshold_manager.is_anomaly(
-                        analysis.anomaly_score, analysis.drawing.age_years, db
-                    )
-                    if is_anomaly:
-                        anomaly_count += 1
-                    else:
-                        normal_count += 1
+                normal_count = total_analyses - anomaly_count
 
                 # Get recent analyses (last 24 hours)
                 cutoff_24h = now - timedelta(hours=24)
