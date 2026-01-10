@@ -449,18 +449,19 @@ class UsageMetricsService:
                     db.query(func.count(func.distinct(Drawing.age_years))).scalar() or 0
                 )
 
-                # Calculate average processing time from recent analyses
-                recent_analyses_with_time = (
-                    db.query(AnomalyAnalysis.processing_time)
-                    .filter(AnomalyAnalysis.analysis_timestamp >= cutoff_24h)
-                    .filter(AnomalyAnalysis.processing_time.isnot(None))
-                    .all()
-                )
-
-                if recent_analyses_with_time:
-                    avg_processing_time = sum(
-                        t[0] for t in recent_analyses_with_time
-                    ) / len(recent_analyses_with_time)
+                # Calculate average processing time from in-memory metrics (not stored in DB)
+                if hasattr(self, "_analysis_metrics") and self._analysis_metrics:
+                    recent_metrics = [
+                        m
+                        for m in self._analysis_metrics
+                        if m.timestamp >= cutoff_24h
+                    ]
+                    if recent_metrics:
+                        avg_processing_time = sum(
+                            m.processing_time for m in recent_metrics
+                        ) / len(recent_metrics)
+                    else:
+                        avg_processing_time = 0.0
                 else:
                     avg_processing_time = 0.0
 
