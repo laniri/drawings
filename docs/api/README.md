@@ -178,6 +178,17 @@ For detailed information, see [Environment-Aware Storage Contract](../interfaces
 - [GET /api/v1/demo/technical-links](./endpoints/GET__api_v1_demo_technical-links.md)
 - [GET /api/v1/demo/statistics](./endpoints/GET__api_v1_demo_statistics.md)
 
+### Metrics
+**Updated January 2026**: Usage metrics endpoint now returns nested data structure.
+
+- [GET /api/v1/metrics/usage](./endpoints/metrics-usage.md) - **UPDATED**: Comprehensive usage metrics with nested structure
+- [GET /api/v1/metrics/health](./endpoints/GET__api_v1_metrics_health.md) - System health metrics
+- [GET /api/v1/metrics/sessions](./endpoints/GET__api_v1_metrics_sessions.md) - Session-specific metrics
+- [GET /api/v1/metrics/performance](./endpoints/GET__api_v1_metrics_performance.md) - Detailed performance metrics
+- [POST /api/v1/metrics/session/start](./endpoints/POST__api_v1_metrics_session_start.md) - Start user session
+- [POST /api/v1/metrics/session/{session_id}/end](./endpoints/POST__api_v1_metrics_session_session_id_end.md) - End user session
+- [GET /api/v1/metrics/cloudwatch/status](./endpoints/GET__api_v1_metrics_cloudwatch_status.md) - CloudWatch integration status
+
 ### Authentication
 **Note**: Authentication endpoints are registered at `/auth/*` (not `/api/v1/auth/*`) for direct access. In production deployments with nginx, these endpoints are proxied directly to the FastAPI backend.
 
