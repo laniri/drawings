@@ -56,6 +56,8 @@ try:
         ErrorHandlingMiddleware,
         RequestLoggingMiddleware,
         ResourceMonitoringMiddleware,
+        ResponseTimeMiddleware,
+        SessionTrackingMiddleware,
         setup_error_monitoring,
     )
     from app.core.security_middleware import SecurityMiddleware
@@ -135,6 +137,12 @@ if SERVICES_INITIALIZED:
     # Add security middleware (first for rate limiting and security headers)
     security_middleware = SecurityMiddleware(app)
     app.add_middleware(SecurityMiddleware)
+
+    # Add session tracking middleware (early to track all requests)
+    app.add_middleware(SessionTrackingMiddleware)
+
+    # Add response time tracking middleware (early to track all requests)
+    app.add_middleware(ResponseTimeMiddleware)
 
     # Add metrics collection middleware
     metrics_middleware = MetricsCollectionMiddleware(app)

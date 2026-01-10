@@ -452,6 +452,99 @@ async def error_context(operation_name: str):
         )
 
 
+class SessionTrackingMiddleware(BaseHTTPMiddleware):
+    """Middleware for tracking user sessions."""
+
+    def __init__(self, app: ASGIApp):
+        super().__init__(app)
+        from app.services.usage_metrics_service import get_metrics_service
+
+        self.metrics_service = get_metrics_service()
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        """Track user sessions from cookies."""
+        # Get or create session ID from cookie
+        session_id = request.cookies.get("session_id")
+
+        if session_id:
+            # Update existing session activity
+            self.metrics_service.update_session_activity(session_id)
+        else:
+            # Create new session
+            session_id = str(uuid.uuid4())
+            ip_address = request.client.host if request.client else "unknown"
+            user_agent = request.headers.get("user-agent", "unknown")
+
+            # Start tracking the session
+            self.metrics_service.start_session(
+                session_id=session_id, ip_address=ip_address, user_agent=user_agent
+            )
+
+        # Process the request
+        response = await call_next(request)
+
+        # Set session cookie if it's a new session
+        if "session_id" not in request.cookies:
+            response.set_cookie(
+                key="session_id",
+                value=session_id,
+                max_age=3600 * 24 * 30,  # 30 days
+                httponly=True,
+                samesite="lax",
+            )
+
+        return response
+
+
+class ResponseTimeMiddleware(BaseHTTPMiddleware):
+    """Middleware for tracking API response times."""
+
+    def __init__(self, app: ASGIApp):
+        super().__init__(app)
+        from app.services.usage_metrics_service import get_metrics_service
+
+        self.metrics_service = get_metrics_service()
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        """Track response times for all requests."""
+        # Skip tracking for static files and health checks
+        if request.url.path.startswith("/static") or request.url.path.startswith(
+            "/uploads"
+        ):
+            return await call_next(request)
+
+        # Record start time
+        start_time = time.time()
+
+        # Process the request
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+        except Exception as e:
+            # Record failed request
+            duration = time.time() - start_time
+            self.metrics_service.record_response_time(
+                endpoint=request.url.path,
+                method=request.method,
+                duration=duration,
+                status_code=500,
+            )
+            raise
+
+        # Calculate duration
+        duration = time.time() - start_time
+
+        # Record response time
+        self.metrics_service.record_response_time(
+            endpoint=request.url.path,
+            method=request.method,
+            duration=duration,
+            status_code=status_code,
+        )
+
+        return response
+
+
 def setup_error_monitoring():
     """Set up error monitoring and alerting."""
     # Get monitoring service instance

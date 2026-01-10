@@ -273,6 +273,53 @@ class UsageMetricsService:
                 del self._session_metrics[session_id]
                 logger.debug(f"Ended session: {session_id}, duration: {duration:.1f}s")
 
+    def record_response_time(
+        self,
+        endpoint: str,
+        method: str,
+        duration: float,
+        status_code: int,
+    ):
+        """
+        Record API response time.
+
+        Args:
+            endpoint: API endpoint path
+            method: HTTP method (GET, POST, etc.)
+            duration: Response time in seconds
+            status_code: HTTP status code
+        """
+        with self._lock:
+            # Store in a simple list for now (could be optimized with deque)
+            if not hasattr(self, "_response_times"):
+                self._response_times = deque(maxlen=1000)
+
+            self._response_times.append(
+                {
+                    "timestamp": datetime.now(timezone.utc),
+                    "endpoint": endpoint,
+                    "method": method,
+                    "duration": duration,
+                    "status_code": status_code,
+                }
+            )
+
+            # Send to CloudWatch
+            self._send_cloudwatch_metrics(
+                [
+                    {
+                        "MetricName": "APIResponseTime",
+                        "Value": duration,
+                        "Unit": "Seconds",
+                        "Dimensions": [
+                            {"Name": "Endpoint", "Value": endpoint},
+                            {"Name": "Method", "Value": method},
+                            {"Name": "StatusCode", "Value": str(status_code)},
+                        ],
+                    }
+                ]
+            )
+
     def record_system_health(
         self,
         cpu_usage: float,
@@ -425,6 +472,38 @@ class UsageMetricsService:
                 # Geographic distribution (from in-memory tracking)
                 geographic_distribution = self._get_geographic_distribution()
 
+                # Response time metrics (from in-memory tracking)
+                if hasattr(self, "_response_times") and self._response_times:
+                    recent_response_times = [
+                        rt["duration"]
+                        for rt in self._response_times
+                        if rt["timestamp"] >= cutoff_24h
+                    ]
+                    if recent_response_times:
+                        avg_response_time = sum(recent_response_times) / len(
+                            recent_response_times
+                        )
+                    else:
+                        avg_response_time = 0.0
+
+                    # Count successful vs failed requests
+                    total_requests = len(self._response_times)
+                    successful_requests = sum(
+                        1 for rt in self._response_times if rt["status_code"] < 400
+                    )
+                    failed_requests = total_requests - successful_requests
+                    error_rate = (
+                        (failed_requests / total_requests * 100)
+                        if total_requests > 0
+                        else 0.0
+                    )
+                else:
+                    avg_response_time = 0.0
+                    total_requests = 0
+                    successful_requests = 0
+                    failed_requests = 0
+                    error_rate = 0.0
+
                 # System metrics
                 import psutil
 
@@ -459,11 +538,11 @@ class UsageMetricsService:
                     "system_health": {
                         "uptime_seconds": int(uptime_seconds),
                         "uptime_percentage": round(uptime_percentage, 1),
-                        "total_requests": 0,  # Not tracked separately
-                        "successful_requests": 0,  # Not tracked separately
-                        "failed_requests": 0,  # Not tracked separately
-                        "error_rate": 0.0,  # Not tracked separately
-                        "average_response_time": 0.0,  # Not tracked separately
+                        "total_requests": total_requests,
+                        "successful_requests": successful_requests,
+                        "failed_requests": failed_requests,
+                        "error_rate": round(error_rate, 2),
+                        "average_response_time": round(avg_response_time, 3),
                         "memory_usage_mb": round(memory_usage_mb, 2),
                         "cpu_usage_percent": round(cpu_usage_percent, 2),
                         "average_processing_time": round(avg_processing_time, 2),
