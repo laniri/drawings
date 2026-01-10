@@ -335,109 +335,146 @@ class UsageMetricsService:
         Returns:
             Dictionary containing dashboard statistics with nested structure
         """
+        from app.core.database import get_db
+        from app.models.database import AnomalyAnalysis, Drawing
+        from sqlalchemy import func
+
         with self._lock:
             now = datetime.now(timezone.utc)
+            db = next(get_db())
 
-            # Calculate total analyses
-            total_analyses = len(self._analysis_metrics)
+            try:
+                # Get database statistics (real data)
+                total_drawings = db.query(Drawing).count()
+                total_analyses = db.query(AnomalyAnalysis).count()
 
-            # Calculate daily/weekly/monthly counts
-            daily_count = len(
-                [m for m in self._analysis_metrics if (now - m.timestamp).days < 1]
-            )
+                # Get threshold manager for dynamic anomaly classification
+                from app.services.threshold_manager import get_threshold_manager
 
-            weekly_count = len(
-                [m for m in self._analysis_metrics if (now - m.timestamp).days < 7]
-            )
+                threshold_manager = get_threshold_manager()
 
-            monthly_count = len(
-                [m for m in self._analysis_metrics if (now - m.timestamp).days < 30]
-            )
-
-            # Calculate average processing time
-            if self._analysis_metrics:
-                avg_processing_time = sum(
-                    m.processing_time for m in self._analysis_metrics
-                ) / len(self._analysis_metrics)
-            else:
-                avg_processing_time = 0.0
-
-            # Active sessions
-            active_sessions = len(self._session_metrics)
-
-            # Calculate total page views
-            total_page_views = sum(
-                session.page_views for session in self._session_metrics.values()
-            )
-
-            # Error rate (last 24 hours)
-            recent_metrics = [
-                m for m in self._analysis_metrics if (now - m.timestamp).days < 1
-            ]
-
-            if recent_metrics:
-                error_rate = sum(1 for m in recent_metrics if m.error_occurred) / len(
-                    recent_metrics
+                # Count anomalies dynamically based on current thresholds
+                analyses_with_drawings = (
+                    db.query(AnomalyAnalysis)
+                    .join(Drawing)
+                    .filter(AnomalyAnalysis.anomaly_score.isnot(None))
+                    .all()
                 )
-            else:
-                error_rate = 0.0
 
-            # Uptime percentage (simplified calculation)
-            uptime_seconds = (now - self._start_time).total_seconds()
-            uptime_percentage = min(
-                99.9, (uptime_seconds / (uptime_seconds + 60)) * 100
-            )  # Assume 1 min downtime max
+                anomaly_count = 0
+                normal_count = 0
+                for analysis in analyses_with_drawings:
+                    is_anomaly, _, _ = threshold_manager.is_anomaly(
+                        analysis.anomaly_score, analysis.drawing.age_years, db
+                    )
+                    if is_anomaly:
+                        anomaly_count += 1
+                    else:
+                        normal_count += 1
 
-            # Geographic distribution
-            geographic_distribution = self._get_geographic_distribution()
+                # Get recent analyses (last 24 hours)
+                cutoff_24h = now - timedelta(hours=24)
+                recent_analyses = (
+                    db.query(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.analysis_timestamp >= cutoff_24h)
+                    .count()
+                )
 
-            # Count anomalies and normal
-            anomaly_count = sum(1 for m in self._analysis_metrics if m.anomaly_detected)
-            normal_count = len(self._analysis_metrics) - anomaly_count
+                # Get time-based counts
+                cutoff_7d = now - timedelta(days=7)
+                cutoff_30d = now - timedelta(days=30)
 
-            # Get system metrics
-            import psutil
+                weekly_analyses = (
+                    db.query(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.analysis_timestamp >= cutoff_7d)
+                    .count()
+                )
 
-            memory_usage_mb = psutil.Process().memory_info().rss / (1024 * 1024)
-            cpu_usage_percent = psutil.cpu_percent(interval=0.1)
+                monthly_analyses = (
+                    db.query(AnomalyAnalysis)
+                    .filter(AnomalyAnalysis.analysis_timestamp >= cutoff_30d)
+                    .count()
+                )
 
-            # Return nested structure expected by frontend
-            return {
-                "timestamp": now.isoformat(),
-                "database": {
-                    "total_drawings": 0,  # Not tracked in metrics service
-                    "total_analyses": total_analyses,
-                    "anomaly_count": anomaly_count,
-                    "normal_count": normal_count,
-                    "recent_analyses_count": len(recent_metrics),
-                    "age_groups_count": 0,  # Not tracked in metrics service
-                },
-                "time_based": {
-                    "daily_analyses": daily_count,
-                    "weekly_analyses": weekly_count,
-                    "monthly_analyses": monthly_count,
-                },
-                "sessions": {
-                    "active_sessions": active_sessions,
-                    "total_page_views": total_page_views,
-                    "total_session_analyses": total_analyses,
-                },
-                "system_health": {
+                # Get age groups count
+                age_groups_count = (
+                    db.query(func.count(func.distinct(Drawing.age_years))).scalar() or 0
+                )
+
+                # Calculate average processing time from recent analyses
+                recent_analyses_with_time = (
+                    db.query(AnomalyAnalysis.processing_time)
+                    .filter(AnomalyAnalysis.analysis_timestamp >= cutoff_24h)
+                    .filter(AnomalyAnalysis.processing_time.isnot(None))
+                    .all()
+                )
+
+                if recent_analyses_with_time:
+                    avg_processing_time = sum(
+                        t[0] for t in recent_analyses_with_time
+                    ) / len(recent_analyses_with_time)
+                else:
+                    avg_processing_time = 0.0
+
+                # Active sessions (from in-memory tracking)
+                active_sessions = len(self._session_metrics)
+                total_page_views = sum(
+                    session.page_views for session in self._session_metrics.values()
+                )
+
+                # Geographic distribution (from in-memory tracking)
+                geographic_distribution = self._get_geographic_distribution()
+
+                # System metrics
+                import psutil
+
+                memory_usage_mb = psutil.Process().memory_info().rss / (1024 * 1024)
+                cpu_usage_percent = psutil.cpu_percent(interval=0.1)
+
+                # Uptime
+                uptime_seconds = (now - self._start_time).total_seconds()
+                uptime_percentage = 99.9  # Simplified
+
+                # Return nested structure expected by frontend
+                return {
+                    "timestamp": now.isoformat(),
+                    "database": {
+                        "total_drawings": total_drawings,
+                        "total_analyses": total_analyses,
+                        "anomaly_count": anomaly_count,
+                        "normal_count": normal_count,
+                        "recent_analyses_count": recent_analyses,
+                        "age_groups_count": age_groups_count,
+                    },
+                    "time_based": {
+                        "daily_analyses": recent_analyses,
+                        "weekly_analyses": weekly_analyses,
+                        "monthly_analyses": monthly_analyses,
+                    },
+                    "sessions": {
+                        "active_sessions": active_sessions,
+                        "total_page_views": total_page_views,
+                        "total_session_analyses": total_analyses,
+                    },
+                    "system_health": {
+                        "uptime_seconds": int(uptime_seconds),
+                        "uptime_percentage": round(uptime_percentage, 1),
+                        "total_requests": 0,  # Not tracked separately
+                        "successful_requests": 0,  # Not tracked separately
+                        "failed_requests": 0,  # Not tracked separately
+                        "error_rate": 0.0,  # Not tracked separately
+                        "average_response_time": 0.0,  # Not tracked separately
+                        "memory_usage_mb": round(memory_usage_mb, 2),
+                        "cpu_usage_percent": round(cpu_usage_percent, 2),
+                        "average_processing_time": round(avg_processing_time, 2),
+                    },
+                    "geographic": geographic_distribution,
                     "uptime_seconds": int(uptime_seconds),
-                    "uptime_percentage": round(uptime_percentage, 1),
-                    "total_requests": 0,  # Not tracked separately
-                    "successful_requests": 0,  # Not tracked separately
-                    "failed_requests": 0,  # Not tracked separately
-                    "error_rate": round(error_rate, 4),
-                    "average_response_time": 0.0,  # Not tracked separately
-                    "memory_usage_mb": round(memory_usage_mb, 2),
-                    "cpu_usage_percent": round(cpu_usage_percent, 2),
-                    "average_processing_time": round(avg_processing_time, 2),
-                },
-                "geographic": geographic_distribution,
-                "uptime_seconds": int(uptime_seconds),
-                "last_updated": now.isoformat(),
-            }
+                    "last_updated": now.isoformat(),
+                }
+
+            finally:
+                db.close()
 
     def get_time_series_data(
         self,
