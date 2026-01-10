@@ -101,6 +101,7 @@ class UsageMetricsService:
 
         # CloudWatch client
         self._cloudwatch_client = None
+        self._cloudwatch_enabled = False
         self._start_time = datetime.now(timezone.utc)
 
         # Initialize service
@@ -114,13 +115,16 @@ class UsageMetricsService:
                 self._cloudwatch_client = boto3.client(
                     "cloudwatch", region_name=settings.aws_region or "eu-west-1"
                 )
+                self._cloudwatch_enabled = True
                 logger.info("Initialized CloudWatch client for metrics")
             else:
+                self._cloudwatch_enabled = False
                 logger.info("Running in local mode - CloudWatch metrics disabled")
 
         except (NoCredentialsError, ClientError) as e:
             logger.warning(f"Failed to initialize CloudWatch client: {e}")
             logger.info("Continuing without CloudWatch integration")
+            self._cloudwatch_enabled = False
 
     def record_analysis(
         self,
@@ -329,7 +333,7 @@ class UsageMetricsService:
         Get real-time statistics for the dashboard.
 
         Returns:
-            Dictionary containing dashboard statistics
+            Dictionary containing dashboard statistics with nested structure
         """
         with self._lock:
             now = datetime.now(timezone.utc)
@@ -361,6 +365,11 @@ class UsageMetricsService:
             # Active sessions
             active_sessions = len(self._session_metrics)
 
+            # Calculate total page views
+            total_page_views = sum(
+                session.page_views for session in self._session_metrics.values()
+            )
+
             # Error rate (last 24 hours)
             recent_metrics = [
                 m for m in self._analysis_metrics if (now - m.timestamp).days < 1
@@ -382,16 +391,50 @@ class UsageMetricsService:
             # Geographic distribution
             geographic_distribution = self._get_geographic_distribution()
 
+            # Count anomalies and normal
+            anomaly_count = sum(1 for m in self._analysis_metrics if m.anomaly_detected)
+            normal_count = len(self._analysis_metrics) - anomaly_count
+
+            # Get system metrics
+            import psutil
+            memory_usage_mb = psutil.Process().memory_info().rss / (1024 * 1024)
+            cpu_usage_percent = psutil.cpu_percent(interval=0.1)
+
+            # Return nested structure expected by frontend
             return {
-                "total_analyses": total_analyses,
-                "daily_analyses": daily_count,
-                "weekly_analyses": weekly_count,
-                "monthly_analyses": monthly_count,
-                "average_processing_time": round(avg_processing_time, 2),
-                "active_sessions": active_sessions,
-                "error_rate": round(error_rate, 4),
-                "uptime_percentage": round(uptime_percentage, 1),
-                "geographic_distribution": geographic_distribution,
+                "timestamp": now.isoformat(),
+                "database": {
+                    "total_drawings": 0,  # Not tracked in metrics service
+                    "total_analyses": total_analyses,
+                    "anomaly_count": anomaly_count,
+                    "normal_count": normal_count,
+                    "recent_analyses_count": len(recent_metrics),
+                    "age_groups_count": 0,  # Not tracked in metrics service
+                },
+                "time_based": {
+                    "daily_analyses": daily_count,
+                    "weekly_analyses": weekly_count,
+                    "monthly_analyses": monthly_count,
+                },
+                "sessions": {
+                    "active_sessions": active_sessions,
+                    "total_page_views": total_page_views,
+                    "total_session_analyses": total_analyses,
+                },
+                "system_health": {
+                    "uptime_seconds": int(uptime_seconds),
+                    "uptime_percentage": round(uptime_percentage, 1),
+                    "total_requests": 0,  # Not tracked separately
+                    "successful_requests": 0,  # Not tracked separately
+                    "failed_requests": 0,  # Not tracked separately
+                    "error_rate": round(error_rate, 4),
+                    "average_response_time": 0.0,  # Not tracked separately
+                    "memory_usage_mb": round(memory_usage_mb, 2),
+                    "cpu_usage_percent": round(cpu_usage_percent, 2),
+                    "average_processing_time": round(avg_processing_time, 2),
+                },
+                "geographic": geographic_distribution,
+                "uptime_seconds": int(uptime_seconds),
                 "last_updated": now.isoformat(),
             }
 
@@ -446,6 +489,59 @@ class UsageMetricsService:
                 distribution["Unknown"] += 1
 
         return dict(distribution)
+
+    def _get_health_metrics(self) -> Dict[str, Any]:
+        """Get system health metrics."""
+        import psutil
+
+        uptime_seconds = int(
+            (datetime.now(timezone.utc) - self._start_time).total_seconds()
+        )
+
+        # Get recent system health metrics
+        recent_health = list(self._system_health_metrics)[-10:] if self._system_health_metrics else []
+
+        if recent_health:
+            avg_cpu = sum(m.cpu_usage for m in recent_health) / len(recent_health)
+            avg_memory = sum(m.memory_usage for m in recent_health) / len(recent_health)
+            total_errors = sum(m.error_count for m in recent_health)
+        else:
+            # Get current metrics
+            avg_cpu = psutil.cpu_percent(interval=0.1)
+            avg_memory = psutil.virtual_memory().percent
+            total_errors = 0
+
+        return {
+            "uptime_seconds": uptime_seconds,
+            "cpu_usage_percent": round(avg_cpu, 2),
+            "memory_usage_percent": round(avg_memory, 2),
+            "error_count": total_errors,
+            "status": "healthy" if avg_cpu < 80 and avg_memory < 80 else "degraded",
+        }
+
+    def _get_session_metrics(self) -> Dict[str, Any]:
+        """Get current session metrics."""
+        with self._lock:
+            total_sessions = len(self._session_metrics)
+            total_page_views = sum(
+                session.page_views for session in self._session_metrics.values()
+            )
+
+            # Calculate average session duration for active sessions
+            now = datetime.now(timezone.utc)
+            if self._session_metrics:
+                avg_duration = sum(
+                    (now - session.start_time).total_seconds()
+                    for session in self._session_metrics.values()
+                ) / len(self._session_metrics)
+            else:
+                avg_duration = 0.0
+
+            return {
+                "active_sessions": total_sessions,
+                "total_page_views": total_page_views,
+                "average_session_duration": round(avg_duration, 2),
+            }
 
     def _aggregate_daily(self, metrics: List[AnalysisMetric]) -> List[Dict[str, Any]]:
         """Aggregate metrics by day."""

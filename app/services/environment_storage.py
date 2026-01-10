@@ -450,10 +450,20 @@ class S3StorageBackend(StorageBackendInterface):
     def get_file_info(self, file_path: str) -> Optional[Dict[str, Any]]:
         """Get information about an S3 stored file"""
         try:
-            if not file_path.startswith("s3://"):
-                return None
+            # Handle both S3 URLs and relative paths stored in database
+            if file_path.startswith("s3://"):
+                s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
+            else:
+                # For relative paths like "uploads/file.png", map to S3 key
+                # Database stores paths as "uploads/..." but S3 has them as "drawings/..."
+                if file_path.startswith("uploads/"):
+                    # Map uploads/ to drawings/ in S3
+                    s3_key = file_path.replace("uploads/", "drawings/", 1)
+                else:
+                    # Use as-is for other paths
+                    s3_key = file_path
 
-            s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
+            logger.debug(f"[S3 get_file_info] file_path={file_path}, s3_key={s3_key}")
 
             response = self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
 
@@ -478,24 +488,38 @@ class S3StorageBackend(StorageBackendInterface):
         Optimized to check if file was already synced locally before downloading.
         """
         try:
-            if not file_path.startswith("s3://"):
-                # Already a local path
-                return file_path
+            # Handle S3 URLs
+            if file_path.startswith("s3://"):
+                s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
+            else:
+                # For relative paths like "uploads/file.png", map to S3 key
+                if file_path.startswith("uploads/"):
+                    # Map uploads/ to drawings/ in S3
+                    s3_key = file_path.replace("uploads/", "drawings/", 1)
+                else:
+                    # Already a local path - return as-is
+                    if Path(file_path).exists():
+                        return file_path
+                    # Try with /app prefix for container paths
+                    app_path = Path("/app") / file_path
+                    if app_path.exists():
+                        return str(app_path)
+                    # Use as S3 key
+                    s3_key = file_path
 
-            s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             filename = Path(s3_key).name
 
             # Check if file was already synced to local uploads directory
-            # The background sync copies files to /app/uploads/
-            if s3_key.startswith("uploads/") or s3_key.startswith("drawings/"):
+            # The background sync copies files to /app/uploads/ or /app/static/
+            if s3_key.startswith("drawings/"):
                 # Try local path first (from background sync)
-                local_synced_path = Path("/app") / s3_key
+                local_synced_path = Path("/app/uploads") / filename
                 if local_synced_path.exists():
                     logger.debug(f"Using locally synced file: {local_synced_path}")
                     return str(local_synced_path)
 
                 # Also check uploads directory directly
-                uploads_path = Path("/app/uploads") / filename
+                uploads_path = Path("uploads") / filename
                 if uploads_path.exists():
                     logger.debug(f"Using locally synced file: {uploads_path}")
                     return str(uploads_path)
@@ -509,6 +533,7 @@ class S3StorageBackend(StorageBackendInterface):
                 return str(local_path)
 
             # Download from S3
+            logger.info(f"Downloading from S3: s3://{self.bucket_name}/{s3_key} -> {local_path}")
             self.s3_client.download_file(
                 Bucket=self.bucket_name, Key=s3_key, Filename=str(local_path)
             )
