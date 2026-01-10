@@ -38,8 +38,15 @@ export const MarkdownViewerPage: React.FC = () => {
     setError(null);
 
     try {
+      // If path doesn't start with docs/, tmp_files/, or an absolute path, prepend docs/
+      // This handles documentation files which are stored in docs/ directory
+      let fullPath = path;
+      if (!path.startsWith('docs/') && !path.startsWith('tmp_files/') && !path.startsWith('/')) {
+        fullPath = `docs/${path}`;
+      }
+
       // Try to fetch from the backend API
-      const response = await fetch(`/api/v1/files/markdown?path=${encodeURIComponent(path)}`);
+      const response = await fetch(`/api/v1/files/markdown?path=${encodeURIComponent(fullPath)}`);
       
       if (!response.ok) {
         throw new Error(`Failed to load file: ${response.statusText}`);
