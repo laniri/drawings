@@ -181,3 +181,15 @@ docker-compose -f docker-compose.dev.yml down
 
 ### AWS Dependencies Missing (Local)
 **Expected**: AWS services optional for local dev, provide local functionality without AWS clients
+
+### Usage Metrics White Screen (Fixed Jan 2026)
+**Symptom**: Dashboard "Usage Metrics" tab displays blank white screen  
+**Root Cause**: Endpoint returned flat dictionary, frontend expected nested structure  
+**Fix**: Updated `UsageMetricsService.get_dashboard_stats()` to return nested data with `database`, `time_based`, `sessions`, `system_health` keys  
+**Files**: `app/services/usage_metrics_service.py`
+
+### Existing Analysis Drawings 404 (Fixed Jan 2026)
+**Symptom**: Drawing images fail to load with 404 on `/api/v1/drawings/{id}/file`  
+**Root Cause**: S3 storage backend only handled S3 URLs, not relative paths; path mismatch between DB (`uploads/`) and S3 (`drawings/`)  
+**Fix**: Enhanced `S3StorageBackend.get_file_info()` and `download_to_local()` to handle relative paths with proper mapping  
+**Files**: `app/services/environment_storage.py`

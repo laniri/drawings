@@ -50,6 +50,7 @@ app/
 │   ├── data_sufficiency_service.py # Training data validation
 │   ├── dataset_preparation.py    # Dataset preparation for training
 │   ├── embedding_service.py      # Hybrid feature extraction (ViT + subject encoding)
+│   ├── environment_storage.py    # Environment-aware storage (S3/local) with path mapping
 │   ├── file_storage.py           # File management
 │   ├── health_monitor.py         # System health monitoring
 │   ├── interpretability_engine.py # Subject-aware saliency map generation
@@ -60,7 +61,8 @@ app/
 │   ├── score_normalizer.py       # Anomaly score normalization
 │   ├── threshold_manager.py      # Subject-contextualized threshold configuration
 │   ├── training_config.py        # Training configuration management
-│   └── training_report_service.py # Training progress reporting
+│   ├── training_report_service.py # Training progress reporting
+│   └── usage_metrics_service.py  # Usage metrics with nested data structure
 └── utils/                        # Utility functions
     └── embedding_serialization.py # Embedding data serialization
 ```
@@ -73,12 +75,15 @@ src/
 ├── main.tsx                      # Application entry point
 ├── components/                   # Reusable UI components
 │   ├── Layout/                   # Layout components
+│   │   └── Layout.tsx            # Main layout with navigation (markdown viewer removed from menu)
+│   ├── UsageMetricsPanel.tsx     # Usage metrics display with nested data structure
 │   └── interpretability/         # Advanced interpretability components
 ├── pages/                        # Page-level components
 │   ├── AnalysisPage.tsx          # Analysis results view
 │   ├── BatchProcessingPage.tsx   # Batch upload interface
 │   ├── ConfigurationPage.tsx     # System configuration
-│   ├── DashboardPage.tsx         # Main dashboard
+│   ├── DashboardPage.tsx         # Main dashboard with usage metrics tab
+│   ├── MarkdownViewerPage.tsx    # Internal documentation viewer (not in navigation)
 │   └── UploadPage.tsx            # Single drawing upload
 ├── store/                        # State management
 │   └── useAppStore.ts            # Zustand store configuration

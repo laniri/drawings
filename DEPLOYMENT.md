@@ -546,6 +546,81 @@ docker exec <container> supervisorctl restart uvicorn
 docker exec <container> ls -la /var/www/html/
 ```
 
+### Production Issues and Resolutions (January 2026)
+
+#### Issue 1: Usage Metrics Dashboard White Screen
+**Symptom**: Dashboard "Usage Metrics" tab displays blank white screen with no data.
+
+**Root Cause**: The `/api/v1/metrics/usage` endpoint returned a flat dictionary structure, but the frontend `UsageMetricsPanel` component expected a nested structure with keys: `database`, `time_based`, `sessions`, `system_health`, `geographic`, and `uptime_seconds`.
+
+**Resolution**:
+- Modified `UsageMetricsService.get_dashboard_stats()` to return properly nested data structure
+- Added missing helper methods: `_get_health_metrics()`, `_get_session_metrics()`
+- Added `_cloudwatch_enabled` property to track CloudWatch integration status
+- All expected fields now populated with appropriate values
+
+**Files Modified**: `app/services/usage_metrics_service.py`
+
+**Verification**:
+```bash
+# Test usage metrics endpoint
+curl -f https://your-domain.com/api/v1/metrics/usage
+
+# Expected response structure:
+{
+  "status": "success",
+  "data": {
+    "timestamp": "2026-01-09T...",
+    "database": { "total_analyses": 123, ... },
+    "time_based": { "daily_analyses": 5, ... },
+    "sessions": { "active_sessions": 2, ... },
+    "system_health": { "uptime_seconds": 3600, ... },
+    "geographic": { "Unknown": 2 }
+  }
+}
+```
+
+#### Issue 2: Existing Analysis Drawings Return 404
+**Symptom**: When opening existing analysis (not just uploaded), drawing images fail to load with 404 error on `/api/v1/drawings/{id}/file`.
+
+**Root Cause**: The S3 storage backend's `get_file_info()` method only handled S3 URLs (starting with `s3://`) and returned `None` for relative paths stored in the database (like `uploads/file.png`). Additionally, database stores paths as `uploads/...` but S3 bucket has them as `drawings/...`.
+
+**Resolution**:
+- Enhanced `S3StorageBackend.get_file_info()` to handle relative paths
+- Added path mapping: `uploads/` → `drawings/` for S3 key resolution
+- Enhanced `S3StorageBackend.download_to_local()` to handle relative paths
+- Added debug logging for S3 file path resolution
+
+**Files Modified**: `app/services/environment_storage.py`
+
+**Path Mapping Logic**:
+```
+Database Path: uploads/file.png
+S3 Key: drawings/file.png
+Local Synced: /app/uploads/file.png
+```
+
+**Verification**:
+```bash
+# Test drawing file endpoint
+curl -f https://your-domain.com/api/v1/drawings/16600/file
+
+# Check logs for path resolution
+docker logs <container> | grep "S3 URL Generation"
+```
+
+#### Issue 3: Markdown Viewer in User Navigation
+**Symptom**: Markdown viewer appeared as a navigation tab, but was intended only for internal documentation viewing.
+
+**Resolution**:
+- Removed "Markdown Viewer" entry from navigation menu items
+- Removed unused `Article` icon import
+- Route and component remain functional for programmatic/internal use
+
+**Files Modified**: `frontend/src/components/Layout/Layout.tsx`
+
+**Note**: The markdown viewer page is still accessible at `/markdown-viewer` for internal documentation purposes, but is no longer exposed in the user-facing navigation.
+
 ### Common Issues
 
 #### Services Won't Start
