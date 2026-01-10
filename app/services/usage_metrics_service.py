@@ -452,9 +452,7 @@ class UsageMetricsService:
                 # Calculate average processing time from in-memory metrics (not stored in DB)
                 if hasattr(self, "_analysis_metrics") and self._analysis_metrics:
                     recent_metrics = [
-                        m
-                        for m in self._analysis_metrics
-                        if m.timestamp >= cutoff_24h
+                        m for m in self._analysis_metrics if m.timestamp >= cutoff_24h
                     ]
                     if recent_metrics:
                         avg_processing_time = sum(
