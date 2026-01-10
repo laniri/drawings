@@ -455,20 +455,46 @@ class S3StorageBackend(StorageBackendInterface):
                 s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             else:
                 # For relative paths like "uploads/file.png" or "uploads/drawings/file.png"
-                # Database stores paths as "uploads/..." but S3 has them as "drawings/..."
+                # S3 bucket has TWO possible locations:
+                # 1. uploads/drawings/ - old files (Dec 2025 and earlier)
+                # 2. drawings/ - new files (Jan 2026 onwards)
                 if file_path.startswith("uploads/"):
-                    # Strip "uploads/" prefix
-                    s3_key = file_path[len("uploads/") :]
-                    # If the result doesn't already start with "drawings/", add it
-                    if not s3_key.startswith("drawings/"):
-                        s3_key = f"drawings/{s3_key}"
+                    # Keep the full path for old files
+                    s3_key = file_path
                 else:
                     # Use as-is for other paths
                     s3_key = file_path
 
             logger.debug(f"[S3 get_file_info] file_path={file_path}, s3_key={s3_key}")
 
-            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
+            # Try the primary location first
+            try:
+                response = self.s3_client.head_object(
+                    Bucket=self.bucket_name, Key=s3_key
+                )
+                logger.debug(f"[S3 get_file_info] Found at primary location: {s3_key}")
+            except Exception as primary_error:
+                # If primary location fails and path starts with uploads/drawings/,
+                # try alternate location at drawings/ (for migration compatibility)
+                if s3_key.startswith("uploads/drawings/"):
+                    alternate_key = s3_key.replace("uploads/drawings/", "drawings/", 1)
+                    logger.debug(
+                        f"[S3 get_file_info] Primary failed, trying alternate: {alternate_key}"
+                    )
+                    try:
+                        response = self.s3_client.head_object(
+                            Bucket=self.bucket_name, Key=alternate_key
+                        )
+                        s3_key = alternate_key
+                        logger.debug(
+                            f"[S3 get_file_info] Found at alternate location: {s3_key}"
+                        )
+                    except Exception:
+                        # Neither location worked, raise original error
+                        raise primary_error
+                else:
+                    # No alternate location to try
+                    raise primary_error
 
             return {
                 "filename": Path(s3_key).name,
@@ -496,12 +522,12 @@ class S3StorageBackend(StorageBackendInterface):
                 s3_key = file_path.replace(f"s3://{self.bucket_name}/", "")
             else:
                 # For relative paths like "uploads/file.png" or "uploads/drawings/file.png"
+                # S3 bucket has TWO possible locations:
+                # 1. uploads/drawings/ - old files (Dec 2025 and earlier)
+                # 2. drawings/ - new files (Jan 2026 onwards)
                 if file_path.startswith("uploads/"):
-                    # Strip "uploads/" prefix
-                    s3_key = file_path[len("uploads/") :]
-                    # If the result doesn't already start with "drawings/", add it
-                    if not s3_key.startswith("drawings/"):
-                        s3_key = f"drawings/{s3_key}"
+                    # Keep the full path for old files
+                    s3_key = file_path
                 else:
                     # Already a local path - return as-is
                     if Path(file_path).exists():
@@ -517,7 +543,7 @@ class S3StorageBackend(StorageBackendInterface):
 
             # Check if file was already synced to local uploads directory
             # The background sync copies files to /app/uploads/ or /app/static/
-            if s3_key.startswith("drawings/"):
+            if s3_key.startswith("drawings/") or s3_key.startswith("uploads/drawings/"):
                 # Try local path first (from background sync)
                 local_synced_path = Path("/app/uploads") / filename
                 if local_synced_path.exists():
@@ -538,15 +564,39 @@ class S3StorageBackend(StorageBackendInterface):
                 logger.debug(f"Using cached temp file: {local_path}")
                 return str(local_path)
 
-            # Download from S3
+            # Download from S3 - try primary location first
             logger.info(
                 f"Downloading from S3: s3://{self.bucket_name}/{s3_key} -> {local_path}"
             )
-            self.s3_client.download_file(
-                Bucket=self.bucket_name, Key=s3_key, Filename=str(local_path)
-            )
+            try:
+                self.s3_client.download_file(
+                    Bucket=self.bucket_name, Key=s3_key, Filename=str(local_path)
+                )
+                logger.info(f"Downloaded S3 file to local: {file_path} -> {local_path}")
+            except Exception as primary_error:
+                # If primary location fails and path starts with uploads/drawings/,
+                # try alternate location at drawings/ (for migration compatibility)
+                if s3_key.startswith("uploads/drawings/"):
+                    alternate_key = s3_key.replace("uploads/drawings/", "drawings/", 1)
+                    logger.debug(
+                        f"Primary download failed, trying alternate: {alternate_key}"
+                    )
+                    try:
+                        self.s3_client.download_file(
+                            Bucket=self.bucket_name,
+                            Key=alternate_key,
+                            Filename=str(local_path),
+                        )
+                        logger.info(
+                            f"Downloaded S3 file from alternate location: {alternate_key} -> {local_path}"
+                        )
+                    except Exception:
+                        # Neither location worked, raise original error
+                        raise primary_error
+                else:
+                    # No alternate location to try
+                    raise primary_error
 
-            logger.info(f"Downloaded S3 file to local: {file_path} -> {local_path}")
             return str(local_path)
 
         except Exception as e:

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -12,10 +13,20 @@ import { MarkdownViewer } from '../components/MarkdownViewer';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 export const MarkdownViewerPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filePath, setFilePath] = useState<string>('');
+
+  // Load file from URL parameter on mount
+  useEffect(() => {
+    const fileParam = searchParams.get('file');
+    if (fileParam) {
+      setFilePath(fileParam);
+      loadMarkdownFile(fileParam);
+    }
+  }, [searchParams]);
 
   const loadMarkdownFile = async (path: string) => {
     if (!path.trim()) {
