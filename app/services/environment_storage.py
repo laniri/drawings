@@ -458,7 +458,7 @@ class S3StorageBackend(StorageBackendInterface):
                 # Database stores paths as "uploads/..." but S3 has them as "drawings/..."
                 if file_path.startswith("uploads/"):
                     # Strip "uploads/" prefix
-                    s3_key = file_path[len("uploads/"):]
+                    s3_key = file_path[len("uploads/") :]
                     # If the result doesn't already start with "drawings/", add it
                     if not s3_key.startswith("drawings/"):
                         s3_key = f"drawings/{s3_key}"
@@ -498,7 +498,7 @@ class S3StorageBackend(StorageBackendInterface):
                 # For relative paths like "uploads/file.png" or "uploads/drawings/file.png"
                 if file_path.startswith("uploads/"):
                     # Strip "uploads/" prefix
-                    s3_key = file_path[len("uploads/"):]
+                    s3_key = file_path[len("uploads/") :]
                     # If the result doesn't already start with "drawings/", add it
                     if not s3_key.startswith("drawings/"):
                         s3_key = f"drawings/{s3_key}"
