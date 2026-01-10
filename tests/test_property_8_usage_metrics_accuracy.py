@@ -153,20 +153,40 @@ class TestUsageMetricsAccuracy:
         # Verify structure and accuracy
         assert isinstance(stats, dict), "Dashboard stats should be a dictionary"
         
-        # Check required fields
-        required_fields = [
-            'total_analyses', 'daily_analyses', 'weekly_analyses', 'monthly_analyses',
-            'average_processing_time', 'active_sessions', 'error_rate', 'uptime_percentage'
+        # Check required top-level fields
+        required_top_level_fields = [
+            'timestamp', 'database', 'time_based', 'sessions', 
+            'system_health', 'geographic', 'uptime_seconds', 'last_updated'
         ]
         
-        for field in required_fields:
-            assert field in stats, f"Missing required field: {field}"
+        for field in required_top_level_fields:
+            assert field in stats, f"Missing required top-level field: {field}"
+        
+        # Check nested database fields
+        assert 'total_analyses' in stats['database'], "Missing database.total_analyses"
+        assert 'anomaly_count' in stats['database'], "Missing database.anomaly_count"
+        assert 'normal_count' in stats['database'], "Missing database.normal_count"
+        
+        # Check nested time_based fields
+        assert 'daily_analyses' in stats['time_based'], "Missing time_based.daily_analyses"
+        assert 'weekly_analyses' in stats['time_based'], "Missing time_based.weekly_analyses"
+        assert 'monthly_analyses' in stats['time_based'], "Missing time_based.monthly_analyses"
+        
+        # Check nested sessions fields
+        assert 'active_sessions' in stats['sessions'], "Missing sessions.active_sessions"
+        
+        # Check nested system_health fields
+        assert 'error_rate' in stats['system_health'], "Missing system_health.error_rate"
+        assert 'uptime_percentage' in stats['system_health'], "Missing system_health.uptime_percentage"
+        assert 'average_processing_time' in stats['system_health'], "Missing system_health.average_processing_time"
         
         # Verify data accuracy
-        assert stats['total_analyses'] == 2, f"Expected 2 analyses, got {stats['total_analyses']}"
-        assert stats['daily_analyses'] == 2, f"Expected 2 daily analyses, got {stats['daily_analyses']}"
-        assert stats['average_processing_time'] == 0.4, f"Expected 0.4 avg time, got {stats['average_processing_time']}"
-        assert stats['error_rate'] == 0.0, f"Expected 0.0 error rate, got {stats['error_rate']}"
+        assert stats['database']['total_analyses'] == 2, f"Expected 2 analyses, got {stats['database']['total_analyses']}"
+        assert stats['database']['anomaly_count'] == 1, f"Expected 1 anomaly, got {stats['database']['anomaly_count']}"
+        assert stats['database']['normal_count'] == 1, f"Expected 1 normal, got {stats['database']['normal_count']}"
+        assert stats['time_based']['daily_analyses'] == 2, f"Expected 2 daily analyses, got {stats['time_based']['daily_analyses']}"
+        assert stats['system_health']['average_processing_time'] == 0.4, f"Expected 0.4 avg time, got {stats['system_health']['average_processing_time']}"
+        assert stats['system_health']['error_rate'] == 0.0, f"Expected 0.0 error rate, got {stats['system_health']['error_rate']}"
 
 
 if __name__ == "__main__":
