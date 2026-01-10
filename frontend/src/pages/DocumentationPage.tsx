@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Typography,
   Paper,
@@ -104,6 +105,7 @@ interface GenerationRequest {
 }
 
 const DocumentationPage: React.FC = () => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState(0)
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -680,7 +682,7 @@ const DocumentationPage: React.FC = () => {
                         <Tooltip title="View file">
                           <IconButton
                             size="small"
-                            onClick={() => window.open(file.url, '_blank')}
+                            onClick={() => navigate(`/markdown-viewer?file=${encodeURIComponent(file.path)}`)}
                           >
                             <Visibility />
                           </IconButton>
